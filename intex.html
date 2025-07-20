@@ -1212,25 +1212,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 const advice = [];
                 if (profit < 0) advice.push(`- **Address Negative Profit:** The current net profit is -$${Math.abs(profit).toFixed(2)}. Prioritize cost reduction or boosting high-margin sales immediately.`);
                 else advice.push(`- **Leverage Positive Profit:** With a net profit of $${profit.toFixed(2)}, consider reinvesting in top-selling products or marketing efforts to scale up.`);
-                if (expenses > revenue * 0.5 && revenue > 0) advice.push(`- **Review High Expenses:** Expenses ($${expenses.toFixed(2)}) are more than 50% of revenue ($${revenue.toFixed(2)}). Conduct a detailed review of all expenses to identify potential savings.`);
-                else if (expenses === 0 && revenue > 0) advice.push(`- **Track All Expenses:** No expenses have been recorded. Ensure all business-related costs are logged to get an accurate view of profitability.`);
-                else advice.push(`- **Maintain Expense Control:** Expenses are currently well-managed relative to revenue. Continue monitoring to maintain this healthy ratio.`);
-                if (transactions.some(t => t.includes('DEAL'))) advice.push(`- **Analyze Deal Performance:** Multiple 'Deal' type sales were recorded. Analyze if these deals are leading to repeat business or if they are impacting overall margin too heavily.`);
-                advice.push(`- **Focus on Top Sellers:** Identify which products are sold most frequently and ensure adequate stock levels for them.`);
-                const response = `### Profit Plan for ${name}\n\n**1. Key Observations:**\n* **Total Revenue:** $${revenue.toFixed(2)}\n* **Total Expenses:** $${expenses.toFixed(2)}\n* **Net Profit:** $${profit.toFixed(2)}\n\n**2. Actionable Steps:**\n${advice.join('\n')}\n\n**3. Next Steps:**\nFocus on implementing one of these suggestions this week and track the impact on your net profit.`;
-                resolve(response.trim());
-            }, 1500));
-        },
-        simpleMarkdownToHtml(md) {
-            let html = md.replace(/^### (.*$)/gim, '<h3 class="text-lg font-semibold mt-4 mb-2">$1</h3>').replace(/^## (.*$)/gim, '<h2 class="text-xl font-bold mt-5 mb-3">$1</h2>').replace(/^# (.*$)/gim, '<h1 class="text-2xl font-bold mt-6 mb-4">$1</h1>').replace(/\*\*(.*)\*\*/gim, '<strong>$1</strong>').replace(/^\* (.*$)/gim, '<li class="ml-4">$1</li>');
-            html = html.replace(/<\/li>\n<li/gim, '</li><li').replace(/(<li.*<\/li>)/gs, '<ul class="list-disc list-inside space-y-1">$1</ul>').replace(/\n/g, '<br>').replace(/<br><ul/g, '<ul').replace(/ul><br>/g, 'ul>').replace(/<br><h/g, '<h').replace(/h3><br>/g, 'h3>');
-            return html;
-        }
-    };
-    app.init();
-    window.app = app; 
-});
-</script>
 
 </body>
 </html>
