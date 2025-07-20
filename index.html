@@ -6,6 +6,8 @@
     <title>Ledgerly - Business Management</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" rel="stylesheet">
+    <!-- Chart.js Library -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script>
         tailwind.config = {
             darkMode: 'class',
@@ -77,11 +79,13 @@
 </head>
 <body class="antialiased font-sans">
 
+    <!-- Notification Container -->
     <div id="notification" class="fixed top-5 right-5 z-[100] text-white py-2 px-4 rounded-md shadow-lg opacity-0">
         <span id="notification-message"></span>
     </div>
 
     <div id="app" class="h-screen flex flex-col">
+        <!-- Header -->
         <header id="main-header" class="bg-sepia-surface dark:bg-surface shadow-md p-4 flex justify-between items-center z-20 flex-shrink-0 hidden">
             <div class="flex items-center space-x-4">
                 <i class="fas fa-book-open text-sepia-primary dark:text-primary text-2xl"></i>
@@ -96,14 +100,21 @@
             </div>
         </header>
 
+        <!-- Main Content -->
         <main id="main-content" class="flex-grow flex flex-col md:flex-row overflow-hidden hidden">
+            <!-- Left Panels -->
             <div class="w-full md:w-1/3 lg:w-1/4 bg-sepia-surface dark:bg-surface p-4 overflow-y-auto flex-shrink-0 border-r border-sepia-border dark:border-gray-700">
+                <!-- Company Overview Panel -->
                 <div id="company-overview-panel" class="mb-6">
                     <h2 class="text-xl font-semibold mb-3 text-sepia-text dark:text-text-primary flex items-center justify-between cursor-pointer" onclick="app.togglePanel('company-overview')">
                         <span><i class="fas fa-building mr-2 text-sepia-primary dark:text-primary"></i>Company Overview</span>
                         <i id="company-overview-toggle-icon" class="fas fa-chevron-down"></i>
                     </h2>
                     <div id="company-overview-content" class="space-y-4 hidden">
+                        <!-- Company-wide stats -->
+                        <div id="company-stats" class="space-y-2 p-3 bg-sepia-bg dark:bg-secondary rounded-lg"></div>
+
+                        <!-- Employees -->
                         <div>
                             <div class="flex justify-between items-center mb-2">
                                 <h3 class="font-bold text-sepia-text-secondary dark:text-text-secondary">Employees</h3>
@@ -111,6 +122,16 @@
                             </div>
                             <ul id="employee-list" class="space-y-2 text-sm"></ul>
                         </div>
+                        
+                        <!-- Inactive Employees -->
+                        <div id="inactive-employee-section" class="hidden">
+                            <div class="flex justify-between items-center mb-2">
+                                <h3 class="font-bold text-sepia-text-secondary dark:text-text-secondary">Inactive Employees</h3>
+                            </div>
+                            <ul id="inactive-employee-list" class="space-y-2 text-sm"></ul>
+                        </div>
+
+                        <!-- Master Inventory -->
                         <div>
                             <div class="flex justify-between items-center mb-2">
                                 <h3 class="font-bold text-sepia-text-secondary dark:text-text-secondary">Master Inventory</h3>
@@ -121,6 +142,7 @@
                             </div>
                             <div id="master-inventory-list" class="space-y-1 text-sm"></div>
                         </div>
+                        <!-- All Tasks -->
                         <div>
                             <div class="flex justify-between items-center mb-2">
                                 <h3 class="font-bold text-sepia-text-secondary dark:text-text-secondary">All Tasks</h3>
@@ -131,6 +153,7 @@
                     </div>
                 </div>
 
+                <!-- Accura AI Advisor Panel -->
                 <div id="ai-advisor-panel">
                     <h2 class="text-xl font-semibold mb-3 text-sepia-text dark:text-text-primary flex items-center justify-between cursor-pointer" onclick="app.togglePanel('ai-advisor')">
                         <span><i class="fas fa-brain mr-2 text-sepia-primary dark:text-primary"></i>Accura AI Advisor</span>
@@ -152,166 +175,16 @@
                 </div>
             </div>
 
+            <!-- Employee-Specific Interface -->
             <div id="employee-view" class="flex-grow p-2 md:p-6 overflow-y-auto">
-                <div class="mb-6 border-b border-sepia-border dark:border-gray-700">
-                    <nav class="flex flex-wrap -mb-px" id="tabs-container">
-                        </nav>
-                </div>
-                <div id="tab-content-container">
-                    <div id="dashboard-content" class="tab-content">
-                        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                           <div class="bg-sepia-surface dark:bg-surface p-6 rounded-lg shadow-lg">
-                               <h3 class="text-lg font-medium text-sepia-text-secondary dark:text-text-secondary">Total Revenue</h3>
-                               <p id="dashboard-revenue" class="text-3xl font-bold text-sepia-accent dark:text-accent mt-2">$0.00</p>
-                           </div>
-                           <div class="bg-sepia-surface dark:bg-surface p-6 rounded-lg shadow-lg">
-                               <h3 class="text-lg font-medium text-sepia-text-secondary dark:text-text-secondary">Total Expenses</h3>
-                               <p id="dashboard-expenses" class="text-3xl font-bold text-sepia-danger dark:text-danger mt-2">$0.00</p>
-                           </div>
-                           <div class="bg-sepia-surface dark:bg-surface p-6 rounded-lg shadow-lg">
-                               <h3 class="text-lg font-medium text-sepia-text-secondary dark:text-text-secondary">Net Profit</h3>
-                               <p id="dashboard-profit" class="text-3xl font-bold text-sepia-text dark:text-text-primary mt-2">$0.00</p>
-                           </div>
-                        </div>
-                    </div>
-                    <div id="my-tasks-content" class="tab-content hidden">
-                        <h2 class="text-2xl font-bold mb-4">My Assigned Tasks</h2>
-                        <ul id="employee-tasks-list" class="space-y-3"></ul>
-                    </div>
-                    <div id="my-inventory-content" class="tab-content hidden">
-                        <h2 class="text-2xl font-bold mb-4">My Delegated Inventory</h2>
-                        <div class="bg-sepia-surface dark:bg-surface rounded-lg shadow overflow-hidden">
-                           <table class="min-w-full">
-                               <thead class="bg-sepia-bg dark:bg-secondary">
-                                   <tr>
-                                       <th class="px-6 py-3 text-left text-xs font-medium text-sepia-text-secondary dark:text-text-secondary uppercase tracking-wider">Product Name</th>
-                                       <th class="px-6 py-3 text-left text-xs font-medium text-sepia-text-secondary dark:text-text-secondary uppercase tracking-wider">Stock</th>
-                                   </tr>
-                               </thead>
-                               <tbody id="employee-inventory-list" class="divide-y divide-sepia-border dark:divide-gray-700"></tbody>
-                           </table>
-                        </div>
-                    </div>
-                    <div id="sales-expenses-content" class="tab-content hidden grid grid-cols-1 lg:grid-cols-2 gap-6">
-                        <div class="bg-sepia-surface dark:bg-surface p-6 rounded-lg shadow-lg">
-                            <h2 class="text-2xl font-bold mb-4">Record a Sale</h2>
-                            <form id="record-sale-form" class="space-y-4">
-                                <div class="grid grid-cols-2 gap-4">
-                                    <div>
-                                        <label for="sale-store" class="block text-sm font-medium text-sepia-text-secondary dark:text-text-secondary">Store</label>
-                                        <select id="sale-store" name="storeId" required class="mt-1 block w-full bg-sepia-bg dark:bg-secondary border border-sepia-border dark:border-gray-600 rounded-md py-2 px-3 text-sepia-text dark:text-text-primary focus:outline-none focus:ring-sepia-primary dark:focus:ring-primary"></select>
-                                    </div>
-                                    <div>
-                                        <label for="sale-type" class="block text-sm font-medium text-sepia-text-secondary dark:text-text-secondary">Sale Type</label>
-                                        <select id="sale-type" name="saleType" required class="mt-1 block w-full bg-sepia-bg dark:bg-secondary border border-sepia-border dark:border-gray-600 rounded-md py-2 px-3 text-sepia-text dark:text-text-primary focus:outline-none focus:ring-sepia-primary dark:focus:ring-primary"></select>
-                                    </div>
-                                </div>
-                                <div class="grid grid-cols-2 gap-4">
-                                    <div>
-                                        <label for="sale-product" class="block text-sm font-medium text-sepia-text-secondary dark:text-text-secondary">Product</label>
-                                        <select id="sale-product" name="productId" required class="mt-1 block w-full bg-sepia-bg dark:bg-secondary border border-sepia-border dark:border-gray-600 rounded-md py-2 px-3 text-sepia-text dark:text-text-primary focus:outline-none focus:ring-sepia-primary dark:focus:ring-primary"></select>
-                                    </div>
-                                    <div>
-                                        <label for="sale-quantity" class="block text-sm font-medium text-sepia-text-secondary dark:text-text-secondary">Quantity</label>
-                                        <input type="number" id="sale-quantity" name="quantity" value="1" min="1" required class="mt-1 block w-full bg-sepia-bg dark:bg-secondary border border-sepia-border dark:border-gray-600 rounded-md py-2 px-3 text-sepia-text dark:text-text-primary focus:outline-none focus:ring-sepia-primary dark:focus:ring-primary">
-                                    </div>
-                                </div>
-                                <div id="discount-container" class="hidden">
-                                    <label for="sale-discount" class="block text-sm font-medium text-sepia-text-secondary dark:text-text-secondary">Discount ($)</label>
-                                    <input type="number" id="sale-discount" name="discount" step="0.01" min="0" class="mt-1 block w-full bg-sepia-bg dark:bg-secondary border border-sepia-border dark:border-gray-600 rounded-md py-2 px-3 text-sepia-text dark:text-text-primary focus:outline-none focus:ring-sepia-primary dark:focus:ring-primary">
-                                </div>
-                                <div class="p-3 bg-sepia-bg dark:bg-secondary rounded-md space-y-2">
-                                    <div class="flex justify-between text-sm">
-                                        <span class="text-sepia-text-secondary dark:text-text-secondary">Total Price:</span>
-                                        <span id="sale-total-price" class="font-medium text-sepia-text dark:text-text-primary">$0.00</span>
-                                    </div>
-                                    <div>
-                                        <label for="sale-amount" class="block text-sm font-bold text-sepia-text-secondary dark:text-text-secondary">Final Amount ($)</label>
-                                        <input type="number" id="sale-amount" name="amount" step="0.01" required readonly class="mt-1 block w-full bg-sepia-border/50 dark:bg-gray-700 border border-sepia-border dark:border-gray-600 rounded-md py-2 px-3 text-sepia-text dark:text-text-primary font-bold focus:outline-none">
-                                    </div>
-                                </div>
-                                <button type="submit" class="w-full bg-sepia-primary text-white py-2 rounded-md hover:bg-sepia-primary-hover dark:bg-primary dark:hover:bg-primary-hover">Record Sale</button>
-                            </form>
-                        </div>
-                        <div class="bg-sepia-surface dark:bg-surface p-6 rounded-lg shadow-lg">
-                            <h2 class="text-2xl font-bold mb-4">Record an Expense</h2>
-                            <form id="record-expense-form" class="space-y-4">
-                                <div>
-                                    <label for="expense-description" class="block text-sm font-medium text-sepia-text-secondary dark:text-text-secondary">Description</label>
-                                    <input type="text" id="expense-description" name="description" required class="mt-1 block w-full bg-sepia-bg dark:bg-secondary border border-sepia-border dark:border-gray-600 rounded-md py-2 px-3 text-sepia-text dark:text-text-primary focus:outline-none focus:ring-sepia-primary dark:focus:ring-primary focus:border-sepia-primary dark:focus:border-primary">
-                                </div>
-                                <div>
-                                    <label for="expense-amount" class="block text-sm font-medium text-sepia-text-secondary dark:text-text-secondary">Amount ($)</label>
-                                    <input type="number" id="expense-amount" name="amount" step="0.01" required class="mt-1 block w-full bg-sepia-bg dark:bg-secondary border border-sepia-border dark:border-gray-600 rounded-md py-2 px-3 text-sepia-text dark:text-text-primary focus:outline-none focus:ring-sepia-primary dark:focus:ring-primary focus:border-sepia-primary dark:focus:border-primary">
-                                </div>
-                                <button type="submit" class="w-full bg-sepia-danger text-white py-2 rounded-md hover:bg-red-700 dark:bg-danger">Record Expense</button>
-                            </form>
-                        </div>
-                    </div>
-                     <div id="stores-content" class="tab-content hidden">
-                        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                            <div class="bg-sepia-surface dark:bg-surface p-6 rounded-lg shadow-lg">
-                                <h2 class="text-2xl font-bold mb-4">Add a New Store</h2>
-                                <form id="employee-add-store-form" class="space-y-4">
-                                    <div>
-                                        <label for="employee-new-store-name" class="block text-sm font-medium text-sepia-text-secondary dark:text-text-secondary">Store Name / Location</label>
-                                        <input type="text" id="employee-new-store-name" required class="mt-1 block w-full bg-sepia-bg dark:bg-secondary border border-sepia-border dark:border-gray-600 rounded-md py-2 px-3 text-sepia-text dark:text-text-primary focus:outline-none focus:ring-sepia-primary dark:focus:ring-primary focus:border-sepia-primary dark:focus:border-primary">
-                                    </div>
-                                    <div>
-                                        <label for="employee-new-store-credit" class="block text-sm font-medium text-sepia-text-secondary dark:text-text-secondary">Store Credit ($) (Optional)</label>
-                                        <input type="number" id="employee-new-store-credit" step="0.01" min="0" class="mt-1 block w-full bg-sepia-bg dark:bg-secondary border border-sepia-border dark:border-gray-600 rounded-md py-2 px-3 text-sepia-text dark:text-text-primary focus:outline-none focus:ring-sepia-primary dark:focus:ring-primary focus:border-sepia-primary dark:focus:border-primary">
-                                    </div>
-                                    <button type="submit" class="w-full bg-sepia-primary text-white py-2 rounded-md hover:bg-sepia-primary-hover dark:bg-primary dark:hover:bg-primary-hover">Add Store</button>
-                                </form>
-                            </div>
-                            <div class="bg-sepia-surface dark:bg-surface p-6 rounded-lg shadow-lg">
-                                <h2 class="text-2xl font-bold mb-4">All Stores</h2>
-                                <div id="employee-view-store-list" class="space-y-3 max-h-96 overflow-y-auto">
-                                    </div>
-                            </div>
-                        </div>
-                    </div>
-                     <div id="invoices-content" class="tab-content hidden">
-                        <h2 class="text-2xl font-bold mb-4">Generate Sales Receipt</h2>
-                        <div class="bg-sepia-surface dark:bg-surface p-6 rounded-lg shadow-lg">
-                            <form id="invoice-form" class="grid grid-cols-1 gap-6">
-                                <div>
-                                    <h3 class="text-lg font-semibold mb-3">Select Uninvoiced Sales</h3>
-                                    <div id="uninvoiced-sales-list" class="space-y-2 max-h-60 overflow-y-auto p-2 bg-sepia-bg dark:bg-secondary rounded-md border border-sepia-border dark:border-gray-600">
-                                        <p class="text-sepia-text-secondary dark:text-gray-400">No uninvoiced sales found.</p>
-                                    </div>
-                                </div>
-                                <div>
-                                     <button id="generate-pdf-btn" type="submit" class="w-full bg-sepia-primary text-white py-2 rounded-md hover:bg-sepia-primary-hover dark:bg-primary dark:hover:bg-primary-hover flex items-center justify-center">
-                                        <span id="generate-pdf-text">Generate & Download PDF Receipt</span>
-                                        <i id="generate-pdf-loader" class="fas fa-spinner fa-spin hidden ml-2"></i>
-                                     </button>
-                                </div>
-                            </form>
-                        </div>
-                    </div>
-                    <div id="ledger-content" class="tab-content hidden">
-                        <h2 class="text-2xl font-bold mb-4">Transaction Ledger</h2>
-                        <div class="bg-sepia-surface dark:bg-surface rounded-lg shadow overflow-hidden">
-                           <table class="min-w-full">
-                               <thead class="bg-sepia-bg dark:bg-secondary">
-                                   <tr>
-                                       <th class="px-6 py-3 text-left text-xs font-medium text-sepia-text-secondary dark:text-text-secondary uppercase tracking-wider">Date</th>
-                                       <th class="px-6 py-3 text-left text-xs font-medium text-sepia-text-secondary dark:text-text-secondary uppercase tracking-wider">Type</th>
-                                       <th class="px-6 py-3 text-left text-xs font-medium text-sepia-text-secondary dark:text-text-secondary uppercase tracking-wider">Description</th>
-                                       <th class="px-6 py-3 text-left text-xs font-medium text-sepia-text-secondary dark:text-text-secondary uppercase tracking-wider">Amount</th>
-                                   </tr>
-                               </thead>
-                               <tbody id="ledger-list" class="divide-y divide-sepia-border dark:divide-gray-700"></tbody>
-                           </table>
-                        </div>
-                    </div>
-                </div>
+                <!-- This content will be replaced dynamically -->
             </div>
         </main>
     </div>
 
+    <!-- Modals -->
     <div id="modal-container">
+        <!-- First Time Setup Modal -->
         <div id="firstTimeModal" class="fixed inset-0 z-50 flex items-center justify-center modal-backdrop hidden">
             <div class="bg-sepia-surface dark:bg-surface rounded-lg shadow-xl p-8 w-full max-w-md">
                 <h2 class="text-2xl font-bold mb-2 text-sepia-text dark:text-text-primary">Welcome to Ledgerly!</h2>
@@ -330,6 +203,7 @@
             </div>
         </div>
 
+        <!-- Add Employee Modal -->
         <div id="addEmployeeModal" class="fixed inset-0 z-50 flex items-center justify-center modal-backdrop hidden">
             <div class="bg-sepia-surface dark:bg-surface rounded-lg shadow-xl p-8 w-full max-w-md relative">
                 <button class="absolute top-4 right-4 text-sepia-text-secondary dark:text-text-secondary hover:text-sepia-text dark:hover:text-text-primary" onclick="app.closeModal('addEmployeeModal')"><i class="fas fa-times"></i></button>
@@ -348,6 +222,7 @@
             </div>
         </div>
         
+        <!-- Edit Employee Modal -->
         <div id="editEmployeeModal" class="fixed inset-0 z-50 flex items-center justify-center modal-backdrop hidden">
             <div class="bg-sepia-surface dark:bg-surface rounded-lg shadow-xl p-8 w-full max-w-md relative">
                 <button class="absolute top-4 right-4 text-sepia-text-secondary dark:text-text-secondary hover:text-sepia-text dark:hover:text-text-primary" onclick="app.closeModal('editEmployeeModal')"><i class="fas fa-times"></i></button>
@@ -367,6 +242,7 @@
             </div>
         </div>
 
+        <!-- Edit Store Modal -->
         <div id="editStoreModal" class="fixed inset-0 z-50 flex items-center justify-center modal-backdrop hidden">
             <div class="bg-sepia-surface dark:bg-surface rounded-lg shadow-xl p-8 w-full max-w-md relative">
                 <button class="absolute top-4 right-4 text-sepia-text-secondary dark:text-text-secondary hover:text-sepia-text dark:hover:text-text-primary" onclick="app.closeModal('editStoreModal')"><i class="fas fa-times"></i></button>
@@ -386,6 +262,7 @@
             </div>
         </div>
         
+        <!-- Add Product Modal -->
         <div id="addProductModal" class="fixed inset-0 z-50 flex items-center justify-center modal-backdrop hidden">
             <div class="bg-sepia-surface dark:bg-surface rounded-lg shadow-xl p-8 w-full max-w-md relative">
                 <button class="absolute top-4 right-4 text-sepia-text-secondary dark:text-text-secondary hover:text-sepia-text dark:hover:text-text-primary" onclick="app.closeModal('addProductModal')"><i class="fas fa-times"></i></button>
@@ -408,6 +285,7 @@
             </div>
         </div>
 
+        <!-- Delegate Stock Modal -->
         <div id="delegateStockModal" class="fixed inset-0 z-50 flex items-center justify-center modal-backdrop hidden">
             <div class="bg-sepia-surface dark:bg-surface rounded-lg shadow-xl p-8 w-full max-w-md relative">
                 <button class="absolute top-4 right-4 text-sepia-text-secondary dark:text-text-secondary hover:text-sepia-text dark:hover:text-text-primary" onclick="app.closeModal('delegateStockModal')"><i class="fas fa-times"></i></button>
@@ -430,6 +308,7 @@
             </div>
         </div>
         
+        <!-- Create Task Modal -->
         <div id="createTaskModal" class="fixed inset-0 z-50 flex items-center justify-center modal-backdrop hidden">
             <div class="bg-sepia-surface dark:bg-surface rounded-lg shadow-xl p-8 w-full max-w-md relative">
                 <button class="absolute top-4 right-4 text-sepia-text-secondary dark:text-text-secondary hover:text-sepia-text dark:hover:text-text-primary" onclick="app.closeModal('createTaskModal')"><i class="fas fa-times"></i></button>
@@ -453,7 +332,7 @@
 document.addEventListener('DOMContentLoaded', () => {
 
     const app = {
-        // --- STATE ---
+        // --- STATE & CONFIG ---
         state: {
             theme: 'dark',
             currentEmployeeId: null,
@@ -462,8 +341,7 @@ document.addEventListener('DOMContentLoaded', () => {
             masterInventory: [],
             tasks: [],
         },
-        
-        // --- API KEYS ---
+        charts: {}, // To hold chart instances
         pdfShiftApiKey: 'Sk_4e4b1acfcab0c0454d642ef6701891a8d318d648',
 
         // --- INITIALIZATION ---
@@ -471,17 +349,7 @@ document.addEventListener('DOMContentLoaded', () => {
             this.loadState();
             this.applyTheme();
             this.addEventListeners();
-
-            if (this.state.employees.length === 0) {
-                this.showFirstTimeSetup();
-            } else {
-                this.showMainApp();
-                if (!this.state.currentEmployeeId || !this.getEmployee(this.state.currentEmployeeId)?.isActive) {
-                    const firstActiveEmployee = this.state.employees.find(e => e.isActive);
-                    this.state.currentEmployeeId = firstActiveEmployee ? firstActiveEmployee.id : null;
-                }
-                this.render();
-            }
+            this.render();
         },
         
         showFirstTimeSetup() {
@@ -505,12 +373,9 @@ document.addEventListener('DOMContentLoaded', () => {
             if (savedState) {
                 this.state = Object.assign({}, this.state, JSON.parse(savedState));
                 // Backwards compatibility for old data
-                this.state.stores.forEach(store => {
-                    if (store.credit === undefined) store.credit = 0;
-                });
-                this.state.employees.forEach(emp => {
-                    if (emp.isActive === undefined) emp.isActive = true;
-                });
+                this.state.stores.forEach(store => { if (store.credit === undefined) store.credit = 0; });
+                this.state.employees.forEach(emp => { if (emp.isActive === undefined) emp.isActive = true; });
+                this.state.masterInventory.forEach(prod => { if (prod.isActive === undefined) prod.isActive = true; });
             }
         },
         
@@ -524,32 +389,24 @@ document.addEventListener('DOMContentLoaded', () => {
         getProduct(productId) {
             return this.state.masterInventory.find(p => p.id === productId);
         },
+        getActiveProducts() {
+            return this.state.masterInventory.filter(p => p.isActive);
+        },
         getStore(storeId) {
             return this.state.stores.find(s => s.id === storeId);
         },
         
-        // --- EVENT LISTENERS ---
+        // --- EVENT LISTENERS & HANDLERS ---
         addEventListeners() {
             document.getElementById('theme-toggle').addEventListener('click', () => this.toggleTheme());
             document.getElementById('first-employee-form').addEventListener('submit', e => this.handleFirstEmployee(e));
             document.getElementById('employee-switcher').addEventListener('change', e => this.handleEmployeeSwitch(e));
-            document.getElementById('tabs-container').addEventListener('click', e => this.handleTabClick(e));
+            
             document.getElementById('add-employee-form').addEventListener('submit', e => this.handleAddEmployee(e));
             document.getElementById('edit-employee-form').addEventListener('submit', e => this.handleUpdateEmployee(e));
-            document.getElementById('employee-add-store-form').addEventListener('submit', e => this.handleAddStore(e));
-            document.getElementById('edit-store-form').addEventListener('submit', e => this.handleUpdateStore(e));
             document.getElementById('add-product-form').addEventListener('submit', e => this.handleAddProduct(e));
             document.getElementById('delegate-stock-form').addEventListener('submit', e => this.handleDelegateStock(e));
             document.getElementById('create-task-form').addEventListener('submit', e => this.handleCreateTask(e));
-            document.getElementById('record-sale-form').addEventListener('submit', e => this.handleRecordSale(e));
-            document.getElementById('record-expense-form').addEventListener('submit', e => this.handleRecordExpense(e));
-            document.getElementById('invoice-form').addEventListener('submit', e => this.handleGenerateInvoice(e));
-
-            // Listeners for dynamic sale form
-            document.getElementById('sale-type').addEventListener('change', () => this.handleSaleTypeChange());
-            document.getElementById('sale-product').addEventListener('change', () => this.updateFinalSaleAmount());
-            document.getElementById('sale-quantity').addEventListener('input', () => this.updateFinalSaleAmount());
-            document.getElementById('sale-discount').addEventListener('input', () => this.updateFinalSaleAmount());
         },
 
         handleFirstEmployee(e) {
@@ -561,7 +418,6 @@ document.addEventListener('DOMContentLoaded', () => {
             this.state.employees.push(newEmployee);
             this.state.currentEmployeeId = newEmployee.id;
             this.saveState();
-            this.showMainApp();
             this.render();
             this.showNotification(`Welcome, ${name}! Your profile is ready.`, 'success');
         },
@@ -572,60 +428,175 @@ document.addEventListener('DOMContentLoaded', () => {
         },
         handleTabClick(e) {
             const button = e.target.closest('.tab-button');
-            if (button) {
-                this.setActiveTab(button.dataset.tab);
+            if (button) this.setActiveTab(button.dataset.tab);
+        },
+        attachEmployeeViewEventListeners() {
+            document.getElementById('tabs-container')?.addEventListener('click', e => this.handleTabClick(e));
+            
+            const saleForm = document.getElementById('record-sale-form');
+            if (saleForm) {
+                saleForm.addEventListener('submit', e => this.handleRecordSale(e));
+                saleForm.querySelector('#sale-type').addEventListener('change', () => this.handleSaleTypeChange());
+                saleForm.querySelector('#sale-product').addEventListener('change', () => this.updateFinalSaleAmount());
+                saleForm.querySelector('#sale-quantity').addEventListener('input', () => this.updateFinalSaleAmount());
+                saleForm.querySelector('#sale-discount').addEventListener('input', () => this.updateFinalSaleAmount());
             }
+            
+            const expenseForm = document.getElementById('record-expense-form');
+            if(expenseForm) expenseForm.addEventListener('submit', e => this.handleRecordExpense(e));
+            
+            const storeForm = document.getElementById('employee-add-store-form');
+            if(storeForm) storeForm.addEventListener('submit', e => this.handleAddStore(e));
+
+            const invoiceForm = document.getElementById('invoice-form');
+            if(invoiceForm) invoiceForm.addEventListener('submit', e => this.handleGenerateInvoice(e));
         },
 
         // --- UI RENDERING ---
         render() {
-            if (this.getActiveEmployees().length === 0 && this.state.employees.length > 0) {
-                 document.getElementById('main-header').classList.remove('hidden');
-                 document.getElementById('main-content').innerHTML = `<div class="p-8 text-center w-full"><h2 class="text-2xl font-bold mb-4">All employees are inactive.</h2><p class="text-sepia-text-secondary dark:text-text-secondary">Please reactivate an employee or clear localStorage to restart.</p></div>`;
-                 document.getElementById('main-content').classList.remove('hidden');
-                 this.renderEmployeeSwitcher(); // Still render switcher to show inactive ones
-                 return;
-            } else if (this.state.employees.length === 0) {
+            if (this.state.employees.length === 0) {
                  this.showFirstTimeSetup();
                  return;
             }
-
+            
             this.showMainApp();
+
+            if (!this.state.currentEmployeeId || !this.getEmployee(this.state.currentEmployeeId)?.isActive) {
+                const firstActiveEmployee = this.getActiveEmployees()[0];
+                this.state.currentEmployeeId = firstActiveEmployee ? firstActiveEmployee.id : null;
+            }
+
             this.renderEmployeeSwitcher();
             this.renderCompanyOverview();
             this.renderAIAdvisorPanel();
-            this.renderTabs();
-            this.setActiveTab(document.querySelector('.tab-button.active')?.dataset.tab || 'dashboard');
+            
+            const employeeView = document.getElementById('employee-view');
+            if (this.getActiveEmployees().length === 0) {
+                employeeView.innerHTML = `<div class="p-8 text-center w-full h-full flex flex-col justify-center items-center">
+                    <h2 class="text-2xl font-bold mb-4">All Employees Inactive</h2>
+                    <p class="text-sepia-text-secondary dark:text-text-secondary">Please reactivate an employee from the Company Overview panel to continue.</p>
+                </div>`;
+            } else {
+                employeeView.innerHTML = this.getEmployeeViewTemplate();
+                this.attachEmployeeViewEventListeners();
+                this.renderTabs();
+                this.setActiveTab(document.querySelector('.tab-button.active')?.dataset.tab || 'dashboard');
+            }
+        },
+
+        getEmployeeViewTemplate() {
+            return `
+                <div class="mb-6 border-b border-sepia-border dark:border-gray-700">
+                    <nav class="flex flex-wrap -mb-px" id="tabs-container"></nav>
+                </div>
+                <div id="tab-content-container">
+                    <div id="dashboard-content" class="tab-content">
+                        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                            <div class="lg:col-span-2 bg-sepia-surface dark:bg-surface p-4 rounded-lg shadow-lg"><div class="relative h-96"><canvas id="sales-over-time-chart"></canvas></div></div>
+                            <div class="bg-sepia-surface dark:bg-surface p-4 rounded-lg shadow-lg"><div class="relative h-80"><canvas id="top-products-chart"></canvas></div></div>
+                            <div class="bg-sepia-surface dark:bg-surface p-4 rounded-lg shadow-lg"><div class="relative h-80"><canvas id="revenue-expense-chart"></canvas></div></div>
+                        </div>
+                    </div>
+                    <div id="my-tasks-content" class="tab-content hidden"><h2 class="text-2xl font-bold mb-4">My Assigned Tasks</h2><ul id="employee-tasks-list" class="space-y-3"></ul></div>
+                    <div id="my-inventory-content" class="tab-content hidden"><h2 class="text-2xl font-bold mb-4">My Delegated Inventory</h2><div class="bg-sepia-surface dark:bg-surface rounded-lg shadow overflow-hidden"><table class="min-w-full"><thead class="bg-sepia-bg dark:bg-secondary"><tr><th class="px-6 py-3 text-left text-xs font-medium text-sepia-text-secondary dark:text-text-secondary uppercase tracking-wider">Product Name</th><th class="px-6 py-3 text-left text-xs font-medium text-sepia-text-secondary dark:text-text-secondary uppercase tracking-wider">Stock</th></tr></thead><tbody id="employee-inventory-list" class="divide-y divide-sepia-border dark:divide-gray-700"></tbody></table></div></div>
+                    <div id="sales-expenses-content" class="tab-content hidden grid grid-cols-1 lg:grid-cols-2 gap-6">
+                        <div class="bg-sepia-surface dark:bg-surface p-6 rounded-lg shadow-lg">
+                            <h2 class="text-2xl font-bold mb-4">Record a Sale</h2>
+                            <form id="record-sale-form" class="space-y-4">
+                                <div class="grid grid-cols-2 gap-4">
+                                    <div><label for="sale-store" class="block text-sm font-medium text-sepia-text-secondary dark:text-text-secondary">Store</label><select id="sale-store" name="storeId" required class="mt-1 block w-full bg-sepia-bg dark:bg-secondary border border-sepia-border dark:border-gray-600 rounded-md py-2 px-3 text-sepia-text dark:text-text-primary focus:outline-none focus:ring-sepia-primary dark:focus:ring-primary"></select></div>
+                                    <div><label for="sale-type" class="block text-sm font-medium text-sepia-text-secondary dark:text-text-secondary">Sale Type</label><select id="sale-type" name="saleType" required class="mt-1 block w-full bg-sepia-bg dark:bg-secondary border border-sepia-border dark:border-gray-600 rounded-md py-2 px-3 text-sepia-text dark:text-text-primary focus:outline-none focus:ring-sepia-primary dark:focus:ring-primary"></select></div>
+                                </div>
+                                <div class="grid grid-cols-2 gap-4">
+                                    <div><label for="sale-product" class="block text-sm font-medium text-sepia-text-secondary dark:text-text-secondary">Product</label><select id="sale-product" name="productId" required class="mt-1 block w-full bg-sepia-bg dark:bg-secondary border border-sepia-border dark:border-gray-600 rounded-md py-2 px-3 text-sepia-text dark:text-text-primary focus:outline-none focus:ring-sepia-primary dark:focus:ring-primary"></select></div>
+                                    <div><label for="sale-quantity" class="block text-sm font-medium text-sepia-text-secondary dark:text-text-secondary">Quantity</label><input type="number" id="sale-quantity" name="quantity" value="1" min="1" required class="mt-1 block w-full bg-sepia-bg dark:bg-secondary border border-sepia-border dark:border-gray-600 rounded-md py-2 px-3 text-sepia-text dark:text-text-primary focus:outline-none focus:ring-sepia-primary dark:focus:ring-primary"></div>
+                                </div>
+                                <div id="discount-container" class="hidden"><label for="sale-discount" class="block text-sm font-medium text-sepia-text-secondary dark:text-text-secondary">Discount ($)</label><input type="number" id="sale-discount" name="discount" step="0.01" min="0" class="mt-1 block w-full bg-sepia-bg dark:bg-secondary border border-sepia-border dark:border-gray-600 rounded-md py-2 px-3 text-sepia-text dark:text-text-primary focus:outline-none focus:ring-sepia-primary dark:focus:ring-primary"></div>
+                                <div class="p-3 bg-sepia-bg dark:bg-secondary rounded-md space-y-2">
+                                    <div class="flex justify-between text-sm"><span class="text-sepia-text-secondary dark:text-text-secondary">Total Price:</span><span id="sale-total-price" class="font-medium text-sepia-text dark:text-text-primary">$0.00</span></div>
+                                    <div><label for="sale-amount" class="block text-sm font-bold text-sepia-text-secondary dark:text-text-secondary">Final Amount ($)</label><input type="number" id="sale-amount" name="amount" step="0.01" required readonly class="mt-1 block w-full bg-sepia-border/50 dark:bg-gray-700 border border-sepia-border dark:border-gray-600 rounded-md py-2 px-3 text-sepia-text dark:text-text-primary font-bold focus:outline-none"></div>
+                                </div>
+                                <button type="submit" class="w-full bg-sepia-primary text-white py-2 rounded-md hover:bg-sepia-primary-hover dark:bg-primary dark:hover:bg-primary-hover">Record Sale</button>
+                            </form>
+                        </div>
+                        <div class="bg-sepia-surface dark:bg-surface p-6 rounded-lg shadow-lg">
+                            <h2 class="text-2xl font-bold mb-4">Record an Expense</h2>
+                            <form id="record-expense-form" class="space-y-4">
+                                <div><label for="expense-description" class="block text-sm font-medium text-sepia-text-secondary dark:text-text-secondary">Description</label><input type="text" id="expense-description" name="description" required class="mt-1 block w-full bg-sepia-bg dark:bg-secondary border border-sepia-border dark:border-gray-600 rounded-md py-2 px-3 text-sepia-text dark:text-text-primary focus:outline-none focus:ring-sepia-primary dark:focus:ring-primary focus:border-sepia-primary dark:focus:border-primary"></div>
+                                <div><label for="expense-amount" class="block text-sm font-medium text-sepia-text-secondary dark:text-text-secondary">Amount ($)</label><input type="number" id="expense-amount" name="amount" step="0.01" required class="mt-1 block w-full bg-sepia-bg dark:bg-secondary border border-sepia-border dark:border-gray-600 rounded-md py-2 px-3 text-sepia-text dark:text-text-primary focus:outline-none focus:ring-sepia-primary dark:focus:ring-primary focus:border-sepia-primary dark:focus:border-primary"></div>
+                                <button type="submit" class="w-full bg-sepia-danger text-white py-2 rounded-md hover:bg-red-700 dark:bg-danger">Record Expense</button>
+                            </form>
+                        </div>
+                    </div>
+                    <div id="stores-content" class="tab-content hidden"><div class="grid grid-cols-1 lg:grid-cols-2 gap-6"><div class="bg-sepia-surface dark:bg-surface p-6 rounded-lg shadow-lg"><h2 class="text-2xl font-bold mb-4">Add a New Store</h2><form id="employee-add-store-form" class="space-y-4"><div><label for="employee-new-store-name" class="block text-sm font-medium text-sepia-text-secondary dark:text-text-secondary">Store Name / Location</label><input type="text" id="employee-new-store-name" required class="mt-1 block w-full bg-sepia-bg dark:bg-secondary border border-sepia-border dark:border-gray-600 rounded-md py-2 px-3 text-sepia-text dark:text-text-primary focus:outline-none focus:ring-sepia-primary dark:focus:ring-primary focus:border-sepia-primary dark:focus:border-primary"></div><div><label for="employee-new-store-credit" class="block text-sm font-medium text-sepia-text-secondary dark:text-text-secondary">Store Credit ($) (Optional)</label><input type="number" id="employee-new-store-credit" step="0.01" min="0" class="mt-1 block w-full bg-sepia-bg dark:bg-secondary border border-sepia-border dark:border-gray-600 rounded-md py-2 px-3 text-sepia-text dark:text-text-primary focus:outline-none focus:ring-sepia-primary dark:focus:ring-primary focus:border-sepia-primary dark:focus:border-primary"></div><button type="submit" class="w-full bg-sepia-primary text-white py-2 rounded-md hover:bg-sepia-primary-hover dark:bg-primary dark:hover:bg-primary-hover">Add Store</button></form></div><div class="bg-sepia-surface dark:bg-surface p-6 rounded-lg shadow-lg"><h2 class="text-2xl font-bold mb-4">All Stores</h2><div id="employee-view-store-list" class="space-y-3 max-h-96 overflow-y-auto"></div></div></div></div>
+                    <div id="invoices-content" class="tab-content hidden"><h2 class="text-2xl font-bold mb-4">Generate Sales Receipt</h2><div class="bg-sepia-surface dark:bg-surface p-6 rounded-lg shadow-lg"><form id="invoice-form" class="grid grid-cols-1 gap-6"><div><h3 class="text-lg font-semibold mb-3">Select Uninvoiced Sales</h3><div id="uninvoiced-sales-list" class="space-y-2 max-h-60 overflow-y-auto p-2 bg-sepia-bg dark:bg-secondary rounded-md border border-sepia-border dark:border-gray-600"><p class="text-sepia-text-secondary dark:text-gray-400">No uninvoiced sales found.</p></div></div><div><button id="generate-pdf-btn" type="submit" class="w-full bg-sepia-primary text-white py-2 rounded-md hover:bg-sepia-primary-hover dark:bg-primary dark:hover:bg-primary-hover flex items-center justify-center"><span id="generate-pdf-text">Generate & Download PDF Receipt</span><i id="generate-pdf-loader" class="fas fa-spinner fa-spin hidden ml-2"></i></button></div></form></div></div>
+                    <div id="ledger-content" class="tab-content hidden"><h2 class="text-2xl font-bold mb-4">Transaction Ledger</h2><div class="bg-sepia-surface dark:bg-surface rounded-lg shadow overflow-hidden"><table class="min-w-full"><thead class="bg-sepia-bg dark:bg-secondary"><tr><th class="px-6 py-3 text-left text-xs font-medium text-sepia-text-secondary dark:text-text-secondary uppercase tracking-wider">Date</th><th class="px-6 py-3 text-left text-xs font-medium text-sepia-text-secondary dark:text-text-secondary uppercase tracking-wider">Type</th><th class="px-6 py-3 text-left text-xs font-medium text-sepia-text-secondary dark:text-text-secondary uppercase tracking-wider">Description</th><th class="px-6 py-3 text-left text-xs font-medium text-sepia-text-secondary dark:text-text-secondary uppercase tracking-wider">Amount</th></tr></thead><tbody id="ledger-list" class="divide-y divide-sepia-border dark:divide-gray-700"></tbody></table></div></div>
+                </div>`;
         },
 
         renderEmployeeSwitcher() {
             const switcher = document.getElementById('employee-switcher');
             const activeEmployees = this.getActiveEmployees();
-            if(activeEmployees.length > 0) {
-                switcher.innerHTML = activeEmployees.map(emp => 
-                    `<option value="${emp.id}" ${emp.id === this.state.currentEmployeeId ? 'selected' : ''}>${emp.name}</option>`
-                ).join('');
-                switcher.disabled = false;
-            } else {
-                switcher.innerHTML = `<option>No active employees</option>`;
-                switcher.disabled = true;
-            }
+            switcher.innerHTML = activeEmployees.length > 0
+                ? activeEmployees.map(emp => `<option value="${emp.id}" ${emp.id === this.state.currentEmployeeId ? 'selected' : ''}>${emp.name}</option>`).join('')
+                : `<option>No active employees</option>`;
+            switcher.disabled = activeEmployees.length === 0;
         },
         
         renderCompanyOverview() {
-            const employeeList = document.getElementById('employee-list');
-            employeeList.innerHTML = this.getActiveEmployees().map(emp => 
-                `<li class="flex justify-between items-center bg-sepia-bg dark:bg-secondary p-2 rounded">
-                    <div>
-                        <span class="text-sepia-text dark:text-text-primary">${emp.name}</span>
-                        <em class="text-sepia-text-secondary dark:text-gray-400 text-xs ml-1">(${emp.position})</em>
+            let totalRevenue = 0, totalExpenses = 0;
+            const employeeContributions = this.state.employees.map(emp => {
+                const revenue = emp.transactions.filter(t => t.type === 'sale').reduce((sum, t) => sum + t.amount, 0);
+                const expenses = emp.transactions.filter(t => t.type === 'expense').reduce((sum, t) => sum + t.amount, 0);
+                if (emp.isActive) {
+                    totalRevenue += revenue;
+                    totalExpenses += expenses;
+                }
+                return { ...emp, revenue, expenses, profit: revenue - expenses };
+            });
+            const totalProfit = totalRevenue - totalExpenses;
+
+            document.getElementById('company-stats').innerHTML = `
+                <h3 class="font-bold text-sepia-text-secondary dark:text-text-secondary text-base">Firm-Wide Totals (Active)</h3>
+                <div class="text-sm space-y-1">
+                    <div class="flex justify-between"><span>Revenue:</span> <span class="font-semibold text-sepia-accent dark:text-accent">$${totalRevenue.toFixed(2)}</span></div>
+                    <div class="flex justify-between"><span>Expenses:</span> <span class="font-semibold text-sepia-danger dark:text-danger">$${totalExpenses.toFixed(2)}</span></div>
+                    <div class="flex justify-between"><span>Net Profit:</span> <span class="font-bold ${totalProfit < 0 ? 'text-sepia-danger dark:text-danger' : 'text-sepia-text dark:text-text-primary'}">$${totalProfit.toFixed(2)}</span></div>
+                </div>`;
+
+            document.getElementById('employee-list').innerHTML = employeeContributions.filter(e => e.isActive).map(emp => `
+                <li class="bg-sepia-bg dark:bg-secondary p-2 rounded">
+                    <div class="flex justify-between items-center">
+                        <div>
+                            <span class="text-sepia-text dark:text-text-primary font-bold">${emp.name}</span>
+                            <em class="text-sepia-text-secondary dark:text-gray-400 text-xs ml-1">(${emp.position})</em>
+                        </div>
+                        <div class="flex space-x-3">
+                            <button class="text-sm text-sepia-text-secondary hover:text-sepia-primary dark:text-text-secondary dark:hover:text-primary" onclick="app.startEditEmployee('${emp.id}')"><i class="fas fa-pencil-alt"></i></button>
+                            <button class="text-sm text-sepia-text-secondary hover:text-sepia-danger dark:text-text-secondary dark:hover:text-danger" onclick="app.deactivateEmployee('${emp.id}')"><i class="fas fa-user-slash"></i></button>
+                        </div>
                     </div>
-                    <div class="flex space-x-3">
-                        <button class="text-sm text-sepia-text-secondary hover:text-sepia-primary dark:text-text-secondary dark:hover:text-primary" onclick="app.startEditEmployee('${emp.id}')"><i class="fas fa-pencil-alt"></i></button>
-                        <button class="text-sm text-sepia-text-secondary hover:text-sepia-danger dark:text-text-secondary dark:hover:text-danger" onclick="app.deactivateEmployee('${emp.id}')"><i class="fas fa-user-slash"></i></button>
+                    <div class="text-xs mt-2 space-y-1 pl-1 border-l-2 border-sepia-border dark:border-gray-600 ml-1 pl-2">
+                        <div class="flex justify-between"><span>Revenue:</span> <span class="font-semibold text-sepia-accent dark:text-accent">$${emp.revenue.toFixed(2)}</span></div>
+                        <div class="flex justify-between"><span>Expenses:</span> <span class="font-semibold text-sepia-danger dark:text-danger">$${emp.expenses.toFixed(2)}</span></div>
                     </div>
                 </li>`
             ).join('') || `<p class="text-sepia-text-secondary dark:text-gray-400 text-sm">No active employees yet.</p>`;
+
+            const inactiveEmployees = this.state.employees.filter(e => !e.isActive);
+            const inactiveSection = document.getElementById('inactive-employee-section');
+            const inactiveList = document.getElementById('inactive-employee-list');
+            if (inactiveEmployees.length > 0) {
+                inactiveSection.classList.remove('hidden');
+                inactiveList.innerHTML = inactiveEmployees.map(emp => `
+                    <li class="flex justify-between items-center bg-sepia-bg dark:bg-secondary p-2 rounded opacity-60">
+                        <span class="text-sepia-text dark:text-text-primary italic">${emp.name}</span>
+                        <button class="text-sm text-green-600 hover:text-green-700 font-semibold" onclick="app.reactivateEmployee('${emp.id}')">Reactivate</button>
+                    </li>
+                `).join('');
+            } else {
+                inactiveSection.classList.add('hidden');
+            }
 
             const inventoryList = document.getElementById('master-inventory-list');
             inventoryList.innerHTML = this.state.masterInventory.map(prod => `
@@ -646,10 +617,7 @@ document.addEventListener('DOMContentLoaded', () => {
         },
         
         renderAIAdvisorPanel() {
-             const aiSwitcher = document.getElementById('ai-employee-select');
-             aiSwitcher.innerHTML = this.getActiveEmployees().map(emp => 
-                `<option value="${emp.id}">${emp.name}</option>`
-            ).join('');
+             document.getElementById('ai-employee-select').innerHTML = this.getActiveEmployees().map(emp => `<option value="${emp.id}">${emp.name}</option>`).join('');
         },
 
         renderTabs() {
@@ -672,14 +640,65 @@ document.addEventListener('DOMContentLoaded', () => {
         renderDashboard() {
             const employee = this.getEmployee(this.state.currentEmployeeId);
             if (!employee) return;
-            const revenue = employee.transactions.filter(t => t.type === 'sale').reduce((sum, t) => sum + t.amount, 0);
-            const expenses = employee.transactions.filter(t => t.type === 'expense').reduce((sum, t) => sum + t.amount, 0);
-            const profit = revenue - expenses;
-            document.getElementById('dashboard-revenue').textContent = `$${revenue.toFixed(2)}`;
-            document.getElementById('dashboard-expenses').textContent = `$${expenses.toFixed(2)}`;
-            document.getElementById('dashboard-profit').textContent = `$${profit.toFixed(2)}`;
-            document.getElementById('dashboard-profit').classList.toggle('text-sepia-danger', profit < 0);
-            document.getElementById('dashboard-profit').classList.toggle('dark:text-danger', profit < 0);
+
+            const isDark = this.state.theme === 'dark';
+            const gridColor = isDark ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.1)';
+            const textColor = isDark ? '#f9fafb' : '#654321';
+            
+            // --- 1. Sales Over Time Data ---
+            const salesByDate = employee.transactions
+                .filter(t => t.type === 'sale')
+                .reduce((acc, t) => {
+                    const date = t.date.split('T')[0];
+                    acc[date] = (acc[date] || 0) + t.amount;
+                    return acc;
+                }, {});
+            const sortedDates = Object.keys(salesByDate).sort();
+            const salesLabels = sortedDates;
+            const salesData = sortedDates.map(date => salesByDate[date]);
+
+            // --- 2. Top Products Data ---
+            const salesByProduct = employee.transactions
+                .filter(t => t.type === 'sale')
+                .reduce((acc, t) => {
+                    acc[t.productId] = (acc[t.productId] || 0) + t.amount;
+                    return acc;
+                }, {});
+            const topProducts = Object.entries(salesByProduct)
+                .sort(([, a], [, b]) => b - a)
+                .slice(0, 5);
+            const topProductsLabels = topProducts.map(([productId]) => this.getProduct(productId)?.name || 'Unknown');
+            const topProductsData = topProducts.map(([, amount]) => amount);
+            
+            // --- 3. Revenue vs Expense Data ---
+            const totalRevenue = salesData.reduce((sum, val) => sum + val, 0);
+            const totalExpenses = employee.transactions.filter(t => t.type === 'expense').reduce((sum, t) => sum + t.amount, 0);
+
+            // Destroy old charts before creating new ones
+            Object.values(this.charts).forEach(chart => {
+                if (chart instanceof Chart) chart.destroy();
+            });
+
+            // Create Sales Chart
+            this.charts.sales = new Chart(document.getElementById('sales-over-time-chart').getContext('2d'), {
+                type: 'line',
+                data: { labels: salesLabels, datasets: [{ label: 'Daily Revenue', data: salesData, borderColor: isDark ? '#4f46e5' : '#a16207', tension: 0.1, fill: false }] },
+                options: { responsive: true, maintainAspectRatio: false, scales: { y: { beginAtZero: true, grid: { color: gridColor }, ticks: { color: textColor } }, x: { grid: { color: gridColor }, ticks: { color: textColor } } }, plugins: { legend: { labels: { color: textColor } } } }
+            });
+
+            // Create Top Products Chart
+            this.charts.products = new Chart(document.getElementById('top-products-chart').getContext('2d'), {
+                type: 'bar',
+                data: { labels: topProductsLabels, datasets: [{ label: 'Revenue by Product', data: topProductsData, backgroundColor: isDark ? ['#4f46e5', '#34d399', '#ef4444', '#f59e0b', '#6366f1'] : ['#a16207', '#16a34a', '#dc2626', '#d97706', '#8b5e34'] }] },
+                options: { responsive: true, maintainAspectRatio: false, indexAxis: 'y', scales: { x: { beginAtZero: true, grid: { color: gridColor }, ticks: { color: textColor } }, y: { grid: { color: gridColor }, ticks: { color: textColor } } }, plugins: { legend: { display: false } } }
+            });
+
+            // Create Revenue/Expense Chart
+            this.charts.revenue = new Chart(document.getElementById('revenue-expense-chart').getContext('2d'), {
+                type: 'doughnut',
+                data: { labels: ['Revenue', 'Expenses'], datasets: [{ data: [totalRevenue, totalExpenses], backgroundColor: [isDark ? '#34d399' : '#16a34a', isDark ? '#ef4444' : '#dc2626'] }] },
+                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'top', labels: { color: textColor } } } }
+            });
         },
         
         renderMyTasks() {
@@ -950,14 +969,20 @@ document.addEventListener('DOMContentLoaded', () => {
                 const employee = this.getEmployee(employeeId);
                 if (employee) {
                     employee.isActive = false;
-                    if (this.state.currentEmployeeId === employeeId) {
-                        const firstActive = this.getActiveEmployees()[0];
-                        this.state.currentEmployeeId = firstActive ? firstActive.id : null;
-                    }
                     this.saveState();
                     this.render();
                     this.showNotification(`${employee.name} has been deactivated.`, 'success');
                 }
+            }
+        },
+        reactivateEmployee(employeeId) {
+            const employee = this.getEmployee(employeeId);
+            if (employee) {
+                employee.isActive = true;
+                this.state.currentEmployeeId = employeeId;
+                this.saveState();
+                this.render();
+                this.showNotification(`${employee.name} has been reactivated.`, 'success');
             }
         },
         handleAddStore(e) {
@@ -1010,7 +1035,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const price = parseFloat(form.querySelector('#new-product-price').value);
             const stock = parseInt(form.querySelector('#new-product-stock').value, 10);
             if (!name || isNaN(price) || isNaN(stock)) return;
-            this.state.masterInventory.push({ id: `prod_${Date.now()}`, name, price, stock });
+            this.state.masterInventory.push({ id: `prod_${Date.now()}`, name, price, stock, isActive: true });
             this.saveState();
             this.render();
             form.reset();
