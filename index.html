@@ -142,7 +142,7 @@
                             <span id="generate-plan-text">Generate Plan</span>
                             <i id="generate-plan-loader" class="fas fa-spinner fa-spin hidden ml-2"></i>
                         </button>
-                        <div id="ai-plan-output" class="mt-4 p-3 bg-light-bg dark:bg-dark-bg rounded-md text-sm prose max-w-none">
+                        <div id="ai-plan-output" class="mt-4 p-3 bg-light-bg dark:bg-dark-bg rounded-md text-sm prose max-w-none max-h-60 overflow-y-auto">
                             <p class="text-light-text-secondary dark:text-dark-text-secondary">Your generated profit improvement plan will appear here.</p>
                         </div>
                     </div>
@@ -158,6 +158,7 @@
         </div>
     
 <script>
+// Full, Corrected Application Script
 document.addEventListener('DOMContentLoaded', () => {
 
     const app = {
@@ -203,7 +204,10 @@ document.addEventListener('DOMContentLoaded', () => {
             if (savedState) {
                 this.state = Object.assign({}, this.state, JSON.parse(savedState));
                 // Backwards compatibility for old data
-                this.state.stores.forEach(store => { if (store.credit === undefined) store.credit = 0; });
+                this.state.stores.forEach(store => { 
+                    if (store.totalCredit === undefined) store.totalCredit = store.credit || 0;
+                    if (store.creditAvailable === undefined) store.creditAvailable = store.credit || 0;
+                });
                 this.state.employees.forEach(emp => { if (emp.isActive === undefined) emp.isActive = true; });
                 this.state.masterInventory.forEach(prod => { if (prod.isActive === undefined) prod.isActive = true; });
             }
@@ -361,9 +365,9 @@ document.addEventListener('DOMContentLoaded', () => {
                             </form>
                         </div>
                     </div>
-                    <div id="stores-content" class="tab-content hidden"><div class="grid grid-cols-1 lg:grid-cols-2 gap-6"><div class="bg-light-surface dark:bg-dark-surface p-6 rounded-lg shadow-lg"><h2 class="text-2xl font-bold mb-4">Add a New Store</h2><form id="employee-add-store-form" class="space-y-4"><div><label for="employee-new-store-name" class="block text-sm font-medium text-light-text-secondary dark:text-dark-text-secondary">Store Name / Location</label><input type="text" id="employee-new-store-name" required class="mt-1 block w-full bg-light-bg dark:bg-dark-bg border border-gray-300 dark:border-gray-600 rounded-md py-2 px-3 text-light-text dark:text-dark-text focus:outline-none focus:ring-primary focus:border-primary"></div><div><label for="employee-new-store-credit" class="block text-sm font-medium text-light-text-secondary dark:text-dark-text-secondary">Store Credit ($) (Optional)</label><input type="number" id="employee-new-store-credit" step="0.01" min="0" class="mt-1 block w-full bg-light-bg dark:bg-dark-bg border border-gray-300 dark:border-gray-600 rounded-md py-2 px-3 text-light-text dark:text-dark-text focus:outline-none focus:ring-primary focus:border-primary"></div><button type="submit" class="w-full bg-primary text-black py-2 rounded-md font-semibold hover:bg-primary-hover">Add Store</button></form></div><div class="bg-light-surface dark:bg-dark-surface p-6 rounded-lg shadow-lg"><h2 class="text-2xl font-bold mb-4">All Stores</h2><div id="employee-view-store-list" class="space-y-3 max-h-96 overflow-y-auto"></div></div></div></div>
+                    <div id="stores-content" class="tab-content hidden"><div class="grid grid-cols-1 lg:grid-cols-2 gap-6"><div class="bg-light-surface dark:bg-dark-surface p-6 rounded-lg shadow-lg"><h2 class="text-2xl font-bold mb-4">Add a New Store</h2><form id="employee-add-store-form" class="space-y-4"><div><label for="employee-new-store-name" class="block text-sm font-medium text-light-text-secondary dark:text-dark-text-secondary">Store Name / Location</label><input type="text" id="employee-new-store-name" required class="mt-1 block w-full bg-light-bg dark:bg-dark-bg border border-gray-300 dark:border-gray-600 rounded-md py-2 px-3 text-light-text dark:text-dark-text focus:outline-none focus:ring-primary focus:border-primary"></div><div><label for="employee-new-store-total-credit" class="block text-sm font-medium text-light-text-secondary dark:text-dark-text-secondary">Total Credit Given ($)</label><input type="number" id="employee-new-store-total-credit" step="0.01" min="0" class="mt-1 block w-full bg-light-bg dark:bg-dark-bg border border-gray-300 dark:border-gray-600 rounded-md py-2 px-3 text-light-text dark:text-dark-text focus:outline-none focus:ring-primary focus:border-primary"></div><div><label for="employee-new-store-due-date" class="block text-sm font-medium text-light-text-secondary dark:text-dark-text-secondary">Due Date</label><input type="date" id="employee-new-store-due-date" class="mt-1 block w-full bg-light-bg dark:bg-dark-bg border border-gray-300 dark:border-gray-600 rounded-md py-2 px-3 text-light-text dark:text-dark-text focus:outline-none focus:ring-primary focus:border-primary"></div><button type="submit" class="w-full bg-primary text-black py-2 rounded-md font-semibold hover:bg-primary-hover">Add Store</button></form></div><div class="bg-light-surface dark:bg-dark-surface p-6 rounded-lg shadow-lg"><h2 class="text-2xl font-bold mb-4">All Stores</h2><div id="employee-view-store-list" class="space-y-3 max-h-96 overflow-y-auto"></div></div></div></div>
                     <div id="invoices-content" class="tab-content hidden"><h2 class="text-2xl font-bold mb-4">Generate Sales Receipt</h2><div class="bg-light-surface dark:bg-dark-surface p-6 rounded-lg shadow-lg"><form id="invoice-form" class="grid grid-cols-1 gap-6"><div><h3 class="text-lg font-semibold mb-3">Select Uninvoiced Sales</h3><div id="uninvoiced-sales-list" class="space-y-2 max-h-60 overflow-y-auto p-2 bg-light-bg dark:bg-dark-bg rounded-md border border-gray-300 dark:border-gray-600"><p class="text-light-text-secondary dark:text-dark-text-secondary">No uninvoiced sales found.</p></div></div><div><button id="generate-pdf-btn" type="submit" class="w-full bg-primary text-black py-2 rounded-md font-semibold hover:bg-primary-hover flex items-center justify-center"><span id="generate-pdf-text">Generate & Download PDF Receipt</span><i id="generate-pdf-loader" class="fas fa-spinner fa-spin hidden ml-2"></i></button></div></form></div></div>
-                    <div id="ledger-content" class="tab-content hidden"><h2 class="text-2xl font-bold mb-4">Transaction Ledger</h2><div class="bg-light-surface dark:bg-dark-surface rounded-lg shadow overflow-hidden"><table class="min-w-full"><thead class="bg-light-bg dark:bg-dark-bg"><tr><th class="px-6 py-3 text-left text-xs font-medium text-light-text-secondary dark:text-dark-text-secondary uppercase tracking-wider">Date</th><th class="px-6 py-3 text-left text-xs font-medium text-light-text-secondary dark:text-dark-text-secondary uppercase tracking-wider">Type</th><th class="px-6 py-3 text-left text-xs font-medium text-light-text-secondary dark:text-dark-text-secondary uppercase tracking-wider">Description</th><th class="px-6 py-3 text-left text-xs font-medium text-light-text-secondary dark:text-dark-text-secondary uppercase tracking-wider">Amount</th></tr></thead><tbody id="ledger-list" class="divide-y divide-gray-200 dark:divide-gray-700"></tbody></table></div></div>
+                    <div id="ledger-content" class="tab-content hidden"><h2 class="text-2xl font-bold mb-4">Transaction Ledger</h2><div class="bg-light-surface dark:bg-dark-surface rounded-lg shadow overflow-hidden"><div class="overflow-x-auto"><table class="min-w-full"><thead class="bg-light-bg dark:bg-dark-bg"><tr><th class="px-6 py-3 text-left text-xs font-medium text-light-text-secondary dark:text-dark-text-secondary uppercase tracking-wider">Date</th><th class="px-6 py-3 text-left text-xs font-medium text-light-text-secondary dark:text-dark-text-secondary uppercase tracking-wider">Type</th><th class="px-6 py-3 text-left text-xs font-medium text-light-text-secondary dark:text-dark-text-secondary uppercase tracking-wider">Description</th><th class="px-6 py-3 text-left text-xs font-medium text-light-text-secondary dark:text-dark-text-secondary uppercase tracking-wider">Amount</th></tr></thead><tbody id="ledger-list" class="divide-y divide-gray-200 dark:divide-gray-700"></tbody></table></div></div></div>
                 </div>`;
         },
 
@@ -668,7 +672,9 @@ document.addEventListener('DOMContentLoaded', () => {
         
         renderModals() {
             const modalContainer = document.getElementById('modal-container');
-            modalContainer.innerHTML = `
+            modalContainer.innerHTML = ``; // Clear previous modals
+            // Add all modals back into the container
+            modalContainer.innerHTML += `
                 <div id="firstTimeModal" class="fixed inset-0 z-50 flex items-center justify-center modal-backdrop hidden">
                     <div class="bg-light-surface dark:bg-dark-surface rounded-lg shadow-xl p-8 w-full max-w-md">
                         <h2 class="text-2xl font-bold mb-2 text-light-text dark:text-dark-text">Welcome to Ledgerly!</h2>
@@ -963,9 +969,10 @@ document.addEventListener('DOMContentLoaded', () => {
             e.preventDefault();
             const form = e.target;
             const name = form.querySelector('#employee-new-store-name').value;
-            const credit = parseFloat(form.querySelector('#employee-new-store-credit').value) || 0;
+            const totalCredit = parseFloat(form.querySelector('#employee-new-store-total-credit').value) || 0;
+            const dueDate = form.querySelector('#employee-new-store-due-date').value;
             if (!name) return;
-            this.state.stores.push({ id: `store_${Date.now()}`, name, credit });
+            this.state.stores.push({ id: `store_${Date.now()}`, name, totalCredit, creditAvailable: totalCredit, dueDate });
             this.saveState();
             this.renderStoresTab();
             this.renderSalesAndExpenses(); 
@@ -977,7 +984,8 @@ document.addEventListener('DOMContentLoaded', () => {
             if (!store) return;
             document.getElementById('edit-store-id').value = store.id;
             document.getElementById('edit-store-name').value = store.name;
-            document.getElementById('edit-store-credit').value = store.credit || 0;
+            document.getElementById('edit-store-total-credit').value = store.totalCredit || 0;
+            document.getElementById('edit-store-due-date').value = store.dueDate || '';
             this.openModal('editStoreModal');
         },
         handleUpdateStore(e) {
@@ -985,8 +993,16 @@ document.addEventListener('DOMContentLoaded', () => {
             const storeId = document.getElementById('edit-store-id').value;
             const store = this.getStore(storeId);
             if (!store) return;
+            
+            const oldTotalCredit = store.totalCredit || 0;
+            const newTotalCredit = parseFloat(document.getElementById('edit-store-total-credit').value) || 0;
+            const creditUsed = oldTotalCredit - (store.creditAvailable || oldTotalCredit);
+            
             store.name = document.getElementById('edit-store-name').value;
-            store.credit = parseFloat(document.getElementById('edit-store-credit').value) || 0;
+            store.totalCredit = newTotalCredit;
+            store.creditAvailable = newTotalCredit - creditUsed;
+            store.dueDate = document.getElementById('edit-store-due-date').value;
+
             this.saveState();
             this.renderStoresTab();
             this.renderSalesAndExpenses();
@@ -1090,11 +1106,11 @@ document.addEventListener('DOMContentLoaded', () => {
             }
 
             if (saleType === 'Credit') {
-                if (!store || (store.credit || 0) < amount) {
+                if (!store || (store.creditAvailable || 0) < amount) {
                     this.showNotification(`Insufficient credit for ${store.name}.`, 'error');
                     return;
                 }
-                store.credit -= amount;
+                store.creditAvailable -= amount;
             }
 
             employeeInventoryItem.stock -= quantity;
