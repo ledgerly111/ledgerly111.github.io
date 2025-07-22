@@ -158,7 +158,6 @@
         </div>
     
 <script>
-// Full, Corrected Application Script
 document.addEventListener('DOMContentLoaded', () => {
 
     const app = {
@@ -205,8 +204,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 this.state = Object.assign({}, this.state, JSON.parse(savedState));
                 // Backwards compatibility for old data
                 this.state.stores.forEach(store => { 
-                    if (store.totalCredit === undefined) store.totalCredit = store.credit || 0;
+                    if (store.creditLimit === undefined) store.creditLimit = store.credit || 0;
                     if (store.creditAvailable === undefined) store.creditAvailable = store.credit || 0;
+                    if (store.creditUsed === undefined) store.creditUsed = 0;
                 });
                 this.state.employees.forEach(emp => { if (emp.isActive === undefined) emp.isActive = true; });
                 this.state.masterInventory.forEach(prod => { if (prod.isActive === undefined) prod.isActive = true; });
@@ -348,7 +348,11 @@ document.addEventListener('DOMContentLoaded', () => {
                                     <div><label for="sale-product" class="block text-sm font-medium text-light-text-secondary dark:text-dark-text-secondary">Product</label><select id="sale-product" name="productId" required class="mt-1 block w-full bg-light-bg dark:bg-dark-bg border border-gray-300 dark:border-gray-600 rounded-md py-2 px-3 text-light-text dark:text-dark-text focus:outline-none focus:ring-primary"></select></div>
                                     <div><label for="sale-quantity" class="block text-sm font-medium text-light-text-secondary dark:text-dark-text-secondary">Quantity</label><input type="number" id="sale-quantity" name="quantity" value="1" min="1" required class="mt-1 block w-full bg-light-bg dark:bg-dark-bg border border-gray-300 dark:border-gray-600 rounded-md py-2 px-3 text-light-text dark:text-dark-text focus:outline-none focus:ring-primary"></div>
                                 </div>
-                                <div id="discount-container" class="hidden"><label for="sale-discount" class="block text-sm font-medium text-light-text-secondary dark:text-dark-text-secondary">Discount ($)</label><input type="number" id="sale-discount" name="discount" step="0.01" min="0" class="mt-1 block w-full bg-light-bg dark:bg-dark-bg border border-gray-300 dark:border-gray-600 rounded-md py-2 px-3 text-light-text dark:text-dark-text focus:outline-none focus:ring-primary"></div>
+                                <div id="deal-specific-fields" class="hidden"><label for="sale-discount" class="block text-sm font-medium text-light-text-secondary dark:text-dark-text-secondary">Discount ($)</label><input type="number" id="sale-discount" name="discount" step="0.01" min="0" class="mt-1 block w-full bg-light-bg dark:bg-dark-bg border border-gray-300 dark:border-gray-600 rounded-md py-2 px-3 text-light-text dark:text-dark-text focus:outline-none focus:ring-primary"></div>
+                                <div id="credit-specific-fields" class="hidden">
+                                     <label for="sale-due-date" class="block text-sm font-medium text-light-text-secondary dark:text-dark-text-secondary">Payment Due Date</label>
+                                     <input type="date" id="sale-due-date" class="mt-1 block w-full bg-light-bg dark:bg-dark-bg border border-gray-300 dark:border-gray-600 rounded-md py-2 px-3 text-light-text dark:text-dark-text focus:outline-none focus:ring-2 focus:ring-primary">
+                                </div>
                                 <div class="p-3 bg-light-bg dark:bg-dark-bg rounded-md space-y-2">
                                     <div class="flex justify-between text-sm"><span class="text-light-text-secondary dark:text-dark-text-secondary">Total Price:</span><span id="sale-total-price" class="font-medium text-light-text dark:text-dark-text">$0.00</span></div>
                                     <div><label for="sale-amount" class="block text-sm font-bold text-light-text-secondary dark:text-dark-text-secondary">Final Amount ($)</label><input type="number" id="sale-amount" name="amount" step="0.01" required readonly class="mt-1 block w-full bg-gray-200 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md py-2 px-3 text-light-text dark:text-dark-text font-bold focus:outline-none"></div>
@@ -365,7 +369,7 @@ document.addEventListener('DOMContentLoaded', () => {
                             </form>
                         </div>
                     </div>
-                    <div id="stores-content" class="tab-content hidden"><div class="grid grid-cols-1 lg:grid-cols-2 gap-6"><div class="bg-light-surface dark:bg-dark-surface p-6 rounded-lg shadow-lg"><h2 class="text-2xl font-bold mb-4">Add a New Store</h2><form id="employee-add-store-form" class="space-y-4"><div><label for="employee-new-store-name" class="block text-sm font-medium text-light-text-secondary dark:text-dark-text-secondary">Store Name / Location</label><input type="text" id="employee-new-store-name" required class="mt-1 block w-full bg-light-bg dark:bg-dark-bg border border-gray-300 dark:border-gray-600 rounded-md py-2 px-3 text-light-text dark:text-dark-text focus:outline-none focus:ring-primary focus:border-primary"></div><div><label for="employee-new-store-total-credit" class="block text-sm font-medium text-light-text-secondary dark:text-dark-text-secondary">Total Credit Given ($)</label><input type="number" id="employee-new-store-total-credit" step="0.01" min="0" class="mt-1 block w-full bg-light-bg dark:bg-dark-bg border border-gray-300 dark:border-gray-600 rounded-md py-2 px-3 text-light-text dark:text-dark-text focus:outline-none focus:ring-primary focus:border-primary"></div><div><label for="employee-new-store-due-date" class="block text-sm font-medium text-light-text-secondary dark:text-dark-text-secondary">Due Date</label><input type="date" id="employee-new-store-due-date" class="mt-1 block w-full bg-light-bg dark:bg-dark-bg border border-gray-300 dark:border-gray-600 rounded-md py-2 px-3 text-light-text dark:text-dark-text focus:outline-none focus:ring-primary focus:border-primary"></div><button type="submit" class="w-full bg-primary text-black py-2 rounded-md font-semibold hover:bg-primary-hover">Add Store</button></form></div><div class="bg-light-surface dark:bg-dark-surface p-6 rounded-lg shadow-lg"><h2 class="text-2xl font-bold mb-4">All Stores</h2><div id="employee-view-store-list" class="space-y-3 max-h-96 overflow-y-auto"></div></div></div></div>
+                    <div id="stores-content" class="tab-content hidden"><div class="grid grid-cols-1 lg:grid-cols-2 gap-6"><div class="bg-light-surface dark:bg-dark-surface p-6 rounded-lg shadow-lg"><h2 class="text-2xl font-bold mb-4">Add a New Store</h2><form id="employee-add-store-form" class="space-y-4"><div><label for="employee-new-store-name" class="block text-sm font-medium text-light-text-secondary dark:text-dark-text-secondary">Store Name / Location</label><input type="text" id="employee-new-store-name" required class="mt-1 block w-full bg-light-bg dark:bg-dark-bg border border-gray-300 dark:border-gray-600 rounded-md py-2 px-3 text-light-text dark:text-dark-text focus:outline-none focus:ring-primary focus:border-primary"></div><div><label for="employee-new-store-credit-limit" class="block text-sm font-medium text-light-text-secondary dark:text-dark-text-secondary">Credit Limit ($)</label><input type="number" id="employee-new-store-credit-limit" step="0.01" min="0" class="mt-1 block w-full bg-light-bg dark:bg-dark-bg border border-gray-300 dark:border-gray-600 rounded-md py-2 px-3 text-light-text dark:text-dark-text focus:outline-none focus:ring-primary focus:border-primary"></div><button type="submit" class="w-full bg-primary text-black py-2 rounded-md font-semibold hover:bg-primary-hover">Add Store</button></form></div><div class="bg-light-surface dark:bg-dark-surface p-6 rounded-lg shadow-lg"><h2 class="text-2xl font-bold mb-4">All Stores</h2><div id="employee-view-store-list" class="space-y-3 max-h-96 overflow-y-auto"></div></div></div></div>
                     <div id="invoices-content" class="tab-content hidden"><h2 class="text-2xl font-bold mb-4">Generate Sales Receipt</h2><div class="bg-light-surface dark:bg-dark-surface p-6 rounded-lg shadow-lg"><form id="invoice-form" class="grid grid-cols-1 gap-6"><div><h3 class="text-lg font-semibold mb-3">Select Uninvoiced Sales</h3><div id="uninvoiced-sales-list" class="space-y-2 max-h-60 overflow-y-auto p-2 bg-light-bg dark:bg-dark-bg rounded-md border border-gray-300 dark:border-gray-600"><p class="text-light-text-secondary dark:text-dark-text-secondary">No uninvoiced sales found.</p></div></div><div><button id="generate-pdf-btn" type="submit" class="w-full bg-primary text-black py-2 rounded-md font-semibold hover:bg-primary-hover flex items-center justify-center"><span id="generate-pdf-text">Generate & Download PDF Receipt</span><i id="generate-pdf-loader" class="fas fa-spinner fa-spin hidden ml-2"></i></button></div></form></div></div>
                     <div id="ledger-content" class="tab-content hidden"><h2 class="text-2xl font-bold mb-4">Transaction Ledger</h2><div class="bg-light-surface dark:bg-dark-surface rounded-lg shadow overflow-hidden"><div class="overflow-x-auto"><table class="min-w-full"><thead class="bg-light-bg dark:bg-dark-bg"><tr><th class="px-6 py-3 text-left text-xs font-medium text-light-text-secondary dark:text-dark-text-secondary uppercase tracking-wider">Date</th><th class="px-6 py-3 text-left text-xs font-medium text-light-text-secondary dark:text-dark-text-secondary uppercase tracking-wider">Type</th><th class="px-6 py-3 text-left text-xs font-medium text-light-text-secondary dark:text-dark-text-secondary uppercase tracking-wider">Description</th><th class="px-6 py-3 text-left text-xs font-medium text-light-text-secondary dark:text-dark-text-secondary uppercase tracking-wider">Amount</th></tr></thead><tbody id="ledger-list" class="divide-y divide-gray-200 dark:divide-gray-700"></tbody></table></div></div></div>
                 </div>`;
@@ -604,19 +608,23 @@ document.addEventListener('DOMContentLoaded', () => {
                 listEl.innerHTML = `<p class="text-light-text-secondary dark:text-dark-text-secondary">No stores have been added yet.</p>`;
                 return;
             }
-            const sortedStores = [...this.state.stores].sort((a, b) => (b.credit || 0) - (a.credit || 0));
-            listEl.innerHTML = sortedStores.map(store =>
-                `<div class="flex justify-between items-center bg-light-bg dark:bg-dark-bg p-3 rounded">
+            const sortedStores = [...this.state.stores].sort((a, b) => (b.creditLimit || 0) - (a.creditLimit || 0));
+            listEl.innerHTML = sortedStores.map(store => {
+                const isOverdue = store.dueDate && new Date(store.dueDate) < new Date();
+                return `
+                <div class="flex justify-between items-center bg-light-bg dark:bg-dark-bg p-3 rounded">
                     <div>
                         <span class="text-light-text dark:text-dark-text font-medium">${store.name}</span>
-                        <div class="font-mono text-sm text-accent-green">Credit: $${(store.credit || 0).toFixed(2)}</div>
+                        <div class="text-xs text-light-text-secondary dark:text-dark-text-secondary">Credit Used: <span class="font-semibold text-accent-red">$${(store.creditUsed || 0).toFixed(2)}</span></div>
+                        <div class="text-xs text-light-text-secondary dark:text-dark-text-secondary">Available: <span class="font-semibold text-accent-green">$${(store.creditAvailable || 0).toFixed(2)}</span> / $${(store.creditLimit || 0).toFixed(2)}</div>
+                        ${store.dueDate ? `<div class="text-xs ${isOverdue ? 'text-accent-red' : 'text-light-text-secondary dark:text-dark-text-secondary'}">Due: ${store.dueDate}</div>` : ''}
                     </div>
                     <div class="flex space-x-3">
                         <button class="text-light-text-secondary hover:text-primary dark:text-dark-text-secondary dark:hover:text-primary" onclick="app.startEditStore('${store.id}')"><i class="fas fa-pencil-alt"></i></button>
                         <button class="text-light-text-secondary hover:text-accent-red dark:text-dark-text-secondary dark:hover:text-accent-red" onclick="app.deleteStore('${store.id}')"><i class="fas fa-trash-alt"></i></button>
                     </div>
                 </div>`
-            ).join('');
+            }).join('');
         },
 
         renderInvoices() {
@@ -672,9 +680,7 @@ document.addEventListener('DOMContentLoaded', () => {
         
         renderModals() {
             const modalContainer = document.getElementById('modal-container');
-            modalContainer.innerHTML = ``; // Clear previous modals
-            // Add all modals back into the container
-            modalContainer.innerHTML += `
+            modalContainer.innerHTML = `
                 <div id="firstTimeModal" class="fixed inset-0 z-50 flex items-center justify-center modal-backdrop hidden">
                     <div class="bg-light-surface dark:bg-dark-surface rounded-lg shadow-xl p-8 w-full max-w-md">
                         <h2 class="text-2xl font-bold mb-2 text-light-text dark:text-dark-text">Welcome to Ledgerly!</h2>
@@ -741,8 +747,8 @@ document.addEventListener('DOMContentLoaded', () => {
                                 <input type="text" id="edit-store-name" required class="mt-1 block w-full bg-light-bg dark:bg-dark-bg border border-gray-300 dark:border-gray-600 rounded-md py-2 px-3 text-light-text dark:text-dark-text focus:outline-none focus:ring-2 focus:ring-primary">
                             </div>
                             <div>
-                                <label for="edit-store-credit" class="block text-sm font-medium text-light-text-secondary dark:text-dark-text-secondary">Store Credit ($)</label>
-                                <input type="number" id="edit-store-credit" step="0.01" min="0" class="mt-1 block w-full bg-light-bg dark:bg-dark-bg border border-gray-300 dark:border-gray-600 rounded-md py-2 px-3 text-light-text dark:text-dark-text focus:outline-none focus:ring-2 focus:ring-primary">
+                                <label for="edit-store-credit-limit" class="block text-sm font-medium text-light-text-secondary dark:text-dark-text-secondary">Credit Limit ($)</label>
+                                <input type="number" id="edit-store-credit-limit" step="0.01" min="0" class="mt-1 block w-full bg-light-bg dark:bg-dark-bg border border-gray-300 dark:border-gray-600 rounded-md py-2 px-3 text-light-text dark:text-dark-text focus:outline-none focus:ring-2 focus:ring-primary">
                             </div>
                             <button type="submit" class="w-full bg-primary text-black font-semibold py-2 rounded-md hover:bg-primary-hover">Save Changes</button>
                         </form>
@@ -879,12 +885,18 @@ document.addEventListener('DOMContentLoaded', () => {
         },
         handleSaleTypeChange() {
             const saleType = document.getElementById('sale-type').value;
-            const discountContainer = document.getElementById('discount-container');
+            const discountContainer = document.getElementById('deal-specific-fields');
+            const creditContainer = document.getElementById('credit-specific-fields');
+            
+            discountContainer.classList.add('hidden');
+            creditContainer.classList.add('hidden');
+            document.getElementById('sale-discount').value = '';
+            document.getElementById('sale-due-date').value = '';
+
             if (saleType === 'Deal') {
                 discountContainer.classList.remove('hidden');
-            } else {
-                discountContainer.classList.add('hidden');
-                document.getElementById('sale-discount').value = '';
+            } else if (saleType === 'Credit') {
+                creditContainer.classList.remove('hidden');
             }
             this.updateFinalSaleAmount();
         },
@@ -969,10 +981,9 @@ document.addEventListener('DOMContentLoaded', () => {
             e.preventDefault();
             const form = e.target;
             const name = form.querySelector('#employee-new-store-name').value;
-            const totalCredit = parseFloat(form.querySelector('#employee-new-store-total-credit').value) || 0;
-            const dueDate = form.querySelector('#employee-new-store-due-date').value;
+            const creditLimit = parseFloat(form.querySelector('#employee-new-store-credit-limit').value) || 0;
             if (!name) return;
-            this.state.stores.push({ id: `store_${Date.now()}`, name, totalCredit, creditAvailable: totalCredit, dueDate });
+            this.state.stores.push({ id: `store_${Date.now()}`, name, creditLimit, creditAvailable: creditLimit, creditUsed: 0, dueDate: null });
             this.saveState();
             this.renderStoresTab();
             this.renderSalesAndExpenses(); 
@@ -984,8 +995,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if (!store) return;
             document.getElementById('edit-store-id').value = store.id;
             document.getElementById('edit-store-name').value = store.name;
-            document.getElementById('edit-store-total-credit').value = store.totalCredit || 0;
-            document.getElementById('edit-store-due-date').value = store.dueDate || '';
+            document.getElementById('edit-store-credit-limit').value = store.creditLimit || 0;
             this.openModal('editStoreModal');
         },
         handleUpdateStore(e) {
@@ -994,14 +1004,13 @@ document.addEventListener('DOMContentLoaded', () => {
             const store = this.getStore(storeId);
             if (!store) return;
             
-            const oldTotalCredit = store.totalCredit || 0;
-            const newTotalCredit = parseFloat(document.getElementById('edit-store-total-credit').value) || 0;
-            const creditUsed = oldTotalCredit - (store.creditAvailable || oldTotalCredit);
+            const oldCreditLimit = store.creditLimit || 0;
+            const newCreditLimit = parseFloat(document.getElementById('edit-store-credit-limit').value) || 0;
+            const creditUsed = oldCreditLimit - (store.creditAvailable || oldCreditLimit);
             
             store.name = document.getElementById('edit-store-name').value;
-            store.totalCredit = newTotalCredit;
-            store.creditAvailable = newTotalCredit - creditUsed;
-            store.dueDate = document.getElementById('edit-store-due-date').value;
+            store.creditLimit = newCreditLimit;
+            store.creditAvailable = newCreditLimit - creditUsed;
 
             this.saveState();
             this.renderStoresTab();
@@ -1091,6 +1100,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const quantity = parseInt(form.querySelector('#sale-quantity').value, 10);
             const discount = parseFloat(form.querySelector('#sale-discount').value) || 0;
             const amount = parseFloat(form.querySelector('#sale-amount').value);
+            const dueDate = form.querySelector('#sale-due-date').value;
 
             const employee = this.getEmployee(this.state.currentEmployeeId);
             const employeeInventoryItem = employee.inventory.find(i => i.productId === productId);
@@ -1111,6 +1121,8 @@ document.addEventListener('DOMContentLoaded', () => {
                     return;
                 }
                 store.creditAvailable -= amount;
+                store.creditUsed = (store.creditUsed || 0) + amount;
+                if (dueDate) store.dueDate = dueDate;
             }
 
             employeeInventoryItem.stock -= quantity;
