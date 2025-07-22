@@ -1,0 +1,22 @@
+<div id="editStoreModal" class="fixed inset-0 z-50 flex items-center justify-center modal-backdrop hidden">
+            <div class="bg-light-surface dark:bg-dark-surface rounded-lg shadow-xl p-8 w-full max-w-md relative">
+                <button class="absolute top-4 right-4 text-light-text-secondary dark:text-dark-text-secondary hover:text-light-text dark:hover:text-dark-text" onclick="app.closeModal('editStoreModal')"><i class="fas fa-times"></i></button>
+                <h2 class="text-2xl font-bold mb-6 text-light-text dark:text-dark-text">Edit Store</h2>
+                <form id="edit-store-form" class="space-y-4">
+                    <input type="hidden" id="edit-store-id">
+                    <div>
+                        <label for="edit-store-name" class="block text-sm font-medium text-light-text-secondary dark:text-dark-text-secondary">Store Name / Location</label>
+                        <input type="text" id="edit-store-name" required class="mt-1 block w-full bg-light-bg dark:bg-dark-bg border border-gray-300 dark:border-gray-600 rounded-md py-2 px-3 text-light-text dark:text-dark-text focus:outline-none focus:ring-2 focus:ring-primary">
+                    </div>
+                    <div>
+                        <label for="edit-store-total-credit" class="block text-sm font-medium text-light-text-secondary dark:text-dark-text-secondary">Total Credit Given ($)</label>
+                        <input type="number" id="edit-store-total-credit" step="0.01" min="0" class="mt-1 block w-full bg-light-bg dark:bg-dark-bg border border-gray-300 dark:border-gray-600 rounded-md py-2 px-3 text-light-text dark:text-dark-text focus:outline-none focus:ring-2 focus:ring-primary">
+                    </div>
+                    <div>
+                        <label for="edit-store-due-date" class="block text-sm font-medium text-light-text-secondary dark:text-dark-text-secondary">Due Date</label>
+                        <input type="date" id="edit-store-due-date" class="mt-1 block w-full bg-light-bg dark:bg-dark-bg border border-gray-300 dark:border-gray-600 rounded-md py-2 px-3 text-light-text dark:text-dark-text focus:outline-none focus:ring-2 focus:ring-primary">
+                    </div>
+                    <button type="submit" class="w-full bg-primary text-black font-semibold py-2 rounded-md hover:bg-primary-hover">Save Changes</button>
+                </form>
+            </div>
+        </div>
