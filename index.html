@@ -107,9 +107,9 @@
                         <i id="ai-advisor-toggle-icon" class="fas fa-chevron-down"></i>
                     </h2>
                     <div id="ai-advisor-content" class="space-y-4 hidden">
-                        <div><label for="ai-employee-select" class="block text-sm font-medium text-light-text-secondary dark:text-dark-text-secondary mb-1">Select Employee to Analyze</label><select id="ai-employee-select" class="w-full bg-light-bg dark:bg-dark-bg rounded-md p-2 focus:ring-2 focus:ring-primary focus:outline-none"></select></div>
+                        <div><label for="ai-employee-select" class="block text-sm font-medium text-light-text-secondary dark:text-dark-text-secondary mb-1">Select Employee</label><select id="ai-employee-select" class="w-full bg-light-bg dark:bg-dark-bg rounded-md p-2 focus:ring-2 focus:ring-primary focus:outline-none"></select></div>
                         <button id="generate-plan-btn" class="w-full bg-primary text-black py-2 rounded-md font-semibold hover:bg-primary-hover flex items-center justify-center" onclick="app.generateAIPlan()"><span id="generate-plan-text">Generate Plan</span><i id="generate-plan-loader" class="fas fa-spinner fa-spin hidden ml-2"></i></button>
-                        <div id="ai-plan-output" class="mt-4 p-3 bg-light-bg dark:bg-dark-bg rounded-md text-sm prose max-w-none max-h-60 overflow-y-auto"><p class="text-light-text-secondary dark:text-dark-text-secondary">Your plan will appear here.</p></div>
+                        <div id="ai-plan-output" class="mt-4 p-3 bg-light-bg dark:bg-dark-bg rounded-md text-sm prose max-w-none max-h-60 overflow-y-auto"><p class="text-light-text-secondary dark:text-dark-text-secondary">Plan will appear here.</p></div>
                     </div>
                 </div>
             </div>
@@ -124,40 +124,27 @@
 document.addEventListener('DOMContentLoaded', () => {
     const app = {
         state: {
-            theme: 'dark',
-            currentEmployeeId: null,
-            employees: [],
-            stores: [],
-            masterInventory: [],
-            tasks: [],
-            expenseCategories: [],
+            theme: 'dark', currentEmployeeId: null, employees: [], stores: [],
+            masterInventory: [], tasks: [], expenseCategories: [],
         },
         charts: {},
         pdfShiftApiKey: 'YOUR_PDFSHIFT_API_KEY',
 
-        // --- INITIALIZATION ---
         init() {
-            this.loadState();
-            this.applyTheme();
-            this.renderModals();
-            this.addEventListeners();
-            this.render();
+            this.loadState(); this.applyTheme(); this.renderModals();
+            this.addEventListeners(); this.render();
             if(this.state.employees.length > 0) {
-                this.togglePanel('company-overview', true);
-                this.togglePanel('ai-advisor', true);
+                this.togglePanel('company-overview', true); this.togglePanel('ai-advisor', true);
             }
         },
 
-        showFirstTimeSetup() {
-            document.getElementById('firstTimeModal')?.classList.remove('hidden');
-        },
+        showFirstTimeSetup() { document.getElementById('firstTimeModal')?.classList.remove('hidden'); },
         showMainApp() {
             document.getElementById('firstTimeModal')?.classList.add('hidden');
             document.getElementById('main-header').classList.remove('hidden');
             document.getElementById('main-content').classList.remove('hidden');
         },
 
-        // --- STATE & DATA ---
         saveState() { localStorage.setItem('ledgerlyState', JSON.stringify(this.state)); },
         loadState() {
             const savedState = localStorage.getItem('ledgerlyState');
@@ -182,7 +169,6 @@ document.addEventListener('DOMContentLoaded', () => {
         getCategory(id) { return this.state.expenseCategories.find(c => c.id === id); },
         getTask(id) { return this.state.tasks.find(t => t.id === id); },
 
-        // --- EVENT LISTENERS ---
         addEventListeners() {
             document.getElementById('theme-toggle').addEventListener('click', () => this.toggleTheme());
             document.getElementById('first-employee-form')?.addEventListener('submit', e => this.handleFirstEmployee(e));
@@ -215,13 +201,9 @@ document.addEventListener('DOMContentLoaded', () => {
             document.getElementById('credit-received-form')?.addEventListener('submit', e => this.handleCreditReceived(e));
         },
         
-        // --- MASTER RENDER LOGIC ---
         render() {
             try {
-                if (this.state.employees.length === 0) {
-                    this.showFirstTimeSetup();
-                    return;
-                }
+                if (this.state.employees.length === 0) { this.showFirstTimeSetup(); return; }
                 this.showMainApp();
                 if (!this.state.currentEmployeeId || !this.getEmployee(this.state.currentEmployeeId)?.isActive) {
                     const firstActive = this.getActiveEmployees()[0];
@@ -232,22 +214,21 @@ document.addEventListener('DOMContentLoaded', () => {
                 this.renderAIAdvisorPanel();
                 const employeeView = document.getElementById('employee-view');
                 if (this.getActiveEmployees().length === 0) {
-                    employeeView.innerHTML = `<div class="p-8 text-center w-full h-full flex flex-col justify-center items-center"><h2 class="text-2xl font-bold mb-4">All Employees Inactive</h2><p>Please reactivate an employee to continue.</p></div>`;
+                    employeeView.innerHTML = `<div class="p-8 text-center w-full h-full flex flex-col justify-center items-center"><h2 class="text-2xl font-bold mb-4">All Employees Inactive</h2><p>Please reactivate an employee.</p></div>`;
                 } else if (this.state.currentEmployeeId) {
                     employeeView.innerHTML = this.getEmployeeViewTemplate();
                     this.renderTabs();
                     this.attachEmployeeViewEventListeners();
                     this.setActiveTab(document.querySelector('.tab-button.active')?.dataset.tab || 'dashboard');
                 } else {
-                    employeeView.innerHTML = `<div class="p-8 text-center w-full h-full flex flex-col justify-center items-center"><h2 class="text-2xl font-bold mb-4">No active employee selected.</h2><p>Please select an employee from the dropdown or reactivate one.</p></div>`;
+                    employeeView.innerHTML = `<div class="p-8 text-center w-full h-full flex flex-col justify-center items-center"><h2 class="text-2xl font-bold mb-4">No active employee selected.</h2><p>Please select an employee.</p></div>`;
                 }
             } catch (error) {
-                console.error("A critical error occurred during rendering:", error);
-                document.body.innerHTML = `<div style="padding: 2rem; font-family: sans-serif;"><h1>An Error Occurred</h1><p>The application could not start. Please check the browser console for errors or try clearing local storage.</p><pre style="background: #eee; padding: 1rem; border-radius: 5px; white-space: pre-wrap;">${error.stack}</pre></div>`;
+                console.error("Render Error:", error);
+                document.body.innerHTML = `<div style="padding: 2rem; font-family: sans-serif;"><h1>An Error Occurred</h1><p>The application could not start. Please check the console or try clearing local storage.</p><pre style="background: #eee; padding: 1rem; border-radius: 5px; white-space: pre-wrap;">${error.stack}</pre></div>`;
             }
         },
 
-        // --- UI COMPONENT RENDERERS ---
         getEmployeeViewTemplate() {
             const employee = this.getEmployee(this.state.currentEmployeeId);
             if (!employee) return '';
@@ -272,14 +253,13 @@ document.addEventListener('DOMContentLoaded', () => {
                 
                 <div class="flex-grow p-4 overflow-y-auto">
                     <div id="dashboard-content" class="tab-content hidden">
-                        
                         <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
                             <div class="bg-light-surface dark:bg-dark-surface p-4 rounded-lg shadow">
-                                <div class="text-sm text-light-text-secondary dark:text-dark-text-secondary">Total Revenue</div>
+                                <div class="text-sm text-light-text-secondary dark:text-dark-text-secondary">Revenue</div>
                                 <div class="text-2xl font-bold text-accent-green">$${revenue.toFixed(2)}</div>
                             </div>
                             <div class="bg-light-surface dark:bg-dark-surface p-4 rounded-lg shadow">
-                                <div class="text-sm text-light-text-secondary dark:text-dark-text-secondary">Total Expenses</div>
+                                <div class="text-sm text-light-text-secondary dark:text-dark-text-secondary">Expenses</div>
                                 <div class="text-2xl font-bold text-accent-red">$${expenses.toFixed(2)}</div>
                             </div>
                             <div class="bg-light-surface dark:bg-dark-surface p-4 rounded-lg shadow">
@@ -289,62 +269,28 @@ document.addEventListener('DOMContentLoaded', () => {
                         </div>
 
                         <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                            <div class="bg-light-surface dark:bg-dark-surface p-4 rounded-lg shadow h-80"><canvas id="sales-over-time-chart"></canvas></div>
-                            <div class="bg-light-surface dark:bg-dark-surface p-4 rounded-lg shadow h-80"><canvas id="top-products-chart"></canvas></div>
-                            <div class="bg-light-surface dark:bg-dark-surface p-4 rounded-lg shadow h-80"><canvas id="expenses-by-category-chart"></canvas></div>
-                            <div class="bg-light-surface dark:bg-dark-surface p-4 rounded-lg shadow h-80"><canvas id="store-credit-chart"></canvas></div>
+                            <div class="bg-light-surface dark:bg-dark-surface p-4 rounded-lg shadow h-64 md:h-72"><canvas id="sales-over-time-chart"></canvas></div>
+                            <div class="bg-light-surface dark:bg-dark-surface p-4 rounded-lg shadow h-64 md:h-72"><canvas id="top-products-chart"></canvas></div>
+                            <div class="bg-light-surface dark:bg-dark-surface p-4 rounded-lg shadow h-64 md:h-72"><canvas id="expenses-by-category-chart"></canvas></div>
+                            <div class="bg-light-surface dark:bg-dark-surface p-4 rounded-lg shadow h-64 md:h-72"><canvas id="store-credit-chart"></canvas></div>
                         </div>
                     </div>
                     <div id="my-tasks-content" class="tab-content hidden"><h3 class="text-xl font-bold mb-4">My Tasks</h3><ul id="employee-tasks-list" class="space-y-3"></ul></div>
-                    <div id="my-inventory-content" class="tab-content hidden"><h3 class="text-xl font-bold mb-4">My Delegated Inventory</h3><div class="overflow-x-auto bg-light-surface dark:bg-dark-surface rounded-lg shadow"><table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700"><thead class="bg-light-bg dark:bg-dark-bg"><tr><th class="table-header">Product</th><th class="table-header">Stock</th></tr></thead><tbody id="employee-inventory-list" class="divide-y divide-gray-200 dark:divide-gray-700"></tbody></table></div></div>
-                    <div id="sales-expenses-content" class="tab-content hidden grid grid-cols-1 lg:grid-cols-2 gap-6"><div class="bg-light-surface dark:bg-dark-surface p-6 rounded-lg shadow-md"><h3 class="text-xl font-bold mb-4 flex items-center"><i class="fas fa-cart-plus mr-3 text-accent-green"></i>Record a Sale</h3><form id="record-sale-form" class="space-y-4"><div class="grid grid-cols-1 md:grid-cols-2 gap-4"><div><label for="sale-product" class="form-label">Product</label><select id="sale-product" name="sale-product" class="form-input"></select></div><div><label for="sale-quantity" class="form-label">Quantity</label><input type="number" id="sale-quantity" name="sale-quantity" min="1" value="1" class="form-input"></div></div><div class="grid grid-cols-1 md:grid-cols-2 gap-4"><div><label for="sale-type" class="form-label">Sale Type</label><select id="sale-type" name="sale-type" class="form-input"></select></div><div><label for="sale-store" class="form-label">Store</label><select id="sale-store" name="sale-store" class="form-input"></select></div></div><div><label for="sale-discount" class="form-label">Discount ($)</label><input type="number" id="sale-discount" name="sale-discount" min="0" value="0" step="0.01" class="form-input"></div><div class="p-3 bg-light-bg dark:bg-dark-bg rounded-md text-right"><span class="text-light-text-secondary dark:text-dark-text-secondary">Final Amount: </span><strong id="final-sale-amount" class="text-xl">$0.00</strong></div><button type="submit" class="w-full bg-primary text-black font-bold py-2 px-4 rounded-md hover:bg-primary-hover">Record Sale</button></form></div><div class="bg-light-surface dark:bg-dark-surface p-6 rounded-lg shadow-md"><h3 class="text-xl font-bold mb-4 flex items-center"><i class="fas fa-money-bill-wave mr-3 text-accent-red"></i>Record an Expense</h3><form id="record-expense-form" class="space-y-4"><div><label for="expense-description" class="form-label">Description</label><input type="text" id="expense-description" name="expense-description" required class="form-input"></div><div class="grid grid-cols-1 md:grid-cols-2 gap-4"><div><label for="expense-amount" class="form-label">Amount ($)</label><input type="number" id="expense-amount" name="expense-amount" step="0.01" min="0" required class="form-input"></div><div><label for="expense-category" class="form-label">Category</label><select id="expense-category" name="expense-category" required class="form-input"></select></div></div><button type="submit" class="w-full bg-primary text-black font-bold py-2 px-4 rounded-md hover:bg-primary-hover">Record Expense</button></form></div></div>
-                    <div id="stores-content" class="tab-content hidden"><div class="grid grid-cols-1 lg:grid-cols-2 gap-6"><div class="bg-light-surface dark:bg-dark-surface p-6 rounded-lg shadow-md"><h3 class="text-xl font-bold mb-4">Add a New Store</h3><form id="employee-add-store-form" class="space-y-4"><div><label for="new-store-name" class="form-label">Store Name</label><input type="text" id="new-store-name" required class="form-input"></div><div><label for="new-store-location" class="form-label">Location</label><input type="text" id="new-store-location" required class="form-input"></div><div><label for="new-store-credit-limit" class="form-label">Credit Limit ($)</label><input type="number" id="new-store-credit-limit" required min="0" step="0.01" class="form-input"></div><button type="submit" class="w-full bg-primary text-black font-bold py-2 px-4 rounded-md hover:bg-primary-hover">Add Store</button></form></div><div class="lg:col-span-1 space-y-4" id="stores-list-container"><h3 class="text-xl font-bold">Existing Stores</h3><div id="stores-list" class="space-y-4 max-h-[60vh] overflow-y-auto pr-2"></div></div></div></div>
-                    <div id="invoices-content" class="tab-content hidden"><div class="max-w-xl mx-auto bg-light-surface dark:bg-dark-surface p-6 rounded-lg shadow-md"><h3 class="text-xl font-bold mb-4">Generate Invoice</h3><form id="invoice-form" class="space-y-4"><div><label for="invoice-store" class="form-label">Select Store</label><select id="invoice-store" class="form-input"></select></div><div class="grid grid-cols-2 gap-4"><div><label for="invoice-start-date" class="form-label">Start Date</label><input type="date" id="invoice-start-date" required class="form-input"></div><div><label for="invoice-end-date" class="form-label">End Date</label><input type="date" id="invoice-end-date" required class="form-input"></div></div><button type="submit" class="w-full bg-primary text-black font-bold py-2 px-4 rounded-md hover:bg-primary-hover">Generate PDF Invoice</button></form><p class="text-xs text-center mt-4 text-light-text-secondary dark:text-dark-text-secondary">Requires a valid PDFShift API Key to be set in the code.</p></div></div>
+                    <div id="my-inventory-content" class="tab-content hidden"><h3 class="text-xl font-bold mb-4">My Inventory</h3><div class="overflow-x-auto bg-light-surface dark:bg-dark-surface rounded-lg shadow"><table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700"><thead class="bg-light-bg dark:bg-dark-bg"><tr><th class="table-header">Product</th><th class="table-header">Stock</th></tr></thead><tbody id="employee-inventory-list" class="divide-y divide-gray-200 dark:divide-gray-700"></tbody></table></div></div>
+                    <div id="sales-expenses-content" class="tab-content hidden grid grid-cols-1 lg:grid-cols-2 gap-6"><div class="bg-light-surface dark:bg-dark-surface p-6 rounded-lg shadow-md"><h3 class="text-xl font-bold mb-4 flex items-center"><i class="fas fa-cart-plus mr-3 text-accent-green"></i>Record a Sale</h3><form id="record-sale-form" class="space-y-4"><div class="grid grid-cols-1 sm:grid-cols-2 gap-4"><div><label for="sale-product" class="form-label">Product</label><select id="sale-product" name="sale-product" class="form-input"></select></div><div><label for="sale-quantity" class="form-label">Quantity</label><input type="number" id="sale-quantity" name="sale-quantity" min="1" value="1" class="form-input"></div></div><div class="grid grid-cols-1 sm:grid-cols-2 gap-4"><div><label for="sale-type" class="form-label">Sale Type</label><select id="sale-type" name="sale-type" class="form-input"></select></div><div><label for="sale-store" class="form-label">Store</label><select id="sale-store" name="sale-store" class="form-input"></select></div></div><div><label for="sale-discount" class="form-label">Discount ($)</label><input type="number" id="sale-discount" name="sale-discount" min="0" value="0" step="0.01" class="form-input"></div><div class="p-3 bg-light-bg dark:bg-dark-bg rounded-md text-right"><span class="text-light-text-secondary dark:text-dark-text-secondary">Final: </span><strong id="final-sale-amount" class="text-xl">$0.00</strong></div><button type="submit" class="w-full bg-primary text-black font-bold py-2 px-4 rounded-md hover:bg-primary-hover">Record Sale</button></form></div><div class="bg-light-surface dark:bg-dark-surface p-6 rounded-lg shadow-md"><h3 class="text-xl font-bold mb-4 flex items-center"><i class="fas fa-money-bill-wave mr-3 text-accent-red"></i>Record an Expense</h3><form id="record-expense-form" class="space-y-4"><div><label for="expense-description" class="form-label">Description</label><input type="text" id="expense-description" name="expense-description" required class="form-input"></div><div class="grid grid-cols-1 sm:grid-cols-2 gap-4"><div><label for="expense-amount" class="form-label">Amount ($)</label><input type="number" id="expense-amount" name="expense-amount" step="0.01" min="0" required class="form-input"></div><div><label for="expense-category" class="form-label">Category</label><select id="expense-category" name="expense-category" required class="form-input"></select></div></div><button type="submit" class="w-full bg-primary text-black font-bold py-2 px-4 rounded-md hover:bg-primary-hover">Record Expense</button></form></div></div>
+                    <div id="stores-content" class="tab-content hidden"><div class="grid grid-cols-1 lg:grid-cols-2 gap-6"><div class="bg-light-surface dark:bg-dark-surface p-6 rounded-lg shadow-md"><h3 class="text-xl font-bold mb-4">Add Store</h3><form id="employee-add-store-form" class="space-y-4"><div><label for="new-store-name" class="form-label">Store Name</label><input type="text" id="new-store-name" required class="form-input"></div><div><label for="new-store-location" class="form-label">Location</label><input type="text" id="new-store-location" required class="form-input"></div><div><label for="new-store-credit-limit" class="form-label">Credit Limit ($)</label><input type="number" id="new-store-credit-limit" required min="0" step="0.01" class="form-input"></div><button type="submit" class="w-full bg-primary text-black font-bold py-2 px-4 rounded-md hover:bg-primary-hover">Add Store</button></form></div><div class="lg:col-span-1 space-y-4" id="stores-list-container"><h3 class="text-xl font-bold">Existing Stores</h3><div id="stores-list" class="space-y-4 max-h-[60vh] overflow-y-auto pr-2"></div></div></div></div>
+                    <div id="invoices-content" class="tab-content hidden"><div class="max-w-xl mx-auto bg-light-surface dark:bg-dark-surface p-6 rounded-lg shadow-md"><h3 class="text-xl font-bold mb-4">Generate Invoice</h3><form id="invoice-form" class="space-y-4"><div><label for="invoice-store" class="form-label">Store</label><select id="invoice-store" class="form-input"></select></div><div class="grid grid-cols-2 gap-4"><div><label for="invoice-start-date" class="form-label">Start Date</label><input type="date" id="invoice-start-date" required class="form-input"></div><div><label for="invoice-end-date" class="form-label">End Date</label><input type="date" id="invoice-end-date" required class="form-input"></div></div><button type="submit" class="w-full bg-primary text-black font-bold py-2 px-4 rounded-md hover:bg-primary-hover">Generate PDF Invoice</button></form><p class="text-xs text-center mt-4 text-light-text-secondary dark:text-dark-text-secondary">Requires PDFShift API Key.</p></div></div>
                     <div id="ledger-content" class="tab-content hidden"><h3 class="text-xl font-bold mb-4">Transaction Ledger</h3><div class="overflow-x-auto bg-light-surface dark:bg-dark-surface rounded-lg shadow"><table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700"><thead class="bg-light-bg dark:bg-dark-bg"><tr><th class="table-header">Date</th><th class="table-header">Type</th><th class="table-header">Details</th><th class="table-header text-right">Amount</th></tr></thead><tbody id="ledger-body" class="divide-y divide-gray-200 dark:divide-gray-700"></tbody></table></div></div>
                 </div>
             </div>`;
         },
         
-        renderTabs() {
-            const tabs = [ { id: 'dashboard', name: 'Dashboard', icon: 'fa-chart-line' }, { id: 'my-tasks', name: 'My Tasks', icon: 'fa-tasks' }, { id: 'my-inventory', name: 'My Inventory', icon: 'fa-boxes' }, { id: 'sales-expenses', name: 'Sales & Expenses', icon: 'fa-exchange-alt' }, { id: 'stores', name: 'Manage Stores', icon: 'fa-store' }, { id: 'invoices', name: 'Invoices', icon: 'fa-file-invoice-dollar' }, { id: 'ledger', name: 'Ledger', icon: 'fa-history' } ];
-            document.getElementById('tabs-container').innerHTML = tabs.map(tab => `<button data-tab="${tab.id}" class="tab-button text-light-text-secondary dark:text-dark-text-secondary hover:text-light-text dark:hover:text-dark-text border-b-2 border-transparent py-3 px-4 font-medium text-sm"><i class="fas ${tab.icon} mr-2 hidden md:inline"></i>${tab.name}</button>`).join('');
-            document.getElementById('mobile-tabs').innerHTML = tabs.map(tab => `<option value="${tab.id}">${tab.name}</option>`).join('');
-        },
-        
-        // --- UI LOGIC ---
-        toggleSidenav() {
-            document.getElementById('side-panel').classList.toggle('-translate-x-full');
-            document.getElementById('sidenav-backdrop').classList.toggle('hidden');
-        },
-
-        setActiveTab(tabName) {
-            document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
-            document.querySelectorAll('.tab-button').forEach(el => el.classList.remove('active'));
-            document.getElementById(`${tabName}-content`)?.classList.remove('hidden');
-            document.querySelector(`[data-tab="${tabName}"]`)?.classList.add('active');
-            
-            const mobileTabs = document.getElementById('mobile-tabs');
-            if (mobileTabs) mobileTabs.value = tabName;
-            
-            const renderMap = { dashboard: 'renderDashboard', 'my-tasks': 'renderMyTasks', 'my-inventory': 'renderMyInventory', 'sales-expenses': 'renderSalesAndExpenses', stores: 'renderStoresTab', invoices: 'renderInvoices', ledger: 'renderLedger' };
-            if (renderMap[tabName]) this[renderMap[tabName]]();
-        },
-
-        togglePanel(panelName, forceOpen = false) {
-            const icon = document.getElementById(`${panelName}-toggle-icon`);
-            const content = document.getElementById(`${panelName}-content`);
-            const isHidden = content.classList.contains('hidden');
-            if (forceOpen && isHidden) {
-                content.classList.remove('hidden');
-            } else if (!forceOpen) {
-                content.classList.toggle('hidden');
-            }
-            icon.classList.toggle('fa-chevron-up', !content.classList.contains('hidden'));
-            icon.classList.toggle('fa-chevron-down', content.classList.contains('hidden'));
-        },
-        
-        // --- The rest of the JS functions are placed here ---
-        // These are identical to the previous version and are included for completeness.
+        // --- The rest of the JS is unchanged. For brevity, it's collapsed here. ---
+        // You can use the full JS block from the previous response.
+        renderTabs() { const tabs = [ { id: 'dashboard', name: 'Dashboard', icon: 'fa-chart-line' }, { id: 'my-tasks', name: 'My Tasks', icon: 'fa-tasks' }, { id: 'my-inventory', name: 'My Inventory', icon: 'fa-boxes' }, { id: 'sales-expenses', name: 'Sales & Expenses', icon: 'fa-exchange-alt' }, { id: 'stores', name: 'Manage Stores', icon: 'fa-store' }, { id: 'invoices', name: 'Invoices', icon: 'fa-file-invoice-dollar' }, { id: 'ledger', name: 'Ledger', icon: 'fa-history' } ]; document.getElementById('tabs-container').innerHTML = tabs.map(tab => `<button data-tab="${tab.id}" class="tab-button text-light-text-secondary dark:text-dark-text-secondary hover:text-light-text dark:hover:text-dark-text border-b-2 border-transparent py-3 px-4 font-medium text-sm"><i class="fas ${tab.icon} mr-2 hidden md:inline"></i>${tab.name}</button>`).join(''); document.getElementById('mobile-tabs').innerHTML = tabs.map(tab => `<option value="${tab.id}">${tab.name}</option>`).join(''); },
+        toggleSidenav() { document.getElementById('side-panel').classList.toggle('-translate-x-full'); document.getElementById('sidenav-backdrop').classList.toggle('hidden'); },
+        setActiveTab(tabName) { document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden')); document.querySelectorAll('.tab-button').forEach(el => el.classList.remove('active')); document.getElementById(`${tabName}-content`)?.classList.remove('hidden'); document.querySelector(`[data-tab="${tabName}"]`)?.classList.add('active'); const mobileTabs = document.getElementById('mobile-tabs'); if (mobileTabs) mobileTabs.value = tabName; const renderMap = { dashboard: 'renderDashboard', 'my-tasks': 'renderMyTasks', 'my-inventory': 'renderMyInventory', 'sales-expenses': 'renderSalesAndExpenses', stores: 'renderStoresTab', invoices: 'renderInvoices', ledger: 'renderLedger' }; if (renderMap[tabName]) this[renderMap[tabName]](); },
+        togglePanel(panelName, forceOpen = false) { const icon = document.getElementById(`${panelName}-toggle-icon`); const content = document.getElementById(`${panelName}-content`); const isHidden = content.classList.contains('hidden'); if (forceOpen && isHidden) { content.classList.remove('hidden'); } else if (!forceOpen) { content.classList.toggle('hidden'); } icon.classList.toggle('fa-chevron-up', !content.classList.contains('hidden')); icon.classList.toggle('fa-chevron-down', content.classList.contains('hidden')); },
         renderCompanyOverview() { let totalRevenue=0,totalExpenses=0;this.state.employees.forEach(emp=>{if(emp.isActive&&emp.transactions){totalRevenue+=emp.transactions.filter(t=>t.type==='sale').reduce((sum,t)=>sum+t.amount,0);totalExpenses+=emp.transactions.filter(t=>t.type==='expense').reduce((sum,t)=>sum+t.amount,0)}});const totalProfit=totalRevenue-totalExpenses;document.getElementById('company-stats').innerHTML=`<h3 class="font-bold text-light-text-secondary dark:text-dark-text-secondary text-base">Firm-Wide Totals (Active)</h3><div class="text-sm space-y-1"><div class="flex justify-between"><span>Revenue:</span> <span class="font-semibold text-accent-green">$${totalRevenue.toFixed(2)}</span></div><div class="flex justify-between"><span>Expenses:</span> <span class="font-semibold text-accent-red">$${totalExpenses.toFixed(2)}</span></div><div class="flex justify-between border-t border-gray-300 dark:border-gray-600 pt-1 mt-1"><span>Net Profit:</span> <span class="font-bold text-lg ${totalProfit<0?'text-accent-red':'text-accent-green'}">$${totalProfit.toFixed(2)}</span></div></div>`;document.getElementById('employee-list').innerHTML=this.getActiveEmployees().map(emp=>{const revenue=emp.transactions.filter(t=>t.type==='sale').reduce((sum,t)=>sum+t.amount,0);const expenses=emp.transactions.filter(t=>t.type==='expense').reduce((sum,t)=>sum+t.amount,0);return`<li class="bg-light-bg dark:bg-dark-bg p-2 rounded"><div class="flex justify-between items-center"><div><span class="font-bold">${emp.name}</span><em class="text-xs ml-1 text-light-text-secondary dark:text-dark-text-secondary">(${emp.position})</em></div><div class="flex space-x-3"><button class="text-sm hover:text-primary" onclick="app.startEditEmployee('${emp.id}')"><i class="fas fa-pencil-alt"></i></button><button class="text-sm hover:text-accent-red" onclick="app.deactivateEmployee('${emp.id}')"><i class="fas fa-user-slash"></i></button></div></div><div class="text-xs mt-2 space-y-1 pl-1 border-l-2 border-gray-200 dark:border-gray-600 ml-1 pl-2"><div class="flex justify-between"><span>Revenue:</span> <span class="font-semibold text-accent-green">$${revenue.toFixed(2)}</span></div><div class="flex justify-between"><span>Expenses:</span> <span class="font-semibold text-accent-red">$${expenses.toFixed(2)}</span></div></div></li>`}).join('')||`<p class="text-sm text-light-text-secondary dark:text-dark-text-secondary">No active employees yet.</p>`;const inactiveEmployees=this.state.employees.filter(e=>!e.isActive);document.getElementById('inactive-employee-section').classList.toggle('hidden',inactiveEmployees.length===0);document.getElementById('inactive-employee-list').innerHTML=inactiveEmployees.map(emp=>`<li class="flex justify-between items-center bg-light-bg dark:bg-dark-bg p-2 rounded opacity-60"><span class="italic">${emp.name}</span><button class="text-sm text-accent-green hover:opacity-80 font-semibold" onclick="app.reactivateEmployee('${emp.id}')">Reactivate</button></li>`).join('');document.getElementById('master-inventory-list').innerHTML=this.getActiveProducts().map(prod=>`<div class="bg-light-bg dark:bg-dark-bg p-2 rounded"><div class="flex justify-between items-center"><span>${prod.name}</span><div class="flex items-center"><span class="font-mono text-xs bg-gray-200 dark:bg-gray-700 px-2 py-1 rounded mr-3">${prod.stock}</span><button class="text-sm hover:text-primary" onclick="app.startEditProduct('${prod.id}')"><i class="fas fa-pencil-alt"></i></button><button class="text-sm hover:text-accent-red ml-2" onclick="app.deleteProduct('${prod.id}')"><i class="fas fa-trash-alt"></i></button></div></div></div>`).join('')||`<p class="text-sm text-light-text-secondary dark:text-dark-text-secondary">No active products.</p>`;document.getElementById('expense-category-list').innerHTML=this.state.expenseCategories.map(cat=>`<div class="flex justify-between items-center bg-light-bg dark:bg-dark-bg p-2 rounded"><span>${cat.name}</span><div><button class="text-sm hover:text-primary" onclick="app.startEditCategory('${cat.id}')"><i class="fas fa-pencil-alt"></i></button><button class="text-sm hover:text-accent-red ml-2" onclick="app.deleteCategory('${cat.id}')"><i class="fas fa-trash-alt"></i></button></div></div>`).join('')||`<p class="text-sm text-light-text-secondary dark:text-dark-text-secondary">No categories defined.</p>`;document.getElementById('all-tasks-list').innerHTML=this.state.tasks.map(task=>`<li class="bg-light-bg dark:bg-dark-bg p-2 rounded ${task.status==='Completed'?'task-completed':''}"><p>${task.description}</p><small class="text-light-text-secondary dark:text-dark-text-secondary">To: ${this.getEmployee(task.assigneeId)?.name||'Unassigned'}</small></li>`).join('')||`<p class="text-sm text-light-text-secondary dark:text-dark-text-secondary">No tasks created.</p>`; },
         renderDashboard() { const employee=this.getEmployee(this.state.currentEmployeeId);if(!employee)return;const isDark=this.state.theme==='dark';const gridColor=isDark?'rgba(255, 255, 255, 0.1)':'rgba(0, 0, 0, 0.1)';const textColor=isDark?'#e3e3e3':'#1f2937';Object.values(this.charts).forEach(chart=>{if(chart)chart.destroy()});const salesByDate=employee.transactions.filter(t=>t.type==='sale').reduce((acc,t)=>{const date=t.date.split('T')[0];acc[date]=(acc[date]||0)+t.amount;return acc},{});const sortedDates=Object.keys(salesByDate).sort();this.charts.sales=new Chart(document.getElementById('sales-over-time-chart').getContext('2d'),{type:'line',data:{labels:sortedDates,datasets:[{label:'Daily Revenue',data:sortedDates.map(date=>salesByDate[date]),borderColor:'#89b4fa',backgroundColor:'rgba(137, 180, 250, 0.2)',tension:0.1,fill:true}]},options:{responsive:true,maintainAspectRatio:false,scales:{y:{beginAtZero:true,grid:{color:gridColor},ticks:{color:textColor}},x:{grid:{color:gridColor},ticks:{color:textColor}}},plugins:{legend:{labels:{color:textColor}}}}});const salesByProduct=employee.transactions.filter(t=>t.type==='sale').reduce((acc,t)=>{acc[t.productId]=(acc[t.productId]||0)+t.amount;return acc},{});const topProducts=Object.entries(salesByProduct).sort(([,a],[,b])=>b-a).slice(0,5);this.charts.products=new Chart(document.getElementById('top-products-chart').getContext('2d'),{type:'bar',data:{labels:topProducts.map(([productId])=>this.getProduct(productId)?.name||'Unknown'),datasets:[{label:'Revenue by Product',data:topProducts.map(([,amount])=>amount),backgroundColor:['#89b4fa','#a6e3a1','#f9e2af','#fab387','#f38ba8']}]},options:{responsive:true,maintainAspectRatio:false,indexAxis:'y',scales:{x:{beginAtZero:true,grid:{color:gridColor},ticks:{color:textColor}},y:{grid:{color:gridColor},ticks:{color:textColor}}},plugins:{legend:{display:false},title:{display:true,text:'Top Products by Revenue',color:textColor,font:{size:16}}}}});const expensesByCategory=employee.transactions.filter(t=>t.type==='expense').reduce((acc,t)=>{const category=this.getCategory(t.categoryId)||{name:'Uncategorized'};acc[category.name]=(acc[category.name]||0)+t.amount;return acc},{});this.charts.expensesByCategory=new Chart(document.getElementById('expenses-by-category-chart').getContext('2d'),{type:'doughnut',data:{labels:Object.keys(expensesByCategory),datasets:[{data:Object.values(expensesByCategory),backgroundColor:['#f38ba8','#fab387','#f9e2af','#a6e3a1','#89b4fa','#cba6f7','#f5c2e7'],borderColor:isDark?'#1e1f20':'#ffffff',borderWidth:4}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'top',labels:{color:textColor}},title:{display:true,text:'Expenses by Category',color:textColor,font:{size:16}}}}});const totalCreditUsed=this.state.stores.reduce((sum,s)=>sum+(s.creditUsed||0),0);const totalCreditAvailable=this.state.stores.reduce((sum,s)=>sum+(s.creditAvailable||0),0);const outstandingCredit=totalCreditUsed-this.state.stores.reduce((sum,s)=>sum+(s.creditPaidBack||0),0);const totalCreditLimit=totalCreditAvailable+totalCreditUsed;this.charts.credit=new Chart(document.getElementById('store-credit-chart').getContext('2d'),{type:'bar',data:{labels:['Credit Status'],datasets:[{label:'Outstanding',data:[outstandingCredit],backgroundColor:'#f38ba8'},{label:'Available',data:[totalCreditLimit-outstandingCredit],backgroundColor:'#a6e3a1'}]},options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,scales:{x:{stacked:true,max:totalCreditLimit>0?totalCreditLimit:1},y:{stacked:true}},plugins:{title:{display:true,text:'Overall Credit Status',color:textColor,font:{size:16}},legend:{position:'top',labels:{color:textColor}}}}})},
         renderMyTasks() { const employeeTasks=this.state.tasks.filter(t=>t.assigneeId===this.state.currentEmployeeId);document.getElementById('employee-tasks-list').innerHTML=employeeTasks.map(task=>`<li class="bg-light-surface dark:bg-dark-surface p-4 rounded-lg shadow flex justify-between items-center ${task.status==='Completed'?'task-completed opacity-60':''}"><span>${task.description}</span><button class="text-black px-3 py-1 rounded-md text-sm font-semibold ${task.status==='Completed'?'bg-gray-400':'bg-accent-green hover:opacity-80'}" onclick="app.toggleTaskStatus('${task.id}')">${task.status==='Completed'?'Reopen':'Complete'}</button></li>`).join('')||`<p class="text-center py-8 text-light-text-secondary dark:text-dark-text-secondary">You have no assigned tasks.</p>`; },
@@ -401,7 +347,6 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     window.app = app;
-    document.documentElement.style.setProperty('--primary-color', tailwind.config.theme.extend.colors.primary);
     
     const styleSheet = document.createElement("style");
     styleSheet.innerText = `.modal-input { width: 100%; background-color: ${tailwind.config.theme.extend.colors['light-bg']}; border: 1px solid #d1d5db; border-radius: 0.375rem; padding: 0.5rem 0.75rem; } .dark .modal-input { background-color: ${tailwind.config.theme.extend.colors['dark-bg']}; border-color: #4b5563; } .modal-submit-button { width: 100%; background-color: ${tailwind.config.theme.extend.colors.primary}; color: black; font-weight: bold; padding: 0.5rem 1rem; border-radius: 0.375rem; transition: background-color 0.2s; } .modal-submit-button:hover { background-color: ${tailwind.config.theme.extend.colors['primary-hover']}; } .form-label { display: block; font-size: 0.875rem; font-weight: 500; color: ${tailwind.config.theme.extend.colors['light-text-secondary']}; } .dark .form-label { color: ${tailwind.config.theme.extend.colors['dark-text-secondary']}; } .form-input { margin-top: 0.25rem; display: block; width: 100%; background-color: ${tailwind.config.theme.extend.colors['light-bg']}; border: 1px solid #d1d5db; border-radius: 0.375rem; padding: 0.5rem 0.75rem; outline: none; } .dark .form-input { background-color: ${tailwind.config.theme.extend.colors['dark-bg']}; border-color: #4b5563; } .form-input:focus { ring: 2px; border-color: ${tailwind.config.theme.extend.colors.primary}; box-shadow: 0 0 0 2px ${tailwind.config.theme.extend.colors.primary}; } .table-header { padding: 0.75rem 1.5rem; text-align: left; font-size: 0.75rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; color: ${tailwind.config.theme.extend.colors['light-text-secondary']}; } .dark .table-header { color: ${tailwind.config.theme.extend.colors['dark-text-secondary']}; }`;
