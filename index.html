@@ -53,9 +53,9 @@
                 <button id="sidenav-toggle" class="md:hidden text-light-text-secondary dark:text-dark-text-secondary text-xl px-2 py-1" onclick="app.toggleSidenav()">
                     <i class="fas fa-bars"></i>
                 </button>
-                <div class="flex items-center space-x-2">
+                <div class="flex items-center space-x-3">
                     <i class="fas fa-book-open text-primary text-2xl"></i>
-                    <h1 id="app-title" class="text-2xl font-bold text-light-text dark:text-dark-text animate-color-pulse hidden sm:block">Ledgerly</h1>
+                    <h1 id="app-title" class="text-2xl font-bold text-light-text dark:text-dark-text animate-color-pulse">Ledgerly</h1>
                 </div>
             </div>
             <div class="flex items-center space-x-2 sm:space-x-4">
@@ -67,7 +67,7 @@
             </div>
         </header>
 
-        <main id="main-content" class="flex-grow md:flex overflow-hidden hidden">
+        <main id="main-content" class="flex-1 flex flex-col md:flex-row overflow-hidden hidden">
             <div id="sidenav-backdrop" class="fixed inset-0 bg-black bg-opacity-50 z-30 hidden md:hidden" onclick="app.toggleSidenav()"></div>
             
             <div id="side-panel" class="fixed inset-y-0 left-0 z-40 w-4/5 max-w-sm bg-light-surface dark:bg-dark-surface p-4 overflow-y-auto transform -translate-x-full transition-transform duration-300 ease-in-out md:relative md:w-1/3 lg:w-1/4 md:translate-x-0 md:flex-shrink-0 md:border-r border-gray-200 dark:border-gray-700">
@@ -79,26 +79,11 @@
                     </h2>
                     <div id="company-overview-content" class="space-y-4 hidden">
                         <div id="company-stats" class="space-y-2 p-3 bg-light-bg dark:bg-dark-bg rounded-lg"></div>
-                        <div>
-                            <div class="flex justify-between items-center mb-2"><h3 class="font-bold text-light-text-secondary dark:text-dark-text-secondary">Employees</h3><button class="bg-primary text-black px-3 py-1 rounded-md text-sm font-semibold hover:bg-primary-hover" onclick="app.openModal('addEmployeeModal')">+ Add</button></div>
-                            <ul id="employee-list" class="space-y-2 text-sm"></ul>
-                        </div>
-                        <div id="inactive-employee-section" class="hidden">
-                            <div class="flex justify-between items-center mb-2"><h3 class="font-bold text-light-text-secondary dark:text-dark-text-secondary">Inactive Employees</h3></div>
-                            <ul id="inactive-employee-list" class="space-y-2 text-sm"></ul>
-                        </div>
-                        <div>
-                            <div class="flex justify-between items-center mb-2"><h3 class="font-bold text-light-text-secondary dark:text-dark-text-secondary">Master Inventory</h3><div><button class="bg-primary text-black px-3 py-1 rounded-md text-sm font-semibold hover:bg-primary-hover mr-2" onclick="app.openModal('addProductModal')">+ Add</button><button class="bg-accent-green text-black px-3 py-1 rounded-md text-sm font-semibold hover:opacity-80" onclick="app.openModal('delegateStockModal')">Delegate</button></div></div>
-                            <div id="master-inventory-list" class="space-y-1 text-sm"></div>
-                        </div>
-                        <div>
-                            <div class="flex justify-between items-center mb-2"><h3 class="font-bold text-light-text-secondary dark:text-dark-text-secondary">Expense Categories</h3><button class="bg-primary text-black px-3 py-1 rounded-md text-sm font-semibold hover:bg-primary-hover" onclick="app.openModal('addCategoryModal')">+ Add</button></div>
-                            <div id="expense-category-list" class="space-y-1 text-sm"></div>
-                        </div>
-                        <div>
-                            <div class="flex justify-between items-center mb-2"><h3 class="font-bold text-light-text-secondary dark:text-dark-text-secondary">All Tasks</h3><button class="bg-primary text-black px-3 py-1 rounded-md text-sm font-semibold hover:bg-primary-hover" onclick="app.openModal('createTaskModal')">+ Create</button></div>
-                            <ul id="all-tasks-list" class="space-y-2 text-sm"></ul>
-                        </div>
+                        <div><div class="flex justify-between items-center mb-2"><h3 class="font-bold text-light-text-secondary dark:text-dark-text-secondary">Employees</h3><button class="bg-primary text-black px-3 py-1 rounded-md text-sm font-semibold hover:bg-primary-hover" onclick="app.openModal('addEmployeeModal')">+ Add</button></div><ul id="employee-list" class="space-y-2 text-sm"></ul></div>
+                        <div id="inactive-employee-section" class="hidden"> <div class="flex justify-between items-center mb-2"><h3 class="font-bold text-light-text-secondary dark:text-dark-text-secondary">Inactive Employees</h3></div> <ul id="inactive-employee-list" class="space-y-2 text-sm"></ul> </div>
+                        <div><div class="flex justify-between items-center mb-2"><h3 class="font-bold text-light-text-secondary dark:text-dark-text-secondary">Master Inventory</h3><div><button class="bg-primary text-black px-3 py-1 rounded-md text-sm font-semibold hover:bg-primary-hover mr-2" onclick="app.openModal('addProductModal')">+ Add</button><button class="bg-accent-green text-black px-3 py-1 rounded-md text-sm font-semibold hover:opacity-80" onclick="app.openModal('delegateStockModal')">Delegate</button></div></div><div id="master-inventory-list" class="space-y-1 text-sm"></div></div>
+                        <div><div class="flex justify-between items-center mb-2"><h3 class="font-bold text-light-text-secondary dark:text-dark-text-secondary">Expense Categories</h3><button class="bg-primary text-black px-3 py-1 rounded-md text-sm font-semibold hover:bg-primary-hover" onclick="app.openModal('addCategoryModal')">+ Add</button></div><div id="expense-category-list" class="space-y-1 text-sm"></div></div>
+                        <div><div class="flex justify-between items-center mb-2"><h3 class="font-bold text-light-text-secondary dark:text-dark-text-secondary">All Tasks</h3><button class="bg-primary text-black px-3 py-1 rounded-md text-sm font-semibold hover:bg-primary-hover" onclick="app.openModal('createTaskModal')">+ Create</button></div><ul id="all-tasks-list" class="space-y-2 text-sm"></ul></div>
                     </div>
                 </div>
                 <div id="ai-advisor-panel">
@@ -114,7 +99,7 @@
                 </div>
             </div>
             
-            <div id="employee-view" class="flex-grow p-2 md:p-6 overflow-y-auto w-full"></div>
+            <div id="employee-view" class="flex-1 overflow-y-auto w-full"></div>
         </main>
     </div>
 
@@ -214,14 +199,14 @@ document.addEventListener('DOMContentLoaded', () => {
                 this.renderAIAdvisorPanel();
                 const employeeView = document.getElementById('employee-view');
                 if (this.getActiveEmployees().length === 0) {
-                    employeeView.innerHTML = `<div class="p-8 text-center w-full h-full flex flex-col justify-center items-center"><h2 class="text-2xl font-bold mb-4">All Employees Inactive</h2><p>Please reactivate an employee.</p></div>`;
+                    employeeView.innerHTML = `<div class="p-8 text-center"><h2 class="text-2xl font-bold mb-4">All Employees Inactive</h2><p>Please reactivate an employee.</p></div>`;
                 } else if (this.state.currentEmployeeId) {
                     employeeView.innerHTML = this.getEmployeeViewTemplate();
                     this.renderTabs();
                     this.attachEmployeeViewEventListeners();
                     this.setActiveTab(document.querySelector('.tab-button.active')?.dataset.tab || 'dashboard');
                 } else {
-                    employeeView.innerHTML = `<div class="p-8 text-center w-full h-full flex flex-col justify-center items-center"><h2 class="text-2xl font-bold mb-4">No active employee selected.</h2><p>Please select an employee.</p></div>`;
+                    employeeView.innerHTML = `<div class="p-8 text-center"><h2 class="text-2xl font-bold mb-4">No active employee selected.</h2><p>Please select an employee.</p></div>`;
                 }
             } catch (error) {
                 console.error("Render Error:", error);
@@ -236,14 +221,16 @@ document.addEventListener('DOMContentLoaded', () => {
             const expenses = employee.transactions.filter(t => t.type === 'expense').reduce((sum, t) => sum + t.amount, 0);
             const profit = revenue - expenses;
 
+            // SCROLLING FIX: The main container inside employee-view is now a simple div.
+            // The parent #employee-view handles the scrolling.
             return `
-            <div class="w-full h-full flex flex-col">
-                <div class="p-4 bg-light-surface dark:bg-dark-surface rounded-t-lg border-b border-gray-200 dark:border-gray-700 flex-shrink-0">
+            <div>
+                <div class="p-4 bg-light-surface dark:bg-dark-surface sticky top-0 z-10 border-b border-gray-200 dark:border-gray-700">
                     <h2 class="text-2xl font-bold">${employee.name}</h2>
                     <p class="text-light-text-secondary dark:text-dark-text-secondary">${employee.position}</p>
                 </div>
 
-                <div class="border-b border-gray-200 dark:border-gray-700 px-4 flex-shrink-0">
+                <div class="border-b border-gray-200 dark:border-gray-700 px-4 sticky top-[97px] z-10 bg-light-bg dark:bg-dark-bg">
                     <div class="md:hidden my-2">
                         <label for="mobile-tabs" class="sr-only">Select a tab</label>
                         <select id="mobile-tabs" class="form-input w-full"></select>
@@ -251,23 +238,13 @@ document.addEventListener('DOMContentLoaded', () => {
                     <nav id="tabs-container" class="-mb-px hidden md:flex space-x-6"></nav>
                 </div>
                 
-                <div class="flex-grow p-4 overflow-y-auto">
+                <div class="p-4">
                     <div id="dashboard-content" class="tab-content hidden">
                         <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
-                            <div class="bg-light-surface dark:bg-dark-surface p-4 rounded-lg shadow">
-                                <div class="text-sm text-light-text-secondary dark:text-dark-text-secondary">Revenue</div>
-                                <div class="text-2xl font-bold text-accent-green">$${revenue.toFixed(2)}</div>
-                            </div>
-                            <div class="bg-light-surface dark:bg-dark-surface p-4 rounded-lg shadow">
-                                <div class="text-sm text-light-text-secondary dark:text-dark-text-secondary">Expenses</div>
-                                <div class="text-2xl font-bold text-accent-red">$${expenses.toFixed(2)}</div>
-                            </div>
-                            <div class="bg-light-surface dark:bg-dark-surface p-4 rounded-lg shadow">
-                                <div class="text-sm text-light-text-secondary dark:text-dark-text-secondary">Net Profit</div>
-                                <div class="text-2xl font-bold ${profit >= 0 ? 'text-accent-green':'text-accent-red'}">$${profit.toFixed(2)}</div>
-                            </div>
+                            <div class="bg-light-surface dark:bg-dark-surface p-4 rounded-lg shadow"><div class="text-sm text-light-text-secondary dark:text-dark-text-secondary">Revenue</div><div class="text-2xl font-bold text-accent-green">$${revenue.toFixed(2)}</div></div>
+                            <div class="bg-light-surface dark:bg-dark-surface p-4 rounded-lg shadow"><div class="text-sm text-light-text-secondary dark:text-dark-text-secondary">Expenses</div><div class="text-2xl font-bold text-accent-red">$${expenses.toFixed(2)}</div></div>
+                            <div class="bg-light-surface dark:bg-dark-surface p-4 rounded-lg shadow"><div class="text-sm text-light-text-secondary dark:text-dark-text-secondary">Net Profit</div><div class="text-2xl font-bold ${profit >= 0 ? 'text-accent-green':'text-accent-red'}">$${profit.toFixed(2)}</div></div>
                         </div>
-
                         <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
                             <div class="bg-light-surface dark:bg-dark-surface p-4 rounded-lg shadow h-64 md:h-72"><canvas id="sales-over-time-chart"></canvas></div>
                             <div class="bg-light-surface dark:bg-dark-surface p-4 rounded-lg shadow h-64 md:h-72"><canvas id="top-products-chart"></canvas></div>
@@ -285,8 +262,8 @@ document.addEventListener('DOMContentLoaded', () => {
             </div>`;
         },
         
-        // --- The rest of the JS is unchanged. For brevity, it's collapsed here. ---
-        // You can use the full JS block from the previous response.
+        // --- The rest of the JS is unchanged and can be copied from the previous full code response. ---
+        // For brevity, it's collapsed into a single block here.
         renderTabs() { const tabs = [ { id: 'dashboard', name: 'Dashboard', icon: 'fa-chart-line' }, { id: 'my-tasks', name: 'My Tasks', icon: 'fa-tasks' }, { id: 'my-inventory', name: 'My Inventory', icon: 'fa-boxes' }, { id: 'sales-expenses', name: 'Sales & Expenses', icon: 'fa-exchange-alt' }, { id: 'stores', name: 'Manage Stores', icon: 'fa-store' }, { id: 'invoices', name: 'Invoices', icon: 'fa-file-invoice-dollar' }, { id: 'ledger', name: 'Ledger', icon: 'fa-history' } ]; document.getElementById('tabs-container').innerHTML = tabs.map(tab => `<button data-tab="${tab.id}" class="tab-button text-light-text-secondary dark:text-dark-text-secondary hover:text-light-text dark:hover:text-dark-text border-b-2 border-transparent py-3 px-4 font-medium text-sm"><i class="fas ${tab.icon} mr-2 hidden md:inline"></i>${tab.name}</button>`).join(''); document.getElementById('mobile-tabs').innerHTML = tabs.map(tab => `<option value="${tab.id}">${tab.name}</option>`).join(''); },
         toggleSidenav() { document.getElementById('side-panel').classList.toggle('-translate-x-full'); document.getElementById('sidenav-backdrop').classList.toggle('hidden'); },
         setActiveTab(tabName) { document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden')); document.querySelectorAll('.tab-button').forEach(el => el.classList.remove('active')); document.getElementById(`${tabName}-content`)?.classList.remove('hidden'); document.querySelector(`[data-tab="${tabName}"]`)?.classList.add('active'); const mobileTabs = document.getElementById('mobile-tabs'); if (mobileTabs) mobileTabs.value = tabName; const renderMap = { dashboard: 'renderDashboard', 'my-tasks': 'renderMyTasks', 'my-inventory': 'renderMyInventory', 'sales-expenses': 'renderSalesAndExpenses', stores: 'renderStoresTab', invoices: 'renderInvoices', ledger: 'renderLedger' }; if (renderMap[tabName]) this[renderMap[tabName]](); },
