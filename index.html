@@ -44,7 +44,7 @@
             src: url('/path/to/your/lemon-milk-pro-italic.woff2') format('woff2');
         } */
 
-        body { background-color: #f0f4f9; color: #1f2937; font-family: 'Inter', sans-serif; overflow-x: hidden; }
+        body { background-color: #f0f4f9; color: #1f2937; font-family: 'Inter', sans-serif; }
         .dark body { background-color: #131314; color: #e3e3e3; }
         .modal-backdrop { background-color: rgba(0, 0, 0, 0.6); backdrop-filter: blur(4px); }
         .tab-button.active { border-color: #89b4fa; color: #89b4fa; }
@@ -80,11 +80,9 @@
                     </div>
                 </div>
             </div>
-            <div class="flex items-center space-x-2 sm:space-x-4">
-                <span class="text-light-text-secondary dark:text-dark-text-secondary hidden md:inline">Current:</span>
-                <select id="employee-switcher" class="bg-light-bg dark:bg-dark-bg text-light-text dark:text-dark-text border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 text-sm sm:text-base focus:ring-2 focus:ring-primary focus:outline-none"></select>
-                 <button id="theme-toggle" class="text-light-text-secondary dark:text-dark-text-secondary text-xl px-2 py-1 rounded-md hover:bg-gray-200 dark:hover:bg-gray-700">
-                    <i id="theme-icon" class="fas"></i>
+            <div class="flex items-center">
+                <button id="settings-button" onclick="app.openModal('settingsModal')" class="text-light-text-secondary dark:text-dark-text-secondary text-xl px-4 py-2 rounded-md hover:bg-gray-200 dark:hover:bg-gray-700">
+                    <i class="fas fa-cog"></i>
                 </button>
             </div>
         </header>
@@ -199,9 +197,11 @@ document.addEventListener('DOMContentLoaded', () => {
         getTask(id) { return this.state.tasks.find(t => t.id === id); },
 
         addEventListeners() {
-            document.getElementById('theme-toggle').addEventListener('click', () => this.toggleTheme());
+            // Event listeners are now for controls inside the settings modal
+            document.getElementById('theme-toggle-modal')?.addEventListener('click', () => this.toggleTheme());
             document.getElementById('first-employee-form')?.addEventListener('submit', e => this.handleFirstEmployee(e));
-            document.getElementById('employee-switcher').addEventListener('change', e => this.handleEmployeeSwitch(e));
+            document.getElementById('employee-switcher-modal')?.addEventListener('change', e => this.handleEmployeeSwitch(e));
+            
             document.getElementById('add-employee-form')?.addEventListener('submit', e => this.handleAddEmployee(e));
             document.getElementById('edit-employee-form')?.addEventListener('submit', e => this.handleUpdateEmployee(e));
             
@@ -1058,6 +1058,21 @@ document.addEventListener('DOMContentLoaded', () => {
             ${this.getGenericModalHTML('creditReceivedModal','Receive Credit Payment',`<form id="credit-received-form" class="space-y-4"><input type="hidden" id="credit-store-id"><p>Receiving payment from: <strong id="credit-store-name"></strong></p><p>Outstanding credit: <strong id="credit-outstanding"></strong></p><div><label for="credit-received-amount" class="block text-sm font-medium">Amount Received</label><input type="number" id="credit-received-amount" step="0.01" min="0" required class="modal-input"></div><button type="submit" class="modal-submit-button">Record Payment</button></form>`)}
             ${this.getAImodalHTML()}
             ${this.getGenericModalHTML('declineStockModal', 'Decline Stock Delivery', `<form id="decline-stock-form" class="space-y-4"><input type="hidden" id="decline-request-id"><div><label for="decline-reason" class="block text-sm font-medium">Reason for Declining</label><select id="decline-reason" required class="modal-input"><option value="">-- Select a Reason --</option><option value="Damaged Goods">Damaged Goods</option><option value="Insufficient Goods">Insufficient Goods</option><option value="Other">Other</option></select></div><div><label for="decline-description" class="block text-sm font-medium">Description (Optional)</label><textarea id="decline-description" rows="3" class="modal-input"></textarea></div><button type="submit" class="modal-submit-button bg-accent-red hover:bg-accent-red/80">Submit Decline</button></form>`)}
+            ${this.getGenericModalHTML('settingsModal', 'Settings', `
+                <div class="space-y-6">
+                    <div>
+                        <label for="employee-switcher-modal" class="block text-sm font-medium mb-2">Current Employee</label>
+                        <select id="employee-switcher-modal" class="modal-input"></select>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium mb-2">Appearance</label>
+                        <button id="theme-toggle-modal" class="w-full text-left bg-light-bg dark:bg-dark-bg p-3 rounded-lg flex items-center justify-between hover:bg-gray-200 dark:hover:bg-gray-700">
+                            <span>Change Theme</span>
+                            <i id="theme-icon-modal" class="fas"></i>
+                        </button>
+                    </div>
+                </div>
+            `)}
             `
         },
         getGenericModalHTML(id,title,content){return`<div id="${id}" class="fixed inset-0 z-50 flex items-center justify-center p-4 hidden modal-backdrop"><div class="bg-light-surface dark:bg-dark-surface rounded-lg shadow-xl w-full max-w-md mx-auto transform transition-all"><div class="flex justify-between items-center p-4 border-b border-gray-200 dark:border-gray-700"><h3 class="text-xl font-semibold">${title}</h3><button onclick="app.closeModal('${id}')" class="text-light-text-secondary dark:text-dark-text-secondary hover:text-light-text dark:hover:text-dark-text">&times;</button></div><div class="p-6">${content}</div></div></div>`},
@@ -1103,7 +1118,15 @@ document.addEventListener('DOMContentLoaded', () => {
                 </div>
             </div>`;
         },
-        renderEmployeeSwitcher() { const switcher=document.getElementById('employee-switcher');switcher.innerHTML=this.getActiveEmployees().map(emp=>`<option value="${emp.id}" ${emp.id===this.state.currentEmployeeId?'selected':''}>${emp.name}</option>`).join('')},
+        renderEmployeeSwitcher() { 
+            const switcher = document.getElementById('employee-switcher-modal');
+            if (!switcher) return;
+            const currentVal = switcher.value;
+            switcher.innerHTML = this.getActiveEmployees().map(emp => `<option value="${emp.id}" ${emp.id === this.state.currentEmployeeId ? 'selected' : ''}>${emp.name}</option>`).join('');
+            if (currentVal) {
+                switcher.value = currentVal;
+            }
+        },
         renderProductRequestsPanel() {
             const container = document.getElementById('product-requests-content');
             if (!container) return;
@@ -1237,9 +1260,25 @@ document.addEventListener('DOMContentLoaded', () => {
             this.showNotification('Delivery declined and returned to sender.');
             form.reset();
         },
-        applyTheme() { const isDark=this.state.theme==='dark';document.documentElement.classList.toggle('dark',isDark);document.getElementById('theme-icon').className=`fas ${isDark?'fa-sun':'fa-moon'}`},
-        toggleTheme() { this.state.theme=this.state.theme==='dark'?'light':'dark';this.applyTheme();this.saveState(); this.render() },
+        applyTheme() { 
+            const isDark = this.state.theme === 'dark';
+            document.documentElement.classList.toggle('dark', isDark);
+            const themeIcon = document.getElementById('theme-icon-modal');
+            if (themeIcon) {
+                themeIcon.className = `fas ${isDark ? 'fa-sun' : 'fa-moon'}`;
+            }
+        },
+        toggleTheme() { 
+            this.state.theme = this.state.theme === 'dark' ? 'light' : 'dark';
+            this.applyTheme();
+            this.saveState(); 
+            this.render();
+        },
         openModal(modalId) {
+            if (modalId === 'settingsModal') {
+                this.renderEmployeeSwitcher();
+                this.applyTheme();
+            }
             if(modalId==='delegateStockModal'){document.getElementById('delegate-employee').innerHTML=this.getActiveEmployees().map(e=>`<option value="${e.id}">${e.name}</option>`).join('');document.getElementById('delegate-product').innerHTML=this.getActiveProducts().filter(p=>p.stock>0).map(p=>`<option value="${p.id}">${p.name} (Master Stock: ${p.stock})</option>`).join('')}
             if(modalId==='createTaskModal'){document.getElementById('task-assignee').innerHTML=this.getActiveEmployees().map(e=>`<option value="${e.id}">${e.name}</option>`).join('')}
             if(modalId === 'aiAdvisorModal') {
@@ -1280,11 +1319,12 @@ document.addEventListener('DOMContentLoaded', () => {
         deactivateEmployee(id){if(confirm('Are you sure you want to deactivate this employee? They will not be able to log sales or expenses.')){const employee=this.getEmployee(id);if(employee){employee.isActive=false;this.saveState();this.render();this.showNotification('Employee deactivated.','error')}}},
         reactivateEmployee(id){const employee=this.getEmployee(id);if(employee){employee.isActive=true;this.saveState();this.render();this.showNotification('Employee reactivated.')}},
         handleEmployeeSwitch(e){
-            this.state.currentEmployeeId=e.target.value;
+            this.state.currentEmployeeId = e.target.value;
             this.state.currentView = 'employee';
             this.state.ledgerFilter = 'all'; 
             this.state.activeInvoiceSubTab = 'create'; 
             this.saveState();
+            this.closeModal('settingsModal'); // Close modal after switching
             this.render();
         },
         handleAddStore(e){e.preventDefault();const employee = this.getCurrentEmployee(); if(!employee) return; const name=document.getElementById('new-store-name').value;const location=document.getElementById('new-store-location').value;const creditLimit=parseFloat(document.getElementById('new-store-credit-limit').value);if(!name.trim()||isNaN(creditLimit)){this.showNotification('Please fill all fields correctly.','error');return}employee.stores.push({id:`store_${Date.now()}`,name,location,creditAvailable:creditLimit,creditUsed:0,creditPaidBack:0});this.saveState();this.setActiveTab('stores', 'employee');this.showNotification('Store added successfully!');e.target.reset()},
