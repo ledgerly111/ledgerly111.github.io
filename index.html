@@ -55,7 +55,7 @@
     <div id="app" class="h-screen flex flex-col">
         <header id="main-header" class="bg-light-surface dark:bg-dark-surface p-4 flex justify-between items-center z-20 flex-shrink-0 border-b border-gray-200 dark:border-gray-700 hidden">
             <div class="flex items-center space-x-4">
-                <button id="sidenav-toggle" class="md:hidden text-light-text-secondary dark:text-dark-text-secondary text-xl px-2 py-1" onclick="app.toggleSidenav()">
+                <button id="sidenav-toggle" class="text-light-text-secondary dark:text-dark-text-secondary text-xl px-2 py-1" onclick="app.toggleSidenav()">
                     <i class="fas fa-bars"></i>
                 </button>
                 <div class="flex items-center space-x-3">
@@ -73,47 +73,39 @@
         </header>
 
         <main id="main-content" class="flex-1 flex md:flex-row overflow-hidden min-h-0 hidden">
-            <div id="sidenav-backdrop" class="fixed inset-0 bg-black bg-opacity-50 z-30 hidden md:hidden" onclick="app.toggleSidenav()"></div>
+            <div id="sidenav-backdrop" class="fixed inset-0 bg-black bg-opacity-50 z-30 hidden" onclick="app.toggleSidenav()"></div>
 
             <div id="side-panel" class="fixed inset-y-0 left-0 z-40 w-4/5 max-w-sm bg-light-surface dark:bg-dark-surface p-4 overflow-y-auto transform -translate-x-full transition-transform duration-300 ease-in-out md:relative md:w-1/3 lg:w-1/4 md:translate-x-0 md:flex-shrink-0 md:border-r border-gray-200 dark:border-gray-700">
-                <button onclick="app.toggleSidenav()" class="md:hidden absolute top-2 right-2 text-xl p-2 text-light-text-secondary dark:text-dark-text-secondary">&times;</button>
+                <button onclick="app.toggleSidenav()" class="absolute top-2 right-2 text-xl p-2 text-light-text-secondary dark:text-dark-text-secondary md:hidden">&times;</button>
                 
-                <div id="company-overview-panel" class="mb-6 mt-8 md:mt-0">
-                    <h2 class="text-xl font-semibold mb-3 text-light-text dark:text-dark-text flex items-center justify-between cursor-pointer hover:text-primary dark:hover:text-primary transition-colors" onclick="app.showCompanyView()">
-                        <span><i class="fas fa-building mr-2 text-primary"></i>Company Overview</span>
-                        <i class="fas fa-arrow-right"></i>
-                    </h2>
-                </div>
-                
-                <div id="quick-actions-panel" class="mb-6">
-                     <h2 class="text-xl font-semibold mb-3 text-light-text dark:text-dark-text flex items-center justify-between cursor-pointer" onclick="app.togglePanel('quick-actions')">
-                        <span><i class="fas fa-bolt mr-2 text-primary"></i>Quick Actions</span>
-                        <i id="quick-actions-toggle-icon" class="fas fa-chevron-down"></i>
-                    </h2>
-                    <div id="quick-actions-content" class="space-y-3 hidden">
-                        <button class="w-full text-left bg-light-bg dark:bg-dark-bg p-2 rounded hover:bg-gray-200 dark:hover:bg-gray-700" onclick="app.openModal('addEmployeeModal')"><i class="fas fa-user-plus w-6 mr-2"></i>Add Employee</button>
-                        <button class="w-full text-left bg-light-bg dark:bg-dark-bg p-2 rounded hover:bg-gray-200 dark:hover:bg-gray-700" onclick="app.openModal('addProductModal')"><i class="fas fa-plus-circle w-6 mr-2"></i>Add Product</button>
-                        <button class="w-full text-left bg-light-bg dark:bg-dark-bg p-2 rounded hover:bg-gray-200 dark:hover:bg-gray-700" onclick="app.openModal('delegateStockModal')"><i class="fas fa-people-arrows w-6 mr-2"></i>Delegate Stock</button>
-                        <button class="w-full text-left bg-light-bg dark:bg-dark-bg p-2 rounded hover:bg-gray-200 dark:hover:bg-gray-700" onclick="app.openModal('createTaskModal')"><i class="fas fa-tasks w-6 mr-2"></i>Create Task</button>
-                         <button class="w-full text-left bg-light-bg dark:bg-dark-bg p-2 rounded hover:bg-gray-200 dark:hover:bg-gray-700" onclick="app.openModal('addCategoryModal')"><i class="fas fa-tag w-6 mr-2"></i>Add Expense Category</button>
+                <div class="mt-10 md:mt-0">
+                    <div id="company-overview-panel" class="mb-6">
+                        <h2 class="text-xl font-semibold mb-3 text-light-text dark:text-dark-text flex items-center justify-between cursor-pointer hover:text-primary dark:hover:text-primary transition-colors" onclick="app.showCompanyView()">
+                            <span><i class="fas fa-building mr-2 text-primary"></i>Company Overview</span>
+                            <i class="fas fa-arrow-right"></i>
+                        </h2>
                     </div>
-                </div>
-
-                <div id="ai-advisor-panel">
-                    <h2 class="text-xl font-semibold mb-3 text-light-text dark:text-dark-text flex items-center justify-between cursor-pointer" onclick="app.togglePanel('ai-advisor')">
-                        <span><i class="fas fa-brain mr-2 text-primary"></i>Accura AI Advisor</span>
-                        <i id="ai-advisor-toggle-icon" class="fas fa-chevron-down"></i>
-                    </h2>
-                    <div id="ai-advisor-content" class="space-y-4 hidden">
-                        <div><label for="ai-employee-select" class="block text-sm font-medium text-light-text-secondary dark:text-dark-text-secondary mb-1">Select Employee</label><select id="ai-employee-select" class="w-full bg-light-bg dark:bg-dark-bg rounded-md p-2 focus:ring-2 focus:ring-primary focus:outline-none"></select></div>
-                        <button id="generate-plan-btn" class="w-full bg-primary text-black py-2 rounded-md font-semibold hover:bg-primary-hover flex items-center justify-center" onclick="app.generateAIPlan()"><span id="generate-plan-text">Generate Plan</span><i id="generate-plan-loader" class="fas fa-spinner fa-spin hidden ml-2"></i></button>
-                        <div id="ai-plan-output" class="mt-4 p-3 bg-light-bg dark:bg-dark-bg rounded-md text-sm prose max-w-none max-h-60 overflow-y-auto"><p class="text-light-text-secondary dark:text-dark-text-secondary">Plan will appear here.</p></div>
+                    
+                    <div id="quick-actions-panel" class="mb-6">
+                        <h2 class="text-xl font-semibold mb-3 text-light-text dark:text-dark-text flex items-center justify-between cursor-pointer" onclick="app.togglePanel('quick-actions')">
+                            <span><i class="fas fa-bolt mr-2 text-primary"></i>Quick Actions</span>
+                            <i id="quick-actions-toggle-icon" class="fas fa-chevron-down"></i>
+                        </h2>
+                        <div id="quick-actions-content" class="space-y-3 hidden">
+                            <button class="w-full text-left bg-light-bg dark:bg-dark-bg p-2 rounded hover:bg-gray-200 dark:hover:bg-gray-700" onclick="app.openModal('addEmployeeModal')"><i class="fas fa-user-plus w-6 mr-2"></i>Add Employee</button>
+                            <button class="w-full text-left bg-light-bg dark:bg-dark-bg p-2 rounded hover:bg-gray-200 dark:hover:bg-gray-700" onclick="app.openModal('addProductModal')"><i class="fas fa-plus-circle w-6 mr-2"></i>Add Product</button>
+                            <button class="w-full text-left bg-light-bg dark:bg-dark-bg p-2 rounded hover:bg-gray-200 dark:hover:bg-gray-700" onclick="app.openModal('delegateStockModal')"><i class="fas fa-people-arrows w-6 mr-2"></i>Delegate Stock</button>
+                            <button class="w-full text-left bg-light-bg dark:bg-dark-bg p-2 rounded hover:bg-gray-200 dark:hover:bg-gray-700" onclick="app.openModal('createTaskModal')"><i class="fas fa-tasks w-6 mr-2"></i>Create Task</button>
+                             <button class="w-full text-left bg-light-bg dark:bg-dark-bg p-2 rounded hover:bg-gray-200 dark:hover:bg-gray-700" onclick="app.openModal('addCategoryModal')"><i class="fas fa-tag w-6 mr-2"></i>Add Expense Category</button>
+                        </div>
                     </div>
                 </div>
             </div>
-
-            <div id="employee-view" class="flex-1 w-full flex-col hidden"></div>
-            <div id="company-view" class="flex-1 w-full flex-col hidden"></div>
+            
+            <div id="content-area" class="flex-1 overflow-y-auto bg-light-bg dark:bg-dark-bg">
+                <div id="employee-view" class="h-full hidden"></div>
+                <div id="company-view" class="h-full hidden"></div>
+            </div>
         </main>
     </div>
 
@@ -136,7 +128,7 @@ document.addEventListener('DOMContentLoaded', () => {
             this.loadState(); this.applyTheme(); this.renderModals();
             this.addEventListeners(); this.render();
             if(this.state.employees.length > 0) {
-                this.togglePanel('quick-actions', true); this.togglePanel('ai-advisor', true);
+                this.togglePanel('quick-actions', true);
             }
         },
 
@@ -282,7 +274,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
                 
                 this.renderEmployeeSwitcher();
-                this.renderAIAdvisorPanel();
                 
                 const employeeView = document.getElementById('employee-view');
                 const companyView = document.getElementById('company-view');
@@ -307,14 +298,14 @@ document.addEventListener('DOMContentLoaded', () => {
         renderEmployeeSpecificView() {
             const employeeView = document.getElementById('employee-view');
             if (this.getActiveEmployees().length === 0) {
-                employeeView.innerHTML = `<div class="p-8 text-center"><h2 class="text-2xl font-bold mb-4">All Employees Inactive</h2><p>Please reactivate an employee or view the Company Overview.</p></div>`;
+                employeeView.innerHTML = `<div class="p-4 sm:p-8 text-center"><h2 class="text-2xl font-bold mb-4">All Employees Inactive</h2><p>Please reactivate an employee or view the Company Overview.</p></div>`;
             } else if (this.state.currentEmployeeId) {
                 employeeView.innerHTML = this.getEmployeeViewTemplate();
                 this.renderTabs('employee');
                 this.attachEmployeeViewEventListeners();
                 this.setActiveTab(document.querySelector('#employee-tabs-container .tab-button.active')?.dataset.tab || 'dashboard', 'employee');
             } else {
-                 employeeView.innerHTML = `<div class="p-8 text-center"><h2 class="text-2xl font-bold mb-4">No active employee selected.</h2><p>Please select an employee from the dropdown or view the Company Overview.</p></div>`;
+                 employeeView.innerHTML = `<div class="p-4 sm:p-8 text-center"><h2 class="text-2xl font-bold mb-4">No active employee selected.</h2><p>Please select an employee from the dropdown or view the Company Overview.</p></div>`;
             }
         },
 
@@ -328,13 +319,19 @@ document.addEventListener('DOMContentLoaded', () => {
 
         showCompanyView() {
             this.state.currentView = 'company';
-            this.state.companyActiveTab = 'dashboard';
+            this.state.companyActiveTab = 'company-dashboard';
+            this.saveState();
+            this.render();
+            this.toggleSidenav(); // Close sidenav after selection
+        },
+
+        showEmployeeView() {
+            this.state.currentView = 'employee';
             this.saveState();
             this.render();
         },
 
         getCompanyViewTemplate() {
-            // Calculate firm-wide stats
             let totalRevenue=0, totalExpenses=0;
             this.state.employees.forEach(emp => {
                 if(emp.transactions){
@@ -345,31 +342,40 @@ document.addEventListener('DOMContentLoaded', () => {
             const totalProfit = totalRevenue - totalExpenses;
 
             return `
-                <div class="flex-shrink-0 p-4 bg-light-surface dark:bg-dark-surface border-b border-gray-200 dark:border-gray-700">
-                    <h2 class="text-2xl font-bold">Company-Wide Overview</h2>
-                     <p class="text-light-text-secondary dark:text-dark-text-secondary">Aggregate data for the entire firm.</p>
-                </div>
-                <div class="flex-shrink-0 border-b border-gray-200 dark:border-gray-700 px-4 bg-light-surface dark:bg-dark-surface">
-                    <nav id="company-tabs-container" class="-mb-px flex space-x-6"></nav>
-                </div>
-                <div class="flex-grow p-4 overflow-y-auto bg-light-bg dark:bg-dark-bg">
-                    <div id="company-dashboard-content" class="tab-content hidden">
-                        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
-                           <div class="bg-light-surface dark:bg-dark-surface p-4 rounded-lg shadow"><div class="text-sm text-light-text-secondary dark:text-dark-text-secondary">Total Revenue</div><div class="text-2xl font-bold text-accent-green">$${totalRevenue.toFixed(2)}</div></div>
-                           <div class="bg-light-surface dark:bg-dark-surface p-4 rounded-lg shadow"><div class="text-sm text-light-text-secondary dark:text-dark-text-secondary">Total Expenses</div><div class="text-2xl font-bold text-accent-red">$${totalExpenses.toFixed(2)}</div></div>
-                           <div class="bg-light-surface dark:bg-dark-surface p-4 rounded-lg shadow"><div class="text-sm text-light-text-secondary dark:text-dark-text-secondary">Net Profit</div><div class="text-2xl font-bold ${totalProfit >= 0 ? 'text-accent-green':'text-accent-red'}">$${totalProfit.toFixed(2)}</div></div>
+            <div class="w-full max-w-6xl mx-auto px-4 py-6">
+                <div class="bg-light-surface dark:bg-dark-surface rounded-lg shadow-lg">
+                    <div class="flex-shrink-0 p-4 flex justify-between items-center border-b border-gray-200 dark:border-gray-700">
+                        <div>
+                            <button onclick="app.showEmployeeView()" class="text-light-text-secondary dark:text-dark-text-secondary hover:text-primary dark:hover:text-primary mr-4"><i class="fas fa-arrow-left mr-2"></i>Back</button>
+                            <h2 class="text-2xl font-bold inline-block">Company-Wide Overview</h2>
                         </div>
-                        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                            <div class="bg-light-surface dark:bg-dark-surface p-4 rounded-lg shadow h-80"><canvas id="company-revenue-expense-chart"></canvas></div>
-                            <div class="bg-light-surface dark:bg-dark-surface p-4 rounded-lg shadow h-80"><canvas id="company-top-products-chart"></canvas></div>
-                        </div>
+                        <button onclick="app.openModal('aiAdvisorModal')" class="bg-primary/20 text-primary font-semibold py-2 px-4 rounded-lg hover:bg-primary hover:text-black transition-colors">
+                            <i class="fas fa-brain mr-2"></i>
+                            <span class="hidden sm:inline">Accura AI</span>
+                        </button>
                     </div>
-                    <div id="company-employees-content" class="tab-content hidden"></div>
-                    <div id="company-inventory-content" class="tab-content hidden"></div>
-                    <div id="company-expenses-content" class="tab-content hidden"></div>
-                    <div id="company-tasks-content" class="tab-content hidden"></div>
+                    <div class="flex-shrink-0 border-b border-gray-200 dark:border-gray-700">
+                        <nav id="company-tabs-container" class="-mb-px flex flex-wrap items-center gap-x-4 gap-y-2 px-4"></nav>
+                    </div>
+                    <div class="p-4 sm:p-6">
+                        <div id="company-dashboard-content" class="tab-content hidden">
+                            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-4">
+                                <div class="bg-light-bg dark:bg-dark-bg p-4 rounded-lg"><div class="text-sm text-light-text-secondary dark:text-dark-text-secondary">Total Revenue</div><div class="text-2xl font-bold text-accent-green">$${totalRevenue.toFixed(2)}</div></div>
+                                <div class="bg-light-bg dark:bg-dark-bg p-4 rounded-lg"><div class="text-sm text-light-text-secondary dark:text-dark-text-secondary">Total Expenses</div><div class="text-2xl font-bold text-accent-red">$${totalExpenses.toFixed(2)}</div></div>
+                                <div class="bg-light-bg dark:bg-dark-bg p-4 rounded-lg"><div class="text-sm text-light-text-secondary dark:text-dark-text-secondary">Net Profit</div><div class="text-2xl font-bold ${totalProfit >= 0 ? 'text-accent-green':'text-accent-red'}">$${totalProfit.toFixed(2)}</div></div>
+                            </div>
+                            <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                                 <div class="bg-light-bg dark:bg-dark-bg p-4 rounded-lg h-72 lg:h-80 w-full"><canvas id="company-revenue-expense-chart"></canvas></div>
+                                 <div class="bg-light-bg dark:bg-dark-bg p-4 rounded-lg h-72 lg:h-80 w-full"><canvas id="company-top-products-chart"></canvas></div>
+                            </div>
+                        </div>
+                        <div id="company-employees-content" class="tab-content hidden"></div>
+                        <div id="company-inventory-content" class="tab-content hidden"></div>
+                        <div id="company-expenses-content" class="tab-content hidden"></div>
+                        <div id="company-tasks-content" class="tab-content hidden"></div>
+                    </div>
                 </div>
-            `;
+            </div>`;
         },
 
         getEmployeeViewTemplate() {
@@ -380,75 +386,84 @@ document.addEventListener('DOMContentLoaded', () => {
             const profit = revenue - expenses;
 
             return `
-                <div class="flex-shrink-0 p-4 bg-light-surface dark:bg-dark-surface border-b border-gray-200 dark:border-gray-700">
-                    <h2 class="text-2xl font-bold">${employee.name}</h2>
-                    <p class="text-light-text-secondary dark:text-dark-text-secondary">${employee.position}</p>
+            <div class="w-full max-w-6xl mx-auto px-4 py-6">
+                <div class="bg-light-surface dark:bg-dark-surface rounded-lg shadow-lg flex flex-col">
+                    <div class="flex-shrink-0 p-4 flex justify-between items-center border-b border-gray-200 dark:border-gray-700">
+                        <div class="flex items-center gap-4">
+                            <h2 class="text-2xl font-bold">${employee.name}</h2>
+                            <button onclick="app.openModal('aiAdvisorModal')" class="text-primary hover:text-primary-hover" title="AI Advisor for ${employee.name}">
+                                <i class="fas fa-brain text-xl"></i>
+                            </button>
+                        </div>
+                        <p class="text-light-text-secondary dark:text-dark-text-secondary hidden sm:block">${employee.position}</p>
+                    </div>
+                    <div class="flex-shrink-0 border-b border-gray-200 dark:border-gray-700">
+                        <div class="md:hidden my-2 px-4">
+                            <label for="mobile-tabs" class="sr-only">Select a tab</label>
+                            <select id="mobile-tabs" class="form-input w-full"></select>
+                        </div>
+                        <nav id="employee-tabs-container" class="-mb-px hidden md:flex space-x-6 px-4"></nav>
+                    </div>
+                    <div class="flex-grow p-4 sm:p-6">
+                        <div id="dashboard-content" class="tab-content hidden">
+                            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-4">
+                                <div class="bg-light-bg dark:bg-dark-bg p-4 rounded-lg"><div class="text-sm text-light-text-secondary dark:text-dark-text-secondary">Revenue</div><div class="text-2xl font-bold text-accent-green">$${revenue.toFixed(2)}</div></div>
+                                <div class="bg-light-bg dark:bg-dark-bg p-4 rounded-lg"><div class="text-sm text-light-text-secondary dark:text-dark-text-secondary">Expenses</div><div class="text-2xl font-bold text-accent-red">$${expenses.toFixed(2)}</div></div>
+                                <div class="bg-light-bg dark:bg-dark-bg p-4 rounded-lg"><div class="text-sm text-light-text-secondary dark:text-dark-text-secondary">Net Profit</div><div class="text-2xl font-bold ${profit >= 0 ? 'text-accent-green':'text-accent-red'}">$${profit.toFixed(2)}</div></div>
+                            </div>
+                            <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                                <div class="bg-light-bg dark:bg-dark-bg p-4 rounded-lg h-60 sm:h-64"><canvas id="sales-over-time-chart"></canvas></div>
+                                <div class="bg-light-bg dark:bg-dark-bg p-4 rounded-lg h-60 sm:h-64"><canvas id="top-products-chart"></canvas></div>
+                                <div class="bg-light-bg dark:bg-dark-bg p-4 rounded-lg h-60 sm:h-64"><canvas id="expenses-by-category-chart"></canvas></div>
+                                <div class="bg-light-bg dark:bg-dark-bg p-4 rounded-lg h-60 sm:h-64"><canvas id="store-credit-chart"></canvas></div>
+                            </div>
+                        </div>
+                        <div id="my-tasks-content" class="tab-content hidden"><h3 class="text-xl font-bold mb-4">My Tasks</h3><ul id="employee-tasks-list" class="space-y-3"></ul></div>
+                        <div id="my-inventory-content" class="tab-content hidden"><h3 class="text-xl font-bold mb-4">My Inventory</h3><div class="overflow-x-auto bg-light-bg dark:bg-dark-bg rounded-lg"><table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700"><thead class="bg-light-bg dark:bg-dark-bg"><tr><th class="table-header">Product</th><th class="table-header">Stock</th></tr></thead><tbody id="employee-inventory-list" class="divide-y divide-gray-200 dark:divide-gray-700"></tbody></table></div></div>
+                        <div id="sales-expenses-content" class="tab-content hidden grid grid-cols-1 lg:grid-cols-2 gap-4"><div class="bg-light-bg dark:bg-dark-bg p-4 sm:p-6 rounded-lg"><h3 class="text-xl font-bold mb-4 flex items-center"><i class="fas fa-cart-plus mr-3 text-accent-green"></i>Record a Sale</h3><form id="record-sale-form" class="space-y-3"><div class="grid grid-cols-1 sm:grid-cols-2 gap-4"><div><label for="sale-product" class="form-label">Product</label><select id="sale-product" name="sale-product" class="form-input"></select></div><div><label for="sale-quantity" class="form-label">Quantity</label><input type="number" id="sale-quantity" name="sale-quantity" min="1" value="1" class="form-input"></div></div><div class="grid grid-cols-1 sm:grid-cols-2 gap-4"><div><label for="sale-type" class="form-label">Sale Type</label><select id="sale-type" name="sale-type" class="form-input"></select></div><div><label for="sale-store" class="form-label">Store</label><select id="sale-store" name="sale-store" class="form-input"></select></div></div><div><label for="sale-discount" class="form-label">Discount ($)</label><input type="number" id="sale-discount" name="sale-discount" min="0" value="0" step="0.01" class="form-input"></div><div class="p-3 bg-light-surface dark:bg-dark-surface rounded-md text-right"><span class="text-light-text-secondary dark:text-dark-text-secondary">Final: </span><strong id="final-sale-amount" class="text-xl">$0.00</strong></div><button type="submit" class="w-full bg-primary text-black font-bold py-2 px-4 rounded-md hover:bg-primary-hover">Record Sale</button></form></div><div class="bg-light-bg dark:bg-dark-bg p-4 sm:p-6 rounded-lg"><h3 class="text-xl font-bold mb-4 flex items-center"><i class="fas fa-money-bill-wave mr-3 text-accent-red"></i>Record an Expense</h3><form id="record-expense-form" class="space-y-3"><div><label for="expense-description" class="form-label">Description</label><input type="text" id="expense-description" name="expense-description" required class="form-input"></div><div class="grid grid-cols-1 sm:grid-cols-2 gap-4"><div><label for="expense-amount" class="form-label">Amount ($)</label><input type="number" id="expense-amount" name="expense-amount" step="0.01" min="0" required class="form-input"></div><div><label for="expense-category" class="form-label">Category</label><select id="expense-category" name="expense-category" required class="form-input"></select></div></div><button type="submit" class="w-full bg-primary text-black font-bold py-2 px-4 rounded-md hover:bg-primary-hover">Record Expense</button></form></div></div>
+                        <div id="stores-content" class="tab-content hidden"><div class="grid grid-cols-1 lg:grid-cols-2 gap-4"><div class="bg-light-bg dark:bg-dark-bg p-4 sm:p-6 rounded-lg"><h3 class="text-xl font-bold mb-4">Add Store</h3><form id="employee-add-store-form" class="space-y-3"><div><label for="new-store-name" class="form-label">Store Name</label><input type="text" id="new-store-name" required class="form-input"></div><div><label for="new-store-location" class="form-label">Location</label><input type="text" id="new-store-location" required class="form-input"></div><div><label for="new-store-credit-limit" class="form-label">Credit Limit ($)</label><input type="number" id="new-store-credit-limit" required min="0" step="0.01" class="form-input"></div><button type="submit" class="w-full bg-primary text-black font-bold py-2 px-4 rounded-md hover:bg-primary-hover">Add Store</button></form></div><div class="lg:col-span-1 space-y-4" id="stores-list-container"><h3 class="text-xl font-bold">My Stores</h3><div id="stores-list" class="space-y-4 max-h-[60vh] overflow-y-auto pr-2"></div></div></div></div>
+                        <div id="invoices-content" class="tab-content hidden">
+                            <div class="mb-4 border-b border-gray-200 dark:border-gray-700">
+                                <nav id="invoice-sub-nav" class="-mb-px flex space-x-6 overflow-x-auto">
+                                    <button data-sub-tab="create" class="invoice-sub-tab-btn whitespace-nowrap py-3 px-1 border-b-2 font-medium text-sm text-light-text-secondary dark:text-dark-text-secondary">Create Invoice</button>
+                                    <button data-sub-tab="pending" class="invoice-sub-tab-btn whitespace-nowrap py-3 px-1 border-b-2 font-medium text-sm text-light-text-secondary dark:text-dark-text-secondary">Pending</button>
+                                    <button data-sub-tab="recent" class="invoice-sub-tab-btn whitespace-nowrap py-3 px-1 border-b-2 font-medium text-sm text-light-text-secondary dark:text-dark-text-secondary">Recent</button>
+                                </nav>
+                            </div>
+                            <div id="create-invoice-panel" class="invoice-sub-tab-content bg-light-bg dark:bg-dark-bg p-4 sm:p-6 rounded-lg">
+                                <h3 class="text-xl font-bold mb-4">Create Invoice</h3>
+                                <form id="invoice-form" class="space-y-4">
+                                    <div><label for="invoice-store" class="form-label">1. Select a Store</label><select id="invoice-store" class="form-input"></select></div>
+                                    <div id="invoice-transactions-container" class="hidden">
+                                        <label class="form-label">2. Select Uninvoiced Sales</label>
+                                        <div id="invoice-transactions-list" class="mt-2 space-y-2 max-h-60 overflow-y-auto border border-gray-300 dark:border-gray-600 rounded-md p-3"></div>
+                                    </div>
+                                    <button type="submit" class="w-full bg-primary text-black font-bold py-2 px-4 rounded-md hover:bg-primary-hover flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed" disabled><i class="fas fa-download mr-2"></i>Generate Invoice</button>
+                                </form>
+                            </div>
+                            <div id="pending-invoice-panel" class="invoice-sub-tab-content hidden bg-light-bg dark:bg-dark-bg p-4 sm:p-6 rounded-lg"></div>
+                            <div id="recent-invoice-panel" class="invoice-sub-tab-content hidden bg-light-bg dark:bg-dark-bg p-4 sm:p-6 rounded-lg"></div>
+                        </div>
+                        <div id="ledger-content" class="tab-content hidden">
+                            <h3 class="text-xl font-bold mb-4">Transaction Ledger</h3>
+                            <div id="ledger-filter-container" class="flex flex-wrap gap-2 mb-4">
+                                <button data-filter="all" class="ledger-filter-btn px-3 py-1 text-sm font-semibold rounded-full border dark:border-gray-600">All</button>
+                                <button data-filter="cash" class="ledger-filter-btn px-3 py-1 text-sm font-semibold rounded-full bg-accent-green/20 text-green-800 dark:text-accent-green">Cash</button>
+                                <button data-filter="credit" class="ledger-filter-btn px-3 py-1 text-sm font-semibold rounded-full bg-accent-yellow/20 text-yellow-800 dark:text-accent-yellow">Credit</button>
+                                <button data-filter="deal" class="ledger-filter-btn px-3 py-1 text-sm font-semibold rounded-full bg-accent-purple/20 text-purple-800 dark:text-accent-purple">Deal</button>
+                                <button data-filter="payment" class="ledger-filter-btn px-3 py-1 text-sm font-semibold rounded-full bg-primary/20 text-blue-800 dark:text-primary">Payment</button>
+                                <button data-filter="expense" class="ledger-filter-btn px-3 py-1 text-sm font-semibold rounded-full bg-accent-red/20 text-red-800 dark:text-accent-red">Expenses</button>
+                            </div>
+                            <div class="overflow-x-auto bg-light-bg dark:bg-dark-bg rounded-lg">
+                                <table class="min-w-full divide-y divide-gray-300 dark:divide-gray-700">
+                                    <thead class="bg-gray-50 dark:bg-gray-800/50"><tr><th class="table-header">Date</th><th class="table-header">Type</th><th class="table-header">Details</th><th class="table-header text-right">Amount</th></tr></thead>
+                                    <tbody id="ledger-body" class="divide-y divide-gray-200 dark:divide-gray-700"></tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
                 </div>
-                <div class="flex-shrink-0 border-b border-gray-200 dark:border-gray-700 px-4 bg-light-surface dark:bg-dark-surface">
-                    <div class="md:hidden my-2">
-                        <label for="mobile-tabs" class="sr-only">Select a tab</label>
-                        <select id="mobile-tabs" class="form-input w-full"></select>
-                    </div>
-                    <nav id="employee-tabs-container" class="-mb-px hidden md:flex space-x-6"></nav>
-                </div>
-                <div class="flex-grow p-4 overflow-y-auto bg-light-bg dark:bg-dark-bg">
-                    <div id="dashboard-content" class="tab-content hidden">
-                        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
-                            <div class="bg-light-surface dark:bg-dark-surface p-4 rounded-lg shadow"><div class="text-sm text-light-text-secondary dark:text-dark-text-secondary">Revenue</div><div class="text-2xl font-bold text-accent-green">$${revenue.toFixed(2)}</div></div>
-                            <div class="bg-light-surface dark:bg-dark-surface p-4 rounded-lg shadow"><div class="text-sm text-light-text-secondary dark:text-dark-text-secondary">Expenses</div><div class="text-2xl font-bold text-accent-red">$${expenses.toFixed(2)}</div></div>
-                            <div class="bg-light-surface dark:bg-dark-surface p-4 rounded-lg shadow"><div class="text-sm text-light-text-secondary dark:text-dark-text-secondary">Net Profit</div><div class="text-2xl font-bold ${profit >= 0 ? 'text-accent-green':'text-accent-red'}">$${profit.toFixed(2)}</div></div>
-                        </div>
-                        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                            <div class="bg-light-surface dark:bg-dark-surface p-4 rounded-lg shadow h-64 md:h-72"><canvas id="sales-over-time-chart"></canvas></div>
-                            <div class="bg-light-surface dark:bg-dark-surface p-4 rounded-lg shadow h-64 md:h-72"><canvas id="top-products-chart"></canvas></div>
-                            <div class="bg-light-surface dark:bg-dark-surface p-4 rounded-lg shadow h-64 md:h-72"><canvas id="expenses-by-category-chart"></canvas></div>
-                            <div class="bg-light-surface dark:bg-dark-surface p-4 rounded-lg shadow h-64 md:h-72"><canvas id="store-credit-chart"></canvas></div>
-                        </div>
-                    </div>
-                    <div id="my-tasks-content" class="tab-content hidden"><h3 class="text-xl font-bold mb-4">My Tasks</h3><ul id="employee-tasks-list" class="space-y-3"></ul></div>
-                    <div id="my-inventory-content" class="tab-content hidden"><h3 class="text-xl font-bold mb-4">My Inventory</h3><div class="overflow-x-auto bg-light-surface dark:bg-dark-surface rounded-lg shadow"><table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700"><thead class="bg-light-bg dark:bg-dark-bg"><tr><th class="table-header">Product</th><th class="table-header">Stock</th></tr></thead><tbody id="employee-inventory-list" class="divide-y divide-gray-200 dark:divide-gray-700"></tbody></table></div></div>
-                    <div id="sales-expenses-content" class="tab-content hidden grid grid-cols-1 lg:grid-cols-2 gap-6"><div class="bg-light-surface dark:bg-dark-surface p-6 rounded-lg shadow-md"><h3 class="text-xl font-bold mb-4 flex items-center"><i class="fas fa-cart-plus mr-3 text-accent-green"></i>Record a Sale</h3><form id="record-sale-form" class="space-y-4"><div class="grid grid-cols-1 sm:grid-cols-2 gap-4"><div><label for="sale-product" class="form-label">Product</label><select id="sale-product" name="sale-product" class="form-input"></select></div><div><label for="sale-quantity" class="form-label">Quantity</label><input type="number" id="sale-quantity" name="sale-quantity" min="1" value="1" class="form-input"></div></div><div class="grid grid-cols-1 sm:grid-cols-2 gap-4"><div><label for="sale-type" class="form-label">Sale Type</label><select id="sale-type" name="sale-type" class="form-input"></select></div><div><label for="sale-store" class="form-label">Store</label><select id="sale-store" name="sale-store" class="form-input"></select></div></div><div><label for="sale-discount" class="form-label">Discount ($)</label><input type="number" id="sale-discount" name="sale-discount" min="0" value="0" step="0.01" class="form-input"></div><div class="p-3 bg-light-bg dark:bg-dark-bg rounded-md text-right"><span class="text-light-text-secondary dark:text-dark-text-secondary">Final: </span><strong id="final-sale-amount" class="text-xl">$0.00</strong></div><button type="submit" class="w-full bg-primary text-black font-bold py-2 px-4 rounded-md hover:bg-primary-hover">Record Sale</button></form></div><div class="bg-light-surface dark:bg-dark-surface p-6 rounded-lg shadow-md"><h3 class="text-xl font-bold mb-4 flex items-center"><i class="fas fa-money-bill-wave mr-3 text-accent-red"></i>Record an Expense</h3><form id="record-expense-form" class="space-y-4"><div><label for="expense-description" class="form-label">Description</label><input type="text" id="expense-description" name="expense-description" required class="form-input"></div><div class="grid grid-cols-1 sm:grid-cols-2 gap-4"><div><label for="expense-amount" class="form-label">Amount ($)</label><input type="number" id="expense-amount" name="expense-amount" step="0.01" min="0" required class="form-input"></div><div><label for="expense-category" class="form-label">Category</label><select id="expense-category" name="expense-category" required class="form-input"></select></div></div><button type="submit" class="w-full bg-primary text-black font-bold py-2 px-4 rounded-md hover:bg-primary-hover">Record Expense</button></form></div></div>
-                    <div id="stores-content" class="tab-content hidden"><div class="grid grid-cols-1 lg:grid-cols-2 gap-6"><div class="bg-light-surface dark:bg-dark-surface p-6 rounded-lg shadow-md"><h3 class="text-xl font-bold mb-4">Add Store</h3><form id="employee-add-store-form" class="space-y-4"><div><label for="new-store-name" class="form-label">Store Name</label><input type="text" id="new-store-name" required class="form-input"></div><div><label for="new-store-location" class="form-label">Location</label><input type="text" id="new-store-location" required class="form-input"></div><div><label for="new-store-credit-limit" class="form-label">Credit Limit ($)</label><input type="number" id="new-store-credit-limit" required min="0" step="0.01" class="form-input"></div><button type="submit" class="w-full bg-primary text-black font-bold py-2 px-4 rounded-md hover:bg-primary-hover">Add Store</button></form></div><div class="lg:col-span-1 space-y-4" id="stores-list-container"><h3 class="text-xl font-bold">My Stores</h3><div id="stores-list" class="space-y-4 max-h-[60vh] overflow-y-auto pr-2"></div></div></div></div>
-                    <div id="invoices-content" class="tab-content hidden">
-                        <div class="mb-4 border-b border-gray-200 dark:border-gray-700">
-                            <nav id="invoice-sub-nav" class="-mb-px flex space-x-6">
-                                <button data-sub-tab="create" class="invoice-sub-tab-btn whitespace-nowrap py-3 px-1 border-b-2 font-medium text-sm text-light-text-secondary dark:text-dark-text-secondary">Create Invoice</button>
-                                <button data-sub-tab="pending" class="invoice-sub-tab-btn whitespace-nowrap py-3 px-1 border-b-2 font-medium text-sm text-light-text-secondary dark:text-dark-text-secondary">Pending</button>
-                                <button data-sub-tab="recent" class="invoice-sub-tab-btn whitespace-nowrap py-3 px-1 border-b-2 font-medium text-sm text-light-text-secondary dark:text-dark-text-secondary">Recent</button>
-                            </nav>
-                        </div>
-                        <div id="create-invoice-panel" class="invoice-sub-tab-content bg-light-surface dark:bg-dark-surface p-6 rounded-lg shadow-md">
-                            <h3 class="text-xl font-bold mb-4">Create Invoice</h3>
-                            <form id="invoice-form" class="space-y-4">
-                                <div><label for="invoice-store" class="form-label">1. Select a Store</label><select id="invoice-store" class="form-input"></select></div>
-                                <div id="invoice-transactions-container" class="hidden">
-                                    <label class="form-label">2. Select Uninvoiced Sales</label>
-                                    <div id="invoice-transactions-list" class="mt-2 space-y-2 max-h-60 overflow-y-auto border border-gray-200 dark:border-gray-700 rounded-md p-3 bg-light-bg dark:bg-dark-bg"></div>
-                                </div>
-                                <button type="submit" class="w-full bg-primary text-black font-bold py-2 px-4 rounded-md hover:bg-primary-hover flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed" disabled><i class="fas fa-download mr-2"></i>Generate Invoice</button>
-                            </form>
-                        </div>
-                        <div id="pending-invoice-panel" class="invoice-sub-tab-content hidden bg-light-surface dark:bg-dark-surface p-6 rounded-lg shadow-md"></div>
-                        <div id="recent-invoice-panel" class="invoice-sub-tab-content hidden bg-light-surface dark:bg-dark-surface p-6 rounded-lg shadow-md"></div>
-                    </div>
-                    <div id="ledger-content" class="tab-content hidden">
-                        <h3 class="text-xl font-bold mb-4">Transaction Ledger</h3>
-                        <div id="ledger-filter-container" class="flex flex-wrap gap-2 mb-4">
-                            <button data-filter="all" class="ledger-filter-btn px-3 py-1 text-sm font-semibold rounded-full border dark:border-gray-600">All</button>
-                            <button data-filter="cash" class="ledger-filter-btn px-3 py-1 text-sm font-semibold rounded-full bg-accent-green/20 text-green-800 dark:text-accent-green">Cash Sale</button>
-                            <button data-filter="credit" class="ledger-filter-btn px-3 py-1 text-sm font-semibold rounded-full bg-accent-yellow/20 text-yellow-800 dark:text-accent-yellow">Credit Sale</button>
-                            <button data-filter="deal" class="ledger-filter-btn px-3 py-1 text-sm font-semibold rounded-full bg-accent-purple/20 text-purple-800 dark:text-accent-purple">Deal Sale</button>
-                            <button data-filter="payment" class="ledger-filter-btn px-3 py-1 text-sm font-semibold rounded-full bg-primary/20 text-blue-800 dark:text-primary">Payment</button>
-                            <button data-filter="expense" class="ledger-filter-btn px-3 py-1 text-sm font-semibold rounded-full bg-accent-red/20 text-red-800 dark:text-accent-red">Expenses</button>
-                        </div>
-                        <div class="overflow-x-auto bg-light-surface dark:bg-dark-surface rounded-lg shadow">
-                            <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
-                                <thead class="bg-light-bg dark:bg-dark-bg"><tr><th class="table-header">Date</th><th class="table-header">Type</th><th class="table-header">Details</th><th class="table-header text-right">Amount</th></tr></thead>
-                                <tbody id="ledger-body" class="divide-y divide-gray-200 dark:divide-gray-700"></tbody>
-                            </table>
-                        </div>
-                    </div>
-                </div>`;
+            </div>`;
         },
 
         showNotification(message, type = 'success') {
@@ -476,7 +491,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 const calculatedCredit = (store.creditUsed || 0) - (store.creditPaidBack || 0);
                 const outstandingCredit = Math.max(0, calculatedCredit);
                 return `
-                <div class="bg-light-surface dark:bg-dark-surface p-4 rounded-lg shadow">
+                <div class="bg-light-surface dark:bg-dark-surface p-4 rounded-lg">
                     <div class="flex justify-between items-start">
                         <div><h4 class="font-bold text-lg">${store.name}</h4><p class="text-sm text-light-text-secondary dark:text-dark-text-secondary">${store.location}</p></div>
                         <div class="flex space-x-3">
@@ -529,13 +544,13 @@ document.addEventListener('DOMContentLoaded', () => {
                         case 'Deal': typeBadge = `<span class="px-2 py-1 text-xs font-semibold rounded-full bg-accent-purple/20 text-purple-600 dark:text-accent-purple">Deal</span>`; break;
                         default: typeBadge = `<span class="px-2 py-1 text-xs font-semibold rounded-full bg-accent-green/20 text-green-600 dark:text-accent-green">Cash Sale</span>`;
                     }
-                    return `<tr class="hover:bg-light-bg dark:hover:bg-dark-bg"><td class="px-4 py-3">${date} ${time}</td><td class="px-4 py-3">${typeBadge}</td><td class="px-4 py-3">Sold ${t.quantity} x ${product?.name||'N/A'} to ${store?.name||'N/A'}${invoicedIcon}</td><td class="px-4 py-3 text-right font-mono text-accent-green">+${t.amount.toFixed(2)}</td></tr>`;
+                    return `<tr class="hover:bg-light-surface dark:hover:bg-dark-surface/50 text-sm"><td class="px-4 py-3 whitespace-nowrap">${date} ${time}</td><td class="px-4 py-3">${typeBadge}</td><td class="px-4 py-3">Sold ${t.quantity} x ${product?.name||'N/A'} to ${store?.name||'N/A'}${invoicedIcon}</td><td class="px-4 py-3 text-right font-mono text-accent-green">+${t.amount.toFixed(2)}</td></tr>`;
                 } else if (t.type === 'expense') {
                     const category = this.getCategory(t.categoryId);
-                    return `<tr class="hover:bg-light-bg dark:hover:bg-dark-bg"><td class="px-4 py-3">${date} ${time}</td><td class="px-4 py-3"><span class="px-2 py-1 text-xs font-semibold rounded-full bg-accent-red/20 text-red-600 dark:text-accent-red">Expense</span></td><td class="px-4 py-3">${t.description} <span class="text-light-text-secondary dark:text-dark-text-secondary">(${category?.name||'Uncategorized'})</span></td><td class="px-4 py-3 text-right font-mono text-accent-red">-${t.amount.toFixed(2)}</td></tr>`;
+                    return `<tr class="hover:bg-light-surface dark:hover:bg-dark-surface/50 text-sm"><td class="px-4 py-3 whitespace-nowrap">${date} ${time}</td><td class="px-4 py-3"><span class="px-2 py-1 text-xs font-semibold rounded-full bg-accent-red/20 text-red-600 dark:text-accent-red">Expense</span></td><td class="px-4 py-3">${t.description} <span class="text-light-text-secondary dark:text-dark-text-secondary">(${category?.name||'Uncategorized'})</span></td><td class="px-4 py-3 text-right font-mono text-accent-red">-${t.amount.toFixed(2)}</td></tr>`;
                 } else if (t.type === 'credit_received') {
                     const store = employee.stores.find(s => s.id === t.storeId);
-                    return `<tr class="hover:bg-light-bg dark:hover:bg-dark-bg"><td class="px-4 py-3">${date} ${time}</td><td class="px-4 py-3"><span class="px-2 py-1 text-xs font-semibold rounded-full bg-primary/20 text-blue-600 dark:text-primary">Payment</span></td><td class="px-4 py-3">Credit Received from ${store?.name || 'N/A'}</td><td class="px-4 py-3 text-right font-mono text-accent-green">+${t.amount.toFixed(2)}</td></tr>`;
+                    return `<tr class="hover:bg-light-surface dark:hover:bg-dark-surface/50 text-sm"><td class="px-4 py-3 whitespace-nowrap">${date} ${time}</td><td class="px-4 py-3"><span class="px-2 py-1 text-xs font-semibold rounded-full bg-primary/20 text-blue-600 dark:text-primary">Payment</span></td><td class="px-4 py-3">Credit Received from ${store?.name || 'N/A'}</td><td class="px-4 py-3 text-right font-mono text-accent-green">+${t.amount.toFixed(2)}</td></tr>`;
                 }
                 return '';
             }).join('') || `<tr><td colspan="4" class="text-center py-10 text-light-text-secondary dark:text-dark-text-secondary">No transactions found for this filter.</td></tr>`;
@@ -595,30 +610,37 @@ document.addEventListener('DOMContentLoaded', () => {
                  tabs = [
                     { id: 'company-dashboard', name: 'Dashboard', icon: 'fa-tachometer-alt' },
                     { id: 'company-employees', name: 'Employees', icon: 'fa-users' },
-                    { id: 'company-inventory', name: 'Master Inventory', icon: 'fa-warehouse' },
+                    { id: 'company-inventory', name: 'Inventory', icon: 'fa-warehouse' },
                     { id: 'company-expenses', name: 'Expenses', icon: 'fa-receipt' },
-                    { id: 'company-tasks', name: 'All Tasks', icon: 'fa-tasks' }
+                    { id: 'company-tasks', name: 'Tasks', icon: 'fa-tasks' }
                 ];
                 containerId = 'company-tabs-container';
             }
 
-            document.getElementById(containerId).innerHTML = tabs.map(tab => `<button data-tab="${tab.id}" class="tab-button text-light-text-secondary dark:text-dark-text-secondary hover:text-light-text dark:hover:text-dark-text border-b-2 border-transparent py-3 px-4 font-medium text-sm"><i class="fas ${tab.icon} mr-2 hidden md:inline"></i>${tab.name}</button>`).join('');
+            document.getElementById(containerId).innerHTML = tabs.map(tab => `<button data-tab="${tab.id}" class="tab-button text-light-text-secondary dark:text-dark-text-secondary hover:text-light-text dark:hover:text-dark-text border-b-2 border-transparent py-3 px-1 sm:px-4 font-medium text-sm"><i class="fas ${tab.icon} mr-0 sm:mr-2"></i><span class="hidden sm:inline">${tab.name}</span></button>`).join('');
             
             if (mobileTabsId) {
                 document.getElementById(mobileTabsId).innerHTML = tabs.map(tab => `<option value="${tab.id}">${tab.name}</option>`).join('');
             }
         },
 
-        toggleSidenav() { document.getElementById('side-panel').classList.toggle('-translate-x-full'); document.getElementById('sidenav-backdrop').classList.toggle('hidden'); },
+        toggleSidenav() { 
+            document.getElementById('side-panel').classList.toggle('-translate-x-full');
+            document.getElementById('sidenav-backdrop').classList.toggle('hidden');
+        },
         
         setActiveTab(tabName, viewType) {
-            const contentPrefix = viewType === 'company' ? 'company-' : '';
+            const viewSelector = viewType === 'company' ? '#company-view' : '#employee-view';
+            const tabsContainerId = viewType === 'company' ? 'company-tabs-container' : 'employee-tabs-container';
             
-            document.querySelectorAll(`#${viewType}-view .tab-content`).forEach(el => el.classList.add('hidden'));
-            document.querySelectorAll(`#${viewType}-tabs-container .tab-button`).forEach(el => el.classList.remove('active'));
+            document.querySelectorAll(`${viewSelector} .tab-content`).forEach(el => el.classList.add('hidden'));
+            document.querySelectorAll(`#${tabsContainerId} .tab-button`).forEach(el => el.classList.remove('active'));
             
-            document.getElementById(`${tabName}-content`)?.classList.remove('hidden');
-            document.querySelector(`#${viewType}-tabs-container [data-tab="${tabName}"]`)?.classList.add('active');
+            const contentEl = document.querySelector(`${viewSelector} #${tabName}-content`);
+            if (contentEl) contentEl.classList.remove('hidden');
+
+            const tabButton = document.querySelector(`#${tabsContainerId} [data-tab="${tabName}"]`);
+            if (tabButton) tabButton.classList.add('active');
 
             if (viewType === 'employee') {
                 const mobileTabs = document.getElementById('mobile-tabs');
@@ -626,7 +648,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 const renderMap = { dashboard: 'renderDashboard', 'my-tasks': 'renderMyTasks', 'my-inventory': 'renderMyInventory', 'sales-expenses': 'renderSalesAndExpenses', stores: 'renderStoresTab', invoices: 'renderInvoices', ledger: 'renderLedger' };
                 if (renderMap[tabName]) this[renderMap[tabName]]();
             } else { // company view
-                 const renderMap = { 
+                const renderMap = { 
                     'company-dashboard': 'renderCompanyDashboardTab', 
                     'company-employees': 'renderCompanyEmployeesTab', 
                     'company-inventory': 'renderCompanyInventoryTab',
@@ -694,28 +716,27 @@ document.addEventListener('DOMContentLoaded', () => {
                 },
                 options: { responsive: true, maintainAspectRatio: false, indexAxis: 'y', scales: { x: { beginAtZero: true, grid: { color: gridColor }, ticks: { color: textColor } }, y: { grid: { color: gridColor }, ticks: { color: textColor } } }, plugins: { legend: { display: false }, title: { display: true, text: 'Top Products by Revenue (Firm-Wide)', color: textColor, font: { size: 16 } } } }
             });
-
         },
 
         renderCompanyEmployeesTab() {
-            const container = document.getElementById('company-employees-content');
+            const container = document.querySelector('#company-view #company-employees-content');
             const activeEmployees = this.state.employees.filter(e => e.isActive);
             const inactiveEmployees = this.state.employees.filter(e => !e.isActive);
             let content = `<h3 class="text-xl font-bold mb-4">Active Employees (${activeEmployees.length})</h3>`;
-            content += `<div class="space-y-3 mb-6">${activeEmployees.map(emp=>{const revenue=emp.transactions.filter(t=>t.type==='sale').reduce((sum,t)=>sum+t.amount,0);const expenses=emp.transactions.filter(t=>t.type==='expense').reduce((sum,t)=>sum+t.amount,0);return`<div class="bg-light-surface dark:bg-dark-surface p-3 rounded-lg shadow-sm"><div class="flex justify-between items-center"><div><span class="font-bold">${emp.name}</span><em class="text-xs ml-2 text-light-text-secondary dark:text-dark-text-secondary">(${emp.position})</em></div><div class="flex space-x-3"><button class="text-sm hover:text-primary" onclick="app.startEditEmployee('${emp.id}')"><i class="fas fa-pencil-alt"></i></button><button class="text-sm hover:text-accent-red" onclick="app.deactivateEmployee('${emp.id}')"><i class="fas fa-user-slash"></i></button></div></div><div class="text-xs mt-2 space-y-1 pl-1 border-l-2 border-gray-200 dark:border-gray-600 ml-1 pl-2"><div class="flex justify-between"><span>Revenue:</span> <span class="font-semibold text-accent-green">$${revenue.toFixed(2)}</span></div><div class="flex justify-between"><span>Expenses:</span> <span class="font-semibold text-accent-red">$${expenses.toFixed(2)}</span></div></div></div>`}).join('')||`<p class="text-sm text-light-text-secondary dark:text-dark-text-secondary">No active employees.</p>`}</div>`;
+            content += `<div class="space-y-3 mb-6">${activeEmployees.map(emp=>{const revenue=emp.transactions.filter(t=>t.type==='sale').reduce((sum,t)=>sum+t.amount,0);const expenses=emp.transactions.filter(t=>t.type==='expense').reduce((sum,t)=>sum+t.amount,0);return`<div class="bg-light-bg dark:bg-dark-bg p-3 rounded-lg"><div class="flex justify-between items-center"><div><span class="font-bold">${emp.name}</span><em class="text-xs ml-2 text-light-text-secondary dark:text-dark-text-secondary">(${emp.position})</em></div><div class="flex space-x-3"><button class="text-sm hover:text-primary" onclick="app.startEditEmployee('${emp.id}')"><i class="fas fa-pencil-alt"></i></button><button class="text-sm hover:text-accent-red" onclick="app.deactivateEmployee('${emp.id}')"><i class="fas fa-user-slash"></i></button></div></div><div class="text-xs mt-2 space-y-1 pl-1 border-l-2 border-gray-300 dark:border-gray-600 ml-1 pl-2"><div class="flex justify-between"><span>Revenue:</span> <span class="font-semibold text-accent-green">$${revenue.toFixed(2)}</span></div><div class="flex justify-between"><span>Expenses:</span> <span class="font-semibold text-accent-red">$${expenses.toFixed(2)}</span></div></div></div>`}).join('')||`<p class="text-sm text-light-text-secondary dark:text-dark-text-secondary">No active employees.</p>`}</div>`;
             if (inactiveEmployees.length > 0) {
                  content += `<h3 class="text-xl font-bold mb-4">Inactive Employees (${inactiveEmployees.length})</h3>`;
-                 content += `<div class="space-y-3">${inactiveEmployees.map(emp=>`<div class="flex justify-between items-center bg-light-surface dark:bg-dark-surface opacity-60 p-3 rounded-lg shadow-sm"><span class="italic">${emp.name}</span><button class="text-sm text-accent-green hover:opacity-80 font-semibold" onclick="app.reactivateEmployee('${emp.id}')">Reactivate</button></div>`).join('')}</div>`;
+                 content += `<div class="space-y-3">${inactiveEmployees.map(emp=>`<div class="flex justify-between items-center bg-light-bg dark:bg-dark-bg opacity-60 p-3 rounded-lg"><span class="italic">${emp.name}</span><button class="text-sm text-accent-green hover:opacity-80 font-semibold" onclick="app.reactivateEmployee('${emp.id}')">Reactivate</button></div>`).join('')}</div>`;
             }
             container.innerHTML = content;
         },
 
         renderCompanyInventoryTab() {
-            const container = document.getElementById('company-inventory-content');
+            const container = document.querySelector('#company-view #company-inventory-content');
             let content = `<h3 class="text-xl font-bold mb-4">Master Inventory</h3>`;
-            content += `<div class="overflow-x-auto bg-light-surface dark:bg-dark-surface rounded-lg shadow"><table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700"><thead class="bg-light-bg dark:bg-dark-bg"><tr><th class="table-header">Product</th><th class="table-header">Price</th><th class="table-header">Stock Available</th><th class="table-header">Actions</th></tr></thead><tbody class="divide-y divide-gray-200 dark:divide-gray-700">`;
+            content += `<div class="overflow-x-auto bg-light-bg dark:bg-dark-bg rounded-lg"><table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700"><thead class="bg-gray-50 dark:bg-gray-800/50"><tr><th class="table-header">Product</th><th class="table-header">Price</th><th class="table-header">Stock</th><th class="table-header">Actions</th></tr></thead><tbody class="divide-y divide-gray-200 dark:divide-gray-700">`;
             content += this.getActiveProducts().map(prod => `
-                <tr class="hover:bg-light-bg dark:hover:bg-dark-bg">
+                <tr class="hover:bg-light-surface dark:hover:bg-dark-surface/50 text-sm">
                     <td class="px-6 py-4 whitespace-nowrap">${prod.name}</td>
                     <td class="px-6 py-4 whitespace-nowrap font-mono">$${prod.price.toFixed(2)}</td>
                     <td class="px-6 py-4 whitespace-nowrap font-mono">${prod.stock}</td>
@@ -727,7 +748,7 @@ document.addEventListener('DOMContentLoaded', () => {
         },
         
         renderCompanyExpensesTab() {
-            const container = document.getElementById('company-expenses-content');
+            const container = document.querySelector('#company-view #company-expenses-content');
             const isDark = this.state.theme === 'dark';
             const textColor = isDark ? '#e3e3e3' : '#1f2937';
             
@@ -741,7 +762,7 @@ document.addEventListener('DOMContentLoaded', () => {
             
             let content = `<h3 class="text-xl font-bold mb-4">Total Expenses by Category</h3>`;
             if (Object.keys(expensesByCategory).length > 0) {
-                 content += `<div class="bg-light-surface dark:bg-dark-surface p-4 rounded-lg shadow mx-auto" style="max-height: 400px; max-width: 400px;"><canvas id="company-expenses-by-category-chart"></canvas></div>`;
+                 content += `<div class="bg-light-bg dark:bg-dark-bg p-4 rounded-lg mx-auto" style="max-height: 400px; max-width: 400px;"><canvas id="company-expenses-by-category-chart"></canvas></div>`;
             } else {
                  content += `<p class="text-center py-8 text-light-text-secondary dark:text-dark-text-secondary">No expenses recorded yet.</p>`;
             }
@@ -761,11 +782,11 @@ document.addEventListener('DOMContentLoaded', () => {
         },
 
         renderCompanyTasksTab() {
-             const container = document.getElementById('company-tasks-content');
+             const container = document.querySelector('#company-view #company-tasks-content');
              let content = `<h3 class="text-xl font-bold mb-4">All Tasks</h3>`;
              const sortedTasks = [...this.state.tasks].sort((a,b) => (a.status === 'Completed' ? 1 : -1) - (b.status === 'Completed' ? 1 : -1) );
              content += `<ul class="space-y-3">${sortedTasks.map(task => `
-                <li class="bg-light-surface dark:bg-dark-surface p-4 rounded-lg shadow flex justify-between items-center ${task.status === 'Completed' ? 'task-completed opacity-60' : ''}">
+                <li class="bg-light-bg dark:bg-dark-bg p-4 rounded-lg flex justify-between items-center ${task.status === 'Completed' ? 'task-completed opacity-60' : ''}">
                     <div>
                         <p>${task.description}</p>
                         <small class="text-light-text-secondary dark:text-dark-text-secondary">To: <strong>${this.getEmployee(task.assigneeId)?.name || 'Unassigned'}</strong></small>
@@ -779,15 +800,15 @@ document.addEventListener('DOMContentLoaded', () => {
         renderDashboard() { const employee=this.getCurrentEmployee();if(!employee)return;const isDark=this.state.theme==='dark';const gridColor=isDark?'rgba(255, 255, 255, 0.1)':'rgba(0, 0, 0, 0.1)';const textColor=isDark?'#e3e3e3':'#1f2937';Object.values(this.charts).forEach(chart=>{if(chart)chart.destroy()});const salesByDate=employee.transactions.filter(t=>t.type==='sale').reduce((acc,t)=>{const date=t.date.split('T')[0];acc[date]=(acc[date]||0)+t.amount;return acc},{});const sortedDates=Object.keys(salesByDate).sort();this.charts.sales=new Chart(document.getElementById('sales-over-time-chart').getContext('2d'),{type:'line',data:{labels:sortedDates,datasets:[{label:'Daily Revenue',data:sortedDates.map(date=>salesByDate[date]),borderColor:'#89b4fa',backgroundColor:'rgba(137, 180, 250, 0.2)',tension:0.1,fill:true}]},options:{responsive:true,maintainAspectRatio:false,scales:{y:{beginAtZero:true,grid:{color:gridColor},ticks:{color:textColor}},x:{grid:{color:gridColor},ticks:{color:textColor}}},plugins:{legend:{labels:{color:textColor}}}}});const salesByProduct=employee.transactions.filter(t=>t.type==='sale').reduce((acc,t)=>{acc[t.productId]=(acc[t.productId]||0)+t.amount;return acc},{});const topProducts=Object.entries(salesByProduct).sort(([,a],[,b])=>b-a).slice(0,5);this.charts.products=new Chart(document.getElementById('top-products-chart').getContext('2d'),{type:'bar',data:{labels:topProducts.map(([productId])=>this.getProduct(productId)?.name||'Unknown'),datasets:[{label:'Revenue by Product',data:topProducts.map(([,amount])=>amount),backgroundColor:['#89b4fa','#a6e3a1','#f9e2af','#fab387','#f38ba8']}]},options:{responsive:true,maintainAspectRatio:false,indexAxis:'y',scales:{x:{beginAtZero:true,grid:{color:gridColor},ticks:{color:textColor}},y:{grid:{color:gridColor},ticks:{color:textColor}}},plugins:{legend:{display:false},title:{display:true,text:'Top Products by Revenue',color:textColor,font:{size:16}}}}});const expensesByCategory=employee.transactions.filter(t=>t.type==='expense').reduce((acc,t)=>{const category=this.getCategory(t.categoryId)||{name:'Uncategorized'};acc[category.name]=(acc[category.name]||0)+t.amount;return acc},{});this.charts.expensesByCategory=new Chart(document.getElementById('expenses-by-category-chart').getContext('2d'),{type:'doughnut',data:{labels:Object.keys(expensesByCategory),datasets:[{data:Object.values(expensesByCategory),backgroundColor:['#f38ba8','#fab387','#f9e2af','#a6e3a1','#89b4fa','#cba6f7','#f5c2e7'],borderColor:isDark?'#1e1f20':'#ffffff',borderWidth:4}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'top',labels:{color:textColor}},title:{display:true,text:'Expenses by Category',color:textColor,font:{size:16}}}}});const totalCreditUsed=employee.stores.reduce((sum,s)=>sum+(s.creditUsed||0),0);const totalCreditAvailable=employee.stores.reduce((sum,s)=>sum+(s.creditAvailable||0),0);const outstandingCredit=totalCreditUsed-employee.stores.reduce((sum,s)=>sum+(s.creditPaidBack||0),0);const totalCreditLimit=totalCreditAvailable+totalCreditUsed;this.charts.credit=new Chart(document.getElementById('store-credit-chart').getContext('2d'),{type:'bar',data:{labels:['Credit Status'],datasets:[{label:'Outstanding',data:[outstandingCredit],backgroundColor:'#f38ba8'},{label:'Available',data:[totalCreditLimit-outstandingCredit],backgroundColor:'#a6e3a1'}]},options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,scales:{x:{stacked:true,max:totalCreditLimit>0?totalCreditLimit:1},y:{stacked:true}},plugins:{title:{display:true,text:'My Store Credit Status',color:textColor,font:{size:16}},legend:{position:'top',labels:{color:textColor}}}}});},
         renderMyTasks() {
             const employeeTasks = this.state.tasks.filter(t => t.assigneeId === this.state.currentEmployeeId);
-            document.getElementById('employee-tasks-list').innerHTML = employeeTasks.map(task => `<li class="bg-light-surface dark:bg-dark-surface p-4 rounded-lg shadow flex justify-between items-center ${task.status === 'Completed' ? 'task-completed opacity-60' : ''}"><span>${task.description}</span><button class="text-black px-3 py-1 rounded-md text-sm font-semibold ${task.status === 'Completed' ? 'bg-gray-400' : 'bg-accent-green hover:opacity-80'}" onclick="app.toggleTaskStatus('${task.id}')">${task.status === 'Completed' ? 'Reopen' : 'Complete'}</button></li>`).join('') || `<p class="text-center py-8 text-light-text-secondary dark:text-dark-text-secondary">You have no assigned tasks.</p>`;
+            document.getElementById('employee-tasks-list').innerHTML = employeeTasks.map(task => `<li class="bg-light-bg dark:bg-dark-bg p-4 rounded-lg flex justify-between items-center ${task.status === 'Completed' ? 'task-completed opacity-60' : ''}"><span>${task.description}</span><button class="text-black px-3 py-1 rounded-md text-sm font-semibold ${task.status === 'Completed' ? 'bg-gray-400' : 'bg-accent-green hover:opacity-80'}" onclick="app.toggleTaskStatus('${task.id}')">${task.status === 'Completed' ? 'Reopen' : 'Complete'}</button></li>`).join('') || `<p class="text-center py-8 text-light-text-secondary dark:text-dark-text-secondary">You have no assigned tasks.</p>`;
         },
-        renderMyInventory() { const employee=this.getCurrentEmployee();const listEl=document.getElementById('employee-inventory-list');if(!employee||!employee.inventory||employee.inventory.filter(i=>i.stock>0).length===0){listEl.innerHTML=`<tr><td colspan="2" class="px-6 py-4 text-center text-light-text-secondary dark:text-dark-text-secondary">No inventory delegated to you.</td></tr>`;return}listEl.innerHTML=employee.inventory.filter(i=>i.stock>0).map(item=>{const product=this.getProduct(item.productId);return`<tr class="hover:bg-light-bg dark:hover:bg-dark-bg"><td class="px-6 py-4 whitespace-nowrap">${product?product.name:'Unknown Product'}</td><td class="px-6 py-4 whitespace-nowrap font-mono">${item.stock}</td></tr>`}).join('')},
+        renderMyInventory() { const employee=this.getCurrentEmployee();const listEl=document.getElementById('employee-inventory-list');if(!employee||!employee.inventory||employee.inventory.filter(i=>i.stock>0).length===0){listEl.innerHTML=`<tr><td colspan="2" class="px-6 py-4 text-center text-light-text-secondary dark:text-dark-text-secondary">No inventory delegated to you.</td></tr>`;return}listEl.innerHTML=employee.inventory.filter(i=>i.stock>0).map(item=>{const product=this.getProduct(item.productId);return`<tr class="hover:bg-light-surface dark:hover:bg-dark-surface/50"><td class="px-6 py-4 whitespace-nowrap">${product?product.name:'Unknown Product'}</td><td class="px-6 py-4 whitespace-nowrap font-mono">${item.stock}</td></tr>`}).join('')},
         renderSalesAndExpenses() { const employee=this.getCurrentEmployee();if(!employee) return; document.getElementById('sale-type').innerHTML=`<option value="Cash">Cash</option><option value="Credit">Credit</option><option value="Deal">Deal</option>`;document.getElementById('sale-store').innerHTML=employee.stores.map(s=>`<option value="${s.id}">${s.name}</option>`).join('')||`<option disabled>Add a store first</option>`;const availableInventory=employee?.inventory?.filter(item=>item.stock>0&&this.getProduct(item.productId)?.isActive)||[];document.getElementById('sale-product').innerHTML=availableInventory.map(item=>{const product=this.getProduct(item.productId);return`<option value="${product.id}">${product.name} (Stock: ${item.stock})</option>`}).join('')||`<option disabled>No inventory to sell</option>`;document.querySelector('#record-sale-form button').disabled=!(employee.stores.length>0&&availableInventory.length>0);this.updateFinalSaleAmount();document.getElementById('expense-category').innerHTML=this.state.expenseCategories.map(c=>`<option value="${c.id}">${c.name}</option>`).join('')||`<option disabled>Add a category first</option>`;document.querySelector('#record-expense-form button').disabled=this.state.expenseCategories.length===0},
         
         setActiveInvoiceSubTab(subTabName) {
             this.state.activeInvoiceSubTab = subTabName;
             document.querySelectorAll('.invoice-sub-tab-content').forEach(p => p.classList.add('hidden'));
-            document.getElementById(`${subTabName}-invoice-panel`)?.classList.remove('hidden');
+            document.querySelector(`#employee-view #${subTabName}-invoice-panel`)?.classList.remove('hidden');
 
             document.querySelectorAll('.invoice-sub-tab-btn').forEach(b => {
                 b.classList.toggle('active', b.dataset.subTab === subTabName);
@@ -798,7 +819,6 @@ document.addEventListener('DOMContentLoaded', () => {
             const employee = this.getCurrentEmployee();
             if(!employee) return;
 
-            // --- RENDER CREATE PANEL ---
             const invoiceStoreSelect = document.getElementById('invoice-store');
             if (invoiceStoreSelect) {
                 const currentStoreValue = invoiceStoreSelect.value;
@@ -809,7 +829,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 this.renderInvoiceTransactionList(invoiceStoreSelect.value);
             }
 
-            // --- RENDER RECENT PANEL ---
             const recentPanel = document.getElementById('recent-invoice-panel');
             if(recentPanel) {
                 const sortedInvoices = [...(employee.invoices || [])].sort((a, b) => new Date(b.date) - new Date(a.date)).slice(0, 15);
@@ -818,7 +837,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     recentContent += `<p class="text-center text-sm text-light-text-secondary dark:text-dark-text-secondary py-4">No recent invoices found.</p>`;
                 } else {
                     recentContent += sortedInvoices.map(inv => `
-                    <div class="bg-light-bg dark:bg-dark-bg p-3 rounded-md flex justify-between items-center text-sm">
+                    <div class="bg-light-surface dark:bg-dark-surface p-3 rounded-md flex justify-between items-center text-sm">
                         <div><div class="font-semibold">${inv.storeName}</div><div class="text-xs text-light-text-secondary dark:text-dark-text-secondary">${new Date(inv.date).toLocaleDateString()}</div></div>
                         <div class="font-mono font-bold text-lg">$${inv.total.toFixed(2)}</div>
                     </div>`).join('');
@@ -827,10 +846,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 recentPanel.innerHTML = recentContent;
             }
             
-            // --- RENDER PENDING PANEL ---
             this.renderPendingInvoices();
-
-            // --- SET ACTIVE SUB-TAB ---
             this.setActiveInvoiceSubTab(this.state.activeInvoiceSubTab);
         },
 
@@ -859,7 +875,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 content += `<p class="text-center text-sm text-light-text-secondary dark:text-dark-text-secondary py-4">No stores have pending sales to be invoiced.</p>`;
             } else {
                 content += storesWithPendingSales.map(store => `
-                    <div data-store-id="${store.id}" class="pending-invoice-item bg-light-bg dark:bg-dark-bg p-3 rounded-md flex justify-between items-center text-sm cursor-pointer hover:ring-2 hover:ring-primary">
+                    <div data-store-id="${store.id}" class="pending-invoice-item bg-light-surface dark:bg-dark-surface p-3 rounded-md flex justify-between items-center text-sm cursor-pointer hover:ring-2 hover:ring-primary">
                         <div>
                             <div class="font-semibold">${store.name}</div>
                             <div class="text-xs text-light-text-secondary dark:text-dark-text-secondary">${store.pendingCount} uninvoiced sale(s)</div>
@@ -902,7 +918,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     const product = this.getProduct(t.productId);
                     const saleDate = new Date(t.date).toLocaleDateString();
                     return `
-                        <label for="txn-${t.id}" class="flex items-center space-x-3 p-2 rounded-md hover:bg-gray-200 dark:hover:bg-gray-700 cursor-pointer">
+                        <label for="txn-${t.id}" class="flex items-center space-x-3 p-2 rounded-md hover:bg-light-surface dark:hover:bg-dark-surface cursor-pointer">
                             <input type="checkbox" id="txn-${t.id}" data-transaction-id="${t.id}" class="invoice-txn-checkbox h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary">
                             <div class="flex-grow flex justify-between items-center text-sm">
                                 <div>
@@ -922,17 +938,57 @@ document.addEventListener('DOMContentLoaded', () => {
             container.classList.remove('hidden');
         },
 
-        renderModals() { document.getElementById('modal-container').innerHTML=`${this.getFirstTimeModalHTML()}${this.getGenericModalHTML('addEmployeeModal','Add New Employee',`<form id="add-employee-form" class="space-y-4"><div><label for="new-employee-name" class="block text-sm font-medium">Name</label><input type="text" id="new-employee-name" required class="modal-input"></div><div><label for="new-employee-position" class="block text-sm font-medium">Position</label><input type="text" id="new-employee-position" required class="modal-input"></div><button type="submit" class="modal-submit-button">Add Employee</button></form>`)}${this.getGenericModalHTML('editEmployeeModal','Edit Employee',`<form id="edit-employee-form" class="space-y-4"><input type="hidden" id="edit-employee-id"><div><label for="edit-employee-name" class="block text-sm font-medium">Name</label><input type="text" id="edit-employee-name" required class="modal-input"></div><div><label for="edit-employee-position" class="block text-sm font-medium">Position</label><input type="text" id="edit-employee-position" required class="modal-input"></div><button type="submit" class="modal-submit-button">Save Changes</button></form>`)}${this.getGenericModalHTML('addProductModal','Add New Product',`<form id="add-product-form" class="space-y-4"><div><label for="new-product-name" class="block text-sm font-medium">Product Name</label><input type="text" id="new-product-name" required class="modal-input"></div><div><label for="new-product-price" class="block text-sm font-medium">Price ($)</label><input type="number" id="new-product-price" step="0.01" min="0" required class="modal-input"></div><div><label for="new-product-stock" class="block text-sm font-medium">Initial Stock</label><input type="number" id="new-product-stock" min="0" required class="modal-input"></div><button type="submit" class="modal-submit-button">Add Product</button></form>`)}${this.getGenericModalHTML('editProductModal','Edit Product',`<form id="edit-product-form" class="space-y-4"><input type="hidden" id="edit-product-id"><div><label for="edit-product-name" class="block text-sm font-medium">Product Name</label><input type="text" id="edit-product-name" required class="modal-input"></div><div><label for="edit-product-price" class="block text-sm font-medium">Price ($)</label><input type="number" id="edit-product-price" step="0.01" min="0" required class="modal-input"></div><div><label for="edit-product-stock" class="block text-sm font-medium">Current Stock</label><input type="number" id="edit-product-stock" min="0" required class="modal-input"></div><button type="submit" class="modal-submit-button">Save Changes</button></form>`)}${this.getGenericModalHTML('addCategoryModal','Add Expense Category',`<form id="add-category-form" class="space-y-4"><div><label for="new-category-name" class="block text-sm font-medium">Category Name</label><input type="text" id="new-category-name" required class="modal-input"></div><button type="submit" class="modal-submit-button">Add Category</button></form>`)}${this.getGenericModalHTML('editCategoryModal','Edit Expense Category',`<form id="edit-category-form" class="space-y-4"><input type="hidden" id="edit-category-id"><div><label for="edit-category-name" class="block text-sm font-medium">Category Name</label><input type="text" id="edit-category-name" required class="modal-input"></div><button type="submit" class="modal-submit-button">Save Changes</button></form>`)}${this.getGenericModalHTML('delegateStockModal','Delegate Stock to Employee',`<form id="delegate-stock-form" class="space-y-4"><div><label for="delegate-employee" class="block text-sm font-medium">Employee</label><select id="delegate-employee" class="modal-input"></select></div><div><label for="delegate-product" class="block text-sm font-medium">Product</label><select id="delegate-product" class="modal-input"></select></div><div><label for="delegate-quantity" class="block text-sm font-medium">Quantity</label><input type="number" id="delegate-quantity" min="1" required class="modal-input"></div><button type="submit" class="modal-submit-button">Delegate Stock</button></form>`)}${this.getGenericModalHTML('createTaskModal','Create a New Task',`<form id="create-task-form" class="space-y-4"><div><label for="task-description" class="block text-sm font-medium">Task Description</label><input type="text" id="task-description" required class="modal-input"></div><div><label for="task-assignee" class="block text-sm font-medium">Assign To</label><select id="task-assignee" class="modal-input"></select></div><button type="submit" class="modal-submit-button">Create Task</button></form>`)}${this.getGenericModalHTML('editStoreModal','Edit Store',`<form id="edit-store-form" class="space-y-4"><input type="hidden" id="edit-store-id"><div><label for="edit-store-name" class="block text-sm font-medium">Store Name</label><input type="text" id="edit-store-name" required class="modal-input"></div><div><label for="edit-store-location" class="block text-sm font-medium">Location</label><input type="text" id="edit-store-location" required class="modal-input"></div><div><label for="edit-store-credit-limit" class="block text-sm font-medium">Credit Limit</label><input type="number" step="0.01" min="0" id="edit-store-credit-limit" required class="modal-input"></div><button type="submit" class="modal-submit-button">Save Changes</button></form>`)}${this.getGenericModalHTML('creditReceivedModal','Receive Credit Payment',`<form id="credit-received-form" class="space-y-4"><input type="hidden" id="credit-store-id"><p>Receiving payment from: <strong id="credit-store-name"></strong></p><p>Outstanding credit: <strong id="credit-outstanding"></strong></p><div><label for="credit-received-amount" class="block text-sm font-medium">Amount Received</label><input type="number" id="credit-received-amount" step="0.01" min="0" required class="modal-input"></div><button type="submit" class="modal-submit-button">Record Payment</button></form>`)}`},
+        renderModals() { document.getElementById('modal-container').innerHTML=`${this.getFirstTimeModalHTML()}${this.getGenericModalHTML('addEmployeeModal','Add New Employee',`<form id="add-employee-form" class="space-y-4"><div><label for="new-employee-name" class="block text-sm font-medium">Name</label><input type="text" id="new-employee-name" required class="modal-input"></div><div><label for="new-employee-position" class="block text-sm font-medium">Position</label><input type="text" id="new-employee-position" required class="modal-input"></div><button type="submit" class="modal-submit-button">Add Employee</button></form>`)}${this.getGenericModalHTML('editEmployeeModal','Edit Employee',`<form id="edit-employee-form" class="space-y-4"><input type="hidden" id="edit-employee-id"><div><label for="edit-employee-name" class="block text-sm font-medium">Name</label><input type="text" id="edit-employee-name" required class="modal-input"></div><div><label for="edit-employee-position" class="block text-sm font-medium">Position</label><input type="text" id="edit-employee-position" required class="modal-input"></div><button type="submit" class="modal-submit-button">Save Changes</button></form>`)}${this.getGenericModalHTML('addProductModal','Add New Product',`<form id="add-product-form" class="space-y-4"><div><label for="new-product-name" class="block text-sm font-medium">Product Name</label><input type="text" id="new-product-name" required class="modal-input"></div><div><label for="new-product-price" class="block text-sm font-medium">Price ($)</label><input type="number" id="new-product-price" step="0.01" min="0" required class="modal-input"></div><div><label for="new-product-stock" class="block text-sm font-medium">Initial Stock</label><input type="number" id="new-product-stock" min="0" required class="modal-input"></div><button type="submit" class="modal-submit-button">Add Product</button></form>`)}${this.getGenericModalHTML('editProductModal','Edit Product',`<form id="edit-product-form" class="space-y-4"><input type="hidden" id="edit-product-id"><div><label for="edit-product-name" class="block text-sm font-medium">Product Name</label><input type="text" id="edit-product-name" required class="modal-input"></div><div><label for="edit-product-price" class="block text-sm font-medium">Price ($)</label><input type="number" id="edit-product-price" step="0.01" min="0" required class="modal-input"></div><div><label for="edit-product-stock" class="block text-sm font-medium">Current Stock</label><input type="number" id="edit-product-stock" min="0" required class="modal-input"></div><button type="submit" class="modal-submit-button">Save Changes</button></form>`)}${this.getGenericModalHTML('addCategoryModal','Add Expense Category',`<form id="add-category-form" class="space-y-4"><div><label for="new-category-name" class="block text-sm font-medium">Category Name</label><input type="text" id="new-category-name" required class="modal-input"></div><button type="submit" class="modal-submit-button">Add Category</button></form>`)}${this.getGenericModalHTML('editCategoryModal','Edit Expense Category',`<form id="edit-category-form" class="space-y-4"><input type="hidden" id="edit-category-id"><div><label for="edit-category-name" class="block text-sm font-medium">Category Name</label><input type="text" id="edit-category-name" required class="modal-input"></div><button type="submit" class="modal-submit-button">Save Changes</button></form>`)}${this.getGenericModalHTML('delegateStockModal','Delegate Stock to Employee',`<form id="delegate-stock-form" class="space-y-4"><div><label for="delegate-employee" class="block text-sm font-medium">Employee</label><select id="delegate-employee" class="modal-input"></select></div><div><label for="delegate-product" class="block text-sm font-medium">Product</label><select id="delegate-product" class="modal-input"></select></div><div><label for="delegate-quantity" class="block text-sm font-medium">Quantity</label><input type="number" id="delegate-quantity" min="1" required class="modal-input"></div><button type="submit" class="modal-submit-button">Delegate Stock</button></form>`)}${this.getGenericModalHTML('createTaskModal','Create a New Task',`<form id="create-task-form" class="space-y-4"><div><label for="task-description" class="block text-sm font-medium">Task Description</label><input type="text" id="task-description" required class="modal-input"></div><div><label for="task-assignee" class="block text-sm font-medium">Assign To</label><select id="task-assignee" class="modal-input"></select></div><button type="submit" class="modal-submit-button">Create Task</button></form>`)}${this.getGenericModalHTML('editStoreModal','Edit Store',`<form id="edit-store-form" class="space-y-4"><input type="hidden" id="edit-store-id"><div><label for="edit-store-name" class="block text-sm font-medium">Store Name</label><input type="text" id="edit-store-name" required class="modal-input"></div><div><label for="edit-store-location" class="block text-sm font-medium">Location</label><input type="text" id="edit-store-location" required class="modal-input"></div><div><label for="edit-store-credit-limit" class="block text-sm font-medium">Credit Limit</label><input type="number" step="0.01" min="0" id="edit-store-credit-limit" required class="modal-input"></div><button type="submit" class="modal-submit-button">Save Changes</button></form>`)}${this.getGenericModalHTML('creditReceivedModal','Receive Credit Payment',`<form id="credit-received-form" class="space-y-4"><input type="hidden" id="credit-store-id"><p>Receiving payment from: <strong id="credit-store-name"></strong></p><p>Outstanding credit: <strong id="credit-outstanding"></strong></p><div><label for="credit-received-amount" class="block text-sm font-medium">Amount Received</label><input type="number" id="credit-received-amount" step="0.01" min="0" required class="modal-input"></div><button type="submit" class="modal-submit-button">Record Payment</button></form>`)}${this.getAImodalHTML()}`},
         getGenericModalHTML(id,title,content){return`<div id="${id}" class="fixed inset-0 z-50 flex items-center justify-center p-4 hidden modal-backdrop"><div class="bg-light-surface dark:bg-dark-surface rounded-lg shadow-xl w-full max-w-md mx-auto transform transition-all"><div class="flex justify-between items-center p-4 border-b border-gray-200 dark:border-gray-700"><h3 class="text-xl font-semibold">${title}</h3><button onclick="app.closeModal('${id}')" class="text-light-text-secondary dark:text-dark-text-secondary hover:text-light-text dark:hover:text-dark-text">&times;</button></div><div class="p-6">${content}</div></div></div>`},
         getFirstTimeModalHTML(){return`<div id="firstTimeModal" class="fixed inset-0 z-50 flex items-center justify-center p-4 hidden modal-backdrop"><div class="bg-light-surface dark:bg-dark-surface rounded-lg shadow-xl w-full max-w-md mx-auto text-center p-8"><i class="fas fa-rocket text-4xl text-primary mb-4"></i><h2 class="text-2xl font-bold mb-2">Welcome to Ledgerly!</h2><p class="text-light-text-secondary dark:text-dark-text-secondary mb-6">Let's get you set up. Start by adding your first employee.</p><form id="first-employee-form" class="space-y-4"><div><label for="first-employee-name" class="sr-only">Name</label><input type="text" id="first-employee-name" placeholder="First Employee's Name" required class="modal-input"></div><div><label for="first-employee-position" class="sr-only">Position</label><input type="text" id="first-employee-position" placeholder="Position (e.g., Manager)" required class="modal-input"></div><button type="submit" class="modal-submit-button w-full">Get Started</button></form></div></div>`},
+        getAImodalHTML() {
+            return `
+            <div id="aiAdvisorModal" class="fixed inset-0 z-50 flex items-center justify-center p-4 hidden modal-backdrop">
+                <div class="bg-light-surface dark:bg-dark-surface rounded-lg shadow-xl w-full max-w-lg mx-auto transform transition-all">
+                    <div class="flex justify-between items-center p-4 border-b border-gray-200 dark:border-gray-700">
+                        <h3 class="text-xl font-semibold flex items-center"><i class="fas fa-brain mr-3 text-primary"></i>Accura AI Advisor</h3>
+                        <button onclick="app.closeModal('aiAdvisorModal')" class="text-light-text-secondary dark:text-dark-text-secondary hover:text-light-text dark:hover:text-dark-text">&times;</button>
+                    </div>
+                    <div class="p-6 space-y-4">
+                        <div id="ai-employee-selector-container">
+                            <label for="ai-employee-select" class="block text-sm font-medium text-light-text-secondary dark:text-dark-text-secondary mb-1">Select Employee</label>
+                            <select id="ai-employee-select" class="w-full bg-light-bg dark:bg-dark-bg rounded-md p-2 focus:ring-2 focus:ring-primary focus:outline-none"></select>
+                        </div>
+                        <button id="generate-plan-btn" class="w-full bg-primary text-black py-2 rounded-md font-semibold hover:bg-primary-hover flex items-center justify-center" onclick="app.generateAIPlan()">
+                            <span id="generate-plan-text">Generate Plan</span>
+                            <i id="generate-plan-loader" class="fas fa-spinner fa-spin hidden ml-2"></i>
+                        </button>
+                        <div id="ai-plan-output" class="mt-4 p-3 bg-light-bg dark:bg-dark-bg rounded-md text-sm prose max-w-none max-h-60 overflow-y-auto">
+                            <p class="text-light-text-secondary dark:text-dark-text-secondary">Your AI-generated action plan will appear here.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>`;
+        },
         renderEmployeeSwitcher() { const switcher=document.getElementById('employee-switcher');switcher.innerHTML=this.getActiveEmployees().map(emp=>`<option value="${emp.id}" ${emp.id===this.state.currentEmployeeId?'selected':''}>${emp.name}</option>`).join('')},
-        renderAIAdvisorPanel() { const selector=document.getElementById('ai-employee-select');selector.innerHTML=this.getActiveEmployees().map(emp=>`<option value="${emp.id}">${emp.name}</option>`).join('');if(this.state.currentEmployeeId){selector.value=this.state.currentEmployeeId}},
         applyTheme() { const isDark=this.state.theme==='dark';document.documentElement.classList.toggle('dark',isDark);document.getElementById('theme-icon').className=`fas ${isDark?'fa-sun':'fa-moon'}`},
         toggleTheme() { this.state.theme=this.state.theme==='dark'?'light':'dark';this.applyTheme();this.saveState(); this.render() },
-        openModal(modalId) {if(modalId==='delegateStockModal'){document.getElementById('delegate-employee').innerHTML=this.getActiveEmployees().map(e=>`<option value="${e.id}">${e.name}</option>`).join('');document.getElementById('delegate-product').innerHTML=this.getActiveProducts().filter(p=>p.stock>0).map(p=>`<option value="${p.id}">${p.name} (Master Stock: ${p.stock})</option>`).join('')}if(modalId==='createTaskModal'){document.getElementById('task-assignee').innerHTML=this.getActiveEmployees().map(e=>`<option value="${e.id}">${e.name}</option>`).join('')}document.getElementById(modalId)?.classList.remove('hidden')},
+        openModal(modalId) {
+            if(modalId==='delegateStockModal'){document.getElementById('delegate-employee').innerHTML=this.getActiveEmployees().map(e=>`<option value="${e.id}">${e.name}</option>`).join('');document.getElementById('delegate-product').innerHTML=this.getActiveProducts().filter(p=>p.stock>0).map(p=>`<option value="${p.id}">${p.name} (Master Stock: ${p.stock})</option>`).join('')}
+            if(modalId==='createTaskModal'){document.getElementById('task-assignee').innerHTML=this.getActiveEmployees().map(e=>`<option value="${e.id}">${e.name}</option>`).join('')}
+            if(modalId === 'aiAdvisorModal') {
+                const selectorContainer = document.getElementById('ai-employee-selector-container');
+                const selector = document.getElementById('ai-employee-select');
+                if (this.state.currentView === 'company') {
+                    selectorContainer.classList.add('hidden');
+                } else {
+                    selectorContainer.classList.remove('hidden');
+                    selector.innerHTML = this.getActiveEmployees().map(emp => `<option value="${emp.id}">${emp.name}</option>`).join('');
+                    if (this.state.currentEmployeeId) {
+                        selector.value = this.state.currentEmployeeId;
+                    }
+                }
+            }
+            document.getElementById(modalId)?.classList.remove('hidden');
+        },
         closeModal(modalId){document.getElementById(modalId)?.classList.add('hidden')},
         createEmployee(name,position){return{id:`emp_${Date.now()}`,name,position,isActive:true,inventory:[],transactions:[],stores:[],invoices:[]}},
-        handleFirstEmployee(e){e.preventDefault();const name=document.getElementById('first-employee-name').value;const position=document.getElementById('first-employee-position').value;if(!name.trim()||!position.trim())return;const firstEmployee=this.createEmployee(name,position);this.state.employees.push(firstEmployee);this.state.currentEmployeeId=firstEmployee.id; this.state.currentView = 'employee'; this.saveState();this.render();this.showMainApp();this.togglePanel('quick-actions',true);this.togglePanel('ai-advisor',true)},
+        handleFirstEmployee(e){e.preventDefault();const name=document.getElementById('first-employee-name').value;const position=document.getElementById('first-employee-position').value;if(!name.trim()||!position.trim())return;const firstEmployee=this.createEmployee(name,position);this.state.employees.push(firstEmployee);this.state.currentEmployeeId=firstEmployee.id; this.state.currentView = 'employee'; this.saveState();this.render();this.showMainApp();this.togglePanel('quick-actions',true);},
         handleAddEmployee(e){e.preventDefault();const name=document.getElementById('new-employee-name').value;const position=document.getElementById('new-employee-position').value;if(!name.trim()||!position.trim())return;this.state.employees.push(this.createEmployee(name,position));this.saveState();this.render();this.closeModal('addEmployeeModal');this.showNotification('Employee added successfully!');e.target.reset()},
         startEditEmployee(id){const employee=this.getEmployee(id);if(!employee)return;document.getElementById('edit-employee-id').value=id;document.getElementById('edit-employee-name').value=employee.name;document.getElementById('edit-employee-position').value=employee.position;this.openModal('editEmployeeModal')},
         handleUpdateEmployee(e){e.preventDefault();const id=document.getElementById('edit-employee-id').value;const employee=this.getEmployee(id);if(!employee)return;employee.name=document.getElementById('edit-employee-name').value;employee.position=document.getElementById('edit-employee-position').value;this.saveState();this.render();this.closeModal('editEmployeeModal');this.showNotification('Employee updated!')},
@@ -986,11 +1042,11 @@ document.addEventListener('DOMContentLoaded', () => {
             document.body.appendChild(overlay);
 
             const opt = {
-                margin:       0.5,
-                filename:     `Invoice_${store.name.replace(/\s/g, '_')}_${invoiceDate}.pdf`,
-                image:        { type: 'jpeg', quality: 0.98 },
-                html2canvas:  { scale: 2, useCORS: true },
-                jsPDF:        { unit: 'in', format: 'letter', orientation: 'portrait' }
+                margin:        0.5,
+                filename:      `Invoice_${store.name.replace(/\s/g, '_')}_${invoiceDate}.pdf`,
+                image:         { type: 'jpeg', quality: 0.98 },
+                html2canvas:   { scale: 2, useCORS: true },
+                jsPDF:         { unit: 'in', format: 'letter', orientation: 'portrait' }
             };
 
             const cleanup = () => {
@@ -1095,15 +1151,73 @@ document.addEventListener('DOMContentLoaded', () => {
                 </div>`;
         },
 
-        async generateAIPlan(){const employeeId=document.getElementById('ai-employee-select').value;const employee=this.getEmployee(employeeId);if(!employee)return;const btn=document.getElementById('generate-plan-btn');const btnText=document.getElementById('generate-plan-text');const loader=document.getElementById('generate-plan-loader');const outputDiv=document.getElementById('ai-plan-output');btn.disabled=true;btnText.textContent='Generating...';loader.classList.remove('hidden');outputDiv.innerHTML='<p class="text-light-text-secondary dark:text-dark-text-secondary">Thinking...</p>';const revenue=employee.transactions.filter(t=>t.type==='sale').reduce((sum,t)=>sum+t.amount,0);const expenses=employee.transactions.filter(t=>t.type==='expense').reduce((sum,t)=>sum+t.amount,0);const profit=revenue-expenses;const transactionsSummary=employee.transactions.slice(-10).map(t=>`${t.type}: $${t.amount.toFixed(2)}`).join(', ');try{const aiResponse=await this.mockGeminiAPI(employee.name,revenue,expenses,profit,transactionsSummary);outputDiv.innerHTML=this.simpleMarkdownToHtml(aiResponse)}catch(error){outputDiv.innerHTML=`<p class="text-accent-red">An error occurred while generating the plan.</p>`}finally{btn.disabled=false;btnText.textContent='Generate Plan';loader.classList.add('hidden')}},
-        async mockGeminiAPI(name,revenue,expenses,profit,transactions){await new Promise(res=>setTimeout(res,1500));let advice=`<h3>Action Plan for ${name}</h3>\n\n**Analysis:**\n- **Revenue:** $${revenue.toFixed(2)}\n- **Expenses:** $${expenses.toFixed(2)}\n- **Profit:** $${profit.toFixed(2)}\n\n`;if(profit>0&&revenue>0){advice+=`**Recommendation:**\nGreat work! ${name} is profitable. To increase profits, focus on two areas:\n1. **Upsell High-Performing Products:** Analyze which products generate the most revenue and ensure ${name} has ample stock.\n2. **Optimize Minor Expenses:** Look at the expense categories. Can any recurring costs be reduced?`}else if(revenue>0){advice+=`**Recommendation:**\n${name} is generating revenue, but expenses are too high. Immediate action is needed:\n1. **Review All Expenses:** Scrutinize every expense. Is it essential? Can a cheaper alternative be found?\n2. **Increase Sales Volume:** Focus on increasing the number of sales to cover fixed costs. Consider small, targeted discounts.`}else{advice+=`**Recommendation:**\nThere is currently no revenue data for ${name}. The primary focus should be on initiating sales activity.\n1. **First Sale Focus:** Prioritize training and resources to help ${name} make their first sales.\n2. **Market Engagement:** Ensure ${name} is actively engaging with potential stores and customers.`}return advice},
+        async generateAIPlan() {
+            const btn = document.getElementById('generate-plan-btn');
+            const btnText = document.getElementById('generate-plan-text');
+            const loader = document.getElementById('generate-plan-loader');
+            const outputDiv = document.getElementById('ai-plan-output');
+            
+            btn.disabled = true;
+            btnText.textContent = 'Generating...';
+            loader.classList.remove('hidden');
+            outputDiv.innerHTML = '<p class="text-light-text-secondary dark:text-dark-text-secondary">Thinking...</p>';
+
+            try {
+                let aiResponse;
+                if (this.state.currentView === 'company') {
+                    let totalRevenue = 0, totalExpenses = 0;
+                    this.state.employees.forEach(emp => {
+                        totalRevenue += (emp.transactions || []).filter(t => t.type === 'sale').reduce((sum, t) => sum + t.amount, 0);
+                        totalExpenses += (emp.transactions || []).filter(t => t.type === 'expense').reduce((sum, t) => sum + t.amount, 0);
+                    });
+                    const topProduct = Object.entries(this.state.employees.flatMap(e => e.transactions || []).filter(t => t.type === 'sale').reduce((acc, t) => { acc[t.productId] = (acc[t.productId] || 0) + t.quantity; return acc; }, {})).sort(([,a],[,b]) => b-a)[0];
+                    const topProductName = topProduct ? (this.getProduct(topProduct[0])?.name || 'N/A') : 'N/A';
+                    aiResponse = await this.mockCompanyGeminiAPI(totalRevenue, totalExpenses, topProductName);
+                } else {
+                    const employeeId = document.getElementById('ai-employee-select').value;
+                    const employee = this.getEmployee(employeeId);
+                    if (!employee) throw new Error("Employee not found");
+                    
+                    const revenue = employee.transactions.filter(t => t.type === 'sale').reduce((sum, t) => sum + t.amount, 0);
+                    const expenses = employee.transactions.filter(t => t.type === 'expense').reduce((sum, t) => sum + t.amount, 0);
+                    const profit = revenue - expenses;
+                    const transactionsSummary = employee.transactions.slice(-10).map(t => `${t.type}: $${t.amount.toFixed(2)}`).join(', ');
+                    aiResponse = await this.mockEmployeeGeminiAPI(employee.name, revenue, expenses, profit, transactionsSummary);
+                }
+                outputDiv.innerHTML = this.simpleMarkdownToHtml(aiResponse);
+            } catch (error) {
+                console.error("AI Plan Error:", error);
+                outputDiv.innerHTML = `<p class="text-accent-red">An error occurred while generating the plan.</p>`;
+            } finally {
+                btn.disabled = false;
+                btnText.textContent = 'Generate Plan';
+                loader.classList.add('hidden');
+            }
+        },
+        
+        async mockEmployeeGeminiAPI(name,revenue,expenses,profit,transactions){await new Promise(res=>setTimeout(res,1500));let advice=`<h3>Action Plan for ${name}</h3>\n\n**Analysis:**\n- **Revenue:** $${revenue.toFixed(2)}\n- **Expenses:** $${expenses.toFixed(2)}\n- **Profit:** $${profit.toFixed(2)}\n\n`;if(profit>0&&revenue>0){advice+=`**Recommendation:**\nGreat work! ${name} is profitable. To increase profits, focus on two areas:\n1. **Upsell High-Performing Products:** Analyze which products generate the most revenue and ensure ${name} has ample stock.\n2. **Optimize Minor Expenses:** Look at the expense categories. Can any recurring costs be reduced?`}else if(revenue>0){advice+=`**Recommendation:**\n${name} is generating revenue, but expenses are too high. Immediate action is needed:\n1. **Review All Expenses:** Scrutinize every expense. Is it essential? Can a cheaper alternative be found?\n2. **Increase Sales Volume:** Focus on increasing the number of sales to cover fixed costs. Consider small, targeted discounts.`}else{advice+=`**Recommendation:**\nThere is currently no revenue data for ${name}. The primary focus should be on initiating sales activity.\n1. **First Sale Focus:** Prioritize training and resources to help ${name} make their first sales.\n2. **Market Engagement:** Ensure ${name} is actively engaging with potential stores and customers.`}return advice},
+        
+        async mockCompanyGeminiAPI(revenue, expenses, topProduct) {
+            await new Promise(res => setTimeout(res, 1500));
+            const profit = revenue - expenses;
+            let advice = `<h3>Firm-Wide Strategic Plan</h3>\n\n**Overall Analysis:**\n- **Total Revenue:** $${revenue.toFixed(2)}\n- **Total Expenses:** $${expenses.toFixed(2)}\n- **Net Profit:** $${profit.toFixed(2)}\n- **Top Selling Product:** ${topProduct}\n\n`;
+            if (profit > 1000) {
+                advice += `**Recommendation:**\nThe company is in a strong profitable position. Key strategies should be:\n1. **Scale Up:** Invest profits into acquiring more master inventory, focusing on top performers like **${topProduct}**.\n2. **Team Expansion:** Consider adding a new employee to expand market reach.\n3. **Expense Audit:** Even with high profit, a quarterly audit of major expense categories can reveal savings opportunities.`;
+            } else if (profit > 0) {
+                advice += `**Recommendation:**\nThe company is profitable, but there's room for growth. Focus on efficiency:\n1. **Boost Top Products:** Run a promotional campaign for **${topProduct}** to increase sales volume.\n2. **Control Variable Costs:** Analyze if costs per sale can be reduced (e.g., bulk buying supplies).\n3. **Employee Performance:** Identify top-performing employees and replicate their strategies across the team.`;
+            } else {
+                 advice += `**Recommendation:**\nThe company is currently operating at a loss. Immediate corrective action is required:\n1. **Cut Non-Essential Costs:** Freeze all non-essential spending. Scrutinize the largest expense categories for immediate cuts.\n2. **High-Margin Sales Push:** Focus all sales efforts on the products with the highest profit margins. Temporarily halt sales of low-margin items.\n3. **Credit Management:** Review outstanding credit given to stores and prioritize collecting payments.`;
+            }
+            return advice;
+        },
+
         simpleMarkdownToHtml(md){return md.replace(/^### (.*$)/gim,'<h3 class="font-bold text-lg mb-2">$1</h3>').replace(/^## (.*$)/gim,'<h2 class="font-bold text-xl mb-3">$1</h2>').replace(/^# (.*$)/gim,'<h1 class="font-bold text-2xl mb-4">$1</h1>').replace(/\*\*(.*)\*\*/gim,'<strong>$1</strong>').replace(/\*(.*)\*/gim,'<em>$1</em>').replace(/\n\s*-\s/g,'<br>- ').replace(/\n/g,'<br>')}
     };
 
     window.app = app;
 
     const styleSheet = document.createElement("style");
-    styleSheet.innerText = `.modal-input { width: 100%; background-color: ${tailwind.config.theme.extend.colors['light-bg']}; border: 1px solid #d1d5db; border-radius: 0.375rem; padding: 0.5rem 0.75rem; } .dark .modal-input { background-color: ${tailwind.config.theme.extend.colors['dark-bg']}; border-color: #4b5563; } .modal-submit-button { width: 100%; background-color: ${tailwind.config.theme.extend.colors.primary}; color: black; font-weight: bold; padding: 0.5rem 1rem; border-radius: 0.375rem; transition: background-color 0.2s; } .modal-submit-button:hover { background-color: ${tailwind.config.theme.extend.colors['primary-hover']}; } .form-label { display: block; font-size: 0.875rem; font-weight: 500; color: ${tailwind.config.theme.extend.colors['light-text-secondary']}; } .dark .form-label { color: ${tailwind.config.theme.extend.colors['dark-text-secondary']}; } .form-input { margin-top: 0.25rem; display: block; width: 100%; background-color: ${tailwind.config.theme.extend.colors['light-bg']}; border: 1px solid #d1d5db; border-radius: 0.375rem; padding: 0.5rem 0.75rem; outline: none; } .dark .form-input { background-color: ${tailwind.config.theme.extend.colors['dark-bg']}; border-color: #4b5563; } .form-input:focus { ring: 2px; border-color: ${tailwind.config.theme.extend.colors.primary}; box-shadow: 0 0 0 2px ${tailwind.config.theme.extend.colors.primary}; } .table-header { padding: 0.75rem 1.5rem; text-align: left; font-size: 0.75rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; color: ${tailwind.config.theme.extend.colors['light-text-secondary']}; } .dark .table-header { color: ${tailwind.config.theme.extend.colors['dark-text-secondary']}; } #employee-view, #company-view { display: flex; }`;
+    styleSheet.innerText = `.modal-input { width: 100%; background-color: ${tailwind.config.theme.extend.colors['light-bg']}; border: 1px solid #d1d5db; border-radius: 0.375rem; padding: 0.5rem 0.75rem; } .dark .modal-input { background-color: ${tailwind.config.theme.extend.colors['dark-bg']}; border-color: #4b5563; } .modal-submit-button { width: 100%; background-color: ${tailwind.config.theme.extend.colors.primary}; color: black; font-weight: bold; padding: 0.5rem 1rem; border-radius: 0.375rem; transition: background-color 0.2s; } .modal-submit-button:hover { background-color: ${tailwind.config.theme.extend.colors['primary-hover']}; } .form-label { display: block; font-size: 0.875rem; font-weight: 500; color: ${tailwind.config.theme.extend.colors['light-text-secondary']}; } .dark .form-label { color: ${tailwind.config.theme.extend.colors['dark-text-secondary']}; } .form-input { margin-top: 0.25rem; display: block; width: 100%; background-color: ${tailwind.config.theme.extend.colors['light-bg']}; border: 1px solid #d1d5db; border-radius: 0.375rem; padding: 0.5rem 0.75rem; outline: none; } .dark .form-input { background-color: ${tailwind.config.theme.extend.colors['dark-bg']}; border-color: #4b5563; } .form-input:focus { ring: 2px; border-color: ${tailwind.config.theme.extend.colors.primary}; box-shadow: 0 0 0 2px ${tailwind.config.theme.extend.colors.primary}; } .table-header { padding: 0.75rem 1.5rem; text-align: left; font-size: 0.75rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; color: ${tailwind.config.theme.extend.colors['light-text-secondary']}; } .dark .table-header { color: ${tailwind.config.theme.extend.colors['dark-text-secondary']}; }`;
     document.head.appendChild(styleSheet);
 
     app.init();
