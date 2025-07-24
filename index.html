@@ -112,8 +112,9 @@
 document.addEventListener('DOMContentLoaded', () => {
     const app = {
         state: {
-            theme: 'dark', currentEmployeeId: null, employees: [], stores: [],
+            theme: 'dark', currentEmployeeId: null, employees: [],
             masterInventory: [], tasks: [], expenseCategories: [],
+            ledgerFilter: 'all',
         },
         charts: {},
         notificationTimeout: null,
@@ -137,23 +138,26 @@ document.addEventListener('DOMContentLoaded', () => {
         loadState() {
             const savedState = localStorage.getItem('ledgerlyState');
             if (savedState) this.state = { ...this.state, ...JSON.parse(savedState) };
+
             this.state.employees.forEach(emp => {
                 if (emp.isActive === undefined) emp.isActive = true;
                 if (!emp.transactions) emp.transactions = [];
                 if (!emp.inventory) emp.inventory = [];
+                if (!emp.stores) emp.stores = [];
+                if (!emp.invoices) emp.invoices = [];
             });
             this.state.masterInventory.forEach(prod => { if (prod.isActive === undefined) prod.isActive = true; });
             if (!this.state.expenseCategories || this.state.expenseCategories.length === 0) {
                 this.state.expenseCategories = [ { id: `cat_${Date.now()}_1`, name: 'Supplies' }, { id: `cat_${Date.now()}_2`, name: 'Travel' }, { id: `cat_${Date.now()}_3`, name: 'Utilities' }, { id: `cat_${Date.now()}_4`, name: 'Uncategorized' } ];
             }
              if (!this.state.tasks) this.state.tasks = [];
-             if (!this.state.stores) this.state.stores = [];
+             if (!this.state.ledgerFilter) this.state.ledgerFilter = 'all';
         },
         getEmployee(id) { return this.state.employees.find(e => e.id === id); },
+        getCurrentEmployee() { return this.getEmployee(this.state.currentEmployeeId); },
         getActiveEmployees() { return this.state.employees.filter(e => e.isActive); },
         getProduct(id) { return this.state.masterInventory.find(p => p.id === id); },
         getActiveProducts() { return this.state.masterInventory.filter(p => p.isActive); },
-        getStore(id) { return this.state.stores.find(s => s.id === id); },
         getCategory(id) { return this.state.expenseCategories.find(c => c.id === id); },
         getTask(id) { return this.state.tasks.find(t => t.id === id); },
 
@@ -187,11 +191,19 @@ document.addEventListener('DOMContentLoaded', () => {
             document.getElementById('edit-store-form')?.addEventListener('submit', e => this.handleUpdateStore(e));
             document.getElementById('invoice-form')?.addEventListener('submit', e => this.handleGenerateInvoice(e));
             document.getElementById('credit-received-form')?.addEventListener('submit', e => this.handleCreditReceived(e));
+            document.getElementById('ledger-filter-container')?.addEventListener('click', e => {
+                const button = e.target.closest('.ledger-filter-btn');
+                if (button && button.dataset.filter) {
+                    this.state.ledgerFilter = button.dataset.filter;
+                    this.renderLedger();
+                }
+            });
         },
 
         handleTabClick(e) {
             const tabButton = e.target.closest('.tab-button');
             if (tabButton && tabButton.dataset.tab) {
+                if(tabButton.dataset.tab === 'ledger') this.state.ledgerFilter = 'all';
                 this.setActiveTab(tabButton.dataset.tab);
             }
         },
@@ -200,7 +212,7 @@ document.addEventListener('DOMContentLoaded', () => {
             try {
                 if (this.state.employees.length === 0) { this.showFirstTimeSetup(); return; }
                 this.showMainApp();
-                if (!this.state.currentEmployeeId || !this.getEmployee(this.state.currentEmployeeId)?.isActive) {
+                if (!this.state.currentEmployeeId || !this.getCurrentEmployee()?.isActive) {
                     const firstActive = this.getActiveEmployees()[0];
                     this.state.currentEmployeeId = firstActive ? firstActive.id : null;
                 }
@@ -225,7 +237,7 @@ document.addEventListener('DOMContentLoaded', () => {
         },
 
         getEmployeeViewTemplate() {
-            const employee = this.getEmployee(this.state.currentEmployeeId);
+            const employee = this.getCurrentEmployee();
             if (!employee) return '';
             const revenue = employee.transactions.filter(t => t.type === 'sale').reduce((sum, t) => sum + t.amount, 0);
             const expenses = employee.transactions.filter(t => t.type === 'expense').reduce((sum, t) => sum + t.amount, 0);
@@ -260,30 +272,48 @@ document.addEventListener('DOMContentLoaded', () => {
                     <div id="my-tasks-content" class="tab-content hidden"><h3 class="text-xl font-bold mb-4">My Tasks</h3><ul id="employee-tasks-list" class="space-y-3"></ul></div>
                     <div id="my-inventory-content" class="tab-content hidden"><h3 class="text-xl font-bold mb-4">My Inventory</h3><div class="overflow-x-auto bg-light-surface dark:bg-dark-surface rounded-lg shadow"><table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700"><thead class="bg-light-bg dark:bg-dark-bg"><tr><th class="table-header">Product</th><th class="table-header">Stock</th></tr></thead><tbody id="employee-inventory-list" class="divide-y divide-gray-200 dark:divide-gray-700"></tbody></table></div></div>
                     <div id="sales-expenses-content" class="tab-content hidden grid grid-cols-1 lg:grid-cols-2 gap-6"><div class="bg-light-surface dark:bg-dark-surface p-6 rounded-lg shadow-md"><h3 class="text-xl font-bold mb-4 flex items-center"><i class="fas fa-cart-plus mr-3 text-accent-green"></i>Record a Sale</h3><form id="record-sale-form" class="space-y-4"><div class="grid grid-cols-1 sm:grid-cols-2 gap-4"><div><label for="sale-product" class="form-label">Product</label><select id="sale-product" name="sale-product" class="form-input"></select></div><div><label for="sale-quantity" class="form-label">Quantity</label><input type="number" id="sale-quantity" name="sale-quantity" min="1" value="1" class="form-input"></div></div><div class="grid grid-cols-1 sm:grid-cols-2 gap-4"><div><label for="sale-type" class="form-label">Sale Type</label><select id="sale-type" name="sale-type" class="form-input"></select></div><div><label for="sale-store" class="form-label">Store</label><select id="sale-store" name="sale-store" class="form-input"></select></div></div><div><label for="sale-discount" class="form-label">Discount ($)</label><input type="number" id="sale-discount" name="sale-discount" min="0" value="0" step="0.01" class="form-input"></div><div class="p-3 bg-light-bg dark:bg-dark-bg rounded-md text-right"><span class="text-light-text-secondary dark:text-dark-text-secondary">Final: </span><strong id="final-sale-amount" class="text-xl">$0.00</strong></div><button type="submit" class="w-full bg-primary text-black font-bold py-2 px-4 rounded-md hover:bg-primary-hover">Record Sale</button></form></div><div class="bg-light-surface dark:bg-dark-surface p-6 rounded-lg shadow-md"><h3 class="text-xl font-bold mb-4 flex items-center"><i class="fas fa-money-bill-wave mr-3 text-accent-red"></i>Record an Expense</h3><form id="record-expense-form" class="space-y-4"><div><label for="expense-description" class="form-label">Description</label><input type="text" id="expense-description" name="expense-description" required class="form-input"></div><div class="grid grid-cols-1 sm:grid-cols-2 gap-4"><div><label for="expense-amount" class="form-label">Amount ($)</label><input type="number" id="expense-amount" name="expense-amount" step="0.01" min="0" required class="form-input"></div><div><label for="expense-category" class="form-label">Category</label><select id="expense-category" name="expense-category" required class="form-input"></select></div></div><button type="submit" class="w-full bg-primary text-black font-bold py-2 px-4 rounded-md hover:bg-primary-hover">Record Expense</button></form></div></div>
-                    <div id="stores-content" class="tab-content hidden"><div class="grid grid-cols-1 lg:grid-cols-2 gap-6"><div class="bg-light-surface dark:bg-dark-surface p-6 rounded-lg shadow-md"><h3 class="text-xl font-bold mb-4">Add Store</h3><form id="employee-add-store-form" class="space-y-4"><div><label for="new-store-name" class="form-label">Store Name</label><input type="text" id="new-store-name" required class="form-input"></div><div><label for="new-store-location" class="form-label">Location</label><input type="text" id="new-store-location" required class="form-input"></div><div><label for="new-store-credit-limit" class="form-label">Credit Limit ($)</label><input type="number" id="new-store-credit-limit" required min="0" step="0.01" class="form-input"></div><button type="submit" class="w-full bg-primary text-black font-bold py-2 px-4 rounded-md hover:bg-primary-hover">Add Store</button></form></div><div class="lg:col-span-1 space-y-4" id="stores-list-container"><h3 class="text-xl font-bold">Existing Stores</h3><div id="stores-list" class="space-y-4 max-h-[60vh] overflow-y-auto pr-2"></div></div></div></div>
+                    <div id="stores-content" class="tab-content hidden"><div class="grid grid-cols-1 lg:grid-cols-2 gap-6"><div class="bg-light-surface dark:bg-dark-surface p-6 rounded-lg shadow-md"><h3 class="text-xl font-bold mb-4">Add Store</h3><form id="employee-add-store-form" class="space-y-4"><div><label for="new-store-name" class="form-label">Store Name</label><input type="text" id="new-store-name" required class="form-input"></div><div><label for="new-store-location" class="form-label">Location</label><input type="text" id="new-store-location" required class="form-input"></div><div><label for="new-store-credit-limit" class="form-label">Credit Limit ($)</label><input type="number" id="new-store-credit-limit" required min="0" step="0.01" class="form-input"></div><button type="submit" class="w-full bg-primary text-black font-bold py-2 px-4 rounded-md hover:bg-primary-hover">Add Store</button></form></div><div class="lg:col-span-1 space-y-4" id="stores-list-container"><h3 class="text-xl font-bold">My Stores</h3><div id="stores-list" class="space-y-4 max-h-[60vh] overflow-y-auto pr-2"></div></div></div></div>
                     <div id="invoices-content" class="tab-content hidden">
-                        <div class="max-w-2xl mx-auto bg-light-surface dark:bg-dark-surface p-6 rounded-lg shadow-md">
-                            <h3 class="text-xl font-bold mb-4">Create Invoice from Transactions</h3>
-                            <form id="invoice-form" class="space-y-4">
-                                <div>
-                                    <label for="invoice-store" class="form-label">1. Select a Store</label>
-                                    <select id="invoice-store" class="form-input"></select>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                            <div class="bg-light-surface dark:bg-dark-surface p-6 rounded-lg shadow-md">
+                                <h3 class="text-xl font-bold mb-4">Create Invoice</h3>
+                                <form id="invoice-form" class="space-y-4">
+                                    <div>
+                                        <label for="invoice-store" class="form-label">1. Select a Store</label>
+                                        <select id="invoice-store" class="form-input"></select>
+                                    </div>
+                                    <div id="invoice-transactions-container" class="hidden">
+                                        <label class="form-label">2. Select Uninvoiced Sales</label>
+                                        <div id="invoice-transactions-list" class="mt-2 space-y-2 max-h-60 overflow-y-auto border border-gray-200 dark:border-gray-700 rounded-md p-3 bg-light-bg dark:bg-dark-bg"></div>
+                                    </div>
+                                    <button type="submit" class="w-full bg-primary text-black font-bold py-2 px-4 rounded-md hover:bg-primary-hover flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed" disabled>
+                                        <i class="fas fa-download mr-2"></i>Generate Invoice
+                                    </button>
+                                </form>
+                            </div>
+                            <div class="bg-light-surface dark:bg-dark-surface p-6 rounded-lg shadow-md">
+                                <h3 class="text-xl font-bold mb-4">My Recent Invoices</h3>
+                                <div id="recent-invoices-list" class="space-y-3 max-h-[28rem] overflow-y-auto pr-2">
                                 </div>
-                                <div id="invoice-transactions-container" class="hidden">
-                                    <label class="form-label">2. Select Transactions to Invoice</label>
-                                    <div id="invoice-transactions-list" class="mt-2 space-y-2 max-h-80 overflow-y-auto border border-gray-200 dark:border-gray-700 rounded-md p-3 bg-light-bg dark:bg-dark-bg">
-                                        </div>
-                                </div>
-                                <button type="submit" class="w-full bg-primary text-black font-bold py-2 px-4 rounded-md hover:bg-primary-hover flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed" disabled>
-                                    <i class="fas fa-download mr-2"></i>Generate Invoice for Selected Items
-                                </button>
-                            </form>
-                            <p class="text-xs text-center mt-4 text-light-text-secondary dark:text-dark-text-secondary">
-                                Select a store to see recent sales transactions.
-                            </p>
+                            </div>
                         </div>
                     </div>
-                    <div id="ledger-content" class="tab-content hidden"><h3 class="text-xl font-bold mb-4">Transaction Ledger</h3><div class="overflow-x-auto bg-light-surface dark:bg-dark-surface rounded-lg shadow"><table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700"><thead class="bg-light-bg dark:bg-dark-bg"><tr><th class="table-header">Date</th><th class="table-header">Type</th><th class="table-header">Details</th><th class="table-header text-right">Amount</th></tr></thead><tbody id="ledger-body" class="divide-y divide-gray-200 dark:divide-gray-700"></tbody></table></div></div>
+                    <div id="ledger-content" class="tab-content hidden">
+                        <h3 class="text-xl font-bold mb-4">Transaction Ledger</h3>
+                        <div id="ledger-filter-container" class="flex flex-wrap gap-2 mb-4">
+                            <button data-filter="all" class="ledger-filter-btn px-3 py-1 text-sm font-semibold rounded-full border dark:border-gray-600">All</button>
+                            <button data-filter="cash" class="ledger-filter-btn px-3 py-1 text-sm font-semibold rounded-full bg-accent-green/20 text-green-800 dark:text-accent-green">Cash Sale</button>
+                            <button data-filter="credit" class="ledger-filter-btn px-3 py-1 text-sm font-semibold rounded-full bg-accent-yellow/20 text-yellow-800 dark:text-accent-yellow">Credit Sale</button>
+                            <button data-filter="deal" class="ledger-filter-btn px-3 py-1 text-sm font-semibold rounded-full bg-accent-purple/20 text-purple-800 dark:text-accent-purple">Deal Sale</button>
+                            <button data-filter="payment" class="ledger-filter-btn px-3 py-1 text-sm font-semibold rounded-full bg-primary/20 text-blue-800 dark:text-primary">Payment</button>
+                        </div>
+                        <div class="overflow-x-auto bg-light-surface dark:bg-dark-surface rounded-lg shadow">
+                            <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+                                <thead class="bg-light-bg dark:bg-dark-bg"><tr><th class="table-header">Date</th><th class="table-header">Type</th><th class="table-header">Details</th><th class="table-header text-right">Amount</th></tr></thead>
+                                <tbody id="ledger-body" class="divide-y divide-gray-200 dark:divide-gray-700"></tbody>
+                            </table>
+                        </div>
+                    </div>
                 </div>`;
         },
 
@@ -305,8 +335,10 @@ document.addEventListener('DOMContentLoaded', () => {
         },
 
         renderStoresTab() {
+            const employee = this.getCurrentEmployee();
+            if (!employee) return;
             const storesList = document.getElementById('stores-list');
-            storesList.innerHTML = this.state.stores.map(store => {
+            storesList.innerHTML = employee.stores.map(store => {
                 const calculatedCredit = (store.creditUsed || 0) - (store.creditPaidBack || 0);
                 const outstandingCredit = Math.max(0, calculatedCredit);
                 return `
@@ -329,32 +361,49 @@ document.addEventListener('DOMContentLoaded', () => {
         },
 
         renderLedger() {
-            const employee = this.getEmployee(this.state.currentEmployeeId);
+            const employee = this.getCurrentEmployee();
+            if (!employee) return;
             const ledgerBody = document.getElementById('ledger-body');
-            if (!employee || !ledgerBody) return;
             const sortedTransactions = [...employee.transactions].sort((a, b) => new Date(b.date) - new Date(a.date));
-            ledgerBody.innerHTML = sortedTransactions.map(t => {
+
+            const filter = this.state.ledgerFilter;
+            const filteredTransactions = sortedTransactions.filter(t => {
+                if (filter === 'all') return true;
+                if (filter === 'payment') return t.type === 'credit_received';
+                if (filter === 'cash') return t.type === 'sale' && t.saleType === 'Cash';
+                if (filter === 'credit') return t.type === 'sale' && t.saleType === 'Credit';
+                if (filter === 'deal') return t.type === 'sale' && t.saleType === 'Deal';
+                return false;
+            });
+
+            document.querySelectorAll('.ledger-filter-btn').forEach(btn => {
+                btn.classList.toggle('ring-2', btn.dataset.filter === filter);
+                btn.classList.toggle('ring-primary', btn.dataset.filter === filter);
+            });
+
+            ledgerBody.innerHTML = filteredTransactions.map(t => {
                 const date = new Date(t.date).toLocaleDateString();
                 const time = new Date(t.date).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
                 if (t.type === 'sale') {
                     const product = this.getProduct(t.productId);
-                    const store = this.getStore(t.storeId);
+                    const store = employee.stores.find(s => s.id === t.storeId);
+                    const invoicedIcon = t.invoiced ? ` <i class="fas fa-file-invoice text-primary ml-2" title="Invoiced"></i>` : '';
                     let typeBadge = '';
                     switch (t.saleType) {
                         case 'Credit': typeBadge = `<span class="px-2 py-1 text-xs font-semibold rounded-full bg-accent-yellow/20 text-yellow-600 dark:text-accent-yellow">Credit</span>`; break;
                         case 'Deal': typeBadge = `<span class="px-2 py-1 text-xs font-semibold rounded-full bg-accent-purple/20 text-purple-600 dark:text-accent-purple">Deal</span>`; break;
                         default: typeBadge = `<span class="px-2 py-1 text-xs font-semibold rounded-full bg-accent-green/20 text-green-600 dark:text-accent-green">Cash Sale</span>`;
                     }
-                    return `<tr class="hover:bg-light-bg dark:hover:bg-dark-bg"><td class="px-4 py-3">${date} ${time}</td><td class="px-4 py-3">${typeBadge}</td><td class="px-4 py-3">Sold ${t.quantity} x ${product?.name||'N/A'} to ${store?.name||'N/A'}</td><td class="px-4 py-3 text-right font-mono text-accent-green">+${t.amount.toFixed(2)}</td></tr>`;
+                    return `<tr class="hover:bg-light-bg dark:hover:bg-dark-bg"><td class="px-4 py-3">${date} ${time}</td><td class="px-4 py-3">${typeBadge}</td><td class="px-4 py-3">Sold ${t.quantity} x ${product?.name||'N/A'} to ${store?.name||'N/A'}${invoicedIcon}</td><td class="px-4 py-3 text-right font-mono text-accent-green">+${t.amount.toFixed(2)}</td></tr>`;
                 } else if (t.type === 'expense') {
                     const category = this.getCategory(t.categoryId);
                     return `<tr class="hover:bg-light-bg dark:hover:bg-dark-bg"><td class="px-4 py-3">${date} ${time}</td><td class="px-4 py-3"><span class="px-2 py-1 text-xs font-semibold rounded-full bg-accent-red/20 text-red-600 dark:text-accent-red">Expense</span></td><td class="px-4 py-3">${t.description} <span class="text-light-text-secondary dark:text-dark-text-secondary">(${category?.name||'Uncategorized'})</span></td><td class="px-4 py-3 text-right font-mono text-accent-red">-${t.amount.toFixed(2)}</td></tr>`;
                 } else if (t.type === 'credit_received') {
-                    const store = this.getStore(t.storeId);
+                    const store = employee.stores.find(s => s.id === t.storeId);
                     return `<tr class="hover:bg-light-bg dark:hover:bg-dark-bg"><td class="px-4 py-3">${date} ${time}</td><td class="px-4 py-3"><span class="px-2 py-1 text-xs font-semibold rounded-full bg-primary/20 text-blue-600 dark:text-primary">Payment</span></td><td class="px-4 py-3">Credit Received from ${store?.name || 'N/A'}</td><td class="px-4 py-3 text-right font-mono text-accent-green">+${t.amount.toFixed(2)}</td></tr>`;
                 }
                 return '';
-            }).join('') || `<tr><td colspan="4" class="text-center py-10 text-light-text-secondary dark:text-dark-text-secondary">No transactions recorded yet.</td></tr>`;
+            }).join('') || `<tr><td colspan="4" class="text-center py-10 text-light-text-secondary dark:text-dark-text-secondary">No transactions found for this filter.</td></tr>`;
         },
 
         handleSaleTypeChange() { this.updateFinalSaleAmount(); },
@@ -370,10 +419,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
         handleCreditReceived(e) {
             e.preventDefault();
+            const employee = this.getCurrentEmployee();
+            if(!employee) return;
             const storeId = document.getElementById('credit-store-id').value;
-            const store = this.getStore(storeId);
-            const employee = this.getEmployee(this.state.currentEmployeeId);
-            if (!store || !employee) return;
+            const store = employee.stores.find(s => s.id === storeId);
+            if (!store) return;
             const amount = parseFloat(document.getElementById('credit-received-amount').value);
             const outstanding = (store.creditUsed || 0) - (store.creditPaidBack || 0);
             if (isNaN(amount) || amount <= 0 || amount > outstanding) { this.showNotification('Invalid payment amount.', 'error'); return; }
@@ -383,8 +433,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 id: `txn_${Date.now()}`, type: 'credit_received', storeId: storeId,
                 amount: amount, date: new Date().toISOString()
             });
-            this.saveState(); this.render();
+            this.saveState();
             this.closeModal('creditReceivedModal');
+            this.setActiveTab('stores');
             this.showNotification('Credit payment recorded!');
         },
 
@@ -393,20 +444,41 @@ document.addEventListener('DOMContentLoaded', () => {
         setActiveTab(tabName) { document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden')); document.querySelectorAll('.tab-button').forEach(el => el.classList.remove('active')); document.getElementById(`${tabName}-content`)?.classList.remove('hidden'); document.querySelector(`[data-tab="${tabName}"]`)?.classList.add('active'); const mobileTabs = document.getElementById('mobile-tabs'); if (mobileTabs) mobileTabs.value = tabName; const renderMap = { dashboard: 'renderDashboard', 'my-tasks': 'renderMyTasks', 'my-inventory': 'renderMyInventory', 'sales-expenses': 'renderSalesAndExpenses', stores: 'renderStoresTab', invoices: 'renderInvoices', ledger: 'renderLedger' }; if (renderMap[tabName]) this[renderMap[tabName]](); },
         togglePanel(panelName, forceOpen = false) { const icon = document.getElementById(`${panelName}-toggle-icon`); const content = document.getElementById(`${panelName}-content`); const isHidden = content.classList.contains('hidden'); if (forceOpen && isHidden) { content.classList.remove('hidden'); } else if (!forceOpen) { content.classList.toggle('hidden'); } icon.classList.toggle('fa-chevron-up', !content.classList.contains('hidden')); icon.classList.toggle('fa-chevron-down', content.classList.contains('hidden')); },
         renderCompanyOverview() { let totalRevenue=0,totalExpenses=0;this.state.employees.forEach(emp=>{if(emp.isActive&&emp.transactions){totalRevenue+=emp.transactions.filter(t=>t.type==='sale').reduce((sum,t)=>sum+t.amount,0);totalExpenses+=emp.transactions.filter(t=>t.type==='expense').reduce((sum,t)=>sum+t.amount,0)}});const totalProfit=totalRevenue-totalExpenses;document.getElementById('company-stats').innerHTML=`<h3 class="font-bold text-light-text-secondary dark:text-dark-text-secondary text-base">Firm-Wide Totals</h3><div class="text-sm space-y-1"><div class="flex justify-between"><span>Revenue:</span> <span class="font-semibold text-accent-green">$${totalRevenue.toFixed(2)}</span></div><div class="flex justify-between"><span>Expenses:</span> <span class="font-semibold text-accent-red">$${totalExpenses.toFixed(2)}</span></div><div class="flex justify-between border-t border-gray-300 dark:border-gray-600 pt-1 mt-1"><span>Net Profit:</span> <span class="font-bold text-lg ${totalProfit<0?'text-accent-red':'text-accent-green'}">$${totalProfit.toFixed(2)}</span></div></div>`;document.getElementById('employee-list').innerHTML=this.getActiveEmployees().map(emp=>{const revenue=emp.transactions.filter(t=>t.type==='sale').reduce((sum,t)=>sum+t.amount,0);const expenses=emp.transactions.filter(t=>t.type==='expense').reduce((sum,t)=>sum+t.amount,0);return`<li class="bg-light-bg dark:bg-dark-bg p-2 rounded"><div class="flex justify-between items-center"><div><span class="font-bold">${emp.name}</span><em class="text-xs ml-1 text-light-text-secondary dark:text-dark-text-secondary">(${emp.position})</em></div><div class="flex space-x-3"><button class="text-sm hover:text-primary" onclick="app.startEditEmployee('${emp.id}')"><i class="fas fa-pencil-alt"></i></button><button class="text-sm hover:text-accent-red" onclick="app.deactivateEmployee('${emp.id}')"><i class="fas fa-user-slash"></i></button></div></div><div class="text-xs mt-2 space-y-1 pl-1 border-l-2 border-gray-200 dark:border-gray-600 ml-1 pl-2"><div class="flex justify-between"><span>Revenue:</span> <span class="font-semibold text-accent-green">$${revenue.toFixed(2)}</span></div><div class="flex justify-between"><span>Expenses:</span> <span class="font-semibold text-accent-red">$${expenses.toFixed(2)}</span></div></div></li>`}).join('')||`<p class="text-sm text-light-text-secondary dark:text-dark-text-secondary">No active employees yet.</p>`;const inactiveEmployees=this.state.employees.filter(e=>!e.isActive);document.getElementById('inactive-employee-section').classList.toggle('hidden',inactiveEmployees.length===0);document.getElementById('inactive-employee-list').innerHTML=inactiveEmployees.map(emp=>`<li class="flex justify-between items-center bg-light-bg dark:bg-dark-bg p-2 rounded opacity-60"><span class="italic">${emp.name}</span><button class="text-sm text-accent-green hover:opacity-80 font-semibold" onclick="app.reactivateEmployee('${emp.id}')">Reactivate</button></li>`).join('');document.getElementById('master-inventory-list').innerHTML=this.getActiveProducts().map(prod=>`<div class="bg-light-bg dark:bg-dark-bg p-2 rounded"><div class="flex justify-between items-center"><span>${prod.name}</span><div class="flex items-center"><span class="font-mono text-xs bg-gray-200 dark:bg-gray-700 px-2 py-1 rounded mr-3">${prod.stock}</span><button class="text-sm hover:text-primary" onclick="app.startEditProduct('${prod.id}')"><i class="fas fa-pencil-alt"></i></button><button class="text-sm hover:text-accent-red ml-2" onclick="app.deleteProduct('${prod.id}')"><i class="fas fa-trash-alt"></i></button></div></div></div>`).join('')||`<p class="text-sm text-light-text-secondary dark:text-dark-text-secondary">No active products.</p>`;document.getElementById('expense-category-list').innerHTML=this.state.expenseCategories.map(cat=>`<div class="flex justify-between items-center bg-light-bg dark:bg-dark-bg p-2 rounded"><span>${cat.name}</span><div><button class="text-sm hover:text-primary" onclick="app.startEditCategory('${cat.id}')"><i class="fas fa-pencil-alt"></i></button><button class="text-sm hover:text-accent-red ml-2" onclick="app.deleteCategory('${cat.id}')"><i class="fas fa-trash-alt"></i></button></div></div>`).join('')||`<p class="text-sm text-light-text-secondary dark:text-dark-text-secondary">No categories defined.</p>`;document.getElementById('all-tasks-list').innerHTML=this.state.tasks.map(task=>`<li class="bg-light-bg dark:bg-dark-bg p-2 rounded ${task.status==='Completed'?'task-completed':''}"><p>${task.description}</p><small class="text-light-text-secondary dark:text-dark-text-secondary">To: ${this.getEmployee(task.assigneeId)?.name||'Unassigned'}</small></li>`).join('')||`<p class="text-sm text-light-text-secondary dark:text-dark-text-secondary">No tasks created.</p>`; },
-        renderDashboard() { const employee=this.getEmployee(this.state.currentEmployeeId);if(!employee)return;const isDark=this.state.theme==='dark';const gridColor=isDark?'rgba(255, 255, 255, 0.1)':'rgba(0, 0, 0, 0.1)';const textColor=isDark?'#e3e3e3':'#1f2937';Object.values(this.charts).forEach(chart=>{if(chart)chart.destroy()});const salesByDate=employee.transactions.filter(t=>t.type==='sale').reduce((acc,t)=>{const date=t.date.split('T')[0];acc[date]=(acc[date]||0)+t.amount;return acc},{});const sortedDates=Object.keys(salesByDate).sort();this.charts.sales=new Chart(document.getElementById('sales-over-time-chart').getContext('2d'),{type:'line',data:{labels:sortedDates,datasets:[{label:'Daily Revenue',data:sortedDates.map(date=>salesByDate[date]),borderColor:'#89b4fa',backgroundColor:'rgba(137, 180, 250, 0.2)',tension:0.1,fill:true}]},options:{responsive:true,maintainAspectRatio:false,scales:{y:{beginAtZero:true,grid:{color:gridColor},ticks:{color:textColor}},x:{grid:{color:gridColor},ticks:{color:textColor}}},plugins:{legend:{labels:{color:textColor}}}}});const salesByProduct=employee.transactions.filter(t=>t.type==='sale').reduce((acc,t)=>{acc[t.productId]=(acc[t.productId]||0)+t.amount;return acc},{});const topProducts=Object.entries(salesByProduct).sort(([,a],[,b])=>b-a).slice(0,5);this.charts.products=new Chart(document.getElementById('top-products-chart').getContext('2d'),{type:'bar',data:{labels:topProducts.map(([productId])=>this.getProduct(productId)?.name||'Unknown'),datasets:[{label:'Revenue by Product',data:topProducts.map(([,amount])=>amount),backgroundColor:['#89b4fa','#a6e3a1','#f9e2af','#fab387','#f38ba8']}]},options:{responsive:true,maintainAspectRatio:false,indexAxis:'y',scales:{x:{beginAtZero:true,grid:{color:gridColor},ticks:{color:textColor}},y:{grid:{color:gridColor},ticks:{color:textColor}}},plugins:{legend:{display:false},title:{display:true,text:'Top Products by Revenue',color:textColor,font:{size:16}}}}});const expensesByCategory=employee.transactions.filter(t=>t.type==='expense').reduce((acc,t)=>{const category=this.getCategory(t.categoryId)||{name:'Uncategorized'};acc[category.name]=(acc[category.name]||0)+t.amount;return acc},{});this.charts.expensesByCategory=new Chart(document.getElementById('expenses-by-category-chart').getContext('2d'),{type:'doughnut',data:{labels:Object.keys(expensesByCategory),datasets:[{data:Object.values(expensesByCategory),backgroundColor:['#f38ba8','#fab387','#f9e2af','#a6e3a1','#89b4fa','#cba6f7','#f5c2e7'],borderColor:isDark?'#1e1f20':'#ffffff',borderWidth:4}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'top',labels:{color:textColor}},title:{display:true,text:'Expenses by Category',color:textColor,font:{size:16}}}}});const totalCreditUsed=this.state.stores.reduce((sum,s)=>sum+(s.creditUsed||0),0);const totalCreditAvailable=this.state.stores.reduce((sum,s)=>sum+(s.creditAvailable||0),0);const outstandingCredit=totalCreditUsed-this.state.stores.reduce((sum,s)=>sum+(s.creditPaidBack||0),0);const totalCreditLimit=totalCreditAvailable+totalCreditUsed;this.charts.credit=new Chart(document.getElementById('store-credit-chart').getContext('2d'),{type:'bar',data:{labels:['Credit Status'],datasets:[{label:'Outstanding',data:[outstandingCredit],backgroundColor:'#f38ba8'},{label:'Available',data:[totalCreditLimit-outstandingCredit],backgroundColor:'#a6e3a1'}]},options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,scales:{x:{stacked:true,max:totalCreditLimit>0?totalCreditLimit:1},y:{stacked:true}},plugins:{title:{display:true,text:'Overall Credit Status',color:textColor,font:{size:16}},legend:{position:'top',labels:{color:textColor}}}}});},
+        renderDashboard() { const employee=this.getCurrentEmployee();if(!employee)return;const isDark=this.state.theme==='dark';const gridColor=isDark?'rgba(255, 255, 255, 0.1)':'rgba(0, 0, 0, 0.1)';const textColor=isDark?'#e3e3e3':'#1f2937';Object.values(this.charts).forEach(chart=>{if(chart)chart.destroy()});const salesByDate=employee.transactions.filter(t=>t.type==='sale').reduce((acc,t)=>{const date=t.date.split('T')[0];acc[date]=(acc[date]||0)+t.amount;return acc},{});const sortedDates=Object.keys(salesByDate).sort();this.charts.sales=new Chart(document.getElementById('sales-over-time-chart').getContext('2d'),{type:'line',data:{labels:sortedDates,datasets:[{label:'Daily Revenue',data:sortedDates.map(date=>salesByDate[date]),borderColor:'#89b4fa',backgroundColor:'rgba(137, 180, 250, 0.2)',tension:0.1,fill:true}]},options:{responsive:true,maintainAspectRatio:false,scales:{y:{beginAtZero:true,grid:{color:gridColor},ticks:{color:textColor}},x:{grid:{color:gridColor},ticks:{color:textColor}}},plugins:{legend:{labels:{color:textColor}}}}});const salesByProduct=employee.transactions.filter(t=>t.type==='sale').reduce((acc,t)=>{acc[t.productId]=(acc[t.productId]||0)+t.amount;return acc},{});const topProducts=Object.entries(salesByProduct).sort(([,a],[,b])=>b-a).slice(0,5);this.charts.products=new Chart(document.getElementById('top-products-chart').getContext('2d'),{type:'bar',data:{labels:topProducts.map(([productId])=>this.getProduct(productId)?.name||'Unknown'),datasets:[{label:'Revenue by Product',data:topProducts.map(([,amount])=>amount),backgroundColor:['#89b4fa','#a6e3a1','#f9e2af','#fab387','#f38ba8']}]},options:{responsive:true,maintainAspectRatio:false,indexAxis:'y',scales:{x:{beginAtZero:true,grid:{color:gridColor},ticks:{color:textColor}},y:{grid:{color:gridColor},ticks:{color:textColor}}},plugins:{legend:{display:false},title:{display:true,text:'Top Products by Revenue',color:textColor,font:{size:16}}}}});const expensesByCategory=employee.transactions.filter(t=>t.type==='expense').reduce((acc,t)=>{const category=this.getCategory(t.categoryId)||{name:'Uncategorized'};acc[category.name]=(acc[category.name]||0)+t.amount;return acc},{});this.charts.expensesByCategory=new Chart(document.getElementById('expenses-by-category-chart').getContext('2d'),{type:'doughnut',data:{labels:Object.keys(expensesByCategory),datasets:[{data:Object.values(expensesByCategory),backgroundColor:['#f38ba8','#fab387','#f9e2af','#a6e3a1','#89b4fa','#cba6f7','#f5c2e7'],borderColor:isDark?'#1e1f20':'#ffffff',borderWidth:4}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'top',labels:{color:textColor}},title:{display:true,text:'Expenses by Category',color:textColor,font:{size:16}}}}});const totalCreditUsed=employee.stores.reduce((sum,s)=>sum+(s.creditUsed||0),0);const totalCreditAvailable=employee.stores.reduce((sum,s)=>sum+(s.creditAvailable||0),0);const outstandingCredit=totalCreditUsed-employee.stores.reduce((sum,s)=>sum+(s.creditPaidBack||0),0);const totalCreditLimit=totalCreditAvailable+totalCreditUsed;this.charts.credit=new Chart(document.getElementById('store-credit-chart').getContext('2d'),{type:'bar',data:{labels:['Credit Status'],datasets:[{label:'Outstanding',data:[outstandingCredit],backgroundColor:'#f38ba8'},{label:'Available',data:[totalCreditLimit-outstandingCredit],backgroundColor:'#a6e3a1'}]},options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,scales:{x:{stacked:true,max:totalCreditLimit>0?totalCreditLimit:1},y:{stacked:true}},plugins:{title:{display:true,text:'My Store Credit Status',color:textColor,font:{size:16}},legend:{position:'top',labels:{color:textColor}}}}});},
         renderMyTasks() {
             const employeeTasks = this.state.tasks.filter(t => t.assigneeId === this.state.currentEmployeeId);
             document.getElementById('employee-tasks-list').innerHTML = employeeTasks.map(task => `<li class="bg-light-surface dark:bg-dark-surface p-4 rounded-lg shadow flex justify-between items-center ${task.status === 'Completed' ? 'task-completed opacity-60' : ''}"><span>${task.description}</span><button class="text-black px-3 py-1 rounded-md text-sm font-semibold ${task.status === 'Completed' ? 'bg-gray-400' : 'bg-accent-green hover:opacity-80'}" onclick="app.toggleTaskStatus('${task.id}')">${task.status === 'Completed' ? 'Reopen' : 'Complete'}</button></li>`).join('') || `<p class="text-center py-8 text-light-text-secondary dark:text-dark-text-secondary">You have no assigned tasks.</p>`;
         },
-        renderMyInventory() { const employee=this.getEmployee(this.state.currentEmployeeId);const listEl=document.getElementById('employee-inventory-list');if(!employee||!employee.inventory||employee.inventory.filter(i=>i.stock>0).length===0){listEl.innerHTML=`<tr><td colspan="2" class="px-6 py-4 text-center text-light-text-secondary dark:text-dark-text-secondary">No inventory delegated to you.</td></tr>`;return}listEl.innerHTML=employee.inventory.filter(i=>i.stock>0).map(item=>{const product=this.getProduct(item.productId);return`<tr class="hover:bg-light-bg dark:hover:bg-dark-bg"><td class="px-6 py-4 whitespace-nowrap">${product?product.name:'Unknown Product'}</td><td class="px-6 py-4 whitespace-nowrap font-mono">${item.stock}</td></tr>`}).join('')},
-        renderSalesAndExpenses() { const employee=this.getEmployee(this.state.currentEmployeeId);document.getElementById('sale-type').innerHTML=`<option value="Cash">Cash</option><option value="Credit">Credit</option><option value="Deal">Deal</option>`;document.getElementById('sale-store').innerHTML=this.state.stores.map(s=>`<option value="${s.id}">${s.name}</option>`).join('')||`<option disabled>Add a store first</option>`;const availableInventory=employee?.inventory?.filter(item=>item.stock>0&&this.getProduct(item.productId)?.isActive)||[];document.getElementById('sale-product').innerHTML=availableInventory.map(item=>{const product=this.getProduct(item.productId);return`<option value="${product.id}">${product.name} (Stock: ${item.stock})</option>`}).join('')||`<option disabled>No inventory to sell</option>`;document.querySelector('#record-sale-form button').disabled=!(this.state.stores.length>0&&availableInventory.length>0);this.updateFinalSaleAmount();document.getElementById('expense-category').innerHTML=this.state.expenseCategories.map(c=>`<option value="${c.id}">${c.name}</option>`).join('')||`<option disabled>Add a category first</option>`;document.querySelector('#record-expense-form button').disabled=this.state.expenseCategories.length===0},
+        renderMyInventory() { const employee=this.getCurrentEmployee();const listEl=document.getElementById('employee-inventory-list');if(!employee||!employee.inventory||employee.inventory.filter(i=>i.stock>0).length===0){listEl.innerHTML=`<tr><td colspan="2" class="px-6 py-4 text-center text-light-text-secondary dark:text-dark-text-secondary">No inventory delegated to you.</td></tr>`;return}listEl.innerHTML=employee.inventory.filter(i=>i.stock>0).map(item=>{const product=this.getProduct(item.productId);return`<tr class="hover:bg-light-bg dark:hover:bg-dark-bg"><td class="px-6 py-4 whitespace-nowrap">${product?product.name:'Unknown Product'}</td><td class="px-6 py-4 whitespace-nowrap font-mono">${item.stock}</td></tr>`}).join('')},
+        renderSalesAndExpenses() { const employee=this.getCurrentEmployee();if(!employee) return; document.getElementById('sale-type').innerHTML=`<option value="Cash">Cash</option><option value="Credit">Credit</option><option value="Deal">Deal</option>`;document.getElementById('sale-store').innerHTML=employee.stores.map(s=>`<option value="${s.id}">${s.name}</option>`).join('')||`<option disabled>Add a store first</option>`;const availableInventory=employee?.inventory?.filter(item=>item.stock>0&&this.getProduct(item.productId)?.isActive)||[];document.getElementById('sale-product').innerHTML=availableInventory.map(item=>{const product=this.getProduct(item.productId);return`<option value="${product.id}">${product.name} (Stock: ${item.stock})</option>`}).join('')||`<option disabled>No inventory to sell</option>`;document.querySelector('#record-sale-form button').disabled=!(employee.stores.length>0&&availableInventory.length>0);this.updateFinalSaleAmount();document.getElementById('expense-category').innerHTML=this.state.expenseCategories.map(c=>`<option value="${c.id}">${c.name}</option>`).join('')||`<option disabled>Add a category first</option>`;document.querySelector('#record-expense-form button').disabled=this.state.expenseCategories.length===0},
         
         renderInvoices() {
+            const employee = this.getCurrentEmployee();
+            if(!employee) return;
+            // Setup for the 'Create Invoice' form
             const invoiceStoreSelect = document.getElementById('invoice-store');
-            invoiceStoreSelect.innerHTML = '<option value="">-- Select a Store --</option>' + this.state.stores.map(s => `<option value="${s.id}">${s.name}</option>`).join('');
+            invoiceStoreSelect.innerHTML = '<option value="">-- Select a Store --</option>' + employee.stores.map(s => `<option value="${s.id}">${s.name}</option>`).join('');
             invoiceStoreSelect.addEventListener('change', (e) => {
                 this.renderInvoiceTransactionList(e.target.value);
             });
+            this.renderInvoiceTransactionList(invoiceStoreSelect.value); // Render for initially selected store
+            // Render the 'Recent Invoices' list
+            const recentListEl = document.getElementById('recent-invoices-list');
+            const sortedInvoices = [...employee.invoices].sort((a, b) => new Date(b.date) - new Date(a.date)).slice(0, 15); // Show last 15
+
+            if (sortedInvoices.length === 0) {
+                recentListEl.innerHTML = `<p class="text-center text-sm text-light-text-secondary dark:text-dark-text-secondary py-4">No recent invoices found.</p>`;
+            } else {
+                recentListEl.innerHTML = sortedInvoices.map(inv => `
+                    <div class="bg-light-bg dark:bg-dark-bg p-3 rounded-md flex justify-between items-center text-sm">
+                        <div>
+                            <div class="font-semibold">${inv.storeName}</div>
+                            <div class="text-xs text-light-text-secondary dark:text-dark-text-secondary">${new Date(inv.date).toLocaleDateString()}</div>
+                        </div>
+                        <div class="font-mono font-bold text-lg">$${inv.total.toFixed(2)}</div>
+                    </div>
+                `).join('');
+            }
         },
 
         renderInvoiceTransactionList(storeId) {
@@ -420,23 +492,23 @@ document.addEventListener('DOMContentLoaded', () => {
                 generateBtn.disabled = true;
                 return;
             }
-
-            let allSales = [];
+            // An invoice for a store should include sales from ALL employees to that store.
+            let allSalesToStore = [];
             this.state.employees.forEach(emp => {
                 emp.transactions.forEach(t => {
-                    if (t.type === 'sale' && t.storeId === storeId) {
-                        allSales.push(t);
+                    if (t.type === 'sale' && t.storeId === storeId && !t.invoiced) {
+                        allSalesToStore.push(t);
                     }
                 });
             });
 
-            allSales.sort((a, b) => new Date(b.date) - new Date(a.date));
+            allSalesToStore.sort((a, b) => new Date(b.date) - new Date(a.date));
 
-            if (allSales.length === 0) {
-                listEl.innerHTML = `<p class="text-center text-sm text-light-text-secondary dark:text-dark-text-secondary py-4">No sales transactions found for this store.</p>`;
+            if (allSalesToStore.length === 0) {
+                listEl.innerHTML = `<p class="text-center text-sm text-light-text-secondary dark:text-dark-text-secondary py-4">No uninvoiced sales found for this store.</p>`;
                 generateBtn.disabled = true;
             } else {
-                listEl.innerHTML = allSales.map(t => {
+                listEl.innerHTML = allSalesToStore.map(t => {
                     const product = this.getProduct(t.productId);
                     const saleDate = new Date(t.date).toLocaleDateString();
                     return `
@@ -473,19 +545,19 @@ document.addEventListener('DOMContentLoaded', () => {
         toggleTheme() { this.state.theme=this.state.theme==='dark'?'light':'dark';this.applyTheme();this.saveState();if(document.getElementById('dashboard-content')?.classList.contains('hidden')===false){this.renderDashboard()}},
         openModal(modalId) {if(modalId==='delegateStockModal'){document.getElementById('delegate-employee').innerHTML=this.getActiveEmployees().map(e=>`<option value="${e.id}">${e.name}</option>`).join('');document.getElementById('delegate-product').innerHTML=this.getActiveProducts().filter(p=>p.stock>0).map(p=>`<option value="${p.id}">${p.name} (Master Stock: ${p.stock})</option>`).join('')}if(modalId==='createTaskModal'){document.getElementById('task-assignee').innerHTML=this.getActiveEmployees().map(e=>`<option value="${e.id}">${e.name}</option>`).join('')}document.getElementById(modalId)?.classList.remove('hidden')},
         closeModal(modalId){document.getElementById(modalId)?.classList.add('hidden')},
-        createEmployee(name,position){return{id:`emp_${Date.now()}`,name,position,isActive:true,inventory:[],transactions:[]}},
+        createEmployee(name,position){return{id:`emp_${Date.now()}`,name,position,isActive:true,inventory:[],transactions:[],stores:[],invoices:[]}},
         handleFirstEmployee(e){e.preventDefault();const name=document.getElementById('first-employee-name').value;const position=document.getElementById('first-employee-position').value;if(!name.trim()||!position.trim())return;const firstEmployee=this.createEmployee(name,position);this.state.employees.push(firstEmployee);this.state.currentEmployeeId=firstEmployee.id;this.saveState();this.render();this.showMainApp();this.togglePanel('company-overview',true);this.togglePanel('ai-advisor',true)},
         handleAddEmployee(e){e.preventDefault();const name=document.getElementById('new-employee-name').value;const position=document.getElementById('new-employee-position').value;if(!name.trim()||!position.trim())return;this.state.employees.push(this.createEmployee(name,position));this.saveState();this.render();this.closeModal('addEmployeeModal');this.showNotification('Employee added successfully!');e.target.reset()},
         startEditEmployee(id){const employee=this.getEmployee(id);if(!employee)return;document.getElementById('edit-employee-id').value=id;document.getElementById('edit-employee-name').value=employee.name;document.getElementById('edit-employee-position').value=employee.position;this.openModal('editEmployeeModal')},
         handleUpdateEmployee(e){e.preventDefault();const id=document.getElementById('edit-employee-id').value;const employee=this.getEmployee(id);if(!employee)return;employee.name=document.getElementById('edit-employee-name').value;employee.position=document.getElementById('edit-employee-position').value;this.saveState();this.render();this.closeModal('editEmployeeModal');this.showNotification('Employee updated!')},
         deactivateEmployee(id){if(confirm('Are you sure you want to deactivate this employee? They will not be able to log sales or expenses.')){const employee=this.getEmployee(id);if(employee){employee.isActive=false;this.saveState();this.render();this.showNotification('Employee deactivated.','error')}}},
         reactivateEmployee(id){const employee=this.getEmployee(id);if(employee){employee.isActive=true;this.saveState();this.render();this.showNotification('Employee reactivated.')}},
-        handleEmployeeSwitch(e){this.state.currentEmployeeId=e.target.value;this.saveState();this.render()},
-        handleAddStore(e){e.preventDefault();const name=document.getElementById('new-store-name').value;const location=document.getElementById('new-store-location').value;const creditLimit=parseFloat(document.getElementById('new-store-credit-limit').value);if(!name.trim()||isNaN(creditLimit)){this.showNotification('Please fill all fields correctly.','error');return}this.state.stores.push({id:`store_${Date.now()}`,name,location,creditAvailable:creditLimit,creditUsed:0,creditPaidBack:0});this.saveState();this.render();this.showNotification('Store added successfully!');e.target.reset()},
-        startEditStore(id){const store=this.getStore(id);if(!store)return;document.getElementById('edit-store-id').value=id;document.getElementById('edit-store-name').value=store.name;document.getElementById('edit-store-location').value=store.location;document.getElementById('edit-store-credit-limit').value=store.creditAvailable+store.creditUsed;this.openModal('editStoreModal')},
-        handleUpdateStore(e){e.preventDefault();const id=document.getElementById('edit-store-id').value;const store=this.getStore(id);if(!store)return;const newCreditLimit=parseFloat(document.getElementById('edit-store-credit-limit').value);if(isNaN(newCreditLimit)||newCreditLimit<store.creditUsed){this.showNotification('New credit limit cannot be less than credit already used.','error');return}store.name=document.getElementById('edit-store-name').value;store.location=document.getElementById('edit-store-location').value;store.creditAvailable=newCreditLimit-store.creditUsed;this.saveState();this.render();this.closeModal('editStoreModal');this.showNotification('Store updated!')},
-        deleteStore(id){if(confirm('Are you sure you want to delete this store? This action cannot be undone.')){this.state.stores=this.state.stores.filter(s=>s.id!==id);this.saveState();this.render();this.showNotification('Store deleted.','error')}},
-        startReceiveCredit(id){const store=this.getStore(id);if(!store)return;const outstanding=(store.creditUsed||0)-(store.creditPaidBack||0);if(outstanding<=0){this.showNotification('This store has no outstanding credit.','success');return}document.getElementById('credit-store-id').value=id;document.getElementById('credit-store-name').textContent=store.name;document.getElementById('credit-outstanding').textContent=`$${outstanding.toFixed(2)}`;document.getElementById('credit-received-amount').max=outstanding;document.getElementById('credit-received-amount').value=outstanding;this.openModal('creditReceivedModal')},
+        handleEmployeeSwitch(e){this.state.currentEmployeeId=e.target.value;this.state.ledgerFilter = 'all'; this.saveState();this.render()},
+        handleAddStore(e){e.preventDefault();const employee = this.getCurrentEmployee(); if(!employee) return; const name=document.getElementById('new-store-name').value;const location=document.getElementById('new-store-location').value;const creditLimit=parseFloat(document.getElementById('new-store-credit-limit').value);if(!name.trim()||isNaN(creditLimit)){this.showNotification('Please fill all fields correctly.','error');return}employee.stores.push({id:`store_${Date.now()}`,name,location,creditAvailable:creditLimit,creditUsed:0,creditPaidBack:0});this.saveState();this.setActiveTab('stores');this.showNotification('Store added successfully!');e.target.reset()},
+        startEditStore(id){const employee = this.getCurrentEmployee(); if(!employee) return; const store=employee.stores.find(s=>s.id===id);if(!store)return;document.getElementById('edit-store-id').value=id;document.getElementById('edit-store-name').value=store.name;document.getElementById('edit-store-location').value=store.location;document.getElementById('edit-store-credit-limit').value=(store.creditAvailable||0)+(store.creditUsed||0);this.openModal('editStoreModal')},
+        handleUpdateStore(e){e.preventDefault();const employee = this.getCurrentEmployee(); if(!employee) return; const id=document.getElementById('edit-store-id').value;const store=employee.stores.find(s=>s.id===id);if(!store)return;const newCreditLimit=parseFloat(document.getElementById('edit-store-credit-limit').value);const creditUsed = store.creditUsed || 0; if(isNaN(newCreditLimit)||newCreditLimit<creditUsed){this.showNotification('New credit limit cannot be less than credit already used.','error');return}store.name=document.getElementById('edit-store-name').value;store.location=document.getElementById('edit-store-location').value;store.creditAvailable=newCreditLimit-creditUsed;this.saveState();this.setActiveTab('stores');this.closeModal('editStoreModal');this.showNotification('Store updated!')},
+        deleteStore(id){if(confirm('Are you sure you want to delete this store? This action cannot be undone.')){const employee = this.getCurrentEmployee(); if(!employee) return; employee.stores=employee.stores.filter(s=>s.id!==id);this.saveState();this.setActiveTab('stores');this.showNotification('Store deleted.','error')}},
+        startReceiveCredit(id){const employee = this.getCurrentEmployee(); if(!employee) return; const store=employee.stores.find(s=>s.id===id);if(!store)return;const outstanding=(store.creditUsed||0)-(store.creditPaidBack||0);if(outstanding<=0){this.showNotification('This store has no outstanding credit.','success');return}document.getElementById('credit-store-id').value=id;document.getElementById('credit-store-name').textContent=store.name;document.getElementById('credit-outstanding').textContent=`$${outstanding.toFixed(2)}`;document.getElementById('credit-received-amount').max=outstanding;document.getElementById('credit-received-amount').value=outstanding.toFixed(2);this.openModal('creditReceivedModal')},
         handleAddProduct(e){e.preventDefault();const name=document.getElementById('new-product-name').value;const price=parseFloat(document.getElementById('new-product-price').value);const stock=parseInt(document.getElementById('new-product-stock').value);if(!name.trim()||isNaN(price)||isNaN(stock))return;this.state.masterInventory.push({id:`prod_${Date.now()}`,name,price,stock,isActive:true});this.saveState();this.render();this.closeModal('addProductModal');this.showNotification('Product added to master inventory!');e.target.reset()},
         startEditProduct(id){const product=this.getProduct(id);if(!product)return;document.getElementById('edit-product-id').value=id;document.getElementById('edit-product-name').value=product.name;document.getElementById('edit-product-price').value=product.price;document.getElementById('edit-product-stock').value=product.stock;this.openModal('editProductModal')},
         handleUpdateProduct(e){e.preventDefault();const id=document.getElementById('edit-product-id').value;const product=this.getProduct(id);if(!product)return;product.name=document.getElementById('edit-product-name').value;product.price=parseFloat(document.getElementById('edit-product-price').value);product.stock=parseInt(document.getElementById('edit-product-stock').value);this.saveState();this.render();this.closeModal('editProductModal');this.showNotification('Product updated!')},
@@ -497,8 +569,8 @@ document.addEventListener('DOMContentLoaded', () => {
         handleDelegateStock(e){e.preventDefault();const employeeId=document.getElementById('delegate-employee').value;const productId=document.getElementById('delegate-product').value;const quantity=parseInt(document.getElementById('delegate-quantity').value);const employee=this.getEmployee(employeeId);const product=this.getProduct(productId);if(!employee||!product||isNaN(quantity)||quantity<=0){this.showNotification('Invalid delegation details.','error');return}if(product.stock<quantity){this.showNotification('Not enough stock in master inventory.','error');return}product.stock-=quantity;let employeeProduct=employee.inventory.find(p=>p.productId===productId);if(employeeProduct){employeeProduct.stock+=quantity}else{employee.inventory.push({productId:productId,stock:quantity})}this.saveState();this.render();this.closeModal('delegateStockModal');this.showNotification(`Delegated ${quantity} of ${product.name} to ${employee.name}.`)},
         handleCreateTask(e){e.preventDefault();const description=document.getElementById('task-description').value;const assigneeId=document.getElementById('task-assignee').value;if(!description.trim()||!assigneeId)return;this.state.tasks.push({id:`task_${Date.now()}`,description,assigneeId,status:'Pending'});this.saveState();this.render();this.closeModal('createTaskModal');this.showNotification('Task created successfully!');e.target.reset()},
         toggleTaskStatus(id){const task=this.getTask(id);if(task){task.status=task.status==='Completed'?'Pending':'Completed';this.saveState();this.render()}},
-        handleRecordSale(e){e.preventDefault();const form=e.target;const employee=this.getEmployee(this.state.currentEmployeeId);const productId=form.elements['sale-product'].value;const quantity=parseInt(form.elements['sale-quantity'].value);const saleType=form.elements['sale-type'].value;const storeId=form.elements['sale-store'].value;const discount=parseFloat(form.elements['sale-discount'].value)||0;const product=this.getProduct(productId);const employeeInventoryItem=employee.inventory.find(i=>i.productId===productId);const store=this.getStore(storeId);if(!product||!employeeInventoryItem||!store||isNaN(quantity)||quantity<=0){this.showNotification('Please fill all fields correctly.','error');return}if(employeeInventoryItem.stock<quantity){this.showNotification(`Not enough stock. Only ${employeeInventoryItem.stock} available.`,'error');return}let finalAmount=(product.price*quantity)-discount;if(saleType==='Credit'){const outstandingCredit=(store.creditUsed||0)-(store.creditPaidBack||0);if(outstandingCredit+finalAmount>store.creditAvailable+store.creditUsed){this.showNotification('This sale exceeds the store\'s credit limit.','error');return}store.creditUsed+=finalAmount;store.creditAvailable-=finalAmount}else if(saleType==='Deal'){const masterProduct=this.getProduct(productId);if(masterProduct.stock<quantity){this.showNotification(`Not enough stock in Master Inventory for a deal sale. Only ${masterProduct.stock} available.`,'error');return}masterProduct.stock-=quantity}else{employeeInventoryItem.stock-=quantity}employee.transactions.push({id:`txn_${Date.now()}`,type:'sale',productId,quantity,saleType,storeId,discount,amount:finalAmount,date:new Date().toISOString()});this.saveState();this.render();this.showNotification('Sale recorded successfully!');form.reset();this.updateFinalSaleAmount()},
-        handleRecordExpense(e){e.preventDefault();const form=e.target;const employee=this.getEmployee(this.state.currentEmployeeId);if(!employee)return;const description=form.elements['expense-description'].value;const amount=parseFloat(form.elements['expense-amount'].value);const categoryId=form.elements['expense-category'].value;if(!description.trim()||isNaN(amount)||amount<=0||!categoryId){this.showNotification('Please fill all fields correctly.','error');return}const newExpense={id:`txn_${Date.now()}`,type:'expense',description:description.trim(),amount,categoryId,date:new Date().toISOString()};employee.transactions.push(newExpense);this.saveState();this.render();this.showNotification('Expense recorded successfully!','success');form.reset()},
+        handleRecordSale(e){e.preventDefault();const form=e.target;const employee=this.getCurrentEmployee();const productId=form.elements['sale-product'].value;const quantity=parseInt(form.elements['sale-quantity'].value);const saleType=form.elements['sale-type'].value;const storeId=form.elements['sale-store'].value;const discount=parseFloat(form.elements['sale-discount'].value)||0;const product=this.getProduct(productId);const employeeInventoryItem=employee.inventory.find(i=>i.productId===productId);const store=employee.stores.find(s => s.id === storeId);if(!product||!employeeInventoryItem||!store||isNaN(quantity)||quantity<=0){this.showNotification('Please fill all fields correctly.','error');return}if(employeeInventoryItem.stock<quantity){this.showNotification(`Not enough stock. Only ${employeeInventoryItem.stock} available.`,'error');return}let finalAmount=(product.price*quantity)-discount;if(saleType==='Credit'){const outstandingCredit=(store.creditUsed||0)-(store.creditPaidBack||0);const creditLimit = (store.creditAvailable || 0) + (store.creditUsed || 0); if(outstandingCredit+finalAmount>creditLimit){this.showNotification('This sale exceeds the store\'s credit limit.','error');return}store.creditUsed+=finalAmount;store.creditAvailable-=finalAmount}else if(saleType==='Deal'){const masterProduct=this.getProduct(productId);if(masterProduct.stock<quantity){this.showNotification(`Not enough stock in Master Inventory for a deal sale. Only ${masterProduct.stock} available.`,'error');return}masterProduct.stock-=quantity}else{employeeInventoryItem.stock-=quantity}employee.transactions.push({id:`txn_${Date.now()}`,type:'sale',productId,quantity,saleType,storeId,discount,amount:finalAmount,date:new Date().toISOString(),invoiced:false});this.saveState();this.setActiveTab('sales-expenses');this.showNotification('Sale recorded successfully!');form.reset();this.updateFinalSaleAmount()},
+        handleRecordExpense(e){e.preventDefault();const form=e.target;const employee=this.getCurrentEmployee();if(!employee)return;const description=form.elements['expense-description'].value;const amount=parseFloat(form.elements['expense-amount'].value);const categoryId=form.elements['expense-category'].value;if(!description.trim()||isNaN(amount)||amount<=0||!categoryId){this.showNotification('Please fill all fields correctly.','error');return}const newExpense={id:`txn_${Date.now()}`,type:'expense',description:description.trim(),amount,categoryId,date:new Date().toISOString()};employee.transactions.push(newExpense);this.saveState();this.setActiveTab('sales-expenses');this.showNotification('Expense recorded successfully!','success');form.reset()},
 
         downloadInvoice(invoiceHTML, store, invoiceDate) {
             this.showNotification('Generating PDF...');
@@ -546,36 +618,48 @@ document.addEventListener('DOMContentLoaded', () => {
 
         handleGenerateInvoice(e) {
             e.preventDefault();
+            const employee = this.getCurrentEmployee();
             const storeId = document.getElementById('invoice-store').value;
-            const store = this.getStore(storeId);
-            if (!store) {
-                this.showNotification('Please select a store first.', 'error');
-                return;
-            }
+            const store = employee.stores.find(s => s.id === storeId);
+            if (!store) { return; }
 
             const selectedCheckboxes = document.querySelectorAll('.invoice-txn-checkbox:checked');
-            if (selectedCheckboxes.length === 0) {
-                this.showNotification('Please select at least one transaction to invoice.', 'error');
-                return;
-            }
+            if (selectedCheckboxes.length === 0) { return; }
 
             const selectedTxnIds = Array.from(selectedCheckboxes).map(cb => cb.dataset.transactionId);
             
             const salesInPeriod = [];
             let total = 0;
-
-            this.state.employees.forEach(emp => {
-                emp.transactions.forEach(t => {
-                    if (selectedTxnIds.includes(t.id)) {
-                        salesInPeriod.push(t);
-                        total += t.amount;
+            // Mark transactions as invoiced across ALL employees
+            selectedTxnIds.forEach(txnId => {
+                for (const emp of this.state.employees) {
+                    const transaction = emp.transactions.find(t => t.id === txnId);
+                    if (transaction) {
+                        transaction.invoiced = true;
+                        salesInPeriod.push(transaction);
+                        total += transaction.amount;
+                        break;
                     }
-                });
+                }
             });
 
-            const invoiceDate = new Date().toLocaleDateString();
-            const invoiceHTML = this.generateInvoiceHtml(store, salesInPeriod, total, `Invoice Generated on ${invoiceDate}`);
+            // Create and store the invoice record on the current employee's record
+            const newInvoice = {
+                id: `inv_${Date.now()}`,
+                storeId: store.id,
+                storeName: store.name,
+                date: new Date().toISOString(),
+                total: total,
+                transactionIds: selectedTxnIds
+            };
+            employee.invoices.push(newInvoice);
+            this.saveState();
+
+            const invoiceDateStr = new Date().toLocaleDateString();
+            const invoiceHTML = this.generateInvoiceHtml(store, salesInPeriod, total, `Invoice Generated on ${invoiceDateStr}`);
             this.downloadInvoice(invoiceHTML, store, new Date().toISOString().split('T')[0]);
+            
+            this.setActiveTab('invoices');
         },
 
         generateInvoiceHtml(store, sales, total, periodText) {
