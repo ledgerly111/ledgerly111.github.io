@@ -77,20 +77,28 @@
 
             <div id="side-panel" class="fixed inset-y-0 left-0 z-40 w-4/5 max-w-sm bg-light-surface dark:bg-dark-surface p-4 overflow-y-auto transform -translate-x-full transition-transform duration-300 ease-in-out md:relative md:w-1/3 lg:w-1/4 md:translate-x-0 md:flex-shrink-0 md:border-r border-gray-200 dark:border-gray-700">
                 <button onclick="app.toggleSidenav()" class="md:hidden absolute top-2 right-2 text-xl p-2 text-light-text-secondary dark:text-dark-text-secondary">&times;</button>
+                
                 <div id="company-overview-panel" class="mb-6 mt-8 md:mt-0">
-                    <h2 class="text-xl font-semibold mb-3 text-light-text dark:text-dark-text flex items-center justify-between cursor-pointer" onclick="app.togglePanel('company-overview')">
+                    <h2 class="text-xl font-semibold mb-3 text-light-text dark:text-dark-text flex items-center justify-between cursor-pointer hover:text-primary dark:hover:text-primary transition-colors" onclick="app.showCompanyView()">
                         <span><i class="fas fa-building mr-2 text-primary"></i>Company Overview</span>
-                        <i id="company-overview-toggle-icon" class="fas fa-chevron-down"></i>
+                        <i class="fas fa-arrow-right"></i>
                     </h2>
-                    <div id="company-overview-content" class="space-y-4 hidden">
-                        <div id="company-stats" class="space-y-2 p-3 bg-light-bg dark:bg-dark-bg rounded-lg"></div>
-                        <div><div class="flex justify-between items-center mb-2"><h3 class="font-bold text-light-text-secondary dark:text-dark-text-secondary">Employees</h3><button class="bg-primary text-black px-3 py-1 rounded-md text-sm font-semibold hover:bg-primary-hover" onclick="app.openModal('addEmployeeModal')">+ Add</button></div><ul id="employee-list" class="space-y-2 text-sm"></ul></div>
-                        <div id="inactive-employee-section" class="hidden"> <div class="flex justify-between items-center mb-2"><h3 class="font-bold text-light-text-secondary dark:text-dark-text-secondary">Inactive Employees</h3></div> <ul id="inactive-employee-list" class="space-y-2 text-sm"></ul> </div>
-                        <div><div class="flex justify-between items-center mb-2"><h3 class="font-bold text-light-text-secondary dark:text-dark-text-secondary">Master Inventory</h3><div><button class="bg-primary text-black px-3 py-1 rounded-md text-sm font-semibold hover:bg-primary-hover mr-2" onclick="app.openModal('addProductModal')">+ Add</button><button class="bg-accent-green text-black px-3 py-1 rounded-md text-sm font-semibold hover:opacity-80" onclick="app.openModal('delegateStockModal')">Delegate</button></div></div><div id="master-inventory-list" class="space-y-1 text-sm"></div></div>
-                        <div><div class="flex justify-between items-center mb-2"><h3 class="font-bold text-light-text-secondary dark:text-dark-text-secondary">Expense Categories</h3><button class="bg-primary text-black px-3 py-1 rounded-md text-sm font-semibold hover:bg-primary-hover" onclick="app.openModal('addCategoryModal')">+ Add</button></div><div id="expense-category-list" class="space-y-1 text-sm"></div></div>
-                        <div><div class="flex justify-between items-center mb-2"><h3 class="font-bold text-light-text-secondary dark:text-dark-text-secondary">All Tasks</h3><button class="bg-primary text-black px-3 py-1 rounded-md text-sm font-semibold hover:bg-primary-hover" onclick="app.openModal('createTaskModal')">+ Create</button></div><ul id="all-tasks-list" class="space-y-2 text-sm"></ul></div>
+                </div>
+                
+                <div id="quick-actions-panel" class="mb-6">
+                     <h2 class="text-xl font-semibold mb-3 text-light-text dark:text-dark-text flex items-center justify-between cursor-pointer" onclick="app.togglePanel('quick-actions')">
+                        <span><i class="fas fa-bolt mr-2 text-primary"></i>Quick Actions</span>
+                        <i id="quick-actions-toggle-icon" class="fas fa-chevron-down"></i>
+                    </h2>
+                    <div id="quick-actions-content" class="space-y-3 hidden">
+                        <button class="w-full text-left bg-light-bg dark:bg-dark-bg p-2 rounded hover:bg-gray-200 dark:hover:bg-gray-700" onclick="app.openModal('addEmployeeModal')"><i class="fas fa-user-plus w-6 mr-2"></i>Add Employee</button>
+                        <button class="w-full text-left bg-light-bg dark:bg-dark-bg p-2 rounded hover:bg-gray-200 dark:hover:bg-gray-700" onclick="app.openModal('addProductModal')"><i class="fas fa-plus-circle w-6 mr-2"></i>Add Product</button>
+                        <button class="w-full text-left bg-light-bg dark:bg-dark-bg p-2 rounded hover:bg-gray-200 dark:hover:bg-gray-700" onclick="app.openModal('delegateStockModal')"><i class="fas fa-people-arrows w-6 mr-2"></i>Delegate Stock</button>
+                        <button class="w-full text-left bg-light-bg dark:bg-dark-bg p-2 rounded hover:bg-gray-200 dark:hover:bg-gray-700" onclick="app.openModal('createTaskModal')"><i class="fas fa-tasks w-6 mr-2"></i>Create Task</button>
+                         <button class="w-full text-left bg-light-bg dark:bg-dark-bg p-2 rounded hover:bg-gray-200 dark:hover:bg-gray-700" onclick="app.openModal('addCategoryModal')"><i class="fas fa-tag w-6 mr-2"></i>Add Expense Category</button>
                     </div>
                 </div>
+
                 <div id="ai-advisor-panel">
                     <h2 class="text-xl font-semibold mb-3 text-light-text dark:text-dark-text flex items-center justify-between cursor-pointer" onclick="app.togglePanel('ai-advisor')">
                         <span><i class="fas fa-brain mr-2 text-primary"></i>Accura AI Advisor</span>
@@ -104,7 +112,8 @@
                 </div>
             </div>
 
-            <div id="employee-view" class="flex-1 w-full flex flex-col"></div>
+            <div id="employee-view" class="flex-1 w-full flex-col hidden"></div>
+            <div id="company-view" class="flex-1 w-full flex-col hidden"></div>
         </main>
     </div>
 
@@ -117,6 +126,8 @@ document.addEventListener('DOMContentLoaded', () => {
             theme: 'dark', currentEmployeeId: null, employees: [],
             masterInventory: [], tasks: [], expenseCategories: [],
             ledgerFilter: 'all', activeInvoiceSubTab: 'create',
+            currentView: 'employee', // 'employee' or 'company'
+            companyActiveTab: 'dashboard',
         },
         charts: {},
         notificationTimeout: null,
@@ -125,7 +136,7 @@ document.addEventListener('DOMContentLoaded', () => {
             this.loadState(); this.applyTheme(); this.renderModals();
             this.addEventListeners(); this.render();
             if(this.state.employees.length > 0) {
-                this.togglePanel('company-overview', true); this.togglePanel('ai-advisor', true);
+                this.togglePanel('quick-actions', true); this.togglePanel('ai-advisor', true);
             }
         },
 
@@ -155,6 +166,8 @@ document.addEventListener('DOMContentLoaded', () => {
              if (!this.state.tasks) this.state.tasks = [];
              if (!this.state.ledgerFilter) this.state.ledgerFilter = 'all';
              if (!this.state.activeInvoiceSubTab) this.state.activeInvoiceSubTab = 'create';
+             if (!this.state.currentView) this.state.currentView = 'employee';
+             if (!this.state.companyActiveTab) this.state.companyActiveTab = 'dashboard';
         },
         getEmployee(id) { return this.state.employees.find(e => e.id === id); },
         getCurrentEmployee() { return this.getEmployee(this.state.currentEmployeeId); },
@@ -179,7 +192,7 @@ document.addEventListener('DOMContentLoaded', () => {
         },
 
         attachEmployeeViewEventListeners() {
-            document.getElementById('tabs-container')?.addEventListener('click', e => this.handleTabClick(e));
+            document.getElementById('employee-tabs-container')?.addEventListener('click', e => this.handleTabClick(e, 'employee'));
             document.getElementById('mobile-tabs')?.addEventListener('change', e => this.handleMobileTabChange(e));
             const saleForm = document.getElementById('record-sale-form');
             if (saleForm) {
@@ -234,18 +247,27 @@ document.addEventListener('DOMContentLoaded', () => {
             });
         },
         
+        attachCompanyViewEventListeners() {
+            document.getElementById('company-tabs-container')?.addEventListener('click', e => this.handleTabClick(e, 'company'));
+        },
+
         handleMobileTabChange(e) {
             const tabName = e.target.value;
             if (tabName === 'ledger') this.state.ledgerFilter = 'all';
-            this.setActiveTab(tabName);
+            this.setActiveTab(tabName, 'employee');
         },
 
-        handleTabClick(e) {
+        handleTabClick(e, viewType) {
             const tabButton = e.target.closest('.tab-button');
-            if (tabButton && tabButton.dataset.tab) {
-                if(tabButton.dataset.tab === 'ledger') this.state.ledgerFilter = 'all';
-                if(tabButton.dataset.tab === 'invoices') this.state.activeInvoiceSubTab = 'create';
-                this.setActiveTab(tabButton.dataset.tab);
+            if (!tabButton || !tabButton.dataset.tab) return;
+            
+            if (viewType === 'employee') {
+                 if(tabButton.dataset.tab === 'ledger') this.state.ledgerFilter = 'all';
+                 if(tabButton.dataset.tab === 'invoices') this.state.activeInvoiceSubTab = 'create';
+                this.setActiveTab(tabButton.dataset.tab, 'employee');
+            } else if (viewType === 'company') {
+                this.state.companyActiveTab = tabButton.dataset.tab;
+                this.setActiveTab(tabButton.dataset.tab, 'company');
             }
         },
 
@@ -253,28 +275,101 @@ document.addEventListener('DOMContentLoaded', () => {
             try {
                 if (this.state.employees.length === 0) { this.showFirstTimeSetup(); return; }
                 this.showMainApp();
+                
                 if (!this.state.currentEmployeeId || !this.getCurrentEmployee()?.isActive) {
                     const firstActive = this.getActiveEmployees()[0];
                     this.state.currentEmployeeId = firstActive ? firstActive.id : null;
                 }
+                
                 this.renderEmployeeSwitcher();
-                this.renderCompanyOverview();
                 this.renderAIAdvisorPanel();
+                
                 const employeeView = document.getElementById('employee-view');
-                if (this.getActiveEmployees().length === 0) {
-                    employeeView.innerHTML = `<div class="p-8 text-center"><h2 class="text-2xl font-bold mb-4">All Employees Inactive</h2><p>Please reactivate an employee.</p></div>`;
-                } else if (this.state.currentEmployeeId) {
-                    employeeView.innerHTML = this.getEmployeeViewTemplate();
-                    this.renderTabs();
-                    this.attachEmployeeViewEventListeners();
-                    this.setActiveTab(document.querySelector('.tab-button.active')?.dataset.tab || 'dashboard');
+                const companyView = document.getElementById('company-view');
+
+                if (this.state.currentView === 'company') {
+                    employeeView.classList.add('hidden');
+                    employeeView.innerHTML = '';
+                    companyView.classList.remove('hidden');
+                    this.renderCompanyDashboardView();
                 } else {
-                    employeeView.innerHTML = `<div class="p-8 text-center"><h2 class="text-2xl font-bold mb-4">No active employee selected.</h2><p>Please select an employee.</p></div>`;
+                    companyView.classList.add('hidden');
+                    companyView.innerHTML = '';
+                    employeeView.classList.remove('hidden');
+                    this.renderEmployeeSpecificView();
                 }
             } catch (error) {
                 console.error("Render Error:", error);
                 document.body.innerHTML = `<div style="padding: 2rem; font-family: sans-serif;"><h1>An Error Occurred</h1><p>The application could not start. Please check the console or try clearing local storage.</p><pre style="background: #eee; padding: 1rem; border-radius: 5px; white-space: pre-wrap;">${error.stack}</pre></div>`;
             }
+        },
+
+        renderEmployeeSpecificView() {
+            const employeeView = document.getElementById('employee-view');
+            if (this.getActiveEmployees().length === 0) {
+                employeeView.innerHTML = `<div class="p-8 text-center"><h2 class="text-2xl font-bold mb-4">All Employees Inactive</h2><p>Please reactivate an employee or view the Company Overview.</p></div>`;
+            } else if (this.state.currentEmployeeId) {
+                employeeView.innerHTML = this.getEmployeeViewTemplate();
+                this.renderTabs('employee');
+                this.attachEmployeeViewEventListeners();
+                this.setActiveTab(document.querySelector('#employee-tabs-container .tab-button.active')?.dataset.tab || 'dashboard', 'employee');
+            } else {
+                 employeeView.innerHTML = `<div class="p-8 text-center"><h2 class="text-2xl font-bold mb-4">No active employee selected.</h2><p>Please select an employee from the dropdown or view the Company Overview.</p></div>`;
+            }
+        },
+
+        renderCompanyDashboardView() {
+            const companyView = document.getElementById('company-view');
+            companyView.innerHTML = this.getCompanyViewTemplate();
+            this.renderTabs('company');
+            this.attachCompanyViewEventListeners();
+            this.setActiveTab(this.state.companyActiveTab, 'company');
+        },
+
+        showCompanyView() {
+            this.state.currentView = 'company';
+            this.state.companyActiveTab = 'dashboard';
+            this.saveState();
+            this.render();
+        },
+
+        getCompanyViewTemplate() {
+            // Calculate firm-wide stats
+            let totalRevenue=0, totalExpenses=0;
+            this.state.employees.forEach(emp => {
+                if(emp.transactions){
+                    totalRevenue += emp.transactions.filter(t => t.type === 'sale').reduce((sum, t) => sum + t.amount, 0);
+                    totalExpenses += emp.transactions.filter(t => t.type === 'expense').reduce((sum, t) => sum + t.amount, 0);
+                }
+            });
+            const totalProfit = totalRevenue - totalExpenses;
+
+            return `
+                <div class="flex-shrink-0 p-4 bg-light-surface dark:bg-dark-surface border-b border-gray-200 dark:border-gray-700">
+                    <h2 class="text-2xl font-bold">Company-Wide Overview</h2>
+                     <p class="text-light-text-secondary dark:text-dark-text-secondary">Aggregate data for the entire firm.</p>
+                </div>
+                <div class="flex-shrink-0 border-b border-gray-200 dark:border-gray-700 px-4 bg-light-surface dark:bg-dark-surface">
+                    <nav id="company-tabs-container" class="-mb-px flex space-x-6"></nav>
+                </div>
+                <div class="flex-grow p-4 overflow-y-auto bg-light-bg dark:bg-dark-bg">
+                    <div id="company-dashboard-content" class="tab-content hidden">
+                        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
+                           <div class="bg-light-surface dark:bg-dark-surface p-4 rounded-lg shadow"><div class="text-sm text-light-text-secondary dark:text-dark-text-secondary">Total Revenue</div><div class="text-2xl font-bold text-accent-green">$${totalRevenue.toFixed(2)}</div></div>
+                           <div class="bg-light-surface dark:bg-dark-surface p-4 rounded-lg shadow"><div class="text-sm text-light-text-secondary dark:text-dark-text-secondary">Total Expenses</div><div class="text-2xl font-bold text-accent-red">$${totalExpenses.toFixed(2)}</div></div>
+                           <div class="bg-light-surface dark:bg-dark-surface p-4 rounded-lg shadow"><div class="text-sm text-light-text-secondary dark:text-dark-text-secondary">Net Profit</div><div class="text-2xl font-bold ${totalProfit >= 0 ? 'text-accent-green':'text-accent-red'}">$${totalProfit.toFixed(2)}</div></div>
+                        </div>
+                        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                            <div class="bg-light-surface dark:bg-dark-surface p-4 rounded-lg shadow h-80"><canvas id="company-revenue-expense-chart"></canvas></div>
+                            <div class="bg-light-surface dark:bg-dark-surface p-4 rounded-lg shadow h-80"><canvas id="company-top-products-chart"></canvas></div>
+                        </div>
+                    </div>
+                    <div id="company-employees-content" class="tab-content hidden"></div>
+                    <div id="company-inventory-content" class="tab-content hidden"></div>
+                    <div id="company-expenses-content" class="tab-content hidden"></div>
+                    <div id="company-tasks-content" class="tab-content hidden"></div>
+                </div>
+            `;
         },
 
         getEmployeeViewTemplate() {
@@ -294,7 +389,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         <label for="mobile-tabs" class="sr-only">Select a tab</label>
                         <select id="mobile-tabs" class="form-input w-full"></select>
                     </div>
-                    <nav id="tabs-container" class="-mb-px hidden md:flex space-x-6"></nav>
+                    <nav id="employee-tabs-container" class="-mb-px hidden md:flex space-x-6"></nav>
                 </div>
                 <div class="flex-grow p-4 overflow-y-auto bg-light-bg dark:bg-dark-bg">
                     <div id="dashboard-content" class="tab-content hidden">
@@ -475,15 +570,212 @@ document.addEventListener('DOMContentLoaded', () => {
             });
             this.saveState();
             this.closeModal('creditReceivedModal');
-            this.setActiveTab('stores');
+            this.setActiveTab('stores', 'employee');
             this.showNotification('Credit payment recorded!');
         },
 
-        renderTabs() { const tabs = [ { id: 'dashboard', name: 'Dashboard', icon: 'fa-chart-line' }, { id: 'my-tasks', name: 'My Tasks', icon: 'fa-tasks' }, { id: 'my-inventory', name: 'My Inventory', icon: 'fa-boxes' }, { id: 'sales-expenses', name: 'Sales & Expenses', icon: 'fa-exchange-alt' }, { id: 'stores', name: 'Manage Stores', icon: 'fa-store' }, { id: 'invoices', name: 'Invoices', icon: 'fa-file-invoice-dollar' }, { id: 'ledger', name: 'Ledger', icon: 'fa-history' } ]; document.getElementById('tabs-container').innerHTML = tabs.map(tab => `<button data-tab="${tab.id}" class="tab-button text-light-text-secondary dark:text-dark-text-secondary hover:text-light-text dark:hover:text-dark-text border-b-2 border-transparent py-3 px-4 font-medium text-sm"><i class="fas ${tab.icon} mr-2 hidden md:inline"></i>${tab.name}</button>`).join(''); document.getElementById('mobile-tabs').innerHTML = tabs.map(tab => `<option value="${tab.id}">${tab.name}</option>`).join(''); },
+        renderTabs(viewType) {
+            let tabs = [];
+            let containerId = '';
+            let mobileTabsId = '';
+
+            if (viewType === 'employee') {
+                tabs = [ 
+                    { id: 'dashboard', name: 'Dashboard', icon: 'fa-chart-line' }, 
+                    { id: 'my-tasks', name: 'My Tasks', icon: 'fa-tasks' }, 
+                    { id: 'my-inventory', name: 'My Inventory', icon: 'fa-boxes' }, 
+                    { id: 'sales-expenses', name: 'Sales & Expenses', icon: 'fa-exchange-alt' }, 
+                    { id: 'stores', name: 'Manage Stores', icon: 'fa-store' }, 
+                    { id: 'invoices', name: 'Invoices', icon: 'fa-file-invoice-dollar' }, 
+                    { id: 'ledger', name: 'Ledger', icon: 'fa-history' } 
+                ];
+                containerId = 'employee-tabs-container';
+                mobileTabsId = 'mobile-tabs';
+            } else { // company view
+                 tabs = [
+                    { id: 'company-dashboard', name: 'Dashboard', icon: 'fa-tachometer-alt' },
+                    { id: 'company-employees', name: 'Employees', icon: 'fa-users' },
+                    { id: 'company-inventory', name: 'Master Inventory', icon: 'fa-warehouse' },
+                    { id: 'company-expenses', name: 'Expenses', icon: 'fa-receipt' },
+                    { id: 'company-tasks', name: 'All Tasks', icon: 'fa-tasks' }
+                ];
+                containerId = 'company-tabs-container';
+            }
+
+            document.getElementById(containerId).innerHTML = tabs.map(tab => `<button data-tab="${tab.id}" class="tab-button text-light-text-secondary dark:text-dark-text-secondary hover:text-light-text dark:hover:text-dark-text border-b-2 border-transparent py-3 px-4 font-medium text-sm"><i class="fas ${tab.icon} mr-2 hidden md:inline"></i>${tab.name}</button>`).join('');
+            
+            if (mobileTabsId) {
+                document.getElementById(mobileTabsId).innerHTML = tabs.map(tab => `<option value="${tab.id}">${tab.name}</option>`).join('');
+            }
+        },
+
         toggleSidenav() { document.getElementById('side-panel').classList.toggle('-translate-x-full'); document.getElementById('sidenav-backdrop').classList.toggle('hidden'); },
-        setActiveTab(tabName) { document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden')); document.querySelectorAll('.tab-button').forEach(el => el.classList.remove('active')); document.getElementById(`${tabName}-content`)?.classList.remove('hidden'); document.querySelector(`[data-tab="${tabName}"]`)?.classList.add('active'); const mobileTabs = document.getElementById('mobile-tabs'); if (mobileTabs) mobileTabs.value = tabName; const renderMap = { dashboard: 'renderDashboard', 'my-tasks': 'renderMyTasks', 'my-inventory': 'renderMyInventory', 'sales-expenses': 'renderSalesAndExpenses', stores: 'renderStoresTab', invoices: 'renderInvoices', ledger: 'renderLedger' }; if (renderMap[tabName]) this[renderMap[tabName]](); },
-        togglePanel(panelName, forceOpen = false) { const icon = document.getElementById(`${panelName}-toggle-icon`); const content = document.getElementById(`${panelName}-content`); const isHidden = content.classList.contains('hidden'); if (forceOpen && isHidden) { content.classList.remove('hidden'); } else if (!forceOpen) { content.classList.toggle('hidden'); } icon.classList.toggle('fa-chevron-up', !content.classList.contains('hidden')); icon.classList.toggle('fa-chevron-down', content.classList.contains('hidden')); },
-        renderCompanyOverview() { let totalRevenue=0,totalExpenses=0;this.state.employees.forEach(emp=>{if(emp.isActive&&emp.transactions){totalRevenue+=emp.transactions.filter(t=>t.type==='sale').reduce((sum,t)=>sum+t.amount,0);totalExpenses+=emp.transactions.filter(t=>t.type==='expense').reduce((sum,t)=>sum+t.amount,0)}});const totalProfit=totalRevenue-totalExpenses;document.getElementById('company-stats').innerHTML=`<h3 class="font-bold text-light-text-secondary dark:text-dark-text-secondary text-base">Firm-Wide Totals</h3><div class="text-sm space-y-1"><div class="flex justify-between"><span>Revenue:</span> <span class="font-semibold text-accent-green">$${totalRevenue.toFixed(2)}</span></div><div class="flex justify-between"><span>Expenses:</span> <span class="font-semibold text-accent-red">$${totalExpenses.toFixed(2)}</span></div><div class="flex justify-between border-t border-gray-300 dark:border-gray-600 pt-1 mt-1"><span>Net Profit:</span> <span class="font-bold text-lg ${totalProfit<0?'text-accent-red':'text-accent-green'}">$${totalProfit.toFixed(2)}</span></div></div>`;document.getElementById('employee-list').innerHTML=this.getActiveEmployees().map(emp=>{const revenue=emp.transactions.filter(t=>t.type==='sale').reduce((sum,t)=>sum+t.amount,0);const expenses=emp.transactions.filter(t=>t.type==='expense').reduce((sum,t)=>sum+t.amount,0);return`<li class="bg-light-bg dark:bg-dark-bg p-2 rounded"><div class="flex justify-between items-center"><div><span class="font-bold">${emp.name}</span><em class="text-xs ml-1 text-light-text-secondary dark:text-dark-text-secondary">(${emp.position})</em></div><div class="flex space-x-3"><button class="text-sm hover:text-primary" onclick="app.startEditEmployee('${emp.id}')"><i class="fas fa-pencil-alt"></i></button><button class="text-sm hover:text-accent-red" onclick="app.deactivateEmployee('${emp.id}')"><i class="fas fa-user-slash"></i></button></div></div><div class="text-xs mt-2 space-y-1 pl-1 border-l-2 border-gray-200 dark:border-gray-600 ml-1 pl-2"><div class="flex justify-between"><span>Revenue:</span> <span class="font-semibold text-accent-green">$${revenue.toFixed(2)}</span></div><div class="flex justify-between"><span>Expenses:</span> <span class="font-semibold text-accent-red">$${expenses.toFixed(2)}</span></div></div></li>`}).join('')||`<p class="text-sm text-light-text-secondary dark:text-dark-text-secondary">No active employees yet.</p>`;const inactiveEmployees=this.state.employees.filter(e=>!e.isActive);document.getElementById('inactive-employee-section').classList.toggle('hidden',inactiveEmployees.length===0);document.getElementById('inactive-employee-list').innerHTML=inactiveEmployees.map(emp=>`<li class="flex justify-between items-center bg-light-bg dark:bg-dark-bg p-2 rounded opacity-60"><span class="italic">${emp.name}</span><button class="text-sm text-accent-green hover:opacity-80 font-semibold" onclick="app.reactivateEmployee('${emp.id}')">Reactivate</button></li>`).join('');document.getElementById('master-inventory-list').innerHTML=this.getActiveProducts().map(prod=>`<div class="bg-light-bg dark:bg-dark-bg p-2 rounded"><div class="flex justify-between items-center"><span>${prod.name}</span><div class="flex items-center"><span class="font-mono text-xs bg-gray-200 dark:bg-gray-700 px-2 py-1 rounded mr-3">${prod.stock}</span><button class="text-sm hover:text-primary" onclick="app.startEditProduct('${prod.id}')"><i class="fas fa-pencil-alt"></i></button><button class="text-sm hover:text-accent-red ml-2" onclick="app.deleteProduct('${prod.id}')"><i class="fas fa-trash-alt"></i></button></div></div></div>`).join('')||`<p class="text-sm text-light-text-secondary dark:text-dark-text-secondary">No active products.</p>`;document.getElementById('expense-category-list').innerHTML=this.state.expenseCategories.map(cat=>`<div class="flex justify-between items-center bg-light-bg dark:bg-dark-bg p-2 rounded"><span>${cat.name}</span><div><button class="text-sm hover:text-primary" onclick="app.startEditCategory('${cat.id}')"><i class="fas fa-pencil-alt"></i></button><button class="text-sm hover:text-accent-red ml-2" onclick="app.deleteCategory('${cat.id}')"><i class="fas fa-trash-alt"></i></button></div></div>`).join('')||`<p class="text-sm text-light-text-secondary dark:text-dark-text-secondary">No categories defined.</p>`;document.getElementById('all-tasks-list').innerHTML=this.state.tasks.map(task=>`<li class="bg-light-bg dark:bg-dark-bg p-2 rounded ${task.status==='Completed'?'task-completed':''}"><p>${task.description}</p><small class="text-light-text-secondary dark:text-dark-text-secondary">To: ${this.getEmployee(task.assigneeId)?.name||'Unassigned'}</small></li>`).join('')||`<p class="text-sm text-light-text-secondary dark:text-dark-text-secondary">No tasks created.</p>`; },
+        
+        setActiveTab(tabName, viewType) {
+            const contentPrefix = viewType === 'company' ? 'company-' : '';
+            
+            document.querySelectorAll(`#${viewType}-view .tab-content`).forEach(el => el.classList.add('hidden'));
+            document.querySelectorAll(`#${viewType}-tabs-container .tab-button`).forEach(el => el.classList.remove('active'));
+            
+            document.getElementById(`${tabName}-content`)?.classList.remove('hidden');
+            document.querySelector(`#${viewType}-tabs-container [data-tab="${tabName}"]`)?.classList.add('active');
+
+            if (viewType === 'employee') {
+                const mobileTabs = document.getElementById('mobile-tabs');
+                if (mobileTabs) mobileTabs.value = tabName;
+                const renderMap = { dashboard: 'renderDashboard', 'my-tasks': 'renderMyTasks', 'my-inventory': 'renderMyInventory', 'sales-expenses': 'renderSalesAndExpenses', stores: 'renderStoresTab', invoices: 'renderInvoices', ledger: 'renderLedger' };
+                if (renderMap[tabName]) this[renderMap[tabName]]();
+            } else { // company view
+                 const renderMap = { 
+                    'company-dashboard': 'renderCompanyDashboardTab', 
+                    'company-employees': 'renderCompanyEmployeesTab', 
+                    'company-inventory': 'renderCompanyInventoryTab',
+                    'company-expenses': 'renderCompanyExpensesTab',
+                    'company-tasks': 'renderCompanyTasksTab',
+                };
+                if (renderMap[tabName]) this[renderMap[tabName]]();
+            }
+        },
+
+        togglePanel(panelName, forceOpen = false) { 
+            const icon = document.getElementById(`${panelName}-toggle-icon`); 
+            const content = document.getElementById(`${panelName}-content`); 
+            if(!icon || !content) return;
+            const isHidden = content.classList.contains('hidden'); 
+            if (forceOpen && isHidden) { content.classList.remove('hidden'); } 
+            else if (!forceOpen) { content.classList.toggle('hidden'); } 
+            icon.classList.toggle('fa-chevron-up', !content.classList.contains('hidden')); 
+            icon.classList.toggle('fa-chevron-down', content.classList.contains('hidden')); 
+        },
+        
+        // --- COMPANY VIEW TAB RENDERERS ---
+        renderCompanyDashboardTab() {
+             Object.values(this.charts).forEach(chart => { if (chart) chart.destroy() });
+             const isDark = this.state.theme === 'dark';
+             const gridColor = isDark ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.1)';
+             const textColor = isDark ? '#e3e3e3' : '#1f2937';
+            
+             // Chart 1: Revenue vs Expenses Over Time
+             const transactionsByDate = {};
+             this.state.employees.forEach(emp => {
+                (emp.transactions || []).forEach(t => {
+                    const date = t.date.split('T')[0];
+                    if (!transactionsByDate[date]) transactionsByDate[date] = { revenue: 0, expenses: 0 };
+                    if (t.type === 'sale') transactionsByDate[date].revenue += t.amount;
+                    if (t.type === 'expense') transactionsByDate[date].expenses += t.amount;
+                });
+             });
+             const sortedDates = Object.keys(transactionsByDate).sort();
+             this.charts.companyRevenue = new Chart(document.getElementById('company-revenue-expense-chart').getContext('2d'), {
+                type: 'line',
+                data: {
+                    labels: sortedDates,
+                    datasets: [
+                        { label: 'Total Revenue', data: sortedDates.map(date => transactionsByDate[date].revenue), borderColor: '#a6e3a1', backgroundColor: 'rgba(166, 227, 161, 0.2)', tension: 0.1, fill: true },
+                        { label: 'Total Expenses', data: sortedDates.map(date => transactionsByDate[date].expenses), borderColor: '#f38ba8', backgroundColor: 'rgba(243, 139, 168, 0.2)', tension: 0.1, fill: true }
+                    ]
+                },
+                options: { responsive: true, maintainAspectRatio: false, scales: { y: { beginAtZero: true, grid: { color: gridColor }, ticks: { color: textColor } }, x: { grid: { color: gridColor }, ticks: { color: textColor } } }, plugins: { legend: { labels: { color: textColor } }, title: {display: true, text: 'Firm-Wide Revenue vs. Expenses', color: textColor, font:{size:16}} } }
+             });
+
+            // Chart 2: Top Products Firm-Wide
+            const salesByProduct = {};
+            this.state.employees.forEach(emp => {
+                (emp.transactions || []).filter(t => t.type === 'sale').forEach(t => {
+                    salesByProduct[t.productId] = (salesByProduct[t.productId] || 0) + t.amount;
+                });
+            });
+            const topProducts = Object.entries(salesByProduct).sort(([, a], [, b]) => b - a).slice(0, 5);
+            this.charts.companyProducts = new Chart(document.getElementById('company-top-products-chart').getContext('2d'), {
+                type: 'bar',
+                data: {
+                    labels: topProducts.map(([productId]) => this.getProduct(productId)?.name || 'Unknown'),
+                    datasets: [{ label: 'Revenue by Product', data: topProducts.map(([, amount]) => amount), backgroundColor: ['#89b4fa', '#a6e3a1', '#f9e2af', '#fab387', '#f38ba8'] }]
+                },
+                options: { responsive: true, maintainAspectRatio: false, indexAxis: 'y', scales: { x: { beginAtZero: true, grid: { color: gridColor }, ticks: { color: textColor } }, y: { grid: { color: gridColor }, ticks: { color: textColor } } }, plugins: { legend: { display: false }, title: { display: true, text: 'Top Products by Revenue (Firm-Wide)', color: textColor, font: { size: 16 } } } }
+            });
+
+        },
+
+        renderCompanyEmployeesTab() {
+            const container = document.getElementById('company-employees-content');
+            const activeEmployees = this.state.employees.filter(e => e.isActive);
+            const inactiveEmployees = this.state.employees.filter(e => !e.isActive);
+            let content = `<h3 class="text-xl font-bold mb-4">Active Employees (${activeEmployees.length})</h3>`;
+            content += `<div class="space-y-3 mb-6">${activeEmployees.map(emp=>{const revenue=emp.transactions.filter(t=>t.type==='sale').reduce((sum,t)=>sum+t.amount,0);const expenses=emp.transactions.filter(t=>t.type==='expense').reduce((sum,t)=>sum+t.amount,0);return`<div class="bg-light-surface dark:bg-dark-surface p-3 rounded-lg shadow-sm"><div class="flex justify-between items-center"><div><span class="font-bold">${emp.name}</span><em class="text-xs ml-2 text-light-text-secondary dark:text-dark-text-secondary">(${emp.position})</em></div><div class="flex space-x-3"><button class="text-sm hover:text-primary" onclick="app.startEditEmployee('${emp.id}')"><i class="fas fa-pencil-alt"></i></button><button class="text-sm hover:text-accent-red" onclick="app.deactivateEmployee('${emp.id}')"><i class="fas fa-user-slash"></i></button></div></div><div class="text-xs mt-2 space-y-1 pl-1 border-l-2 border-gray-200 dark:border-gray-600 ml-1 pl-2"><div class="flex justify-between"><span>Revenue:</span> <span class="font-semibold text-accent-green">$${revenue.toFixed(2)}</span></div><div class="flex justify-between"><span>Expenses:</span> <span class="font-semibold text-accent-red">$${expenses.toFixed(2)}</span></div></div></div>`}).join('')||`<p class="text-sm text-light-text-secondary dark:text-dark-text-secondary">No active employees.</p>`}</div>`;
+            if (inactiveEmployees.length > 0) {
+                 content += `<h3 class="text-xl font-bold mb-4">Inactive Employees (${inactiveEmployees.length})</h3>`;
+                 content += `<div class="space-y-3">${inactiveEmployees.map(emp=>`<div class="flex justify-between items-center bg-light-surface dark:bg-dark-surface opacity-60 p-3 rounded-lg shadow-sm"><span class="italic">${emp.name}</span><button class="text-sm text-accent-green hover:opacity-80 font-semibold" onclick="app.reactivateEmployee('${emp.id}')">Reactivate</button></div>`).join('')}</div>`;
+            }
+            container.innerHTML = content;
+        },
+
+        renderCompanyInventoryTab() {
+            const container = document.getElementById('company-inventory-content');
+            let content = `<h3 class="text-xl font-bold mb-4">Master Inventory</h3>`;
+            content += `<div class="overflow-x-auto bg-light-surface dark:bg-dark-surface rounded-lg shadow"><table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700"><thead class="bg-light-bg dark:bg-dark-bg"><tr><th class="table-header">Product</th><th class="table-header">Price</th><th class="table-header">Stock Available</th><th class="table-header">Actions</th></tr></thead><tbody class="divide-y divide-gray-200 dark:divide-gray-700">`;
+            content += this.getActiveProducts().map(prod => `
+                <tr class="hover:bg-light-bg dark:hover:bg-dark-bg">
+                    <td class="px-6 py-4 whitespace-nowrap">${prod.name}</td>
+                    <td class="px-6 py-4 whitespace-nowrap font-mono">$${prod.price.toFixed(2)}</td>
+                    <td class="px-6 py-4 whitespace-nowrap font-mono">${prod.stock}</td>
+                    <td class="px-6 py-4 whitespace-nowrap"><button class="text-sm hover:text-primary" onclick="app.startEditProduct('${prod.id}')"><i class="fas fa-pencil-alt"></i></button><button class="text-sm hover:text-accent-red ml-4" onclick="app.deleteProduct('${prod.id}')"><i class="fas fa-trash-alt"></i></button></td>
+                </tr>
+            `).join('') || `<tr><td colspan="4" class="text-center py-10 text-light-text-secondary dark:text-dark-text-secondary">No active products in master inventory.</td></tr>`;
+            content += `</tbody></table></div>`;
+            container.innerHTML = content;
+        },
+        
+        renderCompanyExpensesTab() {
+            const container = document.getElementById('company-expenses-content');
+            const isDark = this.state.theme === 'dark';
+            const textColor = isDark ? '#e3e3e3' : '#1f2937';
+            
+            const expensesByCategory = {};
+            this.state.employees.forEach(emp => {
+                (emp.transactions || []).filter(t => t.type === 'expense').forEach(t => {
+                    const category = this.getCategory(t.categoryId) || { name: 'Uncategorized' };
+                    expensesByCategory[category.name] = (expensesByCategory[category.name] || 0) + t.amount;
+                });
+            });
+            
+            let content = `<h3 class="text-xl font-bold mb-4">Total Expenses by Category</h3>`;
+            if (Object.keys(expensesByCategory).length > 0) {
+                 content += `<div class="bg-light-surface dark:bg-dark-surface p-4 rounded-lg shadow mx-auto" style="max-height: 400px; max-width: 400px;"><canvas id="company-expenses-by-category-chart"></canvas></div>`;
+            } else {
+                 content += `<p class="text-center py-8 text-light-text-secondary dark:text-dark-text-secondary">No expenses recorded yet.</p>`;
+            }
+            container.innerHTML = content;
+            
+            if (Object.keys(expensesByCategory).length > 0) {
+                 Object.values(this.charts).forEach(chart=>{if(chart)chart.destroy()});
+                 this.charts.companyExpensesByCategory = new Chart(document.getElementById('company-expenses-by-category-chart').getContext('2d'), {
+                    type: 'doughnut',
+                    data: {
+                        labels: Object.keys(expensesByCategory),
+                        datasets: [{ data: Object.values(expensesByCategory), backgroundColor: ['#f38ba8', '#fab387', '#f9e2af', '#a6e3a1', '#89b4fa', '#cba6f7', '#f5c2e7'], borderColor: isDark ? '#1e1f20' : '#ffffff', borderWidth: 4 }]
+                    },
+                    options: { responsive: true, maintainAspectRatio: true, plugins: { legend: { position: 'top', labels: { color: textColor } } } }
+                });
+            }
+        },
+
+        renderCompanyTasksTab() {
+             const container = document.getElementById('company-tasks-content');
+             let content = `<h3 class="text-xl font-bold mb-4">All Tasks</h3>`;
+             const sortedTasks = [...this.state.tasks].sort((a,b) => (a.status === 'Completed' ? 1 : -1) - (b.status === 'Completed' ? 1 : -1) );
+             content += `<ul class="space-y-3">${sortedTasks.map(task => `
+                <li class="bg-light-surface dark:bg-dark-surface p-4 rounded-lg shadow flex justify-between items-center ${task.status === 'Completed' ? 'task-completed opacity-60' : ''}">
+                    <div>
+                        <p>${task.description}</p>
+                        <small class="text-light-text-secondary dark:text-dark-text-secondary">To: <strong>${this.getEmployee(task.assigneeId)?.name || 'Unassigned'}</strong></small>
+                    </div>
+                    <span class="text-sm font-semibold">${task.status}</span>
+                </li>`).join('') || `<p class="text-center py-8 text-light-text-secondary dark:text-dark-text-secondary">No tasks have been created yet.</p>`}</ul>`;
+             container.innerHTML = content;
+        },
+
+        // --- EMPLOYEE VIEW TAB RENDERERS ---
         renderDashboard() { const employee=this.getCurrentEmployee();if(!employee)return;const isDark=this.state.theme==='dark';const gridColor=isDark?'rgba(255, 255, 255, 0.1)':'rgba(0, 0, 0, 0.1)';const textColor=isDark?'#e3e3e3':'#1f2937';Object.values(this.charts).forEach(chart=>{if(chart)chart.destroy()});const salesByDate=employee.transactions.filter(t=>t.type==='sale').reduce((acc,t)=>{const date=t.date.split('T')[0];acc[date]=(acc[date]||0)+t.amount;return acc},{});const sortedDates=Object.keys(salesByDate).sort();this.charts.sales=new Chart(document.getElementById('sales-over-time-chart').getContext('2d'),{type:'line',data:{labels:sortedDates,datasets:[{label:'Daily Revenue',data:sortedDates.map(date=>salesByDate[date]),borderColor:'#89b4fa',backgroundColor:'rgba(137, 180, 250, 0.2)',tension:0.1,fill:true}]},options:{responsive:true,maintainAspectRatio:false,scales:{y:{beginAtZero:true,grid:{color:gridColor},ticks:{color:textColor}},x:{grid:{color:gridColor},ticks:{color:textColor}}},plugins:{legend:{labels:{color:textColor}}}}});const salesByProduct=employee.transactions.filter(t=>t.type==='sale').reduce((acc,t)=>{acc[t.productId]=(acc[t.productId]||0)+t.amount;return acc},{});const topProducts=Object.entries(salesByProduct).sort(([,a],[,b])=>b-a).slice(0,5);this.charts.products=new Chart(document.getElementById('top-products-chart').getContext('2d'),{type:'bar',data:{labels:topProducts.map(([productId])=>this.getProduct(productId)?.name||'Unknown'),datasets:[{label:'Revenue by Product',data:topProducts.map(([,amount])=>amount),backgroundColor:['#89b4fa','#a6e3a1','#f9e2af','#fab387','#f38ba8']}]},options:{responsive:true,maintainAspectRatio:false,indexAxis:'y',scales:{x:{beginAtZero:true,grid:{color:gridColor},ticks:{color:textColor}},y:{grid:{color:gridColor},ticks:{color:textColor}}},plugins:{legend:{display:false},title:{display:true,text:'Top Products by Revenue',color:textColor,font:{size:16}}}}});const expensesByCategory=employee.transactions.filter(t=>t.type==='expense').reduce((acc,t)=>{const category=this.getCategory(t.categoryId)||{name:'Uncategorized'};acc[category.name]=(acc[category.name]||0)+t.amount;return acc},{});this.charts.expensesByCategory=new Chart(document.getElementById('expenses-by-category-chart').getContext('2d'),{type:'doughnut',data:{labels:Object.keys(expensesByCategory),datasets:[{data:Object.values(expensesByCategory),backgroundColor:['#f38ba8','#fab387','#f9e2af','#a6e3a1','#89b4fa','#cba6f7','#f5c2e7'],borderColor:isDark?'#1e1f20':'#ffffff',borderWidth:4}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'top',labels:{color:textColor}},title:{display:true,text:'Expenses by Category',color:textColor,font:{size:16}}}}});const totalCreditUsed=employee.stores.reduce((sum,s)=>sum+(s.creditUsed||0),0);const totalCreditAvailable=employee.stores.reduce((sum,s)=>sum+(s.creditAvailable||0),0);const outstandingCredit=totalCreditUsed-employee.stores.reduce((sum,s)=>sum+(s.creditPaidBack||0),0);const totalCreditLimit=totalCreditAvailable+totalCreditUsed;this.charts.credit=new Chart(document.getElementById('store-credit-chart').getContext('2d'),{type:'bar',data:{labels:['Credit Status'],datasets:[{label:'Outstanding',data:[outstandingCredit],backgroundColor:'#f38ba8'},{label:'Available',data:[totalCreditLimit-outstandingCredit],backgroundColor:'#a6e3a1'}]},options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,scales:{x:{stacked:true,max:totalCreditLimit>0?totalCreditLimit:1},y:{stacked:true}},plugins:{title:{display:true,text:'My Store Credit Status',color:textColor,font:{size:16}},legend:{position:'top',labels:{color:textColor}}}}});},
         renderMyTasks() {
             const employeeTasks = this.state.tasks.filter(t => t.assigneeId === this.state.currentEmployeeId);
@@ -636,21 +928,28 @@ document.addEventListener('DOMContentLoaded', () => {
         renderEmployeeSwitcher() { const switcher=document.getElementById('employee-switcher');switcher.innerHTML=this.getActiveEmployees().map(emp=>`<option value="${emp.id}" ${emp.id===this.state.currentEmployeeId?'selected':''}>${emp.name}</option>`).join('')},
         renderAIAdvisorPanel() { const selector=document.getElementById('ai-employee-select');selector.innerHTML=this.getActiveEmployees().map(emp=>`<option value="${emp.id}">${emp.name}</option>`).join('');if(this.state.currentEmployeeId){selector.value=this.state.currentEmployeeId}},
         applyTheme() { const isDark=this.state.theme==='dark';document.documentElement.classList.toggle('dark',isDark);document.getElementById('theme-icon').className=`fas ${isDark?'fa-sun':'fa-moon'}`},
-        toggleTheme() { this.state.theme=this.state.theme==='dark'?'light':'dark';this.applyTheme();this.saveState();if(document.getElementById('dashboard-content')?.classList.contains('hidden')===false){this.renderDashboard()}},
+        toggleTheme() { this.state.theme=this.state.theme==='dark'?'light':'dark';this.applyTheme();this.saveState(); this.render() },
         openModal(modalId) {if(modalId==='delegateStockModal'){document.getElementById('delegate-employee').innerHTML=this.getActiveEmployees().map(e=>`<option value="${e.id}">${e.name}</option>`).join('');document.getElementById('delegate-product').innerHTML=this.getActiveProducts().filter(p=>p.stock>0).map(p=>`<option value="${p.id}">${p.name} (Master Stock: ${p.stock})</option>`).join('')}if(modalId==='createTaskModal'){document.getElementById('task-assignee').innerHTML=this.getActiveEmployees().map(e=>`<option value="${e.id}">${e.name}</option>`).join('')}document.getElementById(modalId)?.classList.remove('hidden')},
         closeModal(modalId){document.getElementById(modalId)?.classList.add('hidden')},
         createEmployee(name,position){return{id:`emp_${Date.now()}`,name,position,isActive:true,inventory:[],transactions:[],stores:[],invoices:[]}},
-        handleFirstEmployee(e){e.preventDefault();const name=document.getElementById('first-employee-name').value;const position=document.getElementById('first-employee-position').value;if(!name.trim()||!position.trim())return;const firstEmployee=this.createEmployee(name,position);this.state.employees.push(firstEmployee);this.state.currentEmployeeId=firstEmployee.id;this.saveState();this.render();this.showMainApp();this.togglePanel('company-overview',true);this.togglePanel('ai-advisor',true)},
+        handleFirstEmployee(e){e.preventDefault();const name=document.getElementById('first-employee-name').value;const position=document.getElementById('first-employee-position').value;if(!name.trim()||!position.trim())return;const firstEmployee=this.createEmployee(name,position);this.state.employees.push(firstEmployee);this.state.currentEmployeeId=firstEmployee.id; this.state.currentView = 'employee'; this.saveState();this.render();this.showMainApp();this.togglePanel('quick-actions',true);this.togglePanel('ai-advisor',true)},
         handleAddEmployee(e){e.preventDefault();const name=document.getElementById('new-employee-name').value;const position=document.getElementById('new-employee-position').value;if(!name.trim()||!position.trim())return;this.state.employees.push(this.createEmployee(name,position));this.saveState();this.render();this.closeModal('addEmployeeModal');this.showNotification('Employee added successfully!');e.target.reset()},
         startEditEmployee(id){const employee=this.getEmployee(id);if(!employee)return;document.getElementById('edit-employee-id').value=id;document.getElementById('edit-employee-name').value=employee.name;document.getElementById('edit-employee-position').value=employee.position;this.openModal('editEmployeeModal')},
         handleUpdateEmployee(e){e.preventDefault();const id=document.getElementById('edit-employee-id').value;const employee=this.getEmployee(id);if(!employee)return;employee.name=document.getElementById('edit-employee-name').value;employee.position=document.getElementById('edit-employee-position').value;this.saveState();this.render();this.closeModal('editEmployeeModal');this.showNotification('Employee updated!')},
         deactivateEmployee(id){if(confirm('Are you sure you want to deactivate this employee? They will not be able to log sales or expenses.')){const employee=this.getEmployee(id);if(employee){employee.isActive=false;this.saveState();this.render();this.showNotification('Employee deactivated.','error')}}},
         reactivateEmployee(id){const employee=this.getEmployee(id);if(employee){employee.isActive=true;this.saveState();this.render();this.showNotification('Employee reactivated.')}},
-        handleEmployeeSwitch(e){this.state.currentEmployeeId=e.target.value;this.state.ledgerFilter = 'all'; this.state.activeInvoiceSubTab = 'create'; this.saveState();this.render()},
-        handleAddStore(e){e.preventDefault();const employee = this.getCurrentEmployee(); if(!employee) return; const name=document.getElementById('new-store-name').value;const location=document.getElementById('new-store-location').value;const creditLimit=parseFloat(document.getElementById('new-store-credit-limit').value);if(!name.trim()||isNaN(creditLimit)){this.showNotification('Please fill all fields correctly.','error');return}employee.stores.push({id:`store_${Date.now()}`,name,location,creditAvailable:creditLimit,creditUsed:0,creditPaidBack:0});this.saveState();this.setActiveTab('stores');this.showNotification('Store added successfully!');e.target.reset()},
+        handleEmployeeSwitch(e){
+            this.state.currentEmployeeId=e.target.value;
+            this.state.currentView = 'employee';
+            this.state.ledgerFilter = 'all'; 
+            this.state.activeInvoiceSubTab = 'create'; 
+            this.saveState();
+            this.render();
+        },
+        handleAddStore(e){e.preventDefault();const employee = this.getCurrentEmployee(); if(!employee) return; const name=document.getElementById('new-store-name').value;const location=document.getElementById('new-store-location').value;const creditLimit=parseFloat(document.getElementById('new-store-credit-limit').value);if(!name.trim()||isNaN(creditLimit)){this.showNotification('Please fill all fields correctly.','error');return}employee.stores.push({id:`store_${Date.now()}`,name,location,creditAvailable:creditLimit,creditUsed:0,creditPaidBack:0});this.saveState();this.setActiveTab('stores', 'employee');this.showNotification('Store added successfully!');e.target.reset()},
         startEditStore(id){const employee = this.getCurrentEmployee(); if(!employee) return; const store=employee.stores.find(s=>s.id===id);if(!store)return;document.getElementById('edit-store-id').value=id;document.getElementById('edit-store-name').value=store.name;document.getElementById('edit-store-location').value=store.location;document.getElementById('edit-store-credit-limit').value=(store.creditAvailable||0)+(store.creditUsed||0);this.openModal('editStoreModal')},
-        handleUpdateStore(e){e.preventDefault();const employee = this.getCurrentEmployee(); if(!employee) return; const id=document.getElementById('edit-store-id').value;const store=employee.stores.find(s=>s.id===id);if(!store)return;const newCreditLimit=parseFloat(document.getElementById('edit-store-credit-limit').value);const creditUsed = store.creditUsed || 0; if(isNaN(newCreditLimit)||newCreditLimit<creditUsed){this.showNotification('New credit limit cannot be less than credit already used.','error');return}store.name=document.getElementById('edit-store-name').value;store.location=document.getElementById('edit-store-location').value;store.creditAvailable=newCreditLimit-creditUsed;this.saveState();this.setActiveTab('stores');this.closeModal('editStoreModal');this.showNotification('Store updated!')},
-        deleteStore(id){if(confirm('Are you sure you want to delete this store? This action cannot be undone.')){const employee = this.getCurrentEmployee(); if(!employee) return; employee.stores=employee.stores.filter(s=>s.id!==id);this.saveState();this.setActiveTab('stores');this.showNotification('Store deleted.','error')}},
+        handleUpdateStore(e){e.preventDefault();const employee = this.getCurrentEmployee(); if(!employee) return; const id=document.getElementById('edit-store-id').value;const store=employee.stores.find(s=>s.id===id);if(!store)return;const newCreditLimit=parseFloat(document.getElementById('edit-store-credit-limit').value);const creditUsed = store.creditUsed || 0; if(isNaN(newCreditLimit)||newCreditLimit<creditUsed){this.showNotification('New credit limit cannot be less than credit already used.','error');return}store.name=document.getElementById('edit-store-name').value;store.location=document.getElementById('edit-store-location').value;store.creditAvailable=newCreditLimit-creditUsed;this.saveState();this.setActiveTab('stores', 'employee');this.closeModal('editStoreModal');this.showNotification('Store updated!')},
+        deleteStore(id){if(confirm('Are you sure you want to delete this store? This action cannot be undone.')){const employee = this.getCurrentEmployee(); if(!employee) return; employee.stores=employee.stores.filter(s=>s.id!==id);this.saveState();this.setActiveTab('stores', 'employee');this.showNotification('Store deleted.','error')}},
         startReceiveCredit(id){const employee = this.getCurrentEmployee(); if(!employee) return; const store=employee.stores.find(s=>s.id===id);if(!store)return;const outstanding=(store.creditUsed||0)-(store.creditPaidBack||0);if(outstanding<=0){this.showNotification('This store has no outstanding credit.','success');return}document.getElementById('credit-store-id').value=id;document.getElementById('credit-store-name').textContent=store.name;document.getElementById('credit-outstanding').textContent=`$${outstanding.toFixed(2)}`;document.getElementById('credit-received-amount').max=outstanding;document.getElementById('credit-received-amount').value=outstanding.toFixed(2);this.openModal('creditReceivedModal')},
         handleAddProduct(e){e.preventDefault();const name=document.getElementById('new-product-name').value;const price=parseFloat(document.getElementById('new-product-price').value);const stock=parseInt(document.getElementById('new-product-stock').value);if(!name.trim()||isNaN(price)||isNaN(stock))return;this.state.masterInventory.push({id:`prod_${Date.now()}`,name,price,stock,isActive:true});this.saveState();this.render();this.closeModal('addProductModal');this.showNotification('Product added to master inventory!');e.target.reset()},
         startEditProduct(id){const product=this.getProduct(id);if(!product)return;document.getElementById('edit-product-id').value=id;document.getElementById('edit-product-name').value=product.name;document.getElementById('edit-product-price').value=product.price;document.getElementById('edit-product-stock').value=product.stock;this.openModal('editProductModal')},
@@ -663,8 +962,8 @@ document.addEventListener('DOMContentLoaded', () => {
         handleDelegateStock(e){e.preventDefault();const employeeId=document.getElementById('delegate-employee').value;const productId=document.getElementById('delegate-product').value;const quantity=parseInt(document.getElementById('delegate-quantity').value);const employee=this.getEmployee(employeeId);const product=this.getProduct(productId);if(!employee||!product||isNaN(quantity)||quantity<=0){this.showNotification('Invalid delegation details.','error');return}if(product.stock<quantity){this.showNotification('Not enough stock in master inventory.','error');return}product.stock-=quantity;let employeeProduct=employee.inventory.find(p=>p.productId===productId);if(employeeProduct){employeeProduct.stock+=quantity}else{employee.inventory.push({productId:productId,stock:quantity})}this.saveState();this.render();this.closeModal('delegateStockModal');this.showNotification(`Delegated ${quantity} of ${product.name} to ${employee.name}.`)},
         handleCreateTask(e){e.preventDefault();const description=document.getElementById('task-description').value;const assigneeId=document.getElementById('task-assignee').value;if(!description.trim()||!assigneeId)return;this.state.tasks.push({id:`task_${Date.now()}`,description,assigneeId,status:'Pending'});this.saveState();this.render();this.closeModal('createTaskModal');this.showNotification('Task created successfully!');e.target.reset()},
         toggleTaskStatus(id){const task=this.getTask(id);if(task){task.status=task.status==='Completed'?'Pending':'Completed';this.saveState();this.render()}},
-        handleRecordSale(e){e.preventDefault();const form=e.target;const employee=this.getCurrentEmployee();const productId=form.elements['sale-product'].value;const quantity=parseInt(form.elements['sale-quantity'].value);const saleType=form.elements['sale-type'].value;const storeId=form.elements['sale-store'].value;const discount=parseFloat(form.elements['sale-discount'].value)||0;const product=this.getProduct(productId);const employeeInventoryItem=employee.inventory.find(i=>i.productId===productId);const store=employee.stores.find(s => s.id === storeId);if(!product||!employeeInventoryItem||!store||!quantity||quantity<=0||isNaN(quantity)||isNaN(discount)){this.showNotification('Please fill all fields correctly.','error');return}if(employeeInventoryItem.stock<quantity){this.showNotification(`Not enough stock. Only ${employeeInventoryItem.stock} available.`,'error');return}let finalAmount=(product.price*quantity)-discount;if(isNaN(finalAmount)){this.showNotification('Error calculating final amount. Check product price.','error');return}if(saleType==='Credit'){const outstandingCredit=(store.creditUsed||0)-(store.creditPaidBack||0);const creditLimit = (store.creditAvailable || 0) + (store.creditUsed || 0); if(outstandingCredit+finalAmount>creditLimit){this.showNotification('This sale exceeds the store\'s credit limit.','error');return}store.creditUsed+=finalAmount;store.creditAvailable-=finalAmount}else if(saleType==='Deal'){const masterProduct=this.getProduct(productId);if(masterProduct.stock<quantity){this.showNotification(`Not enough stock in Master Inventory for a deal sale. Only ${masterProduct.stock} available.`,'error');return}masterProduct.stock-=quantity}else{employeeInventoryItem.stock-=quantity}employee.transactions.push({id:`txn_${Date.now()}`,type:'sale',productId,quantity,saleType,storeId,discount,amount:finalAmount,date:new Date().toISOString(),invoiced:false});this.saveState();this.setActiveTab('sales-expenses');this.showNotification('Sale recorded successfully!');form.reset();this.updateFinalSaleAmount()},
-        handleRecordExpense(e){e.preventDefault();const form=e.target;const employee=this.getCurrentEmployee();if(!employee)return;const description=form.elements['expense-description'].value;const amount=parseFloat(form.elements['expense-amount'].value);const categoryId=form.elements['expense-category'].value;if(!description.trim()||isNaN(amount)||amount<=0||!categoryId){this.showNotification('Please fill all fields correctly.','error');return}const newExpense={id:`txn_${Date.now()}`,type:'expense',description:description.trim(),amount,categoryId,date:new Date().toISOString()};employee.transactions.push(newExpense);this.saveState();this.setActiveTab('sales-expenses');this.showNotification('Expense recorded successfully!','success');form.reset()},
+        handleRecordSale(e){e.preventDefault();const form=e.target;const employee=this.getCurrentEmployee();const productId=form.elements['sale-product'].value;const quantity=parseInt(form.elements['sale-quantity'].value);const saleType=form.elements['sale-type'].value;const storeId=form.elements['sale-store'].value;const discount=parseFloat(form.elements['sale-discount'].value)||0;const product=this.getProduct(productId);const employeeInventoryItem=employee.inventory.find(i=>i.productId===productId);const store=employee.stores.find(s => s.id === storeId);if(!product||!employeeInventoryItem||!store||!quantity||quantity<=0||isNaN(quantity)||isNaN(discount)){this.showNotification('Please fill all fields correctly.','error');return}if(employeeInventoryItem.stock<quantity){this.showNotification(`Not enough stock. Only ${employeeInventoryItem.stock} available.`,'error');return}let finalAmount=(product.price*quantity)-discount;if(isNaN(finalAmount)){this.showNotification('Error calculating final amount. Check product price.','error');return}if(saleType==='Credit'){const outstandingCredit=(store.creditUsed||0)-(store.creditPaidBack||0);const creditLimit = (store.creditAvailable || 0) + (store.creditUsed || 0); if(outstandingCredit+finalAmount>creditLimit){this.showNotification('This sale exceeds the store\'s credit limit.','error');return}store.creditUsed+=finalAmount;store.creditAvailable-=finalAmount}else if(saleType==='Deal'){const masterProduct=this.getProduct(productId);if(masterProduct.stock<quantity){this.showNotification(`Not enough stock in Master Inventory for a deal sale. Only ${masterProduct.stock} available.`,'error');return}masterProduct.stock-=quantity}else{employeeInventoryItem.stock-=quantity}employee.transactions.push({id:`txn_${Date.now()}`,type:'sale',productId,quantity,saleType,storeId,discount,amount:finalAmount,date:new Date().toISOString(),invoiced:false});this.saveState();this.setActiveTab('sales-expenses', 'employee');this.showNotification('Sale recorded successfully!');form.reset();this.updateFinalSaleAmount()},
+        handleRecordExpense(e){e.preventDefault();const form=e.target;const employee=this.getCurrentEmployee();if(!employee)return;const description=form.elements['expense-description'].value;const amount=parseFloat(form.elements['expense-amount'].value);const categoryId=form.elements['expense-category'].value;if(!description.trim()||isNaN(amount)||amount<=0||!categoryId){this.showNotification('Please fill all fields correctly.','error');return}const newExpense={id:`txn_${Date.now()}`,type:'expense',description:description.trim(),amount,categoryId,date:new Date().toISOString()};employee.transactions.push(newExpense);this.saveState();this.setActiveTab('sales-expenses', 'employee');this.showNotification('Expense recorded successfully!','success');form.reset()},
 
         downloadInvoice(invoiceHTML, store, invoiceDate) {
             this.showNotification('Generating PDF...');
@@ -753,7 +1052,7 @@ document.addEventListener('DOMContentLoaded', () => {
             this.downloadInvoice(invoiceHTML, store, new Date().toISOString().split('T')[0]);
             
             this.state.activeInvoiceSubTab = 'recent';
-            this.setActiveTab('invoices');
+            this.setActiveTab('invoices', 'employee');
         },
 
         generateInvoiceHtml(store, sales, total, periodText) {
@@ -804,7 +1103,7 @@ document.addEventListener('DOMContentLoaded', () => {
     window.app = app;
 
     const styleSheet = document.createElement("style");
-    styleSheet.innerText = `.modal-input { width: 100%; background-color: ${tailwind.config.theme.extend.colors['light-bg']}; border: 1px solid #d1d5db; border-radius: 0.375rem; padding: 0.5rem 0.75rem; } .dark .modal-input { background-color: ${tailwind.config.theme.extend.colors['dark-bg']}; border-color: #4b5563; } .modal-submit-button { width: 100%; background-color: ${tailwind.config.theme.extend.colors.primary}; color: black; font-weight: bold; padding: 0.5rem 1rem; border-radius: 0.375rem; transition: background-color 0.2s; } .modal-submit-button:hover { background-color: ${tailwind.config.theme.extend.colors['primary-hover']}; } .form-label { display: block; font-size: 0.875rem; font-weight: 500; color: ${tailwind.config.theme.extend.colors['light-text-secondary']}; } .dark .form-label { color: ${tailwind.config.theme.extend.colors['dark-text-secondary']}; } .form-input { margin-top: 0.25rem; display: block; width: 100%; background-color: ${tailwind.config.theme.extend.colors['light-bg']}; border: 1px solid #d1d5db; border-radius: 0.375rem; padding: 0.5rem 0.75rem; outline: none; } .dark .form-input { background-color: ${tailwind.config.theme.extend.colors['dark-bg']}; border-color: #4b5563; } .form-input:focus { ring: 2px; border-color: ${tailwind.config.theme.extend.colors.primary}; box-shadow: 0 0 0 2px ${tailwind.config.theme.extend.colors.primary}; } .table-header { padding: 0.75rem 1.5rem; text-align: left; font-size: 0.75rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; color: ${tailwind.config.theme.extend.colors['light-text-secondary']}; } .dark .table-header { color: ${tailwind.config.theme.extend.colors['dark-text-secondary']}; }`;
+    styleSheet.innerText = `.modal-input { width: 100%; background-color: ${tailwind.config.theme.extend.colors['light-bg']}; border: 1px solid #d1d5db; border-radius: 0.375rem; padding: 0.5rem 0.75rem; } .dark .modal-input { background-color: ${tailwind.config.theme.extend.colors['dark-bg']}; border-color: #4b5563; } .modal-submit-button { width: 100%; background-color: ${tailwind.config.theme.extend.colors.primary}; color: black; font-weight: bold; padding: 0.5rem 1rem; border-radius: 0.375rem; transition: background-color 0.2s; } .modal-submit-button:hover { background-color: ${tailwind.config.theme.extend.colors['primary-hover']}; } .form-label { display: block; font-size: 0.875rem; font-weight: 500; color: ${tailwind.config.theme.extend.colors['light-text-secondary']}; } .dark .form-label { color: ${tailwind.config.theme.extend.colors['dark-text-secondary']}; } .form-input { margin-top: 0.25rem; display: block; width: 100%; background-color: ${tailwind.config.theme.extend.colors['light-bg']}; border: 1px solid #d1d5db; border-radius: 0.375rem; padding: 0.5rem 0.75rem; outline: none; } .dark .form-input { background-color: ${tailwind.config.theme.extend.colors['dark-bg']}; border-color: #4b5563; } .form-input:focus { ring: 2px; border-color: ${tailwind.config.theme.extend.colors.primary}; box-shadow: 0 0 0 2px ${tailwind.config.theme.extend.colors.primary}; } .table-header { padding: 0.75rem 1.5rem; text-align: left; font-size: 0.75rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; color: ${tailwind.config.theme.extend.colors['light-text-secondary']}; } .dark .table-header { color: ${tailwind.config.theme.extend.colors['dark-text-secondary']}; } #employee-view, #company-view { display: flex; }`;
     document.head.appendChild(styleSheet);
 
     app.init();
