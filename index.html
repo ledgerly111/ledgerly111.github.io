@@ -18,7 +18,7 @@
                 extend: {
                     fontFamily: {
                         'sans': ['Inter', 'sans-serif'],
-                        'logo': ['Poppins', 'sans-serif'], // New font for the logo
+                        'logo': ['Poppins', 'sans-serif'],
                     },
                     colors: {
                         'light-bg': '#f0f4f9', 'light-surface': '#ffffff', 'light-text': '#1f2937', 'light-text-secondary': '#6b7280',
@@ -38,12 +38,6 @@
         }
     </script>
     <style>
-        /* This is where you would put the code for your custom font if you host it */
-        /* @font-face {
-            font-family: 'Lemon Milk Pro Italic Var';
-            src: url('/path/to/your/lemon-milk-pro-italic.woff2') format('woff2');
-        } */
-
         body { background-color: #f0f4f9; color: #1f2937; font-family: 'Inter', sans-serif; }
         .dark body { background-color: #131314; color: #e3e3e3; }
         .modal-backdrop { background-color: rgba(0, 0, 0, 0.6); backdrop-filter: blur(4px); }
@@ -141,11 +135,12 @@ document.addEventListener('DOMContentLoaded', () => {
         state: {
             theme: 'dark', currentEmployeeId: null, employees: [],
             masterInventory: [], tasks: [], expenseCategories: [],
-            productRequests: [], // Status can be 'Pending', 'Approved', 'Declined'
+            productRequests: [], 
             ledgerFilter: 'all', activeInvoiceSubTab: 'create',
             currentView: 'employee',
             companyActiveTab: 'dashboard',
         },
+        currentSaleCart: [],
         charts: {},
         notificationTimeout: null,
 
@@ -173,6 +168,17 @@ document.addEventListener('DOMContentLoaded', () => {
             this.state.employees.forEach(emp => {
                 if (emp.isActive === undefined) emp.isActive = true;
                 if (!emp.transactions) emp.transactions = [];
+                // Compatibility for old sales data structure
+                emp.transactions.forEach(t => {
+                    if (t.type === 'sale' && !t.items && t.productId) {
+                        t.items = [{
+                            productId: t.productId,
+                            quantity: t.quantity,
+                            price: t.amount / t.quantity, // Estimate price
+                            name: this.getProduct(t.productId)?.name || 'Unknown'
+                        }];
+                    }
+                });
                 if (!emp.inventory) emp.inventory = [];
                 if (!emp.stores) emp.stores = [];
                 if (!emp.invoices) emp.invoices = [];
@@ -197,7 +203,6 @@ document.addEventListener('DOMContentLoaded', () => {
         getTask(id) { return this.state.tasks.find(t => t.id === id); },
 
         addEventListeners() {
-            // Event listeners are now for controls inside the settings modal
             document.getElementById('theme-toggle-modal')?.addEventListener('click', () => this.toggleTheme());
             document.getElementById('first-employee-form')?.addEventListener('submit', e => this.handleFirstEmployee(e));
             document.getElementById('employee-switcher-modal')?.addEventListener('change', e => this.handleEmployeeSwitch(e));
@@ -222,14 +227,20 @@ document.addEventListener('DOMContentLoaded', () => {
         attachEmployeeViewEventListeners() {
             document.getElementById('employee-tabs-container')?.addEventListener('click', e => this.handleTabClick(e, 'employee'));
             document.getElementById('mobile-tabs')?.addEventListener('change', e => this.handleMobileTabChange(e));
+
             const saleForm = document.getElementById('record-sale-form');
-            if (saleForm) {
+            if(saleForm) {
                 saleForm.addEventListener('submit', e => this.handleRecordSale(e));
-                saleForm.querySelector('#sale-type')?.addEventListener('change', () => this.handleSaleTypeChange());
-                saleForm.querySelector('#sale-product')?.addEventListener('change', () => this.updateFinalSaleAmount());
-                saleForm.querySelector('#sale-quantity')?.addEventListener('input', () => this.updateFinalSaleAmount());
-                saleForm.querySelector('#sale-discount')?.addEventListener('input', () => this.updateFinalSaleAmount());
+                document.getElementById('add-item-to-sale-btn')?.addEventListener('click', () => this.addToSaleCart());
+                document.getElementById('sale-cart-items')?.addEventListener('click', e => {
+                    if (e.target.closest('.remove-sale-item-btn')) {
+                        const productId = e.target.closest('.remove-sale-item-btn').dataset.productId;
+                        this.removeFromSaleCart(productId);
+                    }
+                });
+                document.getElementById('sale-discount')?.addEventListener('input', () => this.updateSaleCartTotal());
             }
+
             document.getElementById('record-expense-form')?.addEventListener('submit', e => this.handleRecordExpense(e));
             document.getElementById('employee-add-store-form')?.addEventListener('submit', e => this.handleAddStore(e));
             document.getElementById('edit-store-form')?.addEventListener('submit', e => this.handleUpdateStore(e));
@@ -422,6 +433,65 @@ document.addEventListener('DOMContentLoaded', () => {
             const revenue = employee.transactions.filter(t => t.type === 'sale').reduce((sum, t) => sum + t.amount, 0);
             const expenses = employee.transactions.filter(t => t.type === 'expense').reduce((sum, t) => sum + t.amount, 0);
             const profit = revenue - expenses;
+            const salesAndExpensesContent = `
+                <div id="sales-expenses-content" class="tab-content hidden grid grid-cols-1 lg:grid-cols-2 gap-4">
+                    <div class="bg-light-bg dark:bg-dark-bg p-4 sm:p-6 rounded-lg">
+                        <h3 class="text-xl font-bold mb-4 flex items-center"><i class="fas fa-cart-plus mr-3 text-accent-green"></i>Record a Sale</h3>
+                        <form id="record-sale-form" class="space-y-4">
+                            <div class="grid grid-cols-1 sm:grid-cols-5 gap-2 items-end p-2 border border-dashed border-gray-400 dark:border-gray-600 rounded-md">
+                                <div class="sm:col-span-2">
+                                    <label for="add-sale-product" class="form-label">Product</label>
+                                    <select id="add-sale-product" class="form-input"></select>
+                                </div>
+                                <div class="sm:col-span-1">
+                                    <label for="add-sale-quantity" class="form-label">Qty</label>
+                                    <input type="number" id="add-sale-quantity" value="1" min="1" class="form-input">
+                                </div>
+                                <div class="sm:col-span-2">
+                                    <button type="button" id="add-item-to-sale-btn" class="w-full bg-primary/80 text-black font-bold py-2 px-4 rounded-md hover:bg-primary">Add to Sale</button>
+                                </div>
+                            </div>
+
+                            <div id="sale-cart-items" class="space-y-2 max-h-48 overflow-y-auto p-2 border-y border-gray-200 dark:border-gray-700">
+                                <p class="text-center text-sm text-light-text-secondary dark:text-dark-text-secondary">Items will appear here...</p>
+                            </div>
+                            
+                            <div class="space-y-3">
+                                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                    <div>
+                                        <label for="sale-type" class="form-label">Sale Type</label>
+                                        <select id="sale-type" name="sale-type" class="form-input"></select>
+                                    </div>
+                                    <div>
+                                        <label for="sale-store" class="form-label">Store</label>
+                                        <select id="sale-store" name="sale-store" class="form-input"></select>
+                                    </div>
+                                </div>
+                                <div>
+                                    <label for="sale-discount" class="form-label">Overall Discount (AED)</label>
+                                    <input type="number" id="sale-discount" name="sale-discount" min="0" value="0" step="0.01" class="form-input">
+                                </div>
+                                <div class="p-3 bg-light-surface dark:bg-dark-surface rounded-md text-right">
+                                    <span class="text-light-text-secondary dark:text-dark-text-secondary">Final Total: </span>
+                                    <strong id="final-sale-amount" class="text-xl">AED 0.00</strong>
+                                </div>
+                                <button type="submit" id="record-sale-btn" class="w-full bg-primary text-black font-bold py-2 px-4 rounded-md hover:bg-primary-hover disabled:opacity-50 disabled:cursor-not-allowed" disabled>Record Transaction</button>
+                            </div>
+                        </form>
+                    </div>
+                    <div class="bg-light-bg dark:bg-dark-bg p-4 sm:p-6 rounded-lg">
+                        <h3 class="text-xl font-bold mb-4 flex items-center"><i class="fas fa-money-bill-wave mr-3 text-accent-red"></i>Record an Expense</h3>
+                        <form id="record-expense-form" class="space-y-3">
+                            <div><label for="expense-description" class="form-label">Description</label><input type="text" id="expense-description" name="expense-description" required class="form-input"></div>
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                <div><label for="expense-amount" class="form-label">Amount (AED)</label><input type="number" id="expense-amount" name="expense-amount" step="0.01" min="0" required class="form-input"></div>
+                                <div><label for="expense-category" class="form-label">Category</label><select id="expense-category" name="expense-category" required class="form-input"></select></div>
+                            </div>
+                            <button type="submit" class="w-full bg-primary text-black font-bold py-2 px-4 rounded-md hover:bg-primary-hover">Record Expense</button>
+                        </form>
+                    </div>
+                </div>
+            `;
 
             return `
             <div class="w-full max-w-6xl mx-auto px-4 py-6">
@@ -458,7 +528,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         </div>
                         <div id="my-tasks-content" class="tab-content hidden"><h3 class="text-xl font-bold mb-4">My Tasks</h3><ul id="employee-tasks-list" class="space-y-3"></ul></div>
                         <div id="my-inventory-content" class="tab-content hidden"></div>
-                        <div id="sales-expenses-content" class="tab-content hidden grid grid-cols-1 lg:grid-cols-2 gap-4"><div class="bg-light-bg dark:bg-dark-bg p-4 sm:p-6 rounded-lg"><h3 class="text-xl font-bold mb-4 flex items-center"><i class="fas fa-cart-plus mr-3 text-accent-green"></i>Record a Sale</h3><form id="record-sale-form" class="space-y-3"><div class="grid grid-cols-1 sm:grid-cols-2 gap-4"><div><label for="sale-product" class="form-label">Product</label><select id="sale-product" name="sale-product" class="form-input"></select></div><div><label for="sale-quantity" class="form-label">Quantity</label><input type="number" id="sale-quantity" name="sale-quantity" min="1" value="1" class="form-input"></div></div><div class="grid grid-cols-1 sm:grid-cols-2 gap-4"><div><label for="sale-type" class="form-label">Sale Type</label><select id="sale-type" name="sale-type" class="form-input"></select></div><div><label for="sale-store" class="form-label">Store</label><select id="sale-store" name="sale-store" class="form-input"></select></div></div><div><label for="sale-discount" class="form-label">Discount (AED)</label><input type="number" id="sale-discount" name="sale-discount" min="0" value="0" step="0.01" class="form-input"></div><div class="p-3 bg-light-surface dark:bg-dark-surface rounded-md text-right"><span class="text-light-text-secondary dark:text-dark-text-secondary">Final: </span><strong id="final-sale-amount" class="text-xl">AED 0.00</strong></div><button type="submit" class="w-full bg-primary text-black font-bold py-2 px-4 rounded-md hover:bg-primary-hover">Record Sale</button></form></div><div class="bg-light-bg dark:bg-dark-bg p-4 sm:p-6 rounded-lg"><h3 class="text-xl font-bold mb-4 flex items-center"><i class="fas fa-money-bill-wave mr-3 text-accent-red"></i>Record an Expense</h3><form id="record-expense-form" class="space-y-3"><div><label for="expense-description" class="form-label">Description</label><input type="text" id="expense-description" name="expense-description" required class="form-input"></div><div class="grid grid-cols-1 sm:grid-cols-2 gap-4"><div><label for="expense-amount" class="form-label">Amount (AED)</label><input type="number" id="expense-amount" name="expense-amount" step="0.01" min="0" required class="form-input"></div><div><label for="expense-category" class="form-label">Category</label><select id="expense-category" name="expense-category" required class="form-input"></select></div></div><button type="submit" class="w-full bg-primary text-black font-bold py-2 px-4 rounded-md hover:bg-primary-hover">Record Expense</button></form></div></div>
+                        ${salesAndExpensesContent}
                         <div id="stores-content" class="tab-content hidden"><div class="grid grid-cols-1 lg:grid-cols-2 gap-4"><div class="bg-light-bg dark:bg-dark-bg p-4 sm:p-6 rounded-lg"><h3 class="text-xl font-bold mb-4">Add Store</h3><form id="employee-add-store-form" class="space-y-3"><div><label for="new-store-name" class="form-label">Store Name</label><input type="text" id="new-store-name" required class="form-input"></div><div><label for="new-store-location" class="form-label">Location</label><input type="text" id="new-store-location" required class="form-input"></div><div><label for="new-store-credit-limit" class="form-label">Credit Limit (AED)</label><input type="number" id="new-store-credit-limit" required min="0" step="0.01" class="form-input"></div><button type="submit" class="w-full bg-primary text-black font-bold py-2 px-4 rounded-md hover:bg-primary-hover">Add Store</button></form></div><div class="lg:col-span-1 space-y-4" id="stores-list-container"><h3 class="text-xl font-bold">My Stores</h3><div id="stores-list" class="space-y-4 max-h-[60vh] overflow-y-auto pr-2"></div></div></div></div>
                         <div id="request-stock-content" class="tab-content hidden"></div>
                         <div id="invoices-content" class="tab-content hidden">
@@ -477,7 +547,7 @@ document.addEventListener('DOMContentLoaded', () => {
                                         <label class="form-label">2. Select Uninvoiced Sales</label>
                                         <div id="invoice-transactions-list" class="mt-2 space-y-2 max-h-60 overflow-y-auto border border-gray-300 dark:border-gray-600 rounded-md p-3"></div>
                                     </div>
-                                    <button type="submit" class="w-full bg-primary text-black font-bold py-2 px-4 rounded-md hover:bg-primary-hover flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed" disabled><i class="fas fa-download mr-2"></i>Generate Invoice</button>
+                                    <button type="submit" class="w-full bg-primary text-black font-bold py-2 px-4 rounded-md hover:bg-primary-hover flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed" disabled><i class="fas fa-file-invoice-dollar mr-2"></i>Create & Save Invoice</button>
                                 </form>
                             </div>
                             <div id="pending-invoice-panel" class="invoice-sub-tab-content hidden bg-light-bg dark:bg-dark-bg p-4 sm:p-6 rounded-lg"></div>
@@ -574,16 +644,26 @@ document.addEventListener('DOMContentLoaded', () => {
                 const date = new Date(t.date).toLocaleDateString();
                 const time = new Date(t.date).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
                 if (t.type === 'sale') {
-                    const product = this.getProduct(t.productId);
                     const store = employee.stores.find(s => s.id === t.storeId);
-                    const invoicedIcon = t.invoiced ? ` <i class="fas fa-file-invoice text-primary ml-2" title="Invoiced"></i>` : '';
+                    const details = (t.items && t.items.length > 1) 
+                        ? `Sold ${t.items.length} products to ${store?.name || 'N/A'}` 
+                        : `Sold ${t.items?.[0]?.quantity || t.quantity} x ${t.items?.[0]?.name || 'N/A'} to ${store?.name || 'N/A'}`;
+                    
+                    // --- MODIFIED: Conditional invoice button ---
+                    let invoicedIcon = '';
+                    if (typeof t.invoiced === 'string' && t.invoiced.startsWith('inv_')) {
+                        invoicedIcon = ` <button onclick="app.previewInvoice('${t.invoiced}')" class="text-primary hover:text-primary-hover ml-2" title="View Invoice"><i class="fas fa-file-invoice"></i></button>`;
+                    } else if (t.invoiced === true) { // Legacy support for old data
+                        invoicedIcon = ` <i class="fas fa-file-invoice text-primary/50 ml-2" title="Invoiced (Legacy)"></i>`;
+                    }
+                    
                     let typeBadge = '';
                     switch (t.saleType) {
                         case 'Credit': typeBadge = `<span class="px-2 py-1 text-xs font-semibold rounded-full bg-accent-yellow/20 text-yellow-600 dark:text-accent-yellow">Credit</span>`; break;
                         case 'Deal': typeBadge = `<span class="px-2 py-1 text-xs font-semibold rounded-full bg-accent-purple/20 text-purple-600 dark:text-accent-purple">Deal</span>`; break;
                         default: typeBadge = `<span class="px-2 py-1 text-xs font-semibold rounded-full bg-accent-green/20 text-green-600 dark:text-accent-green">Cash Sale</span>`;
                     }
-                    return `<tr class="hover:bg-light-surface dark:hover:bg-dark-surface/50 text-sm"><td class="px-4 py-3 whitespace-nowrap">${date} ${time}</td><td class="px-4 py-3">${typeBadge}</td><td class="px-4 py-3">Sold ${t.quantity} x ${product?.name||'N/A'} to ${store?.name||'N/A'}${invoicedIcon}</td><td class="px-4 py-3 text-right font-mono text-accent-green">+${t.amount.toFixed(2)}</td></tr>`;
+                    return `<tr class="hover:bg-light-surface dark:hover:bg-dark-surface/50 text-sm"><td class="px-4 py-3 whitespace-nowrap">${date} ${time}</td><td class="px-4 py-3">${typeBadge}</td><td class="px-4 py-3">${details}${invoicedIcon}</td><td class="px-4 py-3 text-right font-mono text-accent-green">+${t.amount.toFixed(2)}</td></tr>`;
                 } else if (t.type === 'expense') {
                     const category = this.getCategory(t.categoryId);
                     return `<tr class="hover:bg-light-surface dark:hover:bg-dark-surface/50 text-sm"><td class="px-4 py-3 whitespace-nowrap">${date} ${time}</td><td class="px-4 py-3"><span class="px-2 py-1 text-xs font-semibold rounded-full bg-accent-red/20 text-red-600 dark:text-accent-red">Expense</span></td><td class="px-4 py-3">${t.description} <span class="text-light-text-secondary dark:text-dark-text-secondary">(${category?.name||'Uncategorized'})</span></td><td class="px-4 py-3 text-right font-mono text-accent-red">-${t.amount.toFixed(2)}</td></tr>`;
@@ -595,15 +675,79 @@ document.addEventListener('DOMContentLoaded', () => {
             }).join('') || `<tr><td colspan="4" class="text-center py-10 text-light-text-secondary dark:text-dark-text-secondary">No transactions found for this filter.</td></tr>`;
         },
 
-        handleSaleTypeChange() { this.updateFinalSaleAmount(); },
-        updateFinalSaleAmount() {
-            const productSelect = document.getElementById('sale-product');
-            const quantity = parseInt(document.getElementById('sale-quantity').value) || 0;
+        addToSaleCart() {
+            const productSelect = document.getElementById('add-sale-product');
+            const quantityInput = document.getElementById('add-sale-quantity');
+            const productId = productSelect.value;
+            const quantity = parseInt(quantityInput.value);
+            
+            if (!productId || isNaN(quantity) || quantity <= 0) {
+                this.showNotification('Please select a product and enter a valid quantity.', 'error');
+                return;
+            }
+
+            const product = this.getProduct(productId);
+            const employee = this.getCurrentEmployee();
+            const inventoryItem = employee.inventory.find(i => i.productId === productId);
+            const availableStock = inventoryItem ? inventoryItem.stock : 0;
+            
+            const existingCartItem = this.currentSaleCart.find(item => item.productId === productId);
+            const currentQuantityInCart = existingCartItem ? existingCartItem.quantity : 0;
+
+            if (quantity + currentQuantityInCart > availableStock) {
+                this.showNotification(`Not enough stock. You only have ${availableStock} available.`, 'error');
+                return;
+            }
+
+            if (existingCartItem) {
+                existingCartItem.quantity += quantity;
+            } else {
+                this.currentSaleCart.push({ 
+                    productId: product.id, 
+                    name: product.name, 
+                    quantity: quantity, 
+                    price: product.price 
+                });
+            }
+            
+            this.renderSaleCart();
+            productSelect.selectedIndex = 0;
+            quantityInput.value = 1;
+        },
+        
+        removeFromSaleCart(productId) {
+            this.currentSaleCart = this.currentSaleCart.filter(item => item.productId !== productId);
+            this.renderSaleCart();
+        },
+
+        renderSaleCart() {
+            const cartContainer = document.getElementById('sale-cart-items');
+            if (this.currentSaleCart.length === 0) {
+                cartContainer.innerHTML = `<p class="text-center text-sm text-light-text-secondary dark:text-dark-text-secondary">Items will appear here...</p>`;
+            } else {
+                cartContainer.innerHTML = this.currentSaleCart.map(item => `
+                    <div class="flex justify-between items-center p-2 bg-light-surface dark:bg-dark-surface rounded-md text-sm">
+                        <div>
+                            <span class="font-semibold">${item.name}</span>
+                            <span class="text-light-text-secondary dark:text-dark-text-secondary ml-2">(Qty: ${item.quantity})</span>
+                        </div>
+                        <div class="flex items-center">
+                            <span class="font-mono mr-4">AED ${(item.price * item.quantity).toFixed(2)}</span>
+                            <button type="button" class="remove-sale-item-btn text-accent-red hover:opacity-75" data-product-id="${item.productId}">&times;</button>
+                        </div>
+                    </div>
+                `).join('');
+            }
+            this.updateSaleCartTotal();
+        },
+
+        updateSaleCartTotal() {
+            const subtotal = this.currentSaleCart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
             const discount = parseFloat(document.getElementById('sale-discount').value) || 0;
-            const product = this.getProduct(productSelect.value);
-            if (!product || quantity <= 0) { document.getElementById('final-sale-amount').textContent = 'AED 0.00'; return; }
-            const total = (product.price * quantity) - discount;
+            const total = subtotal - discount;
+            
             document.getElementById('final-sale-amount').textContent = `AED ${total.toFixed(2)}`;
+            document.getElementById('record-sale-btn').disabled = this.currentSaleCart.length === 0;
         },
 
         handleCreditReceived(e) {
@@ -742,18 +886,20 @@ document.addEventListener('DOMContentLoaded', () => {
             const salesByProduct = {};
             this.state.employees.forEach(emp => {
                 (emp.transactions || []).filter(t => t.type === 'sale').forEach(t => {
-                    salesByProduct[t.productId] = (salesByProduct[t.productId] || 0) + t.amount;
+                    (t.items || []).forEach(item => {
+                        salesByProduct[item.productId] = (salesByProduct[item.productId] || 0) + (item.price * item.quantity);
+                    });
                 });
             });
             const topProducts = Object.entries(salesByProduct).sort(([, a], [, b]) => b - a).slice(0, 5);
-            this.charts.companyProducts = new Chart(document.getElementById('company-top-products-chart').getContext('2d'), {
+             this.charts.companyProducts = new Chart(document.getElementById('company-top-products-chart').getContext('2d'), {
                 type: 'bar',
                 data: {
                     labels: topProducts.map(([productId]) => this.getProduct(productId)?.name || 'Unknown'),
                     datasets: [{ label: 'Revenue by Product', data: topProducts.map(([, amount]) => amount), backgroundColor: ['#89b4fa', '#a6e3a1', '#f9e2af', '#fab387', '#f38ba8'] }]
                 },
                 options: { responsive: true, maintainAspectRatio: false, indexAxis: 'y', scales: { x: { beginAtZero: true, grid: { color: gridColor }, ticks: { color: textColor } }, y: { grid: { color: gridColor }, ticks: { color: textColor } } }, plugins: { legend: { display: false }, title: { display: true, text: 'Top Products by Revenue (Firm-Wide)', color: textColor, font: { size: 16 } } } }
-            });
+             });
         },
 
         renderCompanyEmployeesTab() {
@@ -835,7 +981,7 @@ document.addEventListener('DOMContentLoaded', () => {
         },
 
         // --- EMPLOYEE VIEW TAB RENDERERS ---
-        renderDashboard() { const employee=this.getCurrentEmployee();if(!employee)return;const isDark=this.state.theme==='dark';const gridColor=isDark?'rgba(255, 255, 255, 0.1)':'rgba(0, 0, 0, 0.1)';const textColor=isDark?'#e3e3e3':'#1f2937';Object.values(this.charts).forEach(chart=>{if(chart)chart.destroy()});const salesByDate=employee.transactions.filter(t=>t.type==='sale').reduce((acc,t)=>{const date=t.date.split('T')[0];acc[date]=(acc[date]||0)+t.amount;return acc},{});const sortedDates=Object.keys(salesByDate).sort();this.charts.sales=new Chart(document.getElementById('sales-over-time-chart').getContext('2d'),{type:'line',data:{labels:sortedDates,datasets:[{label:'Daily Revenue',data:sortedDates.map(date=>salesByDate[date]),borderColor:'#89b4fa',backgroundColor:'rgba(137, 180, 250, 0.2)',tension:0.1,fill:true}]},options:{responsive:true,maintainAspectRatio:false,scales:{y:{beginAtZero:true,grid:{color:gridColor},ticks:{color:textColor}},x:{grid:{color:gridColor},ticks:{color:textColor}}},plugins:{legend:{labels:{color:textColor}}}}});const salesByProduct=employee.transactions.filter(t=>t.type==='sale').reduce((acc,t)=>{acc[t.productId]=(acc[t.productId]||0)+t.amount;return acc},{});const topProducts=Object.entries(salesByProduct).sort(([,a],[,b])=>b-a).slice(0,5);this.charts.products=new Chart(document.getElementById('top-products-chart').getContext('2d'),{type:'bar',data:{labels:topProducts.map(([productId])=>this.getProduct(productId)?.name||'Unknown'),datasets:[{label:'Revenue by Product',data:topProducts.map(([,amount])=>amount),backgroundColor:['#89b4fa','#a6e3a1','#f9e2af','#fab387','#f38ba8']}]},options:{responsive:true,maintainAspectRatio:false,indexAxis:'y',scales:{x:{beginAtZero:true,grid:{color:gridColor},ticks:{color:textColor}},y:{grid:{color:gridColor},ticks:{color:textColor}}},plugins:{legend:{display:false},title:{display:true,text:'Top Products by Revenue',color:textColor,font:{size:16}}}}});const expensesByCategory=employee.transactions.filter(t=>t.type==='expense').reduce((acc,t)=>{const category=this.getCategory(t.categoryId)||{name:'Uncategorized'};acc[category.name]=(acc[category.name]||0)+t.amount;return acc},{});this.charts.expensesByCategory=new Chart(document.getElementById('expenses-by-category-chart').getContext('2d'),{type:'doughnut',data:{labels:Object.keys(expensesByCategory),datasets:[{data:Object.values(expensesByCategory),backgroundColor:['#f38ba8','#fab387','#f9e2af','#a6e3a1','#89b4fa','#cba6f7','#f5c2e7'],borderColor:isDark?'#1e1f20':'#ffffff',borderWidth:4}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'top',labels:{color:textColor}},title:{display:true,text:'Expenses by Category',color:textColor,font:{size:16}}}}});const totalCreditUsed=employee.stores.reduce((sum,s)=>sum+(s.creditUsed||0),0);const totalCreditAvailable=employee.stores.reduce((sum,s)=>sum+(s.creditAvailable||0),0);const outstandingCredit=totalCreditUsed-employee.stores.reduce((sum,s)=>sum+(s.creditPaidBack||0),0);const totalCreditLimit=totalCreditAvailable+totalCreditUsed;this.charts.credit=new Chart(document.getElementById('store-credit-chart').getContext('2d'),{type:'bar',data:{labels:['Credit Status'],datasets:[{label:'Outstanding',data:[outstandingCredit],backgroundColor:'#f38ba8'},{label:'Available',data:[totalCreditLimit-outstandingCredit],backgroundColor:'#a6e3a1'}]},options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,scales:{x:{stacked:true,max:totalCreditLimit>0?totalCreditLimit:1},y:{stacked:true}},plugins:{title:{display:true,text:'My Store Credit Status',color:textColor,font:{size:16}},legend:{position:'top',labels:{color:textColor}}}}});},
+        renderDashboard() { const employee=this.getCurrentEmployee();if(!employee)return;const isDark=this.state.theme==='dark';const gridColor=isDark?'rgba(255, 255, 255, 0.1)':'rgba(0, 0, 0, 0.1)';const textColor=isDark?'#e3e3e3':'#1f2937';Object.values(this.charts).forEach(chart=>{if(chart)chart.destroy()});const salesByDate=employee.transactions.filter(t=>t.type==='sale').reduce((acc,t)=>{const date=t.date.split('T')[0];acc[date]=(acc[date]||0)+t.amount;return acc},{});const sortedDates=Object.keys(salesByDate).sort();this.charts.sales=new Chart(document.getElementById('sales-over-time-chart').getContext('2d'),{type:'line',data:{labels:sortedDates,datasets:[{label:'Daily Revenue',data:sortedDates.map(date=>salesByDate[date]),borderColor:'#89b4fa',backgroundColor:'rgba(137, 180, 250, 0.2)',tension:0.1,fill:true}]},options:{responsive:true,maintainAspectRatio:false,scales:{y:{beginAtZero:true,grid:{color:gridColor},ticks:{color:textColor}},x:{grid:{color:gridColor},ticks:{color:textColor}}},plugins:{legend:{labels:{color:textColor}}}}});const salesByProduct=employee.transactions.filter(t=>t.type==='sale').reduce((acc,t)=>{(t.items||[]).forEach(item=>{acc[item.productId]=(acc[item.productId]||0)+(item.price*item.quantity)});return acc},{});const topProducts=Object.entries(salesByProduct).sort(([,a],[,b])=>b-a).slice(0,5);this.charts.products=new Chart(document.getElementById('top-products-chart').getContext('2d'),{type:'bar',data:{labels:topProducts.map(([productId])=>this.getProduct(productId)?.name||'Unknown'),datasets:[{label:'Revenue by Product',data:topProducts.map(([,amount])=>amount),backgroundColor:['#89b4fa','#a6e3a1','#f9e2af','#fab387','#f38ba8']}]},options:{responsive:true,maintainAspectRatio:false,indexAxis:'y',scales:{x:{beginAtZero:true,grid:{color:gridColor},ticks:{color:textColor}},y:{grid:{color:gridColor},ticks:{color:textColor}}},plugins:{legend:{display:false},title:{display:true,text:'Top Products by Revenue',color:textColor,font:{size:16}}}}});const expensesByCategory=employee.transactions.filter(t=>t.type==='expense').reduce((acc,t)=>{const category=this.getCategory(t.categoryId)||{name:'Uncategorized'};acc[category.name]=(acc[category.name]||0)+t.amount;return acc},{});this.charts.expensesByCategory=new Chart(document.getElementById('expenses-by-category-chart').getContext('2d'),{type:'doughnut',data:{labels:Object.keys(expensesByCategory),datasets:[{data:Object.values(expensesByCategory),backgroundColor:['#f38ba8','#fab387','#f9e2af','#a6e3a1','#89b4fa','#cba6f7','#f5c2e7'],borderColor:isDark?'#1e1f20':'#ffffff',borderWidth:4}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'top',labels:{color:textColor}},title:{display:true,text:'Expenses by Category',color:textColor,font:{size:16}}}}});const totalCreditUsed=employee.stores.reduce((sum,s)=>sum+(s.creditUsed||0),0);const totalCreditAvailable=employee.stores.reduce((sum,s)=>sum+(s.creditAvailable||0),0);const outstandingCredit=totalCreditUsed-employee.stores.reduce((sum,s)=>sum+(s.creditPaidBack||0),0);const totalCreditLimit=totalCreditAvailable+totalCreditUsed;this.charts.credit=new Chart(document.getElementById('store-credit-chart').getContext('2d'),{type:'bar',data:{labels:['Credit Status'],datasets:[{label:'Outstanding',data:[outstandingCredit],backgroundColor:'#f38ba8'},{label:'Available',data:[totalCreditLimit-outstandingCredit],backgroundColor:'#a6e3a1'}]},options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,scales:{x:{stacked:true,max:totalCreditLimit>0?totalCreditLimit:1},y:{stacked:true}},plugins:{title:{display:true,text:'My Store Credit Status',color:textColor,font:{size:16}},legend:{position:'top',labels:{color:textColor}}}}});},
         renderMyTasks() {
             const employeeTasks = this.state.tasks.filter(t => t.assigneeId === this.state.currentEmployeeId);
             document.getElementById('employee-tasks-list').innerHTML = employeeTasks.map(task => `<li class="bg-light-bg dark:bg-dark-bg p-4 rounded-lg flex justify-between items-center ${task.status === 'Completed' ? 'task-completed opacity-60' : ''}"><span>${task.description}</span><button class="text-black px-3 py-1 rounded-md text-sm font-semibold ${task.status === 'Completed' ? 'bg-gray-400' : 'bg-accent-green hover:opacity-80'}" onclick="app.toggleTaskStatus('${task.id}')">${task.status === 'Completed' ? 'Reopen' : 'Complete'}</button></li>`).join('') || `<p class="text-center py-8 text-light-text-secondary dark:text-dark-text-secondary">You have no assigned tasks.</p>`;
@@ -877,7 +1023,26 @@ document.addEventListener('DOMContentLoaded', () => {
 
             contentEl.innerHTML = currentInventoryHTML + pendingDeliveriesHTML;
         },
-        renderSalesAndExpenses() { const employee=this.getCurrentEmployee();if(!employee) return; document.getElementById('sale-type').innerHTML=`<option value="Cash">Cash</option><option value="Credit">Credit</option><option value="Deal">Deal</option>`;document.getElementById('sale-store').innerHTML=employee.stores.map(s=>`<option value="${s.id}">${s.name}</option>`).join('')||`<option disabled>Add a store first</option>`;const availableInventory=employee?.inventory?.filter(item=>item.stock>0&&this.getProduct(item.productId)?.isActive)||[];document.getElementById('sale-product').innerHTML=availableInventory.map(item=>{const product=this.getProduct(item.productId);return`<option value="${product.id}">${product.name} (Stock: ${item.stock})</option>`}).join('')||`<option disabled>No inventory to sell</option>`;document.querySelector('#record-sale-form button').disabled=!(employee.stores.length>0&&availableInventory.length>0);this.updateFinalSaleAmount();document.getElementById('expense-category').innerHTML=this.state.expenseCategories.map(c=>`<option value="${c.id}">${c.name}</option>`).join('')||`<option disabled>Add a category first</option>`;document.querySelector('#record-expense-form button').disabled=this.state.expenseCategories.length===0},
+        renderSalesAndExpenses() {
+            const employee = this.getCurrentEmployee();
+            if(!employee) return;
+            // Setup Sales Form
+            document.getElementById('sale-type').innerHTML = `<option value="Cash">Cash</option><option value="Credit">Credit</option><option value="Deal">Deal</option>`;
+            document.getElementById('sale-store').innerHTML = employee.stores.map(s => `<option value="${s.id}">${s.name}</option>`).join('') || `<option disabled>Add a store first</option>`;
+            const availableInventory = employee.inventory?.filter(item => item.stock > 0 && this.getProduct(item.productId)?.isActive) || [];
+            document.getElementById('add-sale-product').innerHTML = `<option value="">-- Select Product --</option>` + availableInventory.map(item => {
+                const product = this.getProduct(item.productId);
+                return `<option value="${product.id}">${product.name} (Stock: ${item.stock})</option>`
+            }).join('');
+            
+            // Clear cart from previous sessions and render
+            this.currentSaleCart = [];
+            this.renderSaleCart();
+
+            // Setup Expense Form
+            document.getElementById('expense-category').innerHTML=this.state.expenseCategories.map(c=>`<option value="${c.id}">${c.name}</option>`).join('')||`<option disabled>Add a category first</option>`;
+            document.querySelector('#record-expense-form button').disabled=this.state.expenseCategories.length===0
+        },
         
         renderRequestStockTab() {
             const container = document.getElementById('request-stock-content');
@@ -1020,15 +1185,16 @@ document.addEventListener('DOMContentLoaded', () => {
                 generateBtn.disabled = true;
             } else {
                 listEl.innerHTML = allSalesToStore.map(t => {
-                    const product = this.getProduct(t.productId);
+                    const saleDetails = (t.items && t.items.length > 1) 
+                        ? `${t.items.length} different products`
+                        : `${t.items?.[0]?.quantity} x ${t.items?.[0]?.name}`;
                     const saleDate = new Date(t.date).toLocaleDateString();
                     return `
                         <label for="txn-${t.id}" class="flex items-center space-x-3 p-2 rounded-md hover:bg-light-surface dark:hover:bg-dark-surface cursor-pointer">
                             <input type="checkbox" id="txn-${t.id}" data-transaction-id="${t.id}" class="invoice-txn-checkbox h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary">
                             <div class="flex-grow flex justify-between items-center text-sm">
                                 <div>
-                                    <span class="font-semibold">${product?.name || 'N/A'}</span>
-                                    <span class="text-light-text-secondary dark:text-dark-text-secondary">(${t.quantity} items)</span>
+                                    <span class="font-semibold">${saleDetails}</span>
                                 </div>
                                 <div class="text-right">
                                     <span class="font-mono">${saleDate}</span>
@@ -1071,11 +1237,28 @@ document.addEventListener('DOMContentLoaded', () => {
                             <i id="theme-icon-modal" class="fas"></i>
                         </button>
                     </div>
+                    <div id="data-management-settings"></div>
                 </div>
             `)}
+             ${this.getGenericModalHTML('invoicePreviewModal', 'Invoice Preview', `
+                <div id="invoice-preview-content" class="bg-white p-2 rounded max-h-[60vh] overflow-y-auto mb-4 border border-gray-300">
+                    </div>
+                <button id="download-previewed-invoice-btn" class="modal-submit-button">Download as PDF</button>
+            `, 'max-w-4xl')}
             `
         },
-        getGenericModalHTML(id,title,content){return`<div id="${id}" class="fixed inset-0 z-50 flex items-center justify-center p-4 hidden modal-backdrop"><div class="bg-light-surface dark:bg-dark-surface rounded-lg shadow-xl w-full max-w-md mx-auto transform transition-all"><div class="flex justify-between items-center p-4 border-b border-gray-200 dark:border-gray-700"><h3 class="text-xl font-semibold">${title}</h3><button onclick="app.closeModal('${id}')" class="text-light-text-secondary dark:text-dark-text-secondary hover:text-light-text dark:hover:text-dark-text">&times;</button></div><div class="p-6">${content}</div></div></div>`},
+        // --- MODIFIED: Added dialogClass parameter for custom modal widths ---
+        getGenericModalHTML(id, title, content, dialogClass = 'max-w-md') {
+            return `<div id="${id}" class="fixed inset-0 z-50 flex items-center justify-center p-4 hidden modal-backdrop">
+                <div class="bg-light-surface dark:bg-dark-surface rounded-lg shadow-xl w-full ${dialogClass} mx-auto transform transition-all flex flex-col">
+                    <div class="flex justify-between items-center p-4 border-b border-gray-200 dark:border-gray-700">
+                        <h3 class="text-xl font-semibold">${title}</h3>
+                        <button onclick="app.closeModal('${id}')" class="text-light-text-secondary dark:text-dark-text-secondary hover:text-light-text dark:hover:text-dark-text">&times;</button>
+                    </div>
+                    <div class="p-6">${content}</div>
+                </div>
+            </div>`;
+        },
         getFirstTimeModalHTML(){return`<div id="firstTimeModal" class="fixed inset-0 z-50 flex items-center justify-center p-4 hidden modal-backdrop"><div class="bg-light-surface dark:bg-dark-surface rounded-lg shadow-xl w-full max-w-md mx-auto text-center p-8"><i class="fas fa-rocket text-4xl text-primary mb-4"></i><h2 class="text-2xl font-bold mb-2">Welcome to Ledgerly!</h2><p class="text-light-text-secondary dark:text-dark-text-secondary mb-6">Let's get you set up. Start by adding your first employee.</p><form id="first-employee-form" class="space-y-4"><div><label for="first-employee-name" class="sr-only">Name</label><input type="text" id="first-employee-name" placeholder="First Employee's Name" required class="modal-input"></div><div><label for="first-employee-position" class="sr-only">Position</label><input type="text" id="first-employee-position" placeholder="Position (e.g., Manager)" required class="modal-input"></div><button type="submit" class="modal-submit-button w-full">Get Started</button></form></div></div>`},
         getAImodalHTML() {
              return `
@@ -1425,9 +1608,105 @@ document.addEventListener('DOMContentLoaded', () => {
             this.showNotification('Stock request submitted successfully!');
             e.target.reset();
         },
-        handleRecordSale(e){e.preventDefault();const form=e.target;const employee=this.getCurrentEmployee();const productId=form.elements['sale-product'].value;const quantity=parseInt(form.elements['sale-quantity'].value);const saleType=form.elements['sale-type'].value;const storeId=form.elements['sale-store'].value;const discount=parseFloat(form.elements['sale-discount'].value)||0;const product=this.getProduct(productId);const employeeInventoryItem=employee.inventory.find(i=>i.productId===productId);const store=employee.stores.find(s => s.id === storeId);if(!product||!employeeInventoryItem||!store||!quantity||quantity<=0||isNaN(quantity)||isNaN(discount)){this.showNotification('Please fill all fields correctly.','error');return}if(employeeInventoryItem.stock<quantity){this.showNotification(`Not enough stock. Only ${employeeInventoryItem.stock} available.`,'error');return}let finalAmount=(product.price*quantity)-discount;if(isNaN(finalAmount)){this.showNotification('Error calculating final amount. Check product price.','error');return}if(saleType==='Credit'){const outstandingCredit=(store.creditUsed||0)-(store.creditPaidBack||0);const creditLimit = (store.creditAvailable || 0) + (store.creditUsed || 0); if(outstandingCredit+finalAmount>creditLimit){this.showNotification('This sale exceeds the store\'s credit limit.','error');return}store.creditUsed+=finalAmount;store.creditAvailable-=finalAmount}else if(saleType==='Deal'){const masterProduct=this.getProduct(productId);if(masterProduct.stock<quantity){this.showNotification(`Not enough stock in Master Inventory for a deal sale. Only ${masterProduct.stock} available.`,'error');return}masterProduct.stock-=quantity}else{employeeInventoryItem.stock-=quantity}employee.transactions.push({id:`txn_${Date.now()}`,type:'sale',productId,quantity,saleType,storeId,discount,amount:finalAmount,date:new Date().toISOString(),invoiced:false});this.saveState();this.setActiveTab('sales-expenses', 'employee');this.showNotification('Sale recorded successfully!');form.reset();this.updateFinalSaleAmount()},
+        handleRecordSale(e){
+            e.preventDefault();
+            const form=e.target;
+            const employee=this.getCurrentEmployee();
+
+            if (this.currentSaleCart.length === 0) {
+                this.showNotification('Please add at least one item to the sale.', 'error');
+                return;
+            }
+
+            const saleType = form.elements['sale-type'].value;
+            const storeId = form.elements['sale-store'].value;
+            const discount = parseFloat(form.elements['sale-discount'].value) || 0;
+            const store = employee.stores.find(s => s.id === storeId);
+            
+            if (!store) {
+                this.showNotification('Please select a valid store.', 'error');
+                return;
+            }
+            
+            const subtotal = this.currentSaleCart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+            const finalAmount = subtotal - discount;
+
+            if (saleType === 'Credit') {
+                const outstandingCredit = (store.creditUsed || 0) - (store.creditPaidBack || 0);
+                const creditLimit = (store.creditAvailable || 0) + (store.creditUsed || 0);
+                if (outstandingCredit + finalAmount > creditLimit) {
+                    this.showNotification('This sale exceeds the store\'s credit limit.', 'error');
+                    return;
+                }
+                store.creditUsed = (store.creditUsed || 0) + finalAmount;
+                store.creditAvailable = (store.creditAvailable || 0) - finalAmount;
+            }
+            
+            // Deduct stock for all items
+            this.currentSaleCart.forEach(cartItem => {
+                 if (saleType === 'Deal') {
+                    const masterProduct = this.getProduct(cartItem.productId);
+                    if (masterProduct.stock < cartItem.quantity) {
+                         this.showNotification(`Not enough stock in Master Inventory for ${masterProduct.name} for a deal sale.`, 'error');
+                         throw new Error("Insufficient master stock for deal."); // Stop transaction
+                    }
+                    masterProduct.stock -= cartItem.quantity;
+                 } else {
+                    const employeeInventoryItem = employee.inventory.find(i => i.productId === cartItem.productId);
+                    employeeInventoryItem.stock -= cartItem.quantity;
+                 }
+            });
+
+            employee.transactions.push({
+                id: `txn_${Date.now()}`,
+                type: 'sale',
+                items: [...this.currentSaleCart], // Store a copy of the cart
+                saleType,
+                storeId,
+                discount,
+                amount: finalAmount,
+                date: new Date().toISOString(),
+                invoiced: false
+            });
+            
+            this.saveState();
+            this.showNotification('Sale recorded successfully!');
+            this.currentSaleCart = []; // Clear the cart
+            this.setActiveTab('sales-expenses', 'employee'); // Re-render tab
+        },
         handleRecordExpense(e){e.preventDefault();const form=e.target;const employee=this.getCurrentEmployee();if(!employee)return;const description=form.elements['expense-description'].value;const amount=parseFloat(form.elements['expense-amount'].value);const categoryId=form.elements['expense-category'].value;if(!description.trim()||isNaN(amount)||amount<=0||!categoryId){this.showNotification('Please fill all fields correctly.','error');return}const newExpense={id:`txn_${Date.now()}`,type:'expense',description:description.trim(),amount,categoryId,date:new Date().toISOString()};employee.transactions.push(newExpense);this.saveState();this.setActiveTab('sales-expenses', 'employee');this.showNotification('Expense recorded successfully!','success');form.reset()},
 
+        // --- NEW: Function to show a saved invoice ---
+        previewInvoice(invoiceId) {
+            let foundInvoice = null;
+            // Search all employees for the invoice, as any employee could have generated it
+            for (const emp of this.state.employees) {
+                const invoice = (emp.invoices || []).find(inv => inv.id === invoiceId);
+                if (invoice) {
+                    foundInvoice = invoice;
+                    break;
+                }
+            }
+
+            if (foundInvoice && foundInvoice.htmlContent) {
+                const modal = document.getElementById('invoicePreviewModal');
+                document.getElementById('invoice-preview-content').innerHTML = foundInvoice.htmlContent;
+                
+                // Set the onclick for the download button inside the preview modal
+                const downloadBtn = document.getElementById('download-previewed-invoice-btn');
+                downloadBtn.onclick = () => this.downloadInvoice(
+                    foundInvoice.htmlContent, 
+                    { name: foundInvoice.storeName }, 
+                    new Date(foundInvoice.date).toISOString().split('T')[0]
+                );
+
+                this.openModal('invoicePreviewModal');
+            } else {
+                this.showNotification('Could not find the saved invoice data.', 'error');
+                console.error(`Invoice with ID ${invoiceId} not found or has no HTML content.`);
+            }
+        },
+        
         downloadInvoice(invoiceHTML, store, invoiceDate) {
             this.showNotification('Generating PDF...');
 
@@ -1472,6 +1751,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }, 150);
         },
 
+        // --- MODIFIED: Saves invoice to state instead of downloading ---
         handleGenerateInvoice(e) {
             e.preventDefault();
             const employee = this.getCurrentEmployee();
@@ -1484,13 +1764,15 @@ document.addEventListener('DOMContentLoaded', () => {
 
             const selectedTxnIds = Array.from(selectedCheckboxes).map(cb => cb.dataset.transactionId);
             
+            const invoiceId = `inv_${Date.now()}`;
             const salesInPeriod = [];
             let total = 0;
+
             selectedTxnIds.forEach(txnId => {
                 for (const emp of this.state.employees) {
                     const transaction = (emp.transactions || []).find(t => t.id === txnId);
                     if (transaction) {
-                        transaction.invoiced = true;
+                        transaction.invoiced = invoiceId; // Tag transaction with the invoice ID
                         salesInPeriod.push(transaction);
                         total += transaction.amount;
                         break;
@@ -1498,41 +1780,53 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             });
 
+            const invoiceDate = new Date();
+            const invoiceDateStr = invoiceDate.toLocaleDateString();
+            const invoiceHTML = this.generateInvoiceHtml(store, salesInPeriod, total, `Invoice Generated on ${invoiceDateStr}`);
+
             const newInvoice = {
-                id: `inv_${Date.now()}`,
+                id: invoiceId,
                 storeId: store.id,
                 storeName: store.name,
-                date: new Date().toISOString(),
+                date: invoiceDate.toISOString(),
                 total: total,
-                transactionIds: selectedTxnIds
+                transactionIds: selectedTxnIds,
+                htmlContent: invoiceHTML // Save the generated HTML
             };
+
             if (!employee.invoices) employee.invoices = [];
             employee.invoices.push(newInvoice);
             this.saveState();
-
-            const invoiceDateStr = new Date().toLocaleDateString();
-            const invoiceHTML = this.generateInvoiceHtml(store, salesInPeriod, total, `Invoice Generated on ${invoiceDateStr}`);
-            this.downloadInvoice(invoiceHTML, store, new Date().toISOString().split('T')[0]);
+            
+            this.showNotification('Invoice created and saved successfully!');
             
             this.state.activeInvoiceSubTab = 'recent';
             this.setActiveTab('invoices', 'employee');
         },
 
         generateInvoiceHtml(store, sales, total, periodText) {
-            const salesRows = sales.map(sale => {
-                const product = this.getProduct(sale.productId);
+            const salesRows = sales.flatMap(sale => {
                 const employee = this.state.employees.find(e => e.transactions.some(t => t.id === sale.id));
-                return `<tr style="page-break-inside: avoid;">
-                    <td style="border: 1px solid #ddd; padding: 6px; word-break: break-word;">${new Date(sale.date).toLocaleDateString()}</td>
-                    <td style="border: 1px solid #ddd; padding: 6px; word-break: break-word;">${employee?.name || 'N/A'}</td>
-                    <td style="border: 1px solid #ddd; padding: 6px; word-break: break-word;">${product?.name || 'N/A'}</td>
-                    <td style="border: 1px solid #ddd; padding: 6px; word-break: break-word;">${sale.saleType}</td>
-                    <td style="border: 1px solid #ddd; padding: 6px; text-align: center;">${sale.quantity}</td>
-                    <td style="border: 1px solid #ddd; padding: 6px; text-align: right;">AED ${product?.price.toFixed(2)}</td>
-                    <td style="border: 1px solid #ddd; padding: 6px; text-align: right;">AED ${sale.discount.toFixed(2)}</td>
-                    <td style="border: 1px solid #ddd; padding: 6px; text-align: right; font-weight: bold;">AED ${sale.amount.toFixed(2)}</td>
-                </tr>`;
+                return (sale.items || []).map(item => {
+                    return `<tr style="page-break-inside: avoid;">
+                        <td style="border: 1px solid #ddd; padding: 6px; word-break: break-word;">${new Date(sale.date).toLocaleDateString()}</td>
+                        <td style="border: 1px solid #ddd; padding: 6px; word-break: break-word;">${employee?.name || 'N/A'}</td>
+                        <td style="border: 1px solid #ddd; padding: 6px; word-break: break-word;">${item.name}</td>
+                        <td style="border: 1px solid #ddd; padding: 6px; word-break: break-word;">${sale.saleType}</td>
+                        <td style="border: 1px solid #ddd; padding: 6px; text-align: center;">${item.quantity}</td>
+                        <td style="border: 1px solid #ddd; padding: 6px; text-align: right;">AED ${item.price.toFixed(2)}</td>
+                        <td style="border: 1px solid #ddd; padding: 6px; text-align: right;">--</td>
+                        <td style="border: 1px solid #ddd; padding: 6px; text-align: right; font-weight: bold;">AED ${(item.price * item.quantity).toFixed(2)}</td>
+                    </tr>`;
+                });
             }).join('');
+            
+            const discountRow = sales.reduce((sum, sale) => sum + (sale.discount || 0), 0) > 0 ? `
+                <tr>
+                    <td colspan="7" style="border: 1px solid #ddd; padding: 6px; text-align: right; font-weight: bold;">Overall Discount:</td>
+                    <td style="border: 1px solid #ddd; padding: 6px; text-align: right; font-weight: bold; color: #d9534f;">- AED ${sales.reduce((sum, sale) => sum + (sale.discount || 0), 0).toFixed(2)}</td>
+                </tr>
+            ` : '';
 
             return `
                 <div style="box-sizing: border-box; padding: 1rem; font-family: 'Helvetica Neue', 'Helvetica', Helvetica, Arial, sans-serif; color: #333; width: 100%; max-width: 8.5in; margin: auto;">
@@ -1552,13 +1846,15 @@ document.addEventListener('DOMContentLoaded', () => {
                                 <th style="border: 1px solid #ccc; padding: 8px; text-align: right; width: 12%;">Total</th>
                             </tr>
                         </thead>
-                        <tbody>${salesRows}</tbody>
+                        <tbody>
+                            ${salesRows}
+                            ${discountRow}
+                        </tbody>
                     </table>
                     <h2 style="text-align: center; margin-top: 2rem; font-size: 2rem; font-weight: bold; color: #333;">Total Due: AED ${total.toFixed(2)}</h2>
                 </div>`;
         },
 
-        // --- ACCURA AI 2.0 FUNCTIONS ---
         switchAITab(tabName) {
             document.querySelectorAll('.ai-tab-content').forEach(el => el.classList.add('hidden'));
             document.getElementById(`ai-${tabName}-tab`).classList.remove('hidden');
@@ -1597,7 +1893,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 outputArea.innerHTML = thinkingHTML;
             }
 
-            // SIMULATION: Replace this with a real backend call
             const aiResponse = await this.mockAIApi(prompt, subject); 
 
             const aiResponseHTML = `<div class="prose max-w-none text-light-text dark:text-dark-text">${this.simpleMarkdownToHtml(aiResponse)}</div>`;
@@ -1611,7 +1906,6 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         },
 
-        // This is a MOCK function. In a real application, this would call your secure backend server.
         async mockAIApi(prompt, subject) {
             await new Promise(res => setTimeout(res, 1500)); // Simulate network delay
             prompt = prompt.toLowerCase();
