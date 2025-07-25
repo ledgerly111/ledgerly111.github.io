@@ -1737,16 +1737,17 @@ document.addEventListener('DOMContentLoaded', () => {
             };
 
             setTimeout(() => {
-                html2pdf().set(opt).from(elementToCapture).save().then(() => {
-                    cleanup();
-                    this.showNotification('Invoice downloaded!', 'success');
-                }).catch(err => {
-                    cleanup();
-                    this.showNotification('Error generating PDF.', 'error');
-                    console.error('PDF Generation Error:', err);
-                });
-            }, 150);
-        },
+    html2pdf().set(opt).from(elementToCapture).save().then(() => {
+        cleanup();
+        this.showNotification('Invoice downloaded!', 'success');
+        this.closeModal('invoicePreviewModal'); // <-- ADD THIS LINE
+    }).catch(err => {
+        cleanup();
+        this.showNotification('Error generating PDF.', 'error');
+        console.error('PDF Generation Error:', err);
+        this.closeModal('invoicePreviewModal'); // <-- AND ADD THIS LINE
+    });
+}, 150);
 
         handleGenerateInvoice(e) {
             e.preventDefault();
