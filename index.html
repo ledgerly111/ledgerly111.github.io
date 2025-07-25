@@ -139,7 +139,36 @@ document.addEventListener('DOMContentLoaded', () => {
             ledgerFilter: 'all', activeInvoiceSubTab: 'create',
             currentView: 'employee',
             companyActiveTab: 'dashboard',
-        },
+// Inside your main `app` object...
+
+state: {
+    theme: 'dark', currentEmployeeId: null, employees: [],
+    masterInventory: [], tasks: [], expenseCategories: [],
+    productRequests: [], 
+    ledgerFilter: 'all', activeInvoiceSubTab: 'create',
+    currentView: 'employee',
+    companyActiveTab: 'dashboard',
+    storeSearchTerm: '',     // <-- ADD THIS LINE
+    ledgerSearchTerm: '',    // <-- ADD THIS LINE
+},
+
+// ... other functions like setActiveTab ...
+
+togglePanel(panelName, forceOpen = false) { 
+    // ... this function already exists ...
+},
+
+// ADD THE NEW FUNCTION BELOW
+toggleSearch(section) {
+    const container = document.getElementById(`${section}-search-container`);
+    if (container) {
+        container.classList.toggle('hidden');
+        if (!container.classList.contains('hidden')) {
+            document.getElementById(`${section}-search-input`).focus();
+        }
+    } ,
+
+    
         currentSaleCart: [],
         charts: {},
         notificationTimeout: null,
@@ -493,88 +522,118 @@ document.addEventListener('DOMContentLoaded', () => {
                 </div>
             `;
 
-            return `
-            <div class="w-full max-w-6xl mx-auto px-4 py-6">
-                <div class="bg-light-surface dark:bg-dark-surface rounded-lg shadow-lg flex flex-col">
-                    <div class="flex-shrink-0 p-4 flex justify-between items-center border-b border-gray-200 dark:border-gray-700">
-                        <div class="flex items-center gap-4">
-                            <h2 class="text-2xl font-bold">${employee.name}</h2>
-                            <button onclick="app.openModal('aiAdvisorModal')" class="text-primary hover:text-primary-hover" title="AI Advisor for ${employee.name}">
-                                <i class="fas fa-brain text-xl"></i>
-                            </button>
-                        </div>
-                        <p class="text-light-text-secondary dark:text-dark-text-secondary hidden sm:block">${employee.position}</p>
+          return `
+<div class="w-full max-w-6xl mx-auto px-4 py-6">
+    <div class="bg-light-surface dark:bg-dark-surface rounded-lg shadow-lg flex flex-col">
+        <div class="flex-shrink-0 p-4 flex justify-between items-center border-b border-gray-200 dark:border-gray-700">
+            <div class="flex items-center gap-4">
+                <h2 class="text-2xl font-bold">${employee.name}</h2>
+                <button onclick="app.openModal('aiAdvisorModal')" class="text-primary hover:text-primary-hover" title="AI Advisor for ${employee.name}">
+                    <i class="fas fa-brain text-xl"></i>
+                </button>
+            </div>
+            <p class="text-light-text-secondary dark:text-dark-text-secondary hidden sm:block">${employee.position}</p>
+        </div>
+        <div class="flex-shrink-0 border-b border-gray-200 dark:border-gray-700">
+            <div class="md:hidden my-2 px-4">
+                <label for="mobile-tabs" class="sr-only">Select a tab</label>
+                <select id="mobile-tabs" class="form-input w-full"></select>
+            </div>
+            <nav id="employee-tabs-container" class="-mb-px hidden md:flex space-x-6 px-4"></nav>
+        </div>
+        <div class="flex-grow p-4 sm:p-6">
+            <div id="dashboard-content" class="tab-content hidden">
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-4">
+                    <div class="bg-light-bg dark:bg-dark-bg p-4 rounded-lg"><div class="text-sm text-light-text-secondary dark:text-dark-text-secondary">Revenue</div><div class="text-2xl font-bold text-accent-green">AED ${revenue.toFixed(2)}</div></div>
+                    <div class="bg-light-bg dark:bg-dark-bg p-4 rounded-lg"><div class="text-sm text-light-text-secondary dark:text-dark-text-secondary">Expenses</div><div class="text-2xl font-bold text-accent-red">AED ${expenses.toFixed(2)}</div></div>
+                    <div class="bg-light-bg dark:bg-dark-bg p-4 rounded-lg"><div class="text-sm text-light-text-secondary dark:text-dark-text-secondary">Net Profit</div><div class="text-2xl font-bold ${profit >= 0 ? 'text-accent-green':'text-accent-red'}">AED ${profit.toFixed(2)}</div></div>
+                </div>
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                    <div class="bg-light-bg dark:bg-dark-bg p-4 rounded-lg h-60 sm:h-64"><canvas id="sales-over-time-chart"></canvas></div>
+                    <div class="bg-light-bg dark:bg-dark-bg p-4 rounded-lg h-60 sm:h-64"><canvas id="top-products-chart"></canvas></div>
+                    <div class="bg-light-bg dark:bg-dark-bg p-4 rounded-lg h-60 sm:h-64"><canvas id="expenses-by-category-chart"></canvas></div>
+                    <div class="bg-light-bg dark:bg-dark-bg p-4 rounded-lg h-60 sm:h-64"><canvas id="store-credit-chart"></canvas></div>
+                </div>
+            </div>
+            <div id="my-tasks-content" class="tab-content hidden"><h3 class="text-xl font-bold mb-4">My Tasks</h3><ul id="employee-tasks-list" class="space-y-3"></ul></div>
+            <div id="my-inventory-content" class="tab-content hidden"></div>
+            ${salesAndExpensesContent}
+            <div id="stores-content" class="tab-content hidden">
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                    <div class="bg-light-bg dark:bg-dark-bg p-4 sm:p-6 rounded-lg">
+                        <h3 class="text-xl font-bold mb-4">Add Store</h3>
+                        <form id="employee-add-store-form" class="space-y-3">
+                            <div><label for="new-store-name" class="form-label">Store Name</label><input type="text" id="new-store-name" required class="form-input"></div>
+                            <div><label for="new-store-location" class="form-label">Location</label><input type="text" id="new-store-location" required class="form-input"></div>
+                            <div><label for="new-store-credit-limit" class="form-label">Credit Limit (AED)</label><input type="number" id="new-store-credit-limit" required min="0" step="0.01" class="form-input"></div>
+                            <button type="submit" class="w-full bg-primary text-black font-bold py-2 px-4 rounded-md hover:bg-primary-hover">Add Store</button>
+                        </form>
                     </div>
-                    <div class="flex-shrink-0 border-b border-gray-200 dark:border-gray-700">
-                        <div class="md:hidden my-2 px-4">
-                            <label for="mobile-tabs" class="sr-only">Select a tab</label>
-                            <select id="mobile-tabs" class="form-input w-full"></select>
+                    <div class="lg:col-span-1 space-y-4" id="stores-list-container">
+
+                        <div class="flex justify-between items-center">
+                            <h3 class="text-xl font-bold">My Stores</h3>
+                            <button onclick="app.toggleSearch('stores')" class="text-light-text-secondary dark:text-dark-text-secondary hover:text-primary p-2"><i class="fas fa-search"></i></button>
                         </div>
-                        <nav id="employee-tabs-container" class="-mb-px hidden md:flex space-x-6 px-4"></nav>
-                    </div>
-                    <div class="flex-grow p-4 sm:p-6">
-                        <div id="dashboard-content" class="tab-content hidden">
-                            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-4">
-                                <div class="bg-light-bg dark:bg-dark-bg p-4 rounded-lg"><div class="text-sm text-light-text-secondary dark:text-dark-text-secondary">Revenue</div><div class="text-2xl font-bold text-accent-green">AED ${revenue.toFixed(2)}</div></div>
-                                <div class="bg-light-bg dark:bg-dark-bg p-4 rounded-lg"><div class="text-sm text-light-text-secondary dark:text-dark-text-secondary">Expenses</div><div class="text-2xl font-bold text-accent-red">AED ${expenses.toFixed(2)}</div></div>
-                                <div class="bg-light-bg dark:bg-dark-bg p-4 rounded-lg"><div class="text-sm text-light-text-secondary dark:text-dark-text-secondary">Net Profit</div><div class="text-2xl font-bold ${profit >= 0 ? 'text-accent-green':'text-accent-red'}">AED ${profit.toFixed(2)}</div></div>
-                            </div>
-                            <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
-                                <div class="bg-light-bg dark:bg-dark-bg p-4 rounded-lg h-60 sm:h-64"><canvas id="sales-over-time-chart"></canvas></div>
-                                <div class="bg-light-bg dark:bg-dark-bg p-4 rounded-lg h-60 sm:h-64"><canvas id="top-products-chart"></canvas></div>
-                                <div class="bg-light-bg dark:bg-dark-bg p-4 rounded-lg h-60 sm:h-64"><canvas id="expenses-by-category-chart"></canvas></div>
-                                <div class="bg-light-bg dark:bg-dark-bg p-4 rounded-lg h-60 sm:h-64"><canvas id="store-credit-chart"></canvas></div>
-                            </div>
+                        <div id="stores-search-container" class="hidden">
+                            <input type="text" id="stores-search-input" placeholder="Search by name or location..." class="form-input w-full">
                         </div>
-                        <div id="my-tasks-content" class="tab-content hidden"><h3 class="text-xl font-bold mb-4">My Tasks</h3><ul id="employee-tasks-list" class="space-y-3"></ul></div>
-                        <div id="my-inventory-content" class="tab-content hidden"></div>
-                        ${salesAndExpensesContent}
-                        <div id="stores-content" class="tab-content hidden"><div class="grid grid-cols-1 lg:grid-cols-2 gap-4"><div class="bg-light-bg dark:bg-dark-bg p-4 sm:p-6 rounded-lg"><h3 class="text-xl font-bold mb-4">Add Store</h3><form id="employee-add-store-form" class="space-y-3"><div><label for="new-store-name" class="form-label">Store Name</label><input type="text" id="new-store-name" required class="form-input"></div><div><label for="new-store-location" class="form-label">Location</label><input type="text" id="new-store-location" required class="form-input"></div><div><label for="new-store-credit-limit" class="form-label">Credit Limit (AED)</label><input type="number" id="new-store-credit-limit" required min="0" step="0.01" class="form-input"></div><button type="submit" class="w-full bg-primary text-black font-bold py-2 px-4 rounded-md hover:bg-primary-hover">Add Store</button></form></div><div class="lg:col-span-1 space-y-4" id="stores-list-container"><h3 class="text-xl font-bold">My Stores</h3><div id="stores-list" class="space-y-4 max-h-[60vh] overflow-y-auto pr-2"></div></div></div></div>
-                        <div id="request-stock-content" class="tab-content hidden"></div>
-                        <div id="invoices-content" class="tab-content hidden">
-                            <div class="mb-4 border-b border-gray-200 dark:border-gray-700">
-                                <nav id="invoice-sub-nav" class="-mb-px flex space-x-6 overflow-x-auto">
-                                    <button data-sub-tab="create" class="invoice-sub-tab-btn whitespace-nowrap py-3 px-1 border-b-2 font-medium text-sm text-light-text-secondary dark:text-dark-text-secondary">Create Invoice</button>
-                                    <button data-sub-tab="pending" class="invoice-sub-tab-btn whitespace-nowrap py-3 px-1 border-b-2 font-medium text-sm text-light-text-secondary dark:text-dark-text-secondary">Pending</button>
-                                    <button data-sub-tab="recent" class="invoice-sub-tab-btn whitespace-nowrap py-3 px-1 border-b-2 font-medium text-sm text-light-text-secondary dark:text-dark-text-secondary">Recent</button>
-                                </nav>
-                            </div>
-                            <div id="create-invoice-panel" class="invoice-sub-tab-content bg-light-bg dark:bg-dark-bg p-4 sm:p-6 rounded-lg">
-                                <h3 class="text-xl font-bold mb-4">Create Invoice</h3>
-                                <form id="invoice-form" class="space-y-4">
-                                    <div><label for="invoice-store" class="form-label">1. Select a Store</label><select id="invoice-store" class="form-input"></select></div>
-                                    <div id="invoice-transactions-container" class="hidden">
-                                        <label class="form-label">2. Select Uninvoiced Sales</label>
-                                        <div id="invoice-transactions-list" class="mt-2 space-y-2 max-h-60 overflow-y-auto border border-gray-300 dark:border-gray-600 rounded-md p-3"></div>
-                                    </div>
-                                    <button type="submit" class="w-full bg-primary text-black font-bold py-2 px-4 rounded-md hover:bg-primary-hover flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed" disabled><i class="fas fa-file-invoice-dollar mr-2"></i>Create & Save Invoice</button>
-                                </form>
-                            </div>
-                            <div id="pending-invoice-panel" class="invoice-sub-tab-content hidden bg-light-bg dark:bg-dark-bg p-4 sm:p-6 rounded-lg"></div>
-                            <div id="recent-invoice-panel" class="invoice-sub-tab-content hidden bg-light-bg dark:bg-dark-bg p-4 sm:p-6 rounded-lg"></div>
-                        </div>
-                        <div id="ledger-content" class="tab-content hidden">
-                            <h3 class="text-xl font-bold mb-4">Transaction Ledger</h3>
-                            <div id="ledger-filter-container" class="flex flex-wrap gap-2 mb-4">
-                                <button data-filter="all" class="ledger-filter-btn px-3 py-1 text-sm font-semibold rounded-full border dark:border-gray-600">All</button>
-                                <button data-filter="cash" class="ledger-filter-btn px-3 py-1 text-sm font-semibold rounded-full bg-accent-green/20 text-green-800 dark:text-accent-green">Cash</button>
-                                <button data-filter="credit" class="ledger-filter-btn px-3 py-1 text-sm font-semibold rounded-full bg-accent-yellow/20 text-yellow-800 dark:text-accent-yellow">Credit</button>
-                                <button data-filter="deal" class="ledger-filter-btn px-3 py-1 text-sm font-semibold rounded-full bg-accent-purple/20 text-purple-800 dark:text-accent-purple">Deal</button>
-                                <button data-filter="payment" class="ledger-filter-btn px-3 py-1 text-sm font-semibold rounded-full bg-primary/20 text-blue-800 dark:text-primary">Payment</button>
-                                <button data-filter="expense" class="ledger-filter-btn px-3 py-1 text-sm font-semibold rounded-full bg-accent-red/20 text-red-800 dark:text-accent-red">Expenses</button>
-                            </div>
-                            <div class="overflow-x-auto bg-light-bg dark:bg-dark-bg rounded-lg">
-                                <table class="min-w-full divide-y divide-gray-300 dark:divide-gray-700">
-                                    <thead class="bg-gray-50 dark:bg-gray-800/50"><tr><th class="table-header">Date</th><th class="table-header">Type</th><th class="table-header">Details</th><th class="table-header text-right">Amount</th></tr></thead>
-                                    <tbody id="ledger-body" class="divide-y divide-gray-200 dark:divide-gray-700"></tbody>
-                                </table>
-                            </div>
-                        </div>
+                        <div id="stores-list" class="space-y-4 max-h-[60vh] overflow-y-auto pr-2"></div>
                     </div>
                 </div>
-            </div>`;
-        },
+            </div>
+            <div id="request-stock-content" class="tab-content hidden"></div>
+            <div id="invoices-content" class="tab-content hidden">
+                <div class="mb-4 border-b border-gray-200 dark:border-gray-700">
+                    <nav id="invoice-sub-nav" class="-mb-px flex space-x-6 overflow-x-auto">
+                        <button data-sub-tab="create" class="invoice-sub-tab-btn whitespace-nowrap py-3 px-1 border-b-2 font-medium text-sm text-light-text-secondary dark:text-dark-text-secondary">Create Invoice</button>
+                        <button data-sub-tab="pending" class="invoice-sub-tab-btn whitespace-nowrap py-3 px-1 border-b-2 font-medium text-sm text-light-text-secondary dark:text-dark-text-secondary">Pending</button>
+                        <button data-sub-tab="recent" class="invoice-sub-tab-btn whitespace-nowrap py-3 px-1 border-b-2 font-medium text-sm text-light-text-secondary dark:text-dark-text-secondary">Recent</button>
+                    </nav>
+                </div>
+                <div id="create-invoice-panel" class="invoice-sub-tab-content bg-light-bg dark:bg-dark-bg p-4 sm:p-6 rounded-lg">
+                    <h3 class="text-xl font-bold mb-4">Create Invoice</h3>
+                    <form id="invoice-form" class="space-y-4">
+                        <div><label for="invoice-store" class="form-label">1. Select a Store</label><select id="invoice-store" class="form-input"></select></div>
+                        <div id="invoice-transactions-container" class="hidden">
+                            <label class="form-label">2. Select Uninvoiced Sales</label>
+                            <div id="invoice-transactions-list" class="mt-2 space-y-2 max-h-60 overflow-y-auto border border-gray-300 dark:border-gray-600 rounded-md p-3"></div>
+                        </div>
+                        <button type="submit" class="w-full bg-primary text-black font-bold py-2 px-4 rounded-md hover:bg-primary-hover flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed" disabled><i class="fas fa-file-invoice-dollar mr-2"></i>Create & Save Invoice</button>
+                    </form>
+                </div>
+                <div id="pending-invoice-panel" class="invoice-sub-tab-content hidden bg-light-bg dark:bg-dark-bg p-4 sm:p-6 rounded-lg"></div>
+                <div id="recent-invoice-panel" class="invoice-sub-tab-content hidden bg-light-bg dark:bg-dark-bg p-4 sm:p-6 rounded-lg"></div>
+            </div>
+            <div id="ledger-content" class="tab-content hidden">
 
+                <div class="flex justify-between items-center mb-4">
+                    <h3 class="text-xl font-bold">Transaction Ledger</h3>
+                    <button onclick="app.toggleSearch('ledger')" class="text-light-text-secondary dark:text-dark-text-secondary hover:text-primary p-2"><i class="fas fa-search"></i></button>
+                </div>
+                <div id="ledger-search-container" class="hidden mb-4">
+                    <input type="text" id="ledger-search-input" placeholder="Search in transaction details..." class="form-input w-full">
+                </div>
+                <div id="ledger-filter-container" class="flex flex-wrap gap-2 mb-4">
+                    <button data-filter="all" class="ledger-filter-btn px-3 py-1 text-sm font-semibold rounded-full border dark:border-gray-600">All</button>
+                    <button data-filter="cash" class="ledger-filter-btn px-3 py-1 text-sm font-semibold rounded-full bg-accent-green/20 text-green-800 dark:text-accent-green">Cash</button>
+                    <button data-filter="credit" class="ledger-filter-btn px-3 py-1 text-sm font-semibold rounded-full bg-accent-yellow/20 text-yellow-800 dark:text-accent-yellow">Credit</button>
+                    <button data-filter="deal" class="ledger-filter-btn px-3 py-1 text-sm font-semibold rounded-full bg-accent-purple/20 text-purple-800 dark:text-accent-purple">Deal</button>
+                    <button data-filter="payment" class="ledger-filter-btn px-3 py-1 text-sm font-semibold rounded-full bg-primary/20 text-blue-800 dark:text-primary">Payment</button>
+                    <button data-filter="expense" class="ledger-filter-btn px-3 py-1 text-sm font-semibold rounded-full bg-accent-red/20 text-red-800 dark:text-accent-red">Expenses</button>
+                </div>
+                <div class="overflow-x-auto bg-light-bg dark:bg-dark-bg rounded-lg">
+                    <table class="min-w-full divide-y divide-gray-300 dark:divide-gray-700">
+                        <thead class="bg-gray-50 dark:bg-gray-800/50"><tr><th class="table-header">Date</th><th class="table-header">Type</th><th class="table-header">Details</th><th class="table-header text-right">Amount</th></tr></thead>
+                        <tbody id="ledger-body" class="divide-y divide-gray-200 dark:divide-gray-700"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+`;
+},
         showNotification(message, type = 'success') {
             const notification = document.getElementById('notification');
             if (!notification) return;
@@ -593,86 +652,136 @@ document.addEventListener('DOMContentLoaded', () => {
         },
 
         renderStoresTab() {
-            const employee = this.getCurrentEmployee();
-            if (!employee) return;
-            const storesList = document.getElementById('stores-list');
-            storesList.innerHTML = employee.stores.map(store => {
-                const calculatedCredit = (store.creditUsed || 0) - (store.creditPaidBack || 0);
-                const outstandingCredit = Math.max(0, calculatedCredit);
-                return `
-                <div class="bg-light-surface dark:bg-dark-surface p-4 rounded-lg">
-                    <div class="flex justify-between items-start">
-                        <div><h4 class="font-bold text-lg">${store.name}</h4><p class="text-sm text-light-text-secondary dark:text-dark-text-secondary">${store.location}</p></div>
-                        <div class="flex space-x-3">
-                           <button onclick="app.startReceiveCredit('${store.id}')" class="text-sm text-accent-green hover:opacity-80" title="Receive Credit Payment"><i class="fas fa-hand-holding-usd"></i></button>
-                           <button onclick="app.startEditStore('${store.id}')" class="text-sm hover:text-primary" title="Edit Store"><i class="fas fa-pencil-alt"></i></button>
-                           <button onclick="app.deleteStore('${store.id}')" class="text-sm hover:text-accent-red" title="Delete Store"><i class="fas fa-trash-alt"></i></button>
-                        </div>
-                    </div>
-                    <div class="mt-4 text-xs space-y-2">
-                        <div class="flex justify-between"><span>Credit Limit:</span> <span class="font-mono">AED ${((store.creditAvailable || 0) + (store.creditUsed || 0)).toFixed(2)}</span></div>
-                        <div class="flex justify-between"><span>Outstanding Credit:</span> <span class="font-mono ${outstandingCredit > 0 ? 'text-accent-red' : ''}">AED ${outstandingCredit.toFixed(2)}</span></div>
-                        <div class="flex justify-between"><span>Paid Back:</span> <span class="font-mono text-accent-green">AED ${(store.creditPaidBack || 0).toFixed(2)}</span></div>
-                    </div>
-                </div>`;
-            }).join('') || `<p class="text-center py-8 text-light-text-secondary dark:text-dark-text-secondary">No stores added yet.</p>`;
-        },
+    const employee = this.getCurrentEmployee();
+    if (!employee) return;
+    const storesList = document.getElementById('stores-list');
+    const searchTerm = this.state.storeSearchTerm.toLowerCase();
 
-        renderLedger() {
-            const employee = this.getCurrentEmployee();
-            if (!employee) return;
-            const ledgerBody = document.getElementById('ledger-body');
-            const sortedTransactions = [...employee.transactions].sort((a, b) => new Date(b.date) - new Date(a.date));
+    // Filter stores based on the search term
+    const filteredStores = employee.stores.filter(store =>
+        store.name.toLowerCase().includes(searchTerm) ||
+        store.location.toLowerCase().includes(searchTerm)
+    );
 
-            const filter = this.state.ledgerFilter;
-            const filteredTransactions = sortedTransactions.filter(t => {
-                if (filter === 'all') return true;
-                if (filter === 'payment') return t.type === 'credit_received';
-                if (filter === 'expense') return t.type === 'expense';
-                if (filter === 'cash') return t.type === 'sale' && t.saleType === 'Cash';
-                if (filter === 'credit') return t.type === 'sale' && t.saleType === 'Credit';
-                if (filter === 'deal') return t.type === 'sale' && t.saleType === 'Deal';
-                return false;
-            });
+    // Generate the HTML for the filtered list
+    storesList.innerHTML = filteredStores.map(store => {
+        const calculatedCredit = (store.creditUsed || 0) - (store.creditPaidBack || 0);
+        const outstandingCredit = Math.max(0, calculatedCredit);
+        return `
+        <div class="bg-light-surface dark:bg-dark-surface p-4 rounded-lg">
+            <div class="flex justify-between items-start">
+                <div><h4 class="font-bold text-lg">${store.name}</h4><p class="text-sm text-light-text-secondary dark:text-dark-text-secondary">${store.location}</p></div>
+                <div class="flex space-x-3">
+                   <button onclick="app.startReceiveCredit('${store.id}')" class="text-sm text-accent-green hover:opacity-80" title="Receive Credit Payment"><i class="fas fa-hand-holding-usd"></i></button>
+                   <button onclick="app.startEditStore('${store.id}')" class="text-sm hover:text-primary" title="Edit Store"><i class="fas fa-pencil-alt"></i></button>
+                   <button onclick="app.deleteStore('${store.id}')" class="text-sm hover:text-accent-red" title="Delete Store"><i class="fas fa-trash-alt"></i></button>
+                </div>
+            </div>
+            <div class="mt-4 text-xs space-y-2">
+                <div class="flex justify-between"><span>Credit Limit:</span> <span class="font-mono">AED ${((store.creditAvailable || 0) + (store.creditUsed || 0)).toFixed(2)}</span></div>
+                <div class="flex justify-between"><span>Outstanding Credit:</span> <span class="font-mono ${outstandingCredit > 0 ? 'text-accent-red' : ''}">AED ${outstandingCredit.toFixed(2)}</span></div>
+                <div class="flex justify-between"><span>Paid Back:</span> <span class="font-mono text-accent-green">AED ${(store.creditPaidBack || 0).toFixed(2)}</span></div>
+            </div>
+        </div>`;
+    }).join('') || `<p class="text-center py-8 text-light-text-secondary dark:text-dark-text-secondary">No stores found.</p>`;
 
-            document.querySelectorAll('.ledger-filter-btn').forEach(btn => {
-                btn.classList.toggle('ring-2', btn.dataset.filter === filter);
-                btn.classList.toggle('ring-primary', btn.dataset.filter === filter);
-            });
+    // Connect the search input to the state
+    const searchInput = document.getElementById('stores-search-input');
+    if (searchInput) {
+        searchInput.value = this.state.storeSearchTerm;
+        searchInput.oninput = (e) => {
+            this.state.storeSearchTerm = e.target.value;
+            this.renderStoresTab(); // Re-render the list as user types
+        };
+    }
+},
 
-            ledgerBody.innerHTML = filteredTransactions.map(t => {
-                const date = new Date(t.date).toLocaleDateString();
-                const time = new Date(t.date).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-                if (t.type === 'sale') {
-                    const store = employee.stores.find(s => s.id === t.storeId);
-                    const details = (t.items && t.items.length > 1) 
-                        ? `Sold ${t.items.length} products to ${store?.name || 'N/A'}` 
-                        : `Sold ${t.items?.[0]?.quantity || t.quantity} x ${t.items?.[0]?.name || 'N/A'} to ${store?.name || 'N/A'}`;
-                    
-                    let invoicedIcon = '';
-                    if (typeof t.invoiced === 'string' && t.invoiced.startsWith('inv_')) {
-                        invoicedIcon = ` <button onclick="app.previewInvoice('${t.invoiced}')" class="text-primary hover:text-primary-hover ml-2" title="View Invoice"><i class="fas fa-file-invoice"></i></button>`;
-                    } else if (t.invoiced === true) { // Legacy support for old data
-                        invoicedIcon = ` <i class="fas fa-file-invoice text-primary/50 ml-2" title="Invoiced (Legacy)"></i>`;
-                    }
-                    
-                    let typeBadge = '';
-                    switch (t.saleType) {
-                        case 'Credit': typeBadge = `<span class="px-2 py-1 text-xs font-semibold rounded-full bg-accent-yellow/20 text-yellow-600 dark:text-accent-yellow">Credit</span>`; break;
-                        case 'Deal': typeBadge = `<span class="px-2 py-1 text-xs font-semibold rounded-full bg-accent-purple/20 text-purple-600 dark:text-accent-purple">Deal</span>`; break;
-                        default: typeBadge = `<span class="px-2 py-1 text-xs font-semibold rounded-full bg-accent-green/20 text-green-600 dark:text-accent-green">Cash Sale</span>`;
-                    }
-                    return `<tr class="hover:bg-light-surface dark:hover:bg-dark-surface/50 text-sm"><td class="px-4 py-3 whitespace-nowrap">${date} ${time}</td><td class="px-4 py-3">${typeBadge}</td><td class="px-4 py-3">${details}${invoicedIcon}</td><td class="px-4 py-3 text-right font-mono text-accent-green">+${t.amount.toFixed(2)}</td></tr>`;
-                } else if (t.type === 'expense') {
-                    const category = this.getCategory(t.categoryId);
-                    return `<tr class="hover:bg-light-surface dark:hover:bg-dark-surface/50 text-sm"><td class="px-4 py-3 whitespace-nowrap">${date} ${time}</td><td class="px-4 py-3"><span class="px-2 py-1 text-xs font-semibold rounded-full bg-accent-red/20 text-red-600 dark:text-accent-red">Expense</span></td><td class="px-4 py-3">${t.description} <span class="text-light-text-secondary dark:text-dark-text-secondary">(${category?.name||'Uncategorized'})</span></td><td class="px-4 py-3 text-right font-mono text-accent-red">-${t.amount.toFixed(2)}</td></tr>`;
-                } else if (t.type === 'credit_received') {
-                    const store = employee.stores.find(s => s.id === t.storeId);
-                    return `<tr class="hover:bg-light-surface dark:hover:bg-dark-surface/50 text-sm"><td class="px-4 py-3 whitespace-nowrap">${date} ${time}</td><td class="px-4 py-3"><span class="px-2 py-1 text-xs font-semibold rounded-full bg-primary/20 text-blue-600 dark:text-primary">Payment</span></td><td class="px-4 py-3">Credit Received from ${store?.name || 'N/A'}</td><td class="px-4 py-3 text-right font-mono text-accent-green">+${t.amount.toFixed(2)}</td></tr>`;
-                }
-                return '';
-            }).join('') || `<tr><td colspan="4" class="text-center py-10 text-light-text-secondary dark:text-dark-text-secondary">No transactions found for this filter.</td></tr>`;
-        },
+       renderLedger() {
+    const employee = this.getCurrentEmployee();
+    if (!employee) return;
+    const ledgerBody = document.getElementById('ledger-body');
+    const sortedTransactions = [...employee.transactions].sort((a, b) => new Date(b.date) - new Date(a.date));
+    const typeFilter = this.state.ledgerFilter;
+    const searchTerm = this.state.ledgerSearchTerm.toLowerCase();
+
+    // 1. Filter by type buttons (existing logic)
+    let filteredTransactions = sortedTransactions.filter(t => {
+        if (typeFilter === 'all') return true;
+        if (typeFilter === 'payment') return t.type === 'credit_received';
+        if (typeFilter === 'expense') return t.type === 'expense';
+        if (typeFilter === 'cash') return t.type === 'sale' && t.saleType === 'Cash';
+        if (typeFilter === 'credit') return t.type === 'sale' && t.saleType === 'Credit';
+        if (typeFilter === 'deal') return t.type === 'sale' && t.saleType === 'Deal';
+        return false;
+    });
+
+    // 2. Filter by search term (new logic)
+    if (searchTerm) {
+        filteredTransactions = filteredTransactions.filter(t => {
+            let details = '';
+            if (t.type === 'sale') {
+                const store = employee.stores.find(s => s.id === t.storeId);
+                const itemDetails = (t.items || []).map(i => i.name).join(' ');
+                details = `Sold ${itemDetails} to ${store?.name || 'N/A'}`;
+            } else if (t.type === 'expense') {
+                const category = this.getCategory(t.categoryId);
+                details = `${t.description} (${category?.name||'Uncategorized'})`;
+            } else if (t.type === 'credit_received') {
+                const store = employee.stores.find(s => s.id === t.storeId);
+                details = `Credit Received from ${store?.name || 'N/A'}`;
+            }
+            return details.toLowerCase().includes(searchTerm);
+        });
+    }
+
+    // Update active filter button
+    document.querySelectorAll('.ledger-filter-btn').forEach(btn => {
+        btn.classList.toggle('ring-2', btn.dataset.filter === typeFilter);
+        btn.classList.toggle('ring-primary', btn.dataset.filter === typeFilter);
+    });
+
+    // Render the final filtered list
+    ledgerBody.innerHTML = filteredTransactions.map(t => {
+        const date = new Date(t.date).toLocaleDateString();
+        const time = new Date(t.date).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+        if (t.type === 'sale') {
+            const store = employee.stores.find(s => s.id === t.storeId);
+            const details = (t.items && t.items.length > 1) 
+                ? `Sold ${t.items.length} products to ${store?.name || 'N/A'}` 
+                : `Sold ${t.items?.[0]?.quantity || t.quantity} x ${t.items?.[0]?.name || 'N/A'} to ${store?.name || 'N/A'}`;
+            let invoicedIcon = '';
+            if (typeof t.invoiced === 'string' && t.invoiced.startsWith('inv_')) {
+                invoicedIcon = ` <button onclick="app.previewInvoice('${t.invoiced}')" class="text-primary hover:text-primary-hover ml-2" title="View Invoice"><i class="fas fa-file-invoice"></i></button>`;
+            } else if (t.invoiced === true) {
+                invoicedIcon = ` <i class="fas fa-file-invoice text-primary/50 ml-2" title="Invoiced (Legacy)"></i>`;
+            }
+            let typeBadge = '';
+            switch (t.saleType) {
+                case 'Credit': typeBadge = `<span class="px-2 py-1 text-xs font-semibold rounded-full bg-accent-yellow/20 text-yellow-600 dark:text-accent-yellow">Credit</span>`; break;
+                case 'Deal': typeBadge = `<span class="px-2 py-1 text-xs font-semibold rounded-full bg-accent-purple/20 text-purple-600 dark:text-accent-purple">Deal</span>`; break;
+                default: typeBadge = `<span class="px-2 py-1 text-xs font-semibold rounded-full bg-accent-green/20 text-green-600 dark:text-accent-green">Cash Sale</span>`;
+            }
+            return `<tr class="hover:bg-light-surface dark:hover:bg-dark-surface/50 text-sm"><td class="px-4 py-3 whitespace-nowrap">${date} ${time}</td><td class="px-4 py-3">${typeBadge}</td><td class="px-4 py-3">${details}${invoicedIcon}</td><td class="px-4 py-3 text-right font-mono text-accent-green">+${t.amount.toFixed(2)}</td></tr>`;
+        } else if (t.type === 'expense') {
+            const category = this.getCategory(t.categoryId);
+            return `<tr class="hover:bg-light-surface dark:hover:bg-dark-surface/50 text-sm"><td class="px-4 py-3 whitespace-nowrap">${date} ${time}</td><td class="px-4 py-3"><span class="px-2 py-1 text-xs font-semibold rounded-full bg-accent-red/20 text-red-600 dark:text-accent-red">Expense</span></td><td class="px-4 py-3">${t.description} <span class="text-light-text-secondary dark:text-dark-text-secondary">(${category?.name||'Uncategorized'})</span></td><td class="px-4 py-3 text-right font-mono text-accent-red">-${t.amount.toFixed(2)}</td></tr>`;
+        } else if (t.type === 'credit_received') {
+            const store = employee.stores.find(s => s.id === t.storeId);
+            return `<tr class="hover:bg-light-surface dark:hover:bg-dark-surface/50 text-sm"><td class="px-4 py-3 whitespace-nowrap">${date} ${time}</td><td class="px-4 py-3"><span class="px-2 py-1 text-xs font-semibold rounded-full bg-primary/20 text-blue-600 dark:text-primary">Payment</span></td><td class="px-4 py-3">Credit Received from ${store?.name || 'N/A'}</td><td class="px-4 py-3 text-right font-mono text-accent-green">+${t.amount.toFixed(2)}</td></tr>`;
+        }
+        return '';
+    }).join('') || `<tr><td colspan="4" class="text-center py-10 text-light-text-secondary dark:text-dark-text-secondary">No transactions found.</td></tr>`;
+
+    // Connect the search input to the state
+    const searchInput = document.getElementById('ledger-search-input');
+    if (searchInput) {
+        searchInput.value = this.state.ledgerSearchTerm;
+        searchInput.oninput = (e) => {
+            this.state.ledgerSearchTerm = e.target.value;
+            this.renderLedger(); // Re-render the list as user types
+        };
+    }
+},
 
         addToSaleCart() {
             const productSelect = document.getElementById('add-sale-product');
