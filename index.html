@@ -649,7 +649,6 @@ document.addEventListener('DOMContentLoaded', () => {
                         ? `Sold ${t.items.length} products to ${store?.name || 'N/A'}` 
                         : `Sold ${t.items?.[0]?.quantity || t.quantity} x ${t.items?.[0]?.name || 'N/A'} to ${store?.name || 'N/A'}`;
                     
-                    // --- MODIFIED: Conditional invoice button ---
                     let invoicedIcon = '';
                     if (typeof t.invoiced === 'string' && t.invoiced.startsWith('inv_')) {
                         invoicedIcon = ` <button onclick="app.previewInvoice('${t.invoiced}')" class="text-primary hover:text-primary-hover ml-2" title="View Invoice"><i class="fas fa-file-invoice"></i></button>`;
@@ -1247,7 +1246,6 @@ document.addEventListener('DOMContentLoaded', () => {
             `, 'max-w-4xl')}
             `
         },
-        // --- MODIFIED: Added dialogClass parameter for custom modal widths ---
         getGenericModalHTML(id, title, content, dialogClass = 'max-w-md') {
             return `<div id="${id}" class="fixed inset-0 z-50 flex items-center justify-center p-4 hidden modal-backdrop">
                 <div class="bg-light-surface dark:bg-dark-surface rounded-lg shadow-xl w-full ${dialogClass} mx-auto transform transition-all flex flex-col">
@@ -1676,7 +1674,6 @@ document.addEventListener('DOMContentLoaded', () => {
         },
         handleRecordExpense(e){e.preventDefault();const form=e.target;const employee=this.getCurrentEmployee();if(!employee)return;const description=form.elements['expense-description'].value;const amount=parseFloat(form.elements['expense-amount'].value);const categoryId=form.elements['expense-category'].value;if(!description.trim()||isNaN(amount)||amount<=0||!categoryId){this.showNotification('Please fill all fields correctly.','error');return}const newExpense={id:`txn_${Date.now()}`,type:'expense',description:description.trim(),amount,categoryId,date:new Date().toISOString()};employee.transactions.push(newExpense);this.saveState();this.setActiveTab('sales-expenses', 'employee');this.showNotification('Expense recorded successfully!','success');form.reset()},
 
-        // --- NEW: Function to show a saved invoice ---
         previewInvoice(invoiceId) {
             let foundInvoice = null;
             // Search all employees for the invoice, as any employee could have generated it
@@ -1751,7 +1748,6 @@ document.addEventListener('DOMContentLoaded', () => {
             }, 150);
         },
 
-        // --- MODIFIED: Saves invoice to state instead of downloading ---
         handleGenerateInvoice(e) {
             e.preventDefault();
             const employee = this.getCurrentEmployee();
@@ -1781,8 +1777,7 @@ document.addEventListener('DOMContentLoaded', () => {
             });
 
             const invoiceDate = new Date();
-            const invoiceDateStr = invoiceDate.toLocaleDateString();
-            const invoiceHTML = this.generateInvoiceHtml(store, salesInPeriod, total, `Invoice Generated on ${invoiceDateStr}`);
+            const invoiceHTML = this.generateInvoiceHtml(store, salesInPeriod, total, invoiceId, invoiceDate);
 
             const newInvoice = {
                 id: invoiceId,
@@ -1804,55 +1799,109 @@ document.addEventListener('DOMContentLoaded', () => {
             this.setActiveTab('invoices', 'employee');
         },
 
-        generateInvoiceHtml(store, sales, total, periodText) {
-            const salesRows = sales.flatMap(sale => {
-                const employee = this.state.employees.find(e => e.transactions.some(t => t.id === sale.id));
-                return (sale.items || []).map(item => {
-                    return `<tr style="page-break-inside: avoid;">
-                        <td style="border: 1px solid #ddd; padding: 6px; word-break: break-word;">${new Date(sale.date).toLocaleDateString()}</td>
-                        <td style="border: 1px solid #ddd; padding: 6px; word-break: break-word;">${employee?.name || 'N/A'}</td>
-                        <td style="border: 1px solid #ddd; padding: 6px; word-break: break-word;">${item.name}</td>
-                        <td style="border: 1px solid #ddd; padding: 6px; word-break: break-word;">${sale.saleType}</td>
-                        <td style="border: 1px solid #ddd; padding: 6px; text-align: center;">${item.quantity}</td>
-                        <td style="border: 1px solid #ddd; padding: 6px; text-align: right;">AED ${item.price.toFixed(2)}</td>
-                        <td style="border: 1px solid #ddd; padding: 6px; text-align: right;">--</td>
-                        <td style="border: 1px solid #ddd; padding: 6px; text-align: right; font-weight: bold;">AED ${(item.price * item.quantity).toFixed(2)}</td>
-                    </tr>`;
-                });
+        generateInvoiceHtml(store, sales, total, invoiceId, invoiceDate) {
+            const salesByDate = sales.reduce((acc, sale) => {
+                const date = new Date(sale.date).toLocaleDateString('en-CA'); // YYYY-MM-DD format
+                if (!acc[date]) {
+                    acc[date] = [];
+                }
+                acc[date].push(sale);
+                return acc;
+            }, {});
+
+            const sortedDates = Object.keys(salesByDate).sort();
+
+            const tableRows = sortedDates.flatMap(date => {
+                const salesOnDate = salesByDate[date];
+                const dateRow = `<tr><td colspan="5" style="background-color: #f9f9f9; font-weight: bold; padding: 10px 8px; border-top: 1px solid #eee;">${new Date(date).toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}</td></tr>`;
+
+                const itemRows = salesOnDate.flatMap(sale => {
+                    const employee = this.state.employees.find(e => e.transactions.some(t => t.id === sale.id));
+                    const totalQuantityInSale = sale.items.reduce((sum, i) => sum + i.quantity, 1);
+                    const perItemDiscount = sale.discount > 0 && sale.items.length > 0 ? sale.discount / totalQuantityInSale : 0;
+                    return (sale.items || []).map(item => `
+                        <tr style="page-break-inside: avoid;">
+                            <td style="padding: 8px; border-bottom: 1px solid #eee;">
+                                ${item.name}<br>
+                                <small style="color: #666;">Sold by: ${employee?.name || 'N/A'} | Type: ${sale.saleType}</small>
+                            </td>
+                            <td style="padding: 8px; border-bottom: 1px solid #eee; text-align: right;">${item.quantity}</td>
+                            <td style="padding: 8px; border-bottom: 1px solid #eee; text-align: right;">${item.price.toFixed(2)}</td>
+                            <td style="padding: 8px; border-bottom: 1px solid #eee; text-align: right;">${(perItemDiscount * item.quantity).toFixed(2)}</td>
+                            <td style="padding: 8px; border-bottom: 1px solid #eee; text-align: right; font-weight: 500;">${(item.price * item.quantity - perItemDiscount * item.quantity).toFixed(2)}</td>
+                        </tr>`
+                    );
+                }).join('');
+                return [dateRow, itemRows];
             }).join('');
-            
-            const discountRow = sales.reduce((sum, sale) => sum + (sale.discount || 0), 0) > 0 ? `
-                <tr>
-                    <td colspan="7" style="border: 1px solid #ddd; padding: 6px; text-align: right; font-weight: bold;">Overall Discount:</td>
-                    <td style="border: 1px solid #ddd; padding: 6px; text-align: right; font-weight: bold; color: #d9534f;">- AED ${sales.reduce((sum, sale) => sum + (sale.discount || 0), 0).toFixed(2)}</td>
-                </tr>
-            ` : '';
+
+            const subTotal = sales.reduce((sum, sale) => sum + sale.items.reduce((s, i) => s + (i.price * i.quantity), 0), 0);
+            const totalDiscount = sales.reduce((sum, sale) => sum + (sale.discount || 0), 0);
 
             return `
-                <div style="box-sizing: border-box; padding: 1rem; font-family: 'Helvetica Neue', 'Helvetica', Helvetica, Arial, sans-serif; color: #333; width: 100%; max-width: 8.5in; margin: auto;">
-                    <h1 style="color: #333; font-size: 2.5rem; margin-bottom: 0.5rem; text-align: center;">Invoice</h1>
-                    <h2 style="font-size: 1.5rem; margin-bottom: 1rem; color: #555; text-align: center;">${store.name}</h2>
-                    <p style="margin-bottom: 1.5rem; font-size: 0.9rem; text-align: center; color: #666;"><b>Invoice Details:</b> ${periodText}</p>
-                    <table style="width: 100%; border-collapse: collapse; font-size: 0.85rem; table-layout: fixed;">
-                        <thead>
-                            <tr style="background-color: #f2f2f2;">
-                                <th style="border: 1px solid #ccc; padding: 8px; text-align: left; width: 13%;">Date</th>
-                                <th style="border: 1px solid #ccc; padding: 8px; text-align: left; width: 13%;">Sold By</th>
-                                <th style="border: 1px solid #ccc; padding: 8px; text-align: left;">Product</th>
-                                <th style="border: 1px solid #ccc; padding: 8px; text-align: left; width: 10%;">Type</th>
-                                <th style="border: 1px solid #ccc; padding: 8px; text-align: center; width: 8%;">Qty</th>
-                                <th style="border: 1px solid #ccc; padding: 8px; text-align: right; width: 12%;">Unit Price</th>
-                                <th style="border: 1px solid #ccc; padding: 8px; text-align: right; width: 12%;">Discount</th>
-                                <th style="border: 1px solid #ccc; padding: 8px; text-align: right; width: 12%;">Total</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            ${salesRows}
-                            ${discountRow}
-                        </tbody>
-                    </table>
-                    <h2 style="text-align: center; margin-top: 2rem; font-size: 2rem; font-weight: bold; color: #333;">Total Due: AED ${total.toFixed(2)}</h2>
-                </div>`;
+        <div style="background-color: #ffffff; color: #111827; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji'; font-size: 14px; line-height: 1.5; margin: auto; max-width: 8.5in; padding: 2rem; border: 1px solid #e5e7eb; box-shadow: 0 1px 3px 0 rgba(0,0,0,0.1), 0 1px 2px 0 rgba(0,0,0,0.06);">
+            
+            <div style="display: flex; justify-content: space-between; align-items: flex-start; border-bottom: 2px solid #111827; padding-bottom: 1rem; margin-bottom: 2rem;">
+                <div>
+                    <h1 style="font-size: 2.25rem; font-weight: 700; margin: 0; color: #111827; line-height: 1;">LEDGERLY</h1>
+                    <p style="margin: 0.25rem 0 0; color: #6b7280;">Sales Division</p>
+                </div>
+                <div style="text-align: right;">
+                    <h2 style="font-size: 1.875rem; font-weight: 600; margin: 0;">INVOICE</h2>
+                    <p style="margin: 0.25rem 0 0; color: #6b7280;">#${invoiceId}</p>
+                </div>
+            </div>
+
+            <div style="display: flex; justify-content: space-between; margin-bottom: 2rem;">
+                <div>
+                    <p style="margin: 0; color: #6b7280; font-weight: 500;">BILL TO</p>
+                    <p style="margin: 0.25rem 0 0; font-weight: 600; font-size: 1.125rem;">${store.name}</p>
+                    <p style="margin: 0.25rem 0 0; color: #6b7280;">${store.location}</p>
+                </div>
+                <div style="text-align: right;">
+                    <p style="margin: 0; color: #6b7280;"><span style="font-weight: 500;">Invoice Date:</span> ${invoiceDate.toLocaleDateString()}</p>
+                    <p style="margin: 0.25rem 0 0; color: #6b7280;"><span style="font-weight: 500;">Due Date:</span> On Receipt</p>
+                </div>
+            </div>
+
+            <table style="width: 100%; border-collapse: collapse;">
+                <thead style="background-color: #f3f4f6; color: #374151;">
+                    <tr>
+                        <th style="padding: 12px 8px; text-align: left; font-weight: 600; width: 50%;">ITEM DESCRIPTION</th>
+                        <th style="padding: 12px 8px; text-align: right; font-weight: 600;">QTY</th>
+                        <th style="padding: 12px 8px; text-align: right; font-weight: 600;">RATE (AED)</th>
+                        <th style="padding: 12px 8px; text-align: right; font-weight: 600;">DISCOUNT (AED)</th>
+                        <th style="padding: 12px 8px; text-align: right; font-weight: 600;">AMOUNT (AED)</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    ${tableRows}
+                </tbody>
+            </table>
+
+            <div style="display: flex; justify-content: flex-end; margin-top: 2rem;">
+                <div style="width: 100%; max-width: 300px;">
+                    <div style="display: flex; justify-content: space-between; padding: 8px 0;">
+                        <span>Subtotal</span>
+                        <span>${subTotal.toFixed(2)}</span>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; padding: 8px 0; color: #ef4444;">
+                        <span>Discount</span>
+                        <span>(${totalDiscount.toFixed(2)})</span>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; padding: 12px 0; border-top: 2px solid #111827; border-bottom: 2px solid #111827; margin-top: 8px; font-weight: 700; font-size: 1.25rem;">
+                        <span>Total Due</span>
+                        <span>AED ${total.toFixed(2)}</span>
+                    </div>
+                </div>
+            </div>
+
+            <div style="margin-top: 3rem; text-align: center; color: #6b7280; font-size: 0.875rem;">
+                <p>Thank you for your business!</p>
+                <p>All transactions are final. Please contact us for any inquiries.</p>
+            </div>
+        </div>
+            `;
         },
 
         switchAITab(tabName) {
