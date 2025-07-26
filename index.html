@@ -11,6 +11,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,400;0,500;0,600;0,700;1,700&display=swap" rel="stylesheet">
+    <link href="https://rsms.me/inter/inter.css" rel="stylesheet">
     <script>
         tailwind.config = {
             darkMode: 'class',
@@ -48,7 +49,6 @@
         .dark ::-webkit-scrollbar-track { background: #1e1f20; }
         ::-webkit-scrollbar-thumb { background: #d1d5db; border-radius: 4px; }
         .dark ::-webkit-scrollbar-thumb { background: #4b5563; }
-        @import url('https://rsms.me/inter/inter.css');
         .invoice-sub-tab-btn { border-color: transparent; }
         .invoice-sub-tab-btn.active { border-color: #89b4fa; color: #89b4fa; }
         .ai-tab-btn.active { background-color: #89b4fa; color: black; }
@@ -61,7 +61,7 @@
     </div>
 
     <div id="app" class="h-screen flex flex-col">
-        <header id="main-header" class="bg-light-surface dark:bg-dark-surface p-4 flex justify-between items-center relative z-35 flex-shrink-0 border-b border-gray-200 dark:border-gray-700 hidden">
+        <header id="main-header" class="bg-light-surface dark:bg-dark-surface p-4 flex justify-between items-center flex-shrink-0 border-b border-gray-200 dark:border-gray-700 hidden">
             <div class="flex items-center space-x-4">
                 <button id="sidenav-toggle" class="text-light-text-secondary dark:text-dark-text-secondary text-xl px-2 py-1" onclick="app.toggleSidenav()">
                     <i class="fas fa-bars"></i>
@@ -73,11 +73,6 @@
                         <span class="text-xs font-bold tracking-[0.3em] animate-color-pulse opacity-80 -mt-1 text-center">SALES</span>
                     </div>
                 </div>
-            </div>
-            <div class="flex items-center">
-                <button id="settings-button" onclick="app.openModal('settingsModal')" class="text-light-text-secondary dark:text-dark-text-secondary text-xl px-4 py-2 rounded-md hover:bg-gray-200 dark:hover:bg-gray-700">
-                    <i class="fas fa-cog"></i>
-                </button>
             </div>
         </header>
 
@@ -91,6 +86,13 @@
                     <div id="company-overview-panel" class="mb-6">
                         <h2 class="text-xl font-semibold mb-3 text-light-text dark:text-dark-text flex items-center justify-between cursor-pointer hover:text-primary dark:hover:text-primary transition-colors" onclick="app.showCompanyView()">
                             <span><i class="fas fa-building mr-2 text-primary"></i>Company Overview</span>
+                            <i class="fas fa-arrow-right"></i>
+                        </h2>
+                    </div>
+
+                    <div id="settings-panel" class="mb-6">
+                        <h2 class="text-xl font-semibold mb-3 text-light-text dark:text-dark-text flex items-center justify-between cursor-pointer hover:text-primary dark:hover:text-primary transition-colors" onclick="app.openModal('settingsModal')">
+                            <span><i class="fas fa-cog mr-2 text-primary"></i>Settings</span>
                             <i class="fas fa-arrow-right"></i>
                         </h2>
                     </div>
@@ -131,24 +133,43 @@
 
 <script>
 document.addEventListener('DOMContentLoaded', () => {
+    // Data for GCC countries, including currency and VAT rates.
+    const GCC_DATA = {
+        'UAE': { currency: 'AED', vatRate: 0.05 },
+        'Saudi Arabia': { currency: 'SAR', vatRate: 0.15 },
+        'Bahrain': { currency: 'BHD', vatRate: 0.10 },
+        'Oman': { currency: 'OMR', vatRate: 0.05 },
+        'Kuwait': { currency: 'KWD', vatRate: 0 },
+        'Qatar': { currency: 'QAR', vatRate: 0 }
+    };
+
     const app = {
         state: {
             theme: 'dark', currentEmployeeId: null, employees: [],
             masterInventory: [], tasks: [], expenseCategories: [],
-            productRequests: [], 
+            productRequests: [],
             ledgerFilter: 'all', activeInvoiceSubTab: 'create',
             currentView: 'employee',
             companyActiveTab: 'dashboard',
             storeSearchTerm: '',
             ledgerSearchTerm: '',
+            companyInfo: {
+                name: 'Ledgerly Sales',
+                country: 'UAE',
+                currency: 'AED',
+                vatRate: 0.05
+            }
         },
         currentSaleCart: [],
         charts: {},
         notificationTimeout: null,
 
         init() {
-            this.loadState(); this.applyTheme(); this.renderModals();
-            this.addEventListeners(); this.render();
+            this.loadState(); 
+            this.applyTheme(); 
+            this.renderModals();
+            this.addEventListeners(); 
+            this.render();
             if(this.state.employees.length > 0) {
                 this.togglePanel('quick-actions', true);
                 this.togglePanel('product-requests', true);
@@ -167,17 +188,18 @@ document.addEventListener('DOMContentLoaded', () => {
             const savedState = localStorage.getItem('ledgerlyState');
             if (savedState) this.state = { ...this.state, ...JSON.parse(savedState) };
 
+            if (!this.state.companyInfo) {
+                this.state.companyInfo = { name: 'Ledgerly Sales', country: 'UAE', currency: 'AED', vatRate: 0.05 };
+            }
+
             this.state.employees.forEach(emp => {
                 if (emp.isActive === undefined) emp.isActive = true;
                 if (!emp.transactions) emp.transactions = [];
+                // Data migration for old sale format
                 emp.transactions.forEach(t => {
-                    if (t.type === 'sale' && !t.items && t.productId) {
-                        t.items = [{
-                            productId: t.productId,
-                            quantity: t.quantity,
-                            price: t.amount / t.quantity,
-                            name: this.getProduct(t.productId)?.name || 'Unknown'
-                        }];
+                    if (t.type === 'sale' && t.subtotal === undefined) {
+                        t.subtotal = t.amount; // Old `amount` was likely net or pre-tax
+                        t.vatAmount = 0; // Can't recalculate perfectly, assume 0 for old data
                     }
                 });
                 if (!emp.inventory) emp.inventory = [];
@@ -203,27 +225,11 @@ document.addEventListener('DOMContentLoaded', () => {
         getCategory(id) { return this.state.expenseCategories.find(c => c.id === id); },
         getTask(id) { return this.state.tasks.find(t => t.id === id); },
 
-        addEventListeners() {
-            document.getElementById('theme-toggle-modal')?.addEventListener('click', () => this.toggleTheme());
-            document.getElementById('first-employee-form')?.addEventListener('submit', e => this.handleFirstEmployee(e));
-            document.getElementById('employee-switcher-modal')?.addEventListener('change', e => this.handleEmployeeSwitch(e));
-            
-            document.getElementById('add-employee-form')?.addEventListener('submit', e => this.handleAddEmployee(e));
-            document.getElementById('edit-employee-form')?.addEventListener('submit', e => this.handleUpdateEmployee(e));
-            
-            const addProductForm = document.getElementById('add-product-form');
-            if (addProductForm) {
-                addProductForm.addEventListener('submit', e => this.handleAddProduct(e));
-                document.getElementById('new-product-name')?.addEventListener('input', e => this.handleProductNameInput(e));
-            }
-            
-            document.getElementById('edit-product-form')?.addEventListener('submit', e => this.handleUpdateProduct(e));
-            document.getElementById('add-category-form')?.addEventListener('submit', e => this.handleAddCategory(e));
-            document.getElementById('edit-category-form')?.addEventListener('submit', e => this.handleUpdateCategory(e));
-            document.getElementById('delegate-stock-form')?.addEventListener('submit', e => this.handleDelegateStock(e));
-            document.getElementById('create-task-form')?.addEventListener('submit', e => this.handleCreateTask(e));
-            document.getElementById('decline-stock-form')?.addEventListener('submit', e => this.handleDeclineStock(e));
+        formatCurrency(amount) {
+            return `${this.state.companyInfo.currency} ${amount.toFixed(2)}`;
         },
+
+        addEventListeners() {},
 
         attachEmployeeViewEventListeners() {
             document.getElementById('employee-tabs-container')?.addEventListener('click', e => this.handleTabClick(e, 'employee'));
@@ -240,11 +246,13 @@ document.addEventListener('DOMContentLoaded', () => {
                     }
                 });
                 document.getElementById('sale-discount')?.addEventListener('input', () => this.updateSaleCartTotal());
+                document.getElementById('sale-type')?.addEventListener('change', () => this.updateSaleCartTotal());
             }
 
             document.getElementById('record-expense-form')?.addEventListener('submit', e => this.handleRecordExpense(e));
             document.getElementById('employee-add-store-form')?.addEventListener('submit', e => this.handleAddStore(e));
             document.getElementById('edit-store-form')?.addEventListener('submit', e => this.handleUpdateStore(e));
+            document.getElementById('credit-received-form')?.addEventListener('submit', e => this.handleCreditReceived(e));
             document.getElementById('request-stock-form')?.addEventListener('submit', e => this.handleRequestStock(e));
 
             const invoiceForm = document.getElementById('invoice-form');
@@ -261,7 +269,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 });
             }
 
-            document.getElementById('credit-received-form')?.addEventListener('submit', e => this.handleCreditReceived(e));
             document.getElementById('ledger-filter-container')?.addEventListener('click', e => {
                 const button = e.target.closest('.ledger-filter-btn');
                 if (button && button.dataset.filter) {
@@ -317,12 +324,11 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (this.state.employees.length === 0) { this.showFirstTimeSetup(); return; }
                 this.showMainApp();
                 
-                if (!this.state.currentEmployeeId || !this.getCurrentEmployee()?.isActive) {
+                if (!this.state.currentEmployeeId || !this.getEmployee(this.state.currentEmployeeId)?.isActive) {
                     const firstActive = this.getActiveEmployees()[0];
                     this.state.currentEmployeeId = firstActive ? firstActive.id : null;
                 }
                 
-                this.renderEmployeeSwitcher();
                 this.renderProductRequestsPanel();
                 
                 const employeeView = document.getElementById('employee-view');
@@ -353,7 +359,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 employeeView.innerHTML = this.getEmployeeViewTemplate();
                 this.renderTabs('employee');
                 this.attachEmployeeViewEventListeners();
-                this.setActiveTab(document.querySelector('#employee-tabs-container .tab-button.active')?.dataset.tab || 'dashboard', 'employee');
+                const activeTab = document.querySelector('#employee-tabs-container .tab-button.active')?.dataset.tab;
+                const mobileTabValue = document.getElementById('mobile-tabs')?.value;
+                this.setActiveTab(activeTab || mobileTabValue || 'dashboard', 'employee');
             } else {
                 employeeView.innerHTML = `<div class="p-4 sm:p-8 text-center"><h2 class="text-2xl font-bold mb-4">No active employee selected.</h2><p>Please select an employee from the dropdown or view the Company Overview.</p></div>`;
             }
@@ -372,7 +380,9 @@ document.addEventListener('DOMContentLoaded', () => {
             this.state.companyActiveTab = 'company-dashboard';
             this.saveState();
             this.render();
-            this.toggleSidenav();
+            if (window.innerWidth < 768) {
+                this.toggleSidenav();
+            }
         },
 
         showEmployeeView() {
@@ -381,22 +391,29 @@ document.addEventListener('DOMContentLoaded', () => {
             this.render();
         },
 
+        // LOGIC CHANGE: Updated Company overview to show Net Revenue and Total VAT.
         getCompanyViewTemplate() {
-            let totalRevenue=0, totalExpenses=0;
+            let totalNetRevenue = 0, totalVat = 0, totalExpenses = 0;
             this.state.employees.forEach(emp => {
-                if(emp.transactions){
-                    totalRevenue += emp.transactions.filter(t => t.type === 'sale').reduce((sum, t) => sum + t.amount, 0);
-                    totalExpenses += emp.transactions.filter(t => t.type === 'expense').reduce((sum, t) => sum + t.amount, 0);
+                if (emp.transactions) {
+                    emp.transactions.forEach(t => {
+                        if (t.type === 'sale') {
+                            totalNetRevenue += t.subtotal; // `subtotal` now stores the NET amount.
+                            totalVat += t.vatAmount;
+                        } else if (t.type === 'expense') {
+                            totalExpenses += t.amount;
+                        }
+                    });
                 }
             });
-            const totalProfit = totalRevenue - totalExpenses;
+            const totalProfit = totalNetRevenue - totalExpenses;
 
             return `
             <div class="w-full max-w-6xl mx-auto px-4 py-6">
                 <div class="bg-light-surface dark:bg-dark-surface rounded-lg shadow-lg">
                     <div class="flex-shrink-0 p-4 flex justify-between items-center border-b border-gray-200 dark:border-gray-700">
                         <div>
-                            <button onclick="app.showEmployeeView()" class="text-light-text-secondary dark:text-dark-text-secondary hover:text-primary dark:hover:text-primary mr-4"><i class="fas fa-arrow-left mr-2"></i>Back</button>
+                            <button onclick="app.showEmployeeView()" class="text-light-text-secondary dark:text-dark-text-secondary hover:text-primary dark:hover:text-primary mr-4"><i class="fas fa-arrow-left mr-2"></i>Back to Employee</button>
                             <h2 class="text-2xl font-bold inline-block">Company-Wide Overview</h2>
                         </div>
                         <button onclick="app.openModal('aiAdvisorModal')" class="bg-primary/20 text-primary font-semibold py-2 px-4 rounded-lg hover:bg-primary hover:text-black transition-colors">
@@ -409,10 +426,11 @@ document.addEventListener('DOMContentLoaded', () => {
                     </div>
                     <div class="p-4 sm:p-6">
                         <div id="company-dashboard-content" class="tab-content hidden">
-                            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-4">
-                                <div class="bg-light-bg dark:bg-dark-bg p-4 rounded-lg"><div class="text-sm text-light-text-secondary dark:text-dark-text-secondary">Total Revenue</div><div class="text-2xl font-bold text-accent-green">AED ${totalRevenue.toFixed(2)}</div></div>
-                                <div class="bg-light-bg dark:bg-dark-bg p-4 rounded-lg"><div class="text-sm text-light-text-secondary dark:text-dark-text-secondary">Total Expenses</div><div class="text-2xl font-bold text-accent-red">AED ${totalExpenses.toFixed(2)}</div></div>
-                                <div class="bg-light-bg dark:bg-dark-bg p-4 rounded-lg"><div class="text-sm text-light-text-secondary dark:text-dark-text-secondary">Net Profit</div><div class="text-2xl font-bold ${totalProfit >= 0 ? 'text-accent-green':'text-accent-red'}">AED ${totalProfit.toFixed(2)}</div></div>
+                            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
+                                <div class="bg-light-bg dark:bg-dark-bg p-4 rounded-lg"><div class="text-sm text-light-text-secondary dark:text-dark-text-secondary">Total Revenue (Net)</div><div class="text-2xl font-bold text-accent-green">${this.formatCurrency(totalNetRevenue)}</div></div>
+                                <div class="bg-light-bg dark:bg-dark-bg p-4 rounded-lg"><div class="text-sm text-light-text-secondary dark:text-dark-text-secondary">Total VAT Collected</div><div class="text-2xl font-bold text-accent-amber">${this.formatCurrency(totalVat)}</div></div>
+                                <div class="bg-light-bg dark:bg-dark-bg p-4 rounded-lg"><div class="text-sm text-light-text-secondary dark:text-dark-text-secondary">Total Expenses</div><div class="text-2xl font-bold text-accent-red">${this.formatCurrency(totalExpenses)}</div></div>
+                                <div class="bg-light-bg dark:bg-dark-bg p-4 rounded-lg"><div class="text-sm text-light-text-secondary dark:text-dark-text-secondary">Net Profit</div><div class="text-2xl font-bold ${totalProfit >= 0 ? 'text-accent-green':'text-accent-red'}">${this.formatCurrency(totalProfit)}</div></div>
                             </div>
                             <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
                                  <div class="bg-light-bg dark:bg-dark-bg p-4 rounded-lg h-72 lg:h-80 w-full"><canvas id="company-revenue-expense-chart"></canvas></div>
@@ -431,7 +449,7 @@ document.addEventListener('DOMContentLoaded', () => {
         getEmployeeViewTemplate() {
             const employee = this.getCurrentEmployee();
             if (!employee) return '';
-            const revenue = employee.transactions.filter(t => t.type === 'sale').reduce((sum, t) => sum + t.amount, 0);
+            const revenue = employee.transactions.filter(t => t.type === 'sale').reduce((sum, t) => sum + t.subtotal, 0); // subtotal is now net
             const expenses = employee.transactions.filter(t => t.type === 'expense').reduce((sum, t) => sum + t.amount, 0);
             const profit = revenue - expenses;
             const salesAndExpensesContent = `
@@ -441,7 +459,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         <form id="record-sale-form" class="space-y-4">
                             <div class="grid grid-cols-1 sm:grid-cols-5 gap-2 items-end p-2 border border-dashed border-gray-400 dark:border-gray-600 rounded-md">
                                 <div class="sm:col-span-2">
-                                    <label for="add-sale-product" class="form-label">Product</label>
+                                    <label for="add-sale-product" class="form-label">Product (Price is VAT inclusive)</label>
                                     <select id="add-sale-product" class="form-input"></select>
                                 </div>
                                 <div class="sm:col-span-1">
@@ -469,12 +487,17 @@ document.addEventListener('DOMContentLoaded', () => {
                                     </div>
                                 </div>
                                 <div>
-                                    <label for="sale-discount" class="form-label">Overall Discount (AED)</label>
+                                    <label for="sale-discount" class="form-label">Overall Discount (${this.state.companyInfo.currency})</label>
                                     <input type="number" id="sale-discount" name="sale-discount" min="0" value="0" step="0.01" class="form-input">
                                 </div>
-                                <div class="p-3 bg-light-surface dark:bg-dark-surface rounded-md text-right">
-                                    <span class="text-light-text-secondary dark:text-dark-text-secondary">Final Total: </span>
-                                    <strong id="final-sale-amount" class="text-xl">AED 0.00</strong>
+                                <div id="sale-summary" class="p-3 bg-light-surface dark:bg-dark-surface rounded-md text-right space-y-1 text-sm">
+                                    <div class="flex justify-between"><span>Gross Total:</span> <span id="summary-subtotal">${this.formatCurrency(0)}</span></div>
+                                    <div class="flex justify-between"><span>Discount:</span> <span id="summary-discount" class="text-accent-red">-${this.formatCurrency(0)}</span></div>
+                                    <div class="flex justify-between text-xs"><span>(VAT Included):</span> <span id="summary-vat">${this.formatCurrency(0)}</span></div>
+                                    <div class="flex justify-between font-bold text-base mt-2 pt-2 border-t border-gray-300 dark:border-gray-600">
+                                        <span>Final Total Due:</span>
+                                        <strong id="final-sale-amount">${this.formatCurrency(0)}</strong>
+                                    </div>
                                 </div>
                                 <button type="submit" id="record-sale-btn" class="w-full bg-primary text-black font-bold py-2 px-4 rounded-md hover:bg-primary-hover disabled:opacity-50 disabled:cursor-not-allowed" disabled>Record Transaction</button>
                             </div>
@@ -485,7 +508,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         <form id="record-expense-form" class="space-y-3">
                             <div><label for="expense-description" class="form-label">Description</label><input type="text" id="expense-description" name="expense-description" required class="form-input"></div>
                             <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                                <div><label for="expense-amount" class="form-label">Amount (AED)</label><input type="number" id="expense-amount" name="expense-amount" step="0.01" min="0" required class="form-input"></div>
+                                <div><label for="expense-amount" class="form-label">Amount (${this.state.companyInfo.currency})</label><input type="number" id="expense-amount" name="expense-amount" step="0.01" min="0" required class="form-input"></div>
                                 <div><label for="expense-category" class="form-label">Category</label><select id="expense-category" name="expense-category" required class="form-input"></select></div>
                             </div>
                             <button type="submit" class="w-full bg-primary text-black font-bold py-2 px-4 rounded-md hover:bg-primary-hover">Record Expense</button>
@@ -516,9 +539,9 @@ document.addEventListener('DOMContentLoaded', () => {
                     <div class="flex-grow p-4 sm:p-6">
                         <div id="dashboard-content" class="tab-content hidden">
                             <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-4">
-                                <div class="bg-light-bg dark:bg-dark-bg p-4 rounded-lg"><div class="text-sm text-light-text-secondary dark:text-dark-text-secondary">Revenue</div><div class="text-2xl font-bold text-accent-green">AED ${revenue.toFixed(2)}</div></div>
-                                <div class="bg-light-bg dark:bg-dark-bg p-4 rounded-lg"><div class="text-sm text-light-text-secondary dark:text-dark-text-secondary">Expenses</div><div class="text-2xl font-bold text-accent-red">AED ${expenses.toFixed(2)}</div></div>
-                                <div class="bg-light-bg dark:bg-dark-bg p-4 rounded-lg"><div class="text-sm text-light-text-secondary dark:text-dark-text-secondary">Net Profit</div><div class="text-2xl font-bold ${profit >= 0 ? 'text-accent-green':'text-accent-red'}">AED ${profit.toFixed(2)}</div></div>
+                                <div class="bg-light-bg dark:bg-dark-bg p-4 rounded-lg"><div class="text-sm text-light-text-secondary dark:text-dark-text-secondary">Revenue (Net)</div><div class="text-2xl font-bold text-accent-green">${this.formatCurrency(revenue)}</div></div>
+                                <div class="bg-light-bg dark:bg-dark-bg p-4 rounded-lg"><div class="text-sm text-light-text-secondary dark:text-dark-text-secondary">Expenses</div><div class="text-2xl font-bold text-accent-red">${this.formatCurrency(expenses)}</div></div>
+                                <div class="bg-light-bg dark:bg-dark-bg p-4 rounded-lg"><div class="text-sm text-light-text-secondary dark:text-dark-text-secondary">Net Profit</div><div class="text-2xl font-bold ${profit >= 0 ? 'text-accent-green':'text-accent-red'}">${this.formatCurrency(profit)}</div></div>
                             </div>
                             <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
                                 <div class="bg-light-bg dark:bg-dark-bg p-4 rounded-lg h-60 sm:h-64"><canvas id="sales-over-time-chart"></canvas></div>
@@ -537,12 +560,11 @@ document.addEventListener('DOMContentLoaded', () => {
                                     <form id="employee-add-store-form" class="space-y-3">
                                         <div><label for="new-store-name" class="form-label">Store Name</label><input type="text" id="new-store-name" required class="form-input"></div>
                                         <div><label for="new-store-location" class="form-label">Location</label><input type="text" id="new-store-location" required class="form-input"></div>
-                                        <div><label for="new-store-credit-limit" class="form-label">Credit Limit (AED)</label><input type="number" id="new-store-credit-limit" required min="0" step="0.01" class="form-input"></div>
+                                        <div><label for="new-store-credit-limit" class="form-label">Credit Limit (${this.state.companyInfo.currency})</label><input type="number" id="new-store-credit-limit" required min="0" step="0.01" class="form-input"></div>
                                         <button type="submit" class="w-full bg-primary text-black font-bold py-2 px-4 rounded-md hover:bg-primary-hover">Add Store</button>
                                     </form>
                                 </div>
                                 <div class="lg:col-span-1 space-y-4" id="stores-list-container">
-                                    
                                     <div class="flex justify-between items-center">
                                         <h3 class="text-xl font-bold">My Stores</h3>
                                         <button onclick="app.toggleSearch('stores')" class="text-light-text-secondary dark:text-dark-text-secondary hover:text-primary p-2"><i class="fas fa-search"></i></button>
@@ -550,7 +572,6 @@ document.addEventListener('DOMContentLoaded', () => {
                                     <div id="stores-search-container" class="hidden">
                                         <input type="text" id="stores-search-input" placeholder="Search by name or location..." class="form-input w-full">
                                     </div>
-                                    
                                     <div id="stores-list" class="space-y-4 max-h-[60vh] overflow-y-auto pr-2"></div>
                                 </div>
                             </div>
@@ -579,7 +600,6 @@ document.addEventListener('DOMContentLoaded', () => {
                             <div id="recent-invoice-panel" class="invoice-sub-tab-content hidden bg-light-bg dark:bg-dark-bg p-4 sm:p-6 rounded-lg"></div>
                         </div>
                         <div id="ledger-content" class="tab-content hidden">
-
                             <div class="flex justify-between items-center mb-4">
                                 <h3 class="text-xl font-bold">Transaction Ledger</h3>
                                 <button onclick="app.toggleSearch('ledger')" class="text-light-text-secondary dark:text-dark-text-secondary hover:text-primary p-2"><i class="fas fa-search"></i></button>
@@ -615,14 +635,13 @@ document.addEventListener('DOMContentLoaded', () => {
             const notificationMessage = document.getElementById('notification-message');
             if (this.notificationTimeout) { clearTimeout(this.notificationTimeout); }
             notificationMessage.textContent = message;
-            notification.classList.remove('bg-accent-green', 'bg-accent-red', 'opacity-0', 'animate-fade-in-out');
-            void notification.offsetWidth;
-            if (type === 'success') { notification.classList.add('bg-accent-green'); } else { notification.classList.add('bg-accent-red'); }
-            notification.classList.add('animate-fade-in-out');
+            notification.className = 'fixed top-5 right-5 z-[100] text-black py-2 px-4 rounded-md shadow-lg transition-opacity'; // Reset classes
+            void notification.offsetWidth; // Trigger reflow
+            notification.classList.add(type === 'success' ? 'bg-accent-green' : 'bg-accent-red', 'animate-fade-in-out');
+            
             this.notificationTimeout = setTimeout(() => {
                 notification.classList.remove('animate-fade-in-out');
                 notification.classList.add('opacity-0');
-                this.notificationTimeout = null;
             }, 4000);
         },
 
@@ -632,16 +651,15 @@ document.addEventListener('DOMContentLoaded', () => {
             const storesList = document.getElementById('stores-list');
             const searchTerm = this.state.storeSearchTerm.toLowerCase();
 
-            // Filter stores based on the search term
             const filteredStores = employee.stores.filter(store =>
                 store.name.toLowerCase().includes(searchTerm) ||
                 store.location.toLowerCase().includes(searchTerm)
             );
 
-            // Generate the HTML for the filtered list
             storesList.innerHTML = filteredStores.map(store => {
                 const calculatedCredit = (store.creditUsed || 0) - (store.creditPaidBack || 0);
                 const outstandingCredit = Math.max(0, calculatedCredit);
+                const creditLimit = (store.creditAvailable || 0) + (store.creditUsed || 0);
                 return `
                 <div class="bg-light-surface dark:bg-dark-surface p-4 rounded-lg">
                     <div class="flex justify-between items-start">
@@ -653,20 +671,19 @@ document.addEventListener('DOMContentLoaded', () => {
                         </div>
                     </div>
                     <div class="mt-4 text-xs space-y-2">
-                        <div class="flex justify-between"><span>Credit Limit:</span> <span class="font-mono">AED ${((store.creditAvailable || 0) + (store.creditUsed || 0)).toFixed(2)}</span></div>
-                        <div class="flex justify-between"><span>Outstanding Credit:</span> <span class="font-mono ${outstandingCredit > 0 ? 'text-accent-red' : ''}">AED ${outstandingCredit.toFixed(2)}</span></div>
-                        <div class="flex justify-between"><span>Paid Back:</span> <span class="font-mono text-accent-green">AED ${(store.creditPaidBack || 0).toFixed(2)}</span></div>
+                        <div class="flex justify-between"><span>Credit Limit:</span> <span class="font-mono">${this.formatCurrency(creditLimit)}</span></div>
+                        <div class="flex justify-between"><span>Outstanding Credit:</span> <span class="font-mono ${outstandingCredit > 0 ? 'text-accent-red' : ''}">${this.formatCurrency(outstandingCredit)}</span></div>
+                        <div class="flex justify-between"><span>Paid Back:</span> <span class="font-mono text-accent-green">${this.formatCurrency(store.creditPaidBack || 0)}</span></div>
                     </div>
                 </div>`;
             }).join('') || `<p class="text-center py-8 text-light-text-secondary dark:text-dark-text-secondary">No stores found.</p>`;
 
-            // Connect the search input to the state
             const searchInput = document.getElementById('stores-search-input');
             if (searchInput) {
                 searchInput.value = this.state.storeSearchTerm;
                 searchInput.oninput = (e) => {
                     this.state.storeSearchTerm = e.target.value;
-                    this.renderStoresTab(); // Re-render the list as user types
+                    this.renderStoresTab();
                 };
             }
         },
@@ -679,7 +696,6 @@ document.addEventListener('DOMContentLoaded', () => {
             const typeFilter = this.state.ledgerFilter;
             const searchTerm = this.state.ledgerSearchTerm.toLowerCase();
 
-            // 1. Filter by type buttons (existing logic)
             let filteredTransactions = sortedTransactions.filter(t => {
                 if (typeFilter === 'all') return true;
                 if (typeFilter === 'payment') return t.type === 'credit_received';
@@ -690,7 +706,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 return false;
             });
 
-            // 2. Filter by search term (new logic)
             if (searchTerm) {
                 filteredTransactions = filteredTransactions.filter(t => {
                     let details = '';
@@ -709,13 +724,11 @@ document.addEventListener('DOMContentLoaded', () => {
                 });
             }
 
-            // Update active filter button
             document.querySelectorAll('.ledger-filter-btn').forEach(btn => {
                 btn.classList.toggle('ring-2', btn.dataset.filter === typeFilter);
                 btn.classList.toggle('ring-primary', btn.dataset.filter === typeFilter);
             });
 
-            // Render the final filtered list
             ledgerBody.innerHTML = filteredTransactions.map(t => {
                 const date = new Date(t.date).toLocaleDateString();
                 const time = new Date(t.date).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
@@ -747,13 +760,12 @@ document.addEventListener('DOMContentLoaded', () => {
                 return '';
             }).join('') || `<tr><td colspan="4" class="text-center py-10 text-light-text-secondary dark:text-dark-text-secondary">No transactions found.</td></tr>`;
             
-            // Connect the search input to the state
             const searchInput = document.getElementById('ledger-search-input');
             if (searchInput) {
                 searchInput.value = this.state.ledgerSearchTerm;
                 searchInput.oninput = (e) => {
                     this.state.ledgerSearchTerm = e.target.value;
-                    this.renderLedger(); // Re-render the list as user types
+                    this.renderLedger();
                 };
             }
         },
@@ -815,7 +827,7 @@ document.addEventListener('DOMContentLoaded', () => {
                             <span class="text-light-text-secondary dark:text-dark-text-secondary ml-2">(Qty: ${item.quantity})</span>
                         </div>
                         <div class="flex items-center">
-                            <span class="font-mono mr-4">AED ${(item.price * item.quantity).toFixed(2)}</span>
+                            <span class="font-mono mr-4">${this.formatCurrency(item.price * item.quantity)}</span>
                             <button type="button" class="remove-sale-item-btn text-accent-red hover:opacity-75" data-product-id="${item.productId}">&times;</button>
                         </div>
                     </div>
@@ -824,12 +836,27 @@ document.addEventListener('DOMContentLoaded', () => {
             this.updateSaleCartTotal();
         },
 
+        // LOGIC CHANGE: Rewritten to handle tax-inclusive pricing.
         updateSaleCartTotal() {
-            const subtotal = this.currentSaleCart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+            const grossTotal = this.currentSaleCart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
             const discount = parseFloat(document.getElementById('sale-discount').value) || 0;
-            const total = subtotal - discount;
+            const finalTotal = grossTotal - discount;
             
-            document.getElementById('final-sale-amount').textContent = `AED ${total.toFixed(2)}`;
+            const saleType = document.getElementById('sale-type').value;
+            const isDeal = saleType === 'Deal';
+            
+            let vatAmount = 0;
+            if (!isDeal && this.state.companyInfo.vatRate > 0) {
+                // Calculate VAT from the final, discounted price.
+                const netAmount = finalTotal / (1 + this.state.companyInfo.vatRate);
+                vatAmount = finalTotal - netAmount;
+            }
+
+            document.getElementById('summary-subtotal').textContent = this.formatCurrency(grossTotal);
+            document.getElementById('summary-discount').textContent = `-${this.formatCurrency(discount)}`;
+            document.getElementById('summary-vat').textContent = this.formatCurrency(vatAmount);
+            document.getElementById('final-sale-amount').textContent = this.formatCurrency(finalTotal > 0 ? finalTotal : 0);
+            
             document.getElementById('record-sale-btn').disabled = this.currentSaleCart.length === 0;
         },
 
@@ -842,7 +869,10 @@ document.addEventListener('DOMContentLoaded', () => {
             if (!store) return;
             const amount = parseFloat(document.getElementById('credit-received-amount').value);
             const outstanding = (store.creditUsed || 0) - (store.creditPaidBack || 0);
-            if (isNaN(amount) || amount <= 0 || amount > outstanding) { this.showNotification('Invalid payment amount.', 'error'); return; }
+            if (isNaN(amount) || amount <= 0 || amount > outstanding + 0.001) {
+                this.showNotification('Invalid payment amount.', 'error'); 
+                return;
+            }
             store.creditPaidBack = (store.creditPaidBack || 0) + amount;
             store.creditAvailable += amount;
             employee.transactions.push({
@@ -873,7 +903,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 ];
                 containerId = 'employee-tabs-container';
                 mobileTabsId = 'mobile-tabs';
-            } else { // company view
+            } else { 
                  tabs = [
                     { id: 'company-dashboard', name: 'Dashboard', icon: 'fa-tachometer-alt' },
                     { id: 'company-employees', name: 'Employees', icon: 'fa-users' },
@@ -887,7 +917,10 @@ document.addEventListener('DOMContentLoaded', () => {
             document.getElementById(containerId).innerHTML = tabs.map(tab => `<button data-tab="${tab.id}" class="tab-button text-light-text-secondary dark:text-dark-text-secondary hover:text-light-text dark:hover:text-dark-text border-b-2 border-transparent py-3 px-1 sm:px-4 font-medium text-sm"><i class="fas ${tab.icon} mr-0 sm:mr-2"></i><span class="hidden sm:inline">${tab.name}</span></button>`).join('');
             
             if (mobileTabsId) {
-                document.getElementById(mobileTabsId).innerHTML = tabs.map(tab => `<option value="${tab.id}">${tab.name}</option>`).join('');
+                const mobileSelect = document.getElementById(mobileTabsId);
+                if (mobileSelect) {
+                    mobileSelect.innerHTML = tabs.map(tab => `<option value="${tab.id}">${tab.name}</option>`).join('');
+                }
             }
         },
 
@@ -914,7 +947,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (mobileTabs) mobileTabs.value = tabName;
                 const renderMap = { dashboard: 'renderDashboard', 'my-tasks': 'renderMyTasks', 'my-inventory': 'renderMyInventory', 'sales-expenses': 'renderSalesAndExpenses', stores: 'renderStoresTab', invoices: 'renderInvoices', ledger: 'renderLedger', 'request-stock': 'renderRequestStockTab' };
                 if (renderMap[tabName]) this[renderMap[tabName]]();
-            } else { // company view
+            } else { 
                 const renderMap = { 
                     'company-dashboard': 'renderCompanyDashboardTab', 
                     'company-employees': 'renderCompanyEmployeesTab', 
@@ -959,7 +992,7 @@ document.addEventListener('DOMContentLoaded', () => {
                  (emp.transactions || []).forEach(t => {
                      const date = t.date.split('T')[0];
                      if (!transactionsByDate[date]) transactionsByDate[date] = { revenue: 0, expenses: 0 };
-                     if (t.type === 'sale') transactionsByDate[date].revenue += t.amount;
+                     if (t.type === 'sale') transactionsByDate[date].revenue += t.subtotal; // Now net revenue
                      if (t.type === 'expense') transactionsByDate[date].expenses += t.amount;
                  });
              });
@@ -969,18 +1002,18 @@ document.addEventListener('DOMContentLoaded', () => {
                  data: {
                      labels: sortedDates,
                      datasets: [
-                         { label: 'Total Revenue', data: sortedDates.map(date => transactionsByDate[date].revenue), borderColor: '#a6e3a1', backgroundColor: 'rgba(166, 227, 161, 0.2)', tension: 0.1, fill: true },
+                         { label: 'Total Revenue (Net)', data: sortedDates.map(date => transactionsByDate[date].revenue), borderColor: '#a6e3a1', backgroundColor: 'rgba(166, 227, 161, 0.2)', tension: 0.1, fill: true },
                          { label: 'Total Expenses', data: sortedDates.map(date => transactionsByDate[date].expenses), borderColor: '#f38ba8', backgroundColor: 'rgba(243, 139, 168, 0.2)', tension: 0.1, fill: true }
                      ]
                  },
-                 options: { responsive: true, maintainAspectRatio: false, scales: { y: { beginAtZero: true, grid: { color: gridColor }, ticks: { color: textColor } }, x: { grid: { color: gridColor }, ticks: { color: textColor } } }, plugins: { legend: { labels: { color: textColor } }, title: {display: true, text: 'Firm-Wide Revenue vs. Expenses', color: textColor, font:{size:16}} } }
+                 options: { responsive: true, maintainAspectRatio: false, scales: { y: { beginAtZero: true, grid: { color: gridColor }, ticks: { color: textColor } }, x: { grid: { color: gridColor }, ticks: { color: textColor } } }, plugins: { legend: { labels: { color: textColor } }, title: {display: true, text: 'Firm-Wide Net Revenue vs. Expenses', color: textColor, font:{size:16}} } }
              });
 
             const salesByProduct = {};
             this.state.employees.forEach(emp => {
                 (emp.transactions || []).filter(t => t.type === 'sale').forEach(t => {
                     (t.items || []).forEach(item => {
-                        salesByProduct[item.productId] = (salesByProduct[item.productId] || 0) + (item.price * item.quantity);
+                        salesByProduct[item.productId] = (salesByProduct[item.productId] || 0) + (item.price * item.quantity); // Based on gross price
                     });
                 });
             });
@@ -989,9 +1022,9 @@ document.addEventListener('DOMContentLoaded', () => {
                  type: 'bar',
                  data: {
                      labels: topProducts.map(([productId]) => this.getProduct(productId)?.name || 'Unknown'),
-                     datasets: [{ label: 'Revenue by Product', data: topProducts.map(([, amount]) => amount), backgroundColor: ['#89b4fa', '#a6e3a1', '#f9e2af', '#fab387', '#f38ba8'] }]
+                     datasets: [{ label: 'Gross Revenue by Product', data: topProducts.map(([, amount]) => amount), backgroundColor: ['#89b4fa', '#a6e3a1', '#f9e2af', '#fab387', '#f38ba8'] }]
                  },
-                 options: { responsive: true, maintainAspectRatio: false, indexAxis: 'y', scales: { x: { beginAtZero: true, grid: { color: gridColor }, ticks: { color: textColor } }, y: { grid: { color: gridColor }, ticks: { color: textColor } } }, plugins: { legend: { display: false }, title: { display: true, text: 'Top Products by Revenue (Firm-Wide)', color: textColor, font: { size: 16 } } } }
+                 options: { responsive: true, maintainAspectRatio: false, indexAxis: 'y', scales: { x: { beginAtZero: true, grid: { color: gridColor }, ticks: { color: textColor } }, y: { grid: { color: gridColor }, ticks: { color: textColor } } }, plugins: { legend: { display: false }, title: { display: true, text: 'Top Products by Gross Revenue', color: textColor, font: { size: 16 } } } }
              });
         },
 
@@ -1000,7 +1033,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const activeEmployees = this.state.employees.filter(e => e.isActive);
             const inactiveEmployees = this.state.employees.filter(e => !e.isActive);
             let content = `<h3 class="text-xl font-bold mb-4">Active Employees (${activeEmployees.length})</h3>`;
-            content += `<div class="space-y-3 mb-6">${activeEmployees.map(emp=>{const revenue=emp.transactions.filter(t=>t.type==='sale').reduce((sum,t)=>sum+t.amount,0);const expenses=emp.transactions.filter(t=>t.type==='expense').reduce((sum,t)=>sum+t.amount,0);return`<div class="bg-light-bg dark:bg-dark-bg p-3 rounded-lg"><div class="flex justify-between items-center"><div><span class="font-bold">${emp.name}</span><em class="text-xs ml-2 text-light-text-secondary dark:text-dark-text-secondary">(${emp.position})</em></div><div class="flex space-x-3"><button class="text-sm hover:text-primary" onclick="app.startEditEmployee('${emp.id}')"><i class="fas fa-pencil-alt"></i></button><button class="text-sm hover:text-accent-red" onclick="app.deactivateEmployee('${emp.id}')"><i class="fas fa-user-slash"></i></button></div></div><div class="text-xs mt-2 space-y-1 pl-1 border-l-2 border-gray-300 dark:border-gray-600 ml-1 pl-2"><div class="flex justify-between"><span>Revenue:</span> <span class="font-semibold text-accent-green">AED ${revenue.toFixed(2)}</span></div><div class="flex justify-between"><span>Expenses:</span> <span class="font-semibold text-accent-red">AED ${expenses.toFixed(2)}</span></div></div></div>`}).join('')||`<p class="text-sm text-light-text-secondary dark:text-dark-text-secondary">No active employees.</p>`}</div>`;
+            content += `<div class="space-y-3 mb-6">${activeEmployees.map(emp=>{const revenue=emp.transactions.filter(t=>t.type==='sale').reduce((sum,t)=>sum+t.subtotal,0);const expenses=emp.transactions.filter(t=>t.type==='expense').reduce((sum,t)=>sum+t.amount,0);return`<div class="bg-light-bg dark:bg-dark-bg p-3 rounded-lg"><div class="flex justify-between items-center"><div><span class="font-bold">${emp.name}</span><em class="text-xs ml-2 text-light-text-secondary dark:text-dark-text-secondary">(${emp.position})</em></div><div class="flex space-x-3"><button class="text-sm hover:text-primary" onclick="app.startEditEmployee('${emp.id}')"><i class="fas fa-pencil-alt"></i></button><button class="text-sm hover:text-accent-red" onclick="app.deactivateEmployee('${emp.id}')"><i class="fas fa-user-slash"></i></button></div></div><div class="text-xs mt-2 space-y-1 pl-1 border-l-2 border-gray-300 dark:border-gray-600 ml-1 pl-2"><div class="flex justify-between"><span>Revenue (Net):</span> <span class="font-semibold text-accent-green">${this.formatCurrency(revenue)}</span></div><div class="flex justify-between"><span>Expenses:</span> <span class="font-semibold text-accent-red">${this.formatCurrency(expenses)}</span></div></div></div>`}).join('')||`<p class="text-sm text-light-text-secondary dark:text-dark-text-secondary">No active employees.</p>`}</div>`;
             if (inactiveEmployees.length > 0) {
                  content += `<h3 class="text-xl font-bold mb-4">Inactive Employees (${inactiveEmployees.length})</h3>`;
                  content += `<div class="space-y-3">${inactiveEmployees.map(emp=>`<div class="flex justify-between items-center bg-light-bg dark:bg-dark-bg opacity-60 p-3 rounded-lg"><span class="italic">${emp.name}</span><button class="text-sm text-accent-green hover:opacity-80 font-semibold" onclick="app.reactivateEmployee('${emp.id}')">Reactivate</button></div>`).join('')}</div>`;
@@ -1011,11 +1044,11 @@ document.addEventListener('DOMContentLoaded', () => {
         renderCompanyInventoryTab() {
             const container = document.querySelector('#company-view #company-inventory-content');
             let content = `<h3 class="text-xl font-bold mb-4">Master Inventory</h3>`;
-            content += `<div class="overflow-x-auto bg-light-bg dark:bg-dark-bg rounded-lg"><table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700"><thead class="bg-gray-50 dark:bg-gray-800/50"><tr><th class="table-header">Product</th><th class="table-header">Price</th><th class="table-header">Stock</th><th class="table-header">Actions</th></tr></thead><tbody class="divide-y divide-gray-200 dark:divide-gray-700">`;
+            content += `<div class="overflow-x-auto bg-light-bg dark:bg-dark-bg rounded-lg"><table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700"><thead class="bg-gray-50 dark:bg-gray-800/50"><tr><th class="table-header">Product</th><th class="table-header">Price (VAT Incl.)</th><th class="table-header">Stock</th><th class="table-header">Actions</th></tr></thead><tbody class="divide-y divide-gray-200 dark:divide-gray-700">`;
             content += this.getActiveProducts().map(prod => `
                 <tr class="hover:bg-light-surface dark:hover:bg-dark-surface/50 text-sm">
                     <td class="px-6 py-4 whitespace-nowrap">${prod.name}</td>
-                    <td class="px-6 py-4 whitespace-nowrap font-mono">AED ${prod.price.toFixed(2)}</td>
+                    <td class="px-6 py-4 whitespace-nowrap font-mono">${this.formatCurrency(prod.price)}</td>
                     <td class="px-6 py-4 whitespace-nowrap font-mono">${prod.stock}</td>
                     <td class="px-6 py-4 whitespace-nowrap"><button class="text-sm hover:text-primary" onclick="app.startEditProduct('${prod.id}')"><i class="fas fa-pencil-alt"></i></button><button class="text-sm hover:text-accent-red ml-4" onclick="app.deleteProduct('${prod.id}')"><i class="fas fa-trash-alt"></i></button></td>
                 </tr>
@@ -1054,7 +1087,7 @@ document.addEventListener('DOMContentLoaded', () => {
                          datasets: [{ data: Object.values(expensesByCategory), backgroundColor: ['#f38ba8', '#fab387', '#f9e2af', '#a6e3a1', '#89b4fa', '#cba6f7', '#f5c2e7'], borderColor: isDark ? '#1e1f20' : '#ffffff', borderWidth: 4 }]
                      },
                      options: { responsive: true, maintainAspectRatio: true, plugins: { legend: { position: 'top', labels: { color: textColor } } } }
-                });
+                 });
             }
         },
 
@@ -1073,8 +1106,7 @@ document.addEventListener('DOMContentLoaded', () => {
              container.innerHTML = content;
         },
 
-        // --- EMPLOYEE VIEW TAB RENDERERS ---
-        renderDashboard() { const employee=this.getCurrentEmployee();if(!employee)return;const isDark=this.state.theme==='dark';const gridColor=isDark?'rgba(255, 255, 255, 0.1)':'rgba(0, 0, 0, 0.1)';const textColor=isDark?'#e3e3e3':'#1f2937';Object.values(this.charts).forEach(chart=>{if(chart)chart.destroy()});const salesByDate=employee.transactions.filter(t=>t.type==='sale').reduce((acc,t)=>{const date=t.date.split('T')[0];acc[date]=(acc[date]||0)+t.amount;return acc},{});const sortedDates=Object.keys(salesByDate).sort();this.charts.sales=new Chart(document.getElementById('sales-over-time-chart').getContext('2d'),{type:'line',data:{labels:sortedDates,datasets:[{label:'Daily Revenue',data:sortedDates.map(date=>salesByDate[date]),borderColor:'#89b4fa',backgroundColor:'rgba(137, 180, 250, 0.2)',tension:0.1,fill:true}]},options:{responsive:true,maintainAspectRatio:false,scales:{y:{beginAtZero:true,grid:{color:gridColor},ticks:{color:textColor}},x:{grid:{color:gridColor},ticks:{color:textColor}}},plugins:{legend:{labels:{color:textColor}}}}});const salesByProduct=employee.transactions.filter(t=>t.type==='sale').reduce((acc,t)=>{(t.items||[]).forEach(item=>{acc[item.productId]=(acc[item.productId]||0)+(item.price*item.quantity)});return acc},{});const topProducts=Object.entries(salesByProduct).sort(([,a],[,b])=>b-a).slice(0,5);this.charts.products=new Chart(document.getElementById('top-products-chart').getContext('2d'),{type:'bar',data:{labels:topProducts.map(([productId])=>this.getProduct(productId)?.name||'Unknown'),datasets:[{label:'Revenue by Product',data:topProducts.map(([,amount])=>amount),backgroundColor:['#89b4fa','#a6e3a1','#f9e2af','#fab387','#f38ba8']}]},options:{responsive:true,maintainAspectRatio:false,indexAxis:'y',scales:{x:{beginAtZero:true,grid:{color:gridColor},ticks:{color:textColor}},y:{grid:{color:gridColor},ticks:{color:textColor}}},plugins:{legend:{display:false},title:{display:true,text:'Top Products by Revenue',color:textColor,font:{size:16}}}}});const expensesByCategory=employee.transactions.filter(t=>t.type==='expense').reduce((acc,t)=>{const category=this.getCategory(t.categoryId)||{name:'Uncategorized'};acc[category.name]=(acc[category.name]||0)+t.amount;return acc},{});this.charts.expensesByCategory=new Chart(document.getElementById('expenses-by-category-chart').getContext('2d'),{type:'doughnut',data:{labels:Object.keys(expensesByCategory),datasets:[{data:Object.values(expensesByCategory),backgroundColor:['#f38ba8','#fab387','#f9e2af','#a6e3a1','#89b4fa','#cba6f7','#f5c2e7'],borderColor:isDark?'#1e1f20':'#ffffff',borderWidth:4}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'top',labels:{color:textColor}},title:{display:true,text:'Expenses by Category',color:textColor,font:{size:16}}}}});const totalCreditUsed=employee.stores.reduce((sum,s)=>sum+(s.creditUsed||0),0);const totalCreditAvailable=employee.stores.reduce((sum,s)=>sum+(s.creditAvailable||0),0);const outstandingCredit=totalCreditUsed-employee.stores.reduce((sum,s)=>sum+(s.creditPaidBack||0),0);const totalCreditLimit=totalCreditAvailable+totalCreditUsed;this.charts.credit=new Chart(document.getElementById('store-credit-chart').getContext('2d'),{type:'bar',data:{labels:['Credit Status'],datasets:[{label:'Outstanding',data:[outstandingCredit],backgroundColor:'#f38ba8'},{label:'Available',data:[totalCreditLimit-outstandingCredit],backgroundColor:'#a6e3a1'}]},options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,scales:{x:{stacked:true,max:totalCreditLimit>0?totalCreditLimit:1},y:{stacked:true}},plugins:{title:{display:true,text:'My Store Credit Status',color:textColor,font:{size:16}},legend:{position:'top',labels:{color:textColor}}}}});},
+        renderDashboard() { const employee=this.getCurrentEmployee();if(!employee)return;const isDark=this.state.theme==='dark';const gridColor=isDark?'rgba(255, 255, 255, 0.1)':'rgba(0, 0, 0, 0.1)';const textColor=isDark?'#e3e3e3':'#1f2937';Object.values(this.charts).forEach(chart=>{if(chart)chart.destroy()});const salesByDate=employee.transactions.filter(t=>t.type==='sale').reduce((acc,t)=>{const date=t.date.split('T')[0];acc[date]=(acc[date]||0)+t.subtotal;return acc},{});const sortedDates=Object.keys(salesByDate).sort();this.charts.sales=new Chart(document.getElementById('sales-over-time-chart').getContext('2d'),{type:'line',data:{labels:sortedDates,datasets:[{label:'Daily Net Revenue',data:sortedDates.map(date=>salesByDate[date]),borderColor:'#89b4fa',backgroundColor:'rgba(137, 180, 250, 0.2)',tension:0.1,fill:true}]},options:{responsive:true,maintainAspectRatio:false,scales:{y:{beginAtZero:true,grid:{color:gridColor},ticks:{color:textColor}},x:{grid:{color:gridColor},ticks:{color:textColor}}},plugins:{legend:{labels:{color:textColor}}}}});const salesByProduct=employee.transactions.filter(t=>t.type==='sale').reduce((acc,t)=>{(t.items||[]).forEach(item=>{acc[item.productId]=(acc[item.productId]||0)+(item.price*item.quantity)});return acc},{});const topProducts=Object.entries(salesByProduct).sort(([,a],[,b])=>b-a).slice(0,5);this.charts.products=new Chart(document.getElementById('top-products-chart').getContext('2d'),{type:'bar',data:{labels:topProducts.map(([productId])=>this.getProduct(productId)?.name||'Unknown'),datasets:[{label:'Gross Revenue by Product',data:topProducts.map(([,amount])=>amount),backgroundColor:['#89b4fa','#a6e3a1','#f9e2af','#fab387','#f38ba8']}]},options:{responsive:true,maintainAspectRatio:false,indexAxis:'y',scales:{x:{beginAtZero:true,grid:{color:gridColor},ticks:{color:textColor}},y:{grid:{color:gridColor},ticks:{color:textColor}}},plugins:{legend:{display:false},title:{display:true,text:'Top Products by Gross Revenue',color:textColor,font:{size:16}}}}});const expensesByCategory=employee.transactions.filter(t=>t.type==='expense').reduce((acc,t)=>{const category=this.getCategory(t.categoryId)||{name:'Uncategorized'};acc[category.name]=(acc[category.name]||0)+t.amount;return acc},{});this.charts.expensesByCategory=new Chart(document.getElementById('expenses-by-category-chart').getContext('2d'),{type:'doughnut',data:{labels:Object.keys(expensesByCategory),datasets:[{data:Object.values(expensesByCategory),backgroundColor:['#f38ba8','#fab387','#f9e2af','#a6e3a1','#89b4fa','#cba6f7','#f5c2e7'],borderColor:isDark?'#1e1f20':'#ffffff',borderWidth:4}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'top',labels:{color:textColor}},title:{display:true,text:'Expenses by Category',color:textColor,font:{size:16}}}}});const totalCreditUsed=employee.stores.reduce((sum,s)=>sum+(s.creditUsed||0),0);const totalCreditAvailable=employee.stores.reduce((sum,s)=>sum+(s.creditAvailable||0),0);const outstandingCredit=totalCreditUsed-employee.stores.reduce((sum,s)=>sum+(s.creditPaidBack||0),0);const totalCreditLimit=totalCreditAvailable+totalCreditUsed;this.charts.credit=new Chart(document.getElementById('store-credit-chart').getContext('2d'),{type:'bar',data:{labels:['Credit Status'],datasets:[{label:'Outstanding',data:[outstandingCredit],backgroundColor:'#f38ba8'},{label:'Available',data:[totalCreditLimit-outstandingCredit],backgroundColor:'#a6e3a1'}]},options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,scales:{x:{stacked:true,max:totalCreditLimit>0?totalCreditLimit:1},y:{stacked:true}},plugins:{title:{display:true,text:'My Store Credit Status',color:textColor,font:{size:16}},legend:{position:'top',labels:{color:textColor}}}}});},
         renderMyTasks() {
             const employeeTasks = this.state.tasks.filter(t => t.assigneeId === this.state.currentEmployeeId);
             document.getElementById('employee-tasks-list').innerHTML = employeeTasks.map(task => `<li class="bg-light-bg dark:bg-dark-bg p-4 rounded-lg flex justify-between items-center ${task.status === 'Completed' ? 'task-completed opacity-60' : ''}"><span>${task.description}</span><button class="text-black px-3 py-1 rounded-md text-sm font-semibold ${task.status === 'Completed' ? 'bg-gray-400' : 'bg-accent-green hover:opacity-80'}" onclick="app.toggleTaskStatus('${task.id}')">${task.status === 'Completed' ? 'Reopen' : 'Complete'}</button></li>`).join('') || `<p class="text-center py-8 text-light-text-secondary dark:text-dark-text-secondary">You have no assigned tasks.</p>`;
@@ -1119,7 +1151,6 @@ document.addEventListener('DOMContentLoaded', () => {
         renderSalesAndExpenses() {
             const employee = this.getCurrentEmployee();
             if(!employee) return;
-            // Setup Sales Form
             document.getElementById('sale-type').innerHTML = `<option value="Cash">Cash</option><option value="Credit">Credit</option><option value="Deal">Deal</option>`;
             document.getElementById('sale-store').innerHTML = employee.stores.map(s => `<option value="${s.id}">${s.name}</option>`).join('') || `<option disabled>Add a store first</option>`;
             const availableInventory = employee.inventory?.filter(item => item.stock > 0 && this.getProduct(item.productId)?.isActive) || [];
@@ -1128,13 +1159,12 @@ document.addEventListener('DOMContentLoaded', () => {
                 return `<option value="${product.id}">${product.name} (Stock: ${item.stock})</option>`
             }).join('');
             
-            // Clear cart from previous sessions and render
             this.currentSaleCart = [];
             this.renderSaleCart();
 
-            // Setup Expense Form
             document.getElementById('expense-category').innerHTML=this.state.expenseCategories.map(c=>`<option value="${c.id}">${c.name}</option>`).join('')||`<option disabled>Add a category first</option>`;
-            document.querySelector('#record-expense-form button').disabled=this.state.expenseCategories.length===0
+            const expenseBtn = document.querySelector('#record-expense-form button');
+            if (expenseBtn) expenseBtn.disabled = this.state.expenseCategories.length === 0;
         },
         
         renderRequestStockTab() {
@@ -1163,15 +1193,14 @@ document.addEventListener('DOMContentLoaded', () => {
                     </div>
                     <button type="submit" class="w-full bg-primary text-black font-bold py-2 px-4 rounded-md hover:bg-primary-hover">Submit Request</button>
                 </form>
-            </div>
-            `;
-            document.getElementById('request-stock-form')?.addEventListener('submit', e => this.handleRequestStock(e));
+            </div>`;
         },
 
         setActiveInvoiceSubTab(subTabName) {
             this.state.activeInvoiceSubTab = subTabName;
             document.querySelectorAll('.invoice-sub-tab-content').forEach(p => p.classList.add('hidden'));
-            document.querySelector(`#employee-view #${subTabName}-invoice-panel`)?.classList.remove('hidden');
+            const panel = document.querySelector(`#employee-view #${subTabName}-invoice-panel`);
+            if (panel) panel.classList.remove('hidden');
 
             document.querySelectorAll('.invoice-sub-tab-btn').forEach(b => {
                 b.classList.toggle('active', b.dataset.subTab === subTabName);
@@ -1201,8 +1230,11 @@ document.addEventListener('DOMContentLoaded', () => {
                 } else {
                     recentContent += sortedInvoices.map(inv => `
                     <div class="bg-light-surface dark:bg-dark-surface p-3 rounded-md flex justify-between items-center text-sm">
-                        <div><div class="font-semibold">${inv.storeName}</div><div class="text-xs text-light-text-secondary dark:text-dark-text-secondary">${new Date(inv.date).toLocaleDateString()}</div></div>
-                        <div class="font-mono font-bold text-lg">AED ${inv.total.toFixed(2)}</div>
+                        <div>
+                            <div class="font-semibold">${inv.storeName}</div>
+                            <div class="text-xs text-light-text-secondary dark:text-dark-text-secondary">${new Date(inv.date).toLocaleDateString()}</div>
+                        </div>
+                        <div class="font-mono font-bold text-lg">${this.formatCurrency(inv.total)}</div>
                     </div>`).join('');
                 }
                 recentContent += `</div>`;
@@ -1243,7 +1275,7 @@ document.addEventListener('DOMContentLoaded', () => {
                             <div class="font-semibold">${store.name}</div>
                             <div class="text-xs text-light-text-secondary dark:text-dark-text-secondary">${store.pendingCount} uninvoiced sale(s)</div>
                         </div>
-                        <div class="font-mono font-bold text-lg">AED ${store.pendingTotal.toFixed(2)}</div>
+                        <div class="font-mono font-bold text-lg">${this.formatCurrency(store.pendingTotal)}</div>
                     </div>
                 `).join('');
             }
@@ -1259,7 +1291,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if (!storeId) {
                 container.classList.add('hidden');
                 listEl.innerHTML = '';
-                generateBtn.disabled = true;
+                if(generateBtn) generateBtn.disabled = true;
                 return;
             }
             let allSalesToStore = [];
@@ -1275,7 +1307,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
             if (allSalesToStore.length === 0) {
                 listEl.innerHTML = `<p class="text-center text-sm text-light-text-secondary dark:text-dark-text-secondary py-4">No uninvoiced sales found for this store.</p>`;
-                generateBtn.disabled = true;
+                if(generateBtn) generateBtn.disabled = true;
             } else {
                 listEl.innerHTML = allSalesToStore.map(t => {
                     const saleDetails = (t.items && t.items.length > 1) 
@@ -1291,29 +1323,31 @@ document.addEventListener('DOMContentLoaded', () => {
                                 </div>
                                 <div class="text-right">
                                     <span class="font-mono">${saleDate}</span>
-                                    <strong class="ml-4">AED ${t.amount.toFixed(2)}</strong>
+                                    <strong class="ml-4">${this.formatCurrency(t.amount)}</strong>
                                 </div>
                             </div>
                         </label>
                     `;
                 }).join('');
-                generateBtn.disabled = true;
+                if(generateBtn) generateBtn.disabled = true;
             }
             container.classList.remove('hidden');
         },
 
         renderModals() { 
-            document.getElementById('modal-container').innerHTML=`
+            const modalContainer = document.getElementById('modal-container');
+            if (!modalContainer) return;
+            modalContainer.innerHTML=`
             ${this.getFirstTimeModalHTML()}
             ${this.getGenericModalHTML('addEmployeeModal','Add New Employee',`<form id="add-employee-form" class="space-y-4"><div><label for="new-employee-name" class="block text-sm font-medium">Name</label><input type="text" id="new-employee-name" required class="modal-input"></div><div><label for="new-employee-position" class="block text-sm font-medium">Position</label><input type="text" id="new-employee-position" required class="modal-input"></div><button type="submit" class="modal-submit-button">Add Employee</button></form>`)}
             ${this.getGenericModalHTML('editEmployeeModal','Edit Employee',`<form id="edit-employee-form" class="space-y-4"><input type="hidden" id="edit-employee-id"><div><label for="edit-employee-name" class="block text-sm font-medium">Name</label><input type="text" id="edit-employee-name" required class="modal-input"></div><div><label for="edit-employee-position" class="block text-sm font-medium">Position</label><input type="text" id="edit-employee-position" required class="modal-input"></div><button type="submit" class="modal-submit-button">Save Changes</button></form>`)}
-            ${this.getGenericModalHTML('addProductModal','Add New Product / Stock',`<form id="add-product-form" class="space-y-4"><div><label for="new-product-name" class="block text-sm font-medium">Product Name</label><input type="text" id="new-product-name" required class="modal-input"></div><div id="price-container"><label for="new-product-price" class="block text-sm font-medium">Price (AED)</label><input type="number" id="new-product-price" step="0.01" min="0" required class="modal-input"></div><div><label id="stock-label" for="new-product-stock" class="block text-sm font-medium">Initial Stock</label><input type="number" id="new-product-stock" min="0" required class="modal-input"></div><button id="add-product-submit-btn" type="submit" class="modal-submit-button">Add Product</button></form>`)}
-            ${this.getGenericModalHTML('editProductModal','Edit Product',`<form id="edit-product-form" class="space-y-4"><input type="hidden" id="edit-product-id"><div><label for="edit-product-name" class="block text-sm font-medium">Product Name</label><input type="text" id="edit-product-name" required class="modal-input"></div><div><label for="edit-product-price" class="block text-sm font-medium">Price (AED)</label><input type="number" id="edit-product-price" step="0.01" min="0" required class="modal-input"></div><div><label for="edit-product-stock" class="block text-sm font-medium">Current Stock</label><input type="number" id="edit-product-stock" min="0" required class="modal-input"></div><button type="submit" class="modal-submit-button">Save Changes</button></form>`)}
+            ${this.getGenericModalHTML('addProductModal','Add New Product / Stock',`<form id="add-product-form" class="space-y-4"><div><label for="new-product-name" class="block text-sm font-medium">Product Name</label><input type="text" id="new-product-name" required class="modal-input"></div><div id="price-container"><label for="new-product-price" class="block text-sm font-medium">Price (VAT Inclusive, ${this.state.companyInfo.currency})</label><input type="number" id="new-product-price" step="0.01" min="0" required class="modal-input"></div><div><label id="stock-label" for="new-product-stock" class="block text-sm font-medium">Initial Stock</label><input type="number" id="new-product-stock" min="0" required class="modal-input"></div><button id="add-product-submit-btn" type="submit" class="modal-submit-button">Add Product</button></form>`)}
+            ${this.getGenericModalHTML('editProductModal','Edit Product',`<form id="edit-product-form" class="space-y-4"><input type="hidden" id="edit-product-id"><div><label for="edit-product-name" class="block text-sm font-medium">Product Name</label><input type="text" id="edit-product-name" required class="modal-input"></div><div><label for="edit-product-price" class="block text-sm font-medium">Price (VAT Inclusive, ${this.state.companyInfo.currency})</label><input type="number" id="edit-product-price" step="0.01" min="0" required class="modal-input"></div><div><label for="edit-product-stock" class="block text-sm font-medium">Current Stock</label><input type="number" id="edit-product-stock" min="0" required class="modal-input"></div><button type="submit" class="modal-submit-button">Save Changes</button></form>`)}
             ${this.getGenericModalHTML('addCategoryModal','Add Expense Category',`<form id="add-category-form" class="space-y-4"><div><label for="new-category-name" class="block text-sm font-medium">Category Name</label><input type="text" id="new-category-name" required class="modal-input"></div><button type="submit" class="modal-submit-button">Add Category</button></form>`)}
             ${this.getGenericModalHTML('editCategoryModal','Edit Expense Category',`<form id="edit-category-form" class="space-y-4"><input type="hidden" id="edit-category-id"><div><label for="edit-category-name" class="block text-sm font-medium">Category Name</label><input type="text" id="edit-category-name" required class="modal-input"></div><button type="submit" class="modal-submit-button">Save Changes</button></form>`)}
             ${this.getGenericModalHTML('delegateStockModal','Delegate Stock to Employee',`<form id="delegate-stock-form" class="space-y-4"><div><label for="delegate-employee" class="block text-sm font-medium">Employee</label><select id="delegate-employee" class="modal-input"></select></div><div><label for="delegate-product" class="block text-sm font-medium">Product</label><select id="delegate-product" class="modal-input"></select></div><div><label for="delegate-quantity" class="block text-sm font-medium">Quantity</label><input type="number" id="delegate-quantity" min="1" required class="modal-input"></div><button type="submit" class="modal-submit-button">Delegate Stock</button></form>`)}
             ${this.getGenericModalHTML('createTaskModal','Create a New Task',`<form id="create-task-form" class="space-y-4"><div><label for="task-description" class="block text-sm font-medium">Task Description</label><input type="text" id="task-description" required class="modal-input"></div><div><label for="task-assignee" class="block text-sm font-medium">Assign To</label><select id="task-assignee" class="modal-input"></select></div><button type="submit" class="modal-submit-button">Create Task</button></form>`)}
-            ${this.getGenericModalHTML('editStoreModal','Edit Store',`<form id="edit-store-form" class="space-y-4"><input type="hidden" id="edit-store-id"><div><label for="edit-store-name" class="block text-sm font-medium">Store Name</label><input type="text" id="edit-store-name" required class="modal-input"></div><div><label for="edit-store-location" class="block text-sm font-medium">Location</label><input type="text" id="edit-store-location" required class="modal-input"></div><div><label for="edit-store-credit-limit" class="block text-sm font-medium">Credit Limit</label><input type="number" step="0.01" min="0" id="edit-store-credit-limit" required class="modal-input"></div><button type="submit" class="modal-submit-button">Save Changes</button></form>`)}
+            ${this.getGenericModalHTML('editStoreModal','Edit Store',`<form id="edit-store-form" class="space-y-4"><input type="hidden" id="edit-store-id"><div><label for="edit-store-name" class="block text-sm font-medium">Store Name</label><input type="text" id="edit-store-name" required class="modal-input"></div><div><label for="edit-store-location" class="block text-sm font-medium">Location</label><input type="text" id="edit-store-location" required class="modal-input"></div><div><label for="edit-store-credit-limit" class="block text-sm font-medium">Credit Limit (${this.state.companyInfo.currency})</label><input type="number" step="0.01" min="0" id="edit-store-credit-limit" required class="modal-input"></div><button type="submit" class="modal-submit-button">Save Changes</button></form>`)}
             ${this.getGenericModalHTML('creditReceivedModal','Receive Credit Payment',`<form id="credit-received-form" class="space-y-4"><input type="hidden" id="credit-store-id"><p>Receiving payment from: <strong id="credit-store-name"></strong></p><p>Outstanding credit: <strong id="credit-outstanding"></strong></p><div><label for="credit-received-amount" class="block text-sm font-medium">Amount Received</label><input type="number" id="credit-received-amount" step="0.01" min="0" required class="modal-input"></div><button type="submit" class="modal-submit-button">Record Payment</button></form>`)}
             ${this.getAImodalHTML()}
             ${this.getGenericModalHTML('declineStockModal', 'Decline Stock Delivery', `<form id="decline-stock-form" class="space-y-4"><input type="hidden" id="decline-request-id"><div><label for="decline-reason" class="block text-sm font-medium">Reason for Declining</label><select id="decline-reason" required class="modal-input"><option value="">-- Select a Reason --</option><option value="Damaged Goods">Damaged Goods</option><option value="Insufficient Goods">Insufficient Goods</option><option value="Other">Other</option></select></div><div><label for="decline-description" class="block text-sm font-medium">Description (Optional)</label><textarea id="decline-description" rows="3" class="modal-input"></textarea></div><button type="submit" class="modal-submit-button bg-accent-red hover:bg-accent-red/80">Submit Decline</button></form>`)}
@@ -1321,44 +1355,70 @@ document.addEventListener('DOMContentLoaded', () => {
                 <div class="space-y-6">
                     <div>
                         <label for="employee-switcher-modal" class="block text-sm font-medium mb-2">Current Employee</label>
-                        <select id="employee-switcher-modal" class="modal-input"></select>
+                        <select id="employee-switcher-modal" onchange="app.handleEmployeeSwitch(event)" class="modal-input"></select>
                     </div>
                     <div>
                         <label class="block text-sm font-medium mb-2">Appearance</label>
-                        <button id="theme-toggle-modal" class="w-full text-left bg-light-bg dark:bg-dark-bg p-3 rounded-lg flex items-center justify-between hover:bg-gray-200 dark:hover:bg-gray-700">
+                        <button id="theme-toggle-modal" onclick="app.toggleTheme()" class="w-full text-left bg-light-bg dark:bg-dark-bg p-3 rounded-lg flex items-center justify-between hover:bg-gray-200 dark:hover:bg-gray-700">
                             <span>Change Theme</span>
                             <i id="theme-icon-modal" class="fas"></i>
                         </button>
                     </div>
-                    <div id="data-management-settings"></div>
+                    <div id="company-info-settings">
+                        <h4 class="text-lg font-semibold mb-3 border-t pt-4 border-gray-300 dark:border-gray-600">Company Settings</h4>
+                        <form id="company-info-form" onsubmit="app.handleUpdateCompanyInfo(event)" class="space-y-4">
+                            <div>
+                                <label for="company-name-input" class="block text-sm font-medium">Company Name</label>
+                                <input type="text" id="company-name-input" class="modal-input">
+                            </div>
+                            <div>
+                                <label for="company-country-select" class="block text-sm font-medium">Operating Country (for VAT & Currency)</label>
+                                <select id="company-country-select" class="modal-input"></select>
+                            </div>
+                            <button type="submit" class="modal-submit-button">Save Company Info</button>
+                        </form>
+                    </div>
                 </div>
             `)}
              ${this.getGenericModalHTML('invoicePreviewModal', 'Invoice Preview', `
                 <div id="invoice-preview-content" class="bg-white p-2 rounded max-h-[60vh] overflow-y-auto mb-4 border border-gray-300">
-                    </div>
+                </div>
                 <button id="download-previewed-invoice-btn" class="modal-submit-button">Download as PDF</button>
             `, 'max-w-4xl')}
-            `
+            `;
+
+            document.getElementById('first-employee-form')?.addEventListener('submit', e => this.handleFirstEmployee(e));
+            document.getElementById('add-employee-form')?.addEventListener('submit', e => this.handleAddEmployee(e));
+            document.getElementById('edit-employee-form')?.addEventListener('submit', e => this.handleUpdateEmployee(e));
+            document.getElementById('add-product-form')?.addEventListener('submit', e => this.handleAddProduct(e));
+            document.getElementById('new-product-name')?.addEventListener('input', e => this.handleProductNameInput(e));
+            document.getElementById('edit-product-form')?.addEventListener('submit', e => this.handleUpdateProduct(e));
+            document.getElementById('add-category-form')?.addEventListener('submit', e => this.handleAddCategory(e));
+            document.getElementById('edit-category-form')?.addEventListener('submit', e => this.handleUpdateCategory(e));
+            document.getElementById('delegate-stock-form')?.addEventListener('submit', e => this.handleDelegateStock(e));
+            document.getElementById('create-task-form')?.addEventListener('submit', e => this.handleCreateTask(e));
+            document.getElementById('decline-stock-form')?.addEventListener('submit', e => this.handleDeclineStock(e));
+
         },
         getGenericModalHTML(id, title, content, dialogClass = 'max-w-md') {
-            return `<div id="${id}" class="fixed inset-0 z-50 flex items-center justify-center p-4 hidden modal-backdrop">
-                <div class="bg-light-surface dark:bg-dark-surface rounded-lg shadow-xl w-full ${dialogClass} mx-auto transform transition-all flex flex-col">
-                    <div class="flex justify-between items-center p-4 border-b border-gray-200 dark:border-gray-700">
+            return `<div id="${id}" onclick="app.closeModal('${id}')" class="fixed inset-0 z-50 flex items-center justify-center p-4 hidden modal-backdrop">
+                <div onclick="event.stopPropagation()" class="bg-light-surface dark:bg-dark-surface rounded-lg shadow-xl w-full ${dialogClass} mx-auto transform transition-all flex flex-col max-h-[90vh]">
+                    <div class="flex justify-between items-center p-4 border-b border-gray-200 dark:border-gray-700 flex-shrink-0">
                         <h3 class="text-xl font-semibold">${title}</h3>
-                        <button onclick="app.closeModal('${id}')" class="text-light-text-secondary dark:text-dark-text-secondary hover:text-light-text dark:hover:text-dark-text">&times;</button>
+                        <button onclick="app.closeModal('${id}')" class="text-light-text-secondary dark:text-dark-text-secondary hover:text-light-text dark:hover:text-dark-text text-2xl">&times;</button>
                     </div>
-                    <div class="p-6">${content}</div>
+                    <div class="p-6 overflow-y-auto">${content}</div>
                 </div>
             </div>`;
         },
         getFirstTimeModalHTML(){return`<div id="firstTimeModal" class="fixed inset-0 z-50 flex items-center justify-center p-4 hidden modal-backdrop"><div class="bg-light-surface dark:bg-dark-surface rounded-lg shadow-xl w-full max-w-md mx-auto text-center p-8"><i class="fas fa-rocket text-4xl text-primary mb-4"></i><h2 class="text-2xl font-bold mb-2">Welcome to Ledgerly!</h2><p class="text-light-text-secondary dark:text-dark-text-secondary mb-6">Let's get you set up. Start by adding your first employee.</p><form id="first-employee-form" class="space-y-4"><div><label for="first-employee-name" class="sr-only">Name</label><input type="text" id="first-employee-name" placeholder="First Employee's Name" required class="modal-input"></div><div><label for="first-employee-position" class="sr-only">Position</label><input type="text" id="first-employee-position" placeholder="Position (e.g., Manager)" required class="modal-input"></div><button type="submit" class="modal-submit-button w-full">Get Started</button></form></div></div>`},
         getAImodalHTML() {
              return `
-            <div id="aiAdvisorModal" class="fixed inset-0 z-50 flex items-center justify-center p-4 hidden modal-backdrop">
-                <div class="bg-light-surface dark:bg-dark-surface rounded-lg shadow-xl w-full max-w-2xl mx-auto transform transition-all flex flex-col" style="max-height: 90vh;">
+            <div id="aiAdvisorModal" onclick="app.closeModal('aiAdvisorModal')" class="fixed inset-0 z-50 flex items-center justify-center p-4 hidden modal-backdrop">
+                <div onclick="event.stopPropagation()" class="bg-light-surface dark:bg-dark-surface rounded-lg shadow-xl w-full max-w-2xl mx-auto transform transition-all flex flex-col" style="height: 90vh; max-height: 700px;">
                     <div class="flex justify-between items-center p-4 border-b border-gray-200 dark:border-gray-700 flex-shrink-0">
                         <h3 class="text-xl font-semibold flex items-center"><i class="fas fa-brain mr-3 text-primary"></i>Accura AI <span class="text-primary font-bold ml-2">2.0 FLASH</span></h3>
-                        <button onclick="app.closeModal('aiAdvisorModal')" class="text-light-text-secondary dark:text-dark-text-secondary hover:text-light-text dark:hover:text-dark-text">&times;</button>
+                        <button onclick="app.closeModal('aiAdvisorModal')" class="text-light-text-secondary dark:text-dark-text-secondary hover:text-light-text dark:hover:text-dark-text text-2xl">&times;</button>
                     </div>
                     <div class="p-4 flex-shrink-0">
                         <div id="ai-employee-selector-container" class="mb-4">
@@ -1396,11 +1456,7 @@ document.addEventListener('DOMContentLoaded', () => {
         renderEmployeeSwitcher() { 
             const switcher = document.getElementById('employee-switcher-modal');
             if (!switcher) return;
-            const currentVal = switcher.value;
             switcher.innerHTML = this.getActiveEmployees().map(emp => `<option value="${emp.id}" ${emp.id === this.state.currentEmployeeId ? 'selected' : ''}>${emp.name}</option>`).join('');
-            if (currentVal) {
-                switcher.value = currentVal;
-            }
         },
         renderProductRequestsPanel() {
             const container = document.getElementById('product-requests-content');
@@ -1480,14 +1536,11 @@ document.addEventListener('DOMContentLoaded', () => {
             const employee = this.getEmployee(request.employeeId);
             const product = this.getProduct(request.productId);
 
-            if (!employee || !product) {
-                this.showNotification('Error: Employee or product not found.', 'error');
-                return;
-            }
+            if (!employee || !product) { this.showNotification('Error: Employee or product not found.', 'error'); return; }
 
             if (product.stock < request.quantity) {
                 this.showNotification(`Action failed: Not enough master stock for ${product.name}.`, 'error');
-                this.state.productRequests.splice(requestIndex, 1); // Remove failed request
+                this.state.productRequests.splice(requestIndex, 1);
                 this.saveState();
                 this.render();
                 return;
@@ -1517,10 +1570,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const reason = document.getElementById('decline-reason').value;
             const description = document.getElementById('decline-description').value;
 
-            if (!reason) {
-                this.showNotification('Please select a reason for declining.', 'error');
-                return;
-            }
+            if (!reason) { this.showNotification('Please select a reason for declining.', 'error'); return; }
 
             const request = this.state.productRequests.find(r => r.id === requestId);
             if (request) {
@@ -1553,6 +1603,14 @@ document.addEventListener('DOMContentLoaded', () => {
             if (modalId === 'settingsModal') {
                 this.renderEmployeeSwitcher();
                 this.applyTheme();
+                const nameInput = document.getElementById('company-name-input');
+                const countrySelect = document.getElementById('company-country-select');
+                if (nameInput) nameInput.value = this.state.companyInfo.name;
+                if (countrySelect) {
+                    countrySelect.innerHTML = Object.keys(GCC_DATA).map(country => 
+                        `<option value="${country}" ${this.state.companyInfo.country === country ? 'selected' : ''}>${country}</option>`
+                    ).join('');
+                }
             }
             if(modalId==='delegateStockModal'){document.getElementById('delegate-employee').innerHTML=this.getActiveEmployees().map(e=>`<option value="${e.id}">${e.name}</option>`).join('');document.getElementById('delegate-product').innerHTML=this.getActiveProducts().filter(p=>p.stock>0).map(p=>`<option value="${p.id}">${p.name} (Master Stock: ${p.stock})</option>`).join('')}
             if(modalId==='createTaskModal'){document.getElementById('task-assignee').innerHTML=this.getActiveEmployees().map(e=>`<option value="${e.id}">${e.name}</option>`).join('')}
@@ -1560,16 +1618,11 @@ document.addEventListener('DOMContentLoaded', () => {
                 const selector = document.getElementById('ai-employee-select');
                 selector.innerHTML = `<option value="company">Entire Company</option>` + this.getActiveEmployees().map(emp => `<option value="${emp.id}">${emp.name}</option>`).join('');
                 
-                if (this.state.currentView === 'company') {
-                    selector.value = 'company';
-                } else {
-                    selector.value = this.state.currentEmployeeId;
-                }
+                selector.value = this.state.currentView === 'company' ? 'company' : this.state.currentEmployeeId;
                 this.switchAITab('questions');
                 document.getElementById('ai-response-area').innerHTML = `<p class="text-light-text-secondary dark:text-dark-text-secondary">Your AI-generated response will appear here.</p>`;
                 document.getElementById('ai-chat-history').innerHTML = '';
                 
-                // Attach listeners for chat
                 const sendBtn = document.getElementById('ai-chat-send');
                 const chatInput = document.getElementById('ai-chat-input');
                 const sendMsg = () => {
@@ -1581,7 +1634,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 chatInput.onkeyup = (e) => { if(e.key === 'Enter') sendMsg(); };
             }
             if (modalId === 'addProductModal') {
-                this.handleProductNameInput({ target: { value: '' } }); // Reset modal state
+                this.handleProductNameInput({ target: { value: '' } });
             }
             document.getElementById(modalId)?.classList.remove('hidden');
         },
@@ -1604,17 +1657,35 @@ document.addEventListener('DOMContentLoaded', () => {
             this.closeModal('settingsModal');
             this.render();
         },
+        handleUpdateCompanyInfo(e) {
+            e.preventDefault();
+            const newName = document.getElementById('company-name-input').value;
+            const newCountry = document.getElementById('company-country-select').value;
+            const countryData = GCC_DATA[newCountry];
+
+            this.state.companyInfo.name = newName.trim() || 'Ledgerly Sales';
+            this.state.companyInfo.country = newCountry;
+            this.state.companyInfo.currency = countryData.currency;
+            this.state.companyInfo.vatRate = countryData.vatRate;
+
+            this.saveState();
+            this.closeModal('settingsModal');
+            this.renderModals();
+            this.render(); 
+            this.showNotification('Company info updated successfully!');
+        },
         handleAddStore(e){e.preventDefault();const employee = this.getCurrentEmployee(); if(!employee) return; const name=document.getElementById('new-store-name').value;const location=document.getElementById('new-store-location').value;const creditLimit=parseFloat(document.getElementById('new-store-credit-limit').value);if(!name.trim()||isNaN(creditLimit)){this.showNotification('Please fill all fields correctly.','error');return}employee.stores.push({id:`store_${Date.now()}`,name,location,creditAvailable:creditLimit,creditUsed:0,creditPaidBack:0});this.saveState();this.setActiveTab('stores', 'employee');this.showNotification('Store added successfully!');e.target.reset()},
         startEditStore(id){const employee = this.getCurrentEmployee(); if(!employee) return; const store=employee.stores.find(s=>s.id===id);if(!store)return;document.getElementById('edit-store-id').value=id;document.getElementById('edit-store-name').value=store.name;document.getElementById('edit-store-location').value=store.location;document.getElementById('edit-store-credit-limit').value=(store.creditAvailable||0)+(store.creditUsed||0);this.openModal('editStoreModal')},
         handleUpdateStore(e){e.preventDefault();const employee = this.getCurrentEmployee(); if(!employee) return; const id=document.getElementById('edit-store-id').value;const store=employee.stores.find(s=>s.id===id);if(!store)return;const newCreditLimit=parseFloat(document.getElementById('edit-store-credit-limit').value);const creditUsed = store.creditUsed || 0; if(isNaN(newCreditLimit)||newCreditLimit<creditUsed){this.showNotification('New credit limit cannot be less than credit already used.','error');return}store.name=document.getElementById('edit-store-name').value;store.location=document.getElementById('edit-store-location').value;store.creditAvailable=newCreditLimit-creditUsed;this.saveState();this.setActiveTab('stores', 'employee');this.closeModal('editStoreModal');this.showNotification('Store updated!')},
         deleteStore(id){if(confirm('Are you sure you want to delete this store? This action cannot be undone.')){const employee = this.getCurrentEmployee(); if(!employee) return; employee.stores=employee.stores.filter(s=>s.id!==id);this.saveState();this.setActiveTab('stores', 'employee');this.showNotification('Store deleted.','error')}},
-        startReceiveCredit(id){const employee = this.getCurrentEmployee(); if(!employee) return; const store=employee.stores.find(s=>s.id===id);if(!store)return;const outstanding=(store.creditUsed||0)-(store.creditPaidBack||0);if(outstanding<=0){this.showNotification('This store has no outstanding credit.','success');return}document.getElementById('credit-store-id').value=id;document.getElementById('credit-store-name').textContent=store.name;document.getElementById('credit-outstanding').textContent=`AED ${outstanding.toFixed(2)}`;document.getElementById('credit-received-amount').max=outstanding;document.getElementById('credit-received-amount').value=outstanding.toFixed(2);this.openModal('creditReceivedModal')},
+        startReceiveCredit(id){const employee = this.getCurrentEmployee(); if(!employee) return; const store=employee.stores.find(s=>s.id===id);if(!store)return;const outstanding=(store.creditUsed||0)-(store.creditPaidBack||0);if(outstanding<=0){this.showNotification('This store has no outstanding credit.','success');return}document.getElementById('credit-store-id').value=id;document.getElementById('credit-store-name').textContent=store.name;document.getElementById('credit-outstanding').textContent=this.formatCurrency(outstanding);document.getElementById('credit-received-amount').max=outstanding;document.getElementById('credit-received-amount').value=outstanding.toFixed(2);this.openModal('creditReceivedModal')},
         
         handleProductNameInput(e) {
             const name = e.target.value.trim().toLowerCase();
             const existingProduct = this.state.masterInventory.find(p => p.name.toLowerCase() === name);
-            const priceContainer = document.getElementById('price-container');
             const priceInput = document.getElementById('new-product-price');
+            if (!priceInput) return;
+            const priceContainer = document.getElementById('price-container');
             const stockLabel = document.getElementById('stock-label');
             const submitBtn = document.getElementById('add-product-submit-btn');
 
@@ -1634,15 +1705,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
         handleAddProduct(e){
             e.preventDefault();
-            const nameInput = document.getElementById('new-product-name');
-            const name = nameInput.value.trim();
+            const name = document.getElementById('new-product-name').value.trim();
             const price = parseFloat(document.getElementById('new-product-price').value);
             const stock = parseInt(document.getElementById('new-product-stock').value);
 
-            if (!name || isNaN(stock) || stock < 0) {
-                this.showNotification('Please provide a valid name and stock quantity.', 'error');
-                return;
-            }
+            if (!name || isNaN(stock) || stock < 0) { this.showNotification('Please provide a valid name and stock quantity.', 'error'); return; }
 
             const existingProduct = this.state.masterInventory.find(p => p.name.toLowerCase() === name.toLowerCase());
 
@@ -1650,10 +1717,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 existingProduct.stock += stock;
                 this.showNotification(`Added ${stock} to ${existingProduct.name}. New total: ${existingProduct.stock}.`);
             } else {
-                if (isNaN(price) || price < 0) {
-                    this.showNotification('Please provide a valid price for the new product.', 'error');
-                    return;
-                }
+                if (isNaN(price) || price < 0) { this.showNotification('Please provide a valid price for the new product.', 'error'); return; }
                 this.state.masterInventory.push({id:`prod_${Date.now()}`,name,price,stock,isActive:true});
                 this.showNotification('Product added to master inventory!');
             }
@@ -1682,91 +1746,74 @@ document.addEventListener('DOMContentLoaded', () => {
             const productId = document.getElementById('request-product').value;
             const quantity = parseInt(document.getElementById('request-quantity').value);
 
-            if (!productId || isNaN(quantity) || quantity <= 0) {
-                this.showNotification('Please select a product and enter a valid quantity.', 'error');
-                return;
-            }
+            if (!productId || isNaN(quantity) || quantity <= 0) { this.showNotification('Please select a product and enter a valid quantity.', 'error'); return; }
 
-            const request = {
-                id: `req_${Date.now()}`,
-                employeeId: employee.id,
-                productId: productId,
-                quantity: quantity,
-                date: new Date().toISOString(),
-                status: 'Pending'
-            };
-
-            this.state.productRequests.push(request);
+            this.state.productRequests.push({id: `req_${Date.now()}`, employeeId: employee.id, productId, quantity, date: new Date().toISOString(), status: 'Pending'});
             this.saveState();
             this.render();
             this.showNotification('Stock request submitted successfully!');
             e.target.reset();
         },
+        // LOGIC CHANGE: Rewritten to calculate Net and VAT from a tax-inclusive price.
         handleRecordSale(e){
             e.preventDefault();
             const form=e.target;
             const employee=this.getCurrentEmployee();
 
-            if (this.currentSaleCart.length === 0) {
-                this.showNotification('Please add at least one item to the sale.', 'error');
-                return;
-            }
+            if (this.currentSaleCart.length === 0) { this.showNotification('Please add at least one item to the sale.', 'error'); return; }
 
             const saleType = form.elements['sale-type'].value;
             const storeId = form.elements['sale-store'].value;
             const discount = parseFloat(form.elements['sale-discount'].value) || 0;
             const store = employee.stores.find(s => s.id === storeId);
             
-            if (!store) {
-                this.showNotification('Please select a valid store.', 'error');
-                return;
-            }
+            if (!store) { this.showNotification('Please select a valid store.', 'error'); return; }
             
-            const subtotal = this.currentSaleCart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
-            const finalAmount = subtotal - discount;
+            const grossTotal = this.currentSaleCart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+            const finalAmount = grossTotal - discount; // This is the final amount paid by the customer.
+            const isDeal = saleType === 'Deal';
+            const { vatRate } = this.state.companyInfo;
+
+            let vatAmount = 0;
+            let netSubtotal = finalAmount;
+
+            if (!isDeal && vatRate > 0) {
+                netSubtotal = finalAmount / (1 + vatRate);
+                vatAmount = finalAmount - netSubtotal;
+            }
 
             if (saleType === 'Credit') {
                 const outstandingCredit = (store.creditUsed || 0) - (store.creditPaidBack || 0);
                 const creditLimit = (store.creditAvailable || 0) + (store.creditUsed || 0);
-                if (outstandingCredit + finalAmount > creditLimit) {
-                    this.showNotification('This sale exceeds the store\'s credit limit.', 'error');
-                    return;
-                }
+                if (outstandingCredit + finalAmount > creditLimit) { this.showNotification(`This sale exceeds the store's credit limit.`, 'error'); return; }
                 store.creditUsed = (store.creditUsed || 0) + finalAmount;
                 store.creditAvailable = (store.creditAvailable || 0) - finalAmount;
             }
             
-            // Deduct stock for all items
             this.currentSaleCart.forEach(cartItem => {
-                 if (saleType === 'Deal') {
+                if (isDeal) {
                     const masterProduct = this.getProduct(cartItem.productId);
-                    if (masterProduct.stock < cartItem.quantity) {
-                         this.showNotification(`Not enough stock in Master Inventory for ${masterProduct.name} for a deal sale.`, 'error');
-                         throw new Error("Insufficient master stock for deal."); // Stop transaction
-                    }
+                    if (masterProduct.stock < cartItem.quantity) { this.showNotification(`Not enough stock in Master Inventory for ${masterProduct.name}.`, 'error'); throw new Error("Insufficient master stock for deal."); }
                     masterProduct.stock -= cartItem.quantity;
-                 } else {
+                } else {
                     const employeeInventoryItem = employee.inventory.find(i => i.productId === cartItem.productId);
                     employeeInventoryItem.stock -= cartItem.quantity;
-                 }
+                }
             });
 
             employee.transactions.push({
-                id: `txn_${Date.now()}`,
-                type: 'sale',
-                items: [...this.currentSaleCart],
-                saleType,
-                storeId,
-                discount,
-                amount: finalAmount,
-                date: new Date().toISOString(),
-                invoiced: false
+                id: `txn_${Date.now()}`, type: 'sale', items: [...this.currentSaleCart],
+                saleType, storeId, 
+                subtotal: netSubtotal, // Store the calculated NET amount here
+                discount, vatAmount,
+                amount: finalAmount, // Store the final GROSS amount here
+                date: new Date().toISOString(), invoiced: false
             });
             
             this.saveState();
             this.showNotification('Sale recorded successfully!');
-            this.currentSaleCart = []; // Clear the cart
-            this.setActiveTab('sales-expenses', 'employee'); // Re-render tab
+            this.currentSaleCart = [];
+            this.setActiveTab('sales-expenses', 'employee');
         },
         handleRecordExpense(e){e.preventDefault();const form=e.target;const employee=this.getCurrentEmployee();if(!employee)return;const description=form.elements['expense-description'].value;const amount=parseFloat(form.elements['expense-amount'].value);const categoryId=form.elements['expense-category'].value;if(!description.trim()||isNaN(amount)||amount<=0||!categoryId){this.showNotification('Please fill all fields correctly.','error');return}const newExpense={id:`txn_${Date.now()}`,type:'expense',description:description.trim(),amount,categoryId,date:new Date().toISOString()};employee.transactions.push(newExpense);this.saveState();this.setActiveTab('sales-expenses', 'employee');this.showNotification('Expense recorded successfully!','success');form.reset()},
 
@@ -1774,76 +1821,42 @@ document.addEventListener('DOMContentLoaded', () => {
             let foundInvoice = null;
             for (const emp of this.state.employees) {
                 const invoice = (emp.invoices || []).find(inv => inv.id === invoiceId);
-                if (invoice) {
-                    foundInvoice = invoice;
-                    break;
-                }
+                if (invoice) { foundInvoice = invoice; break; }
             }
 
             if (foundInvoice && foundInvoice.htmlContent) {
-                const modal = document.getElementById('invoicePreviewModal');
                 document.getElementById('invoice-preview-content').innerHTML = foundInvoice.htmlContent;
-                
-                const downloadBtn = document.getElementById('download-previewed-invoice-btn');
-                downloadBtn.onclick = () => this.downloadInvoice(
-                    foundInvoice.htmlContent, 
-                    { name: foundInvoice.storeName }, 
-                    new Date(foundInvoice.date).toISOString().split('T')[0]
+                document.getElementById('download-previewed-invoice-btn').onclick = () => this.downloadInvoice(
+                    foundInvoice.htmlContent, { name: foundInvoice.storeName }, new Date(foundInvoice.date).toISOString().split('T')[0]
                 );
-
                 this.openModal('invoicePreviewModal');
             } else {
                 this.showNotification('Could not find the saved invoice data.', 'error');
-                console.error(`Invoice with ID ${invoiceId} not found or has no HTML content.`);
             }
         },
         
         downloadInvoice(invoiceHTML, store, invoiceDate) {
             this.showNotification('Generating PDF...');
-
-            const overlay = document.createElement('div');
-            overlay.style.position = 'fixed';
-            overlay.style.inset = '0';
-            overlay.style.backgroundColor = 'white';
-            overlay.style.zIndex = '9999';
-            overlay.style.overflow = 'auto';
-            overlay.style.padding = '1rem';
-            overlay.style.display = 'flex';
-            overlay.style.alignItems = 'flex-start';
-            overlay.style.justifyContent = 'center';
-
-            overlay.innerHTML = invoiceHTML;
-            
-            const elementToCapture = overlay.firstElementChild;
-
-            document.body.appendChild(overlay);
+            const element = document.createElement('div');
+            element.innerHTML = invoiceHTML;
+            const elementToCapture = element.firstElementChild;
 
             const opt = {
-                margin:       0.5,
-                filename:     `Invoice_${store.name.replace(/\s/g, '_')}_${invoiceDate}.pdf`,
-                image:        { type: 'jpeg', quality: 0.98 },
-                html2canvas:  { scale: 2, useCORS: true },
-                jsPDF:        { unit: 'in', format: 'letter', orientation: 'portrait' }
+                margin: 0.5, filename: `Invoice_${store.name.replace(/\s/g, '_')}_${invoiceDate}.pdf`,
+                image: { type: 'jpeg', quality: 0.98 }, html2canvas: { scale: 2, useCORS: true },
+                jsPDF: { unit: 'in', format: 'letter', orientation: 'portrait' }
             };
 
-            const cleanup = () => {
-                document.body.removeChild(overlay);
-            };
-
-            setTimeout(() => {
-                html2pdf().set(opt).from(elementToCapture).save().then(() => {
-                    cleanup();
-                    this.showNotification('Invoice downloaded!', 'success');
-                    this.closeModal('invoicePreviewModal');
-                }).catch(err => {
-                    cleanup();
-                    this.showNotification('Error generating PDF.', 'error');
-                    console.error('PDF Generation Error:', err);
-                    this.closeModal('invoicePreviewModal');
-                });
-            }, 150);
+            html2pdf().set(opt).from(elementToCapture).save().then(() => {
+                this.showNotification('Invoice downloaded!', 'success');
+                this.closeModal('invoicePreviewModal');
+            }).catch(err => {
+                this.showNotification('Error generating PDF.', 'error');
+                console.error('PDF Generation Error:', err);
+                this.closeModal('invoicePreviewModal');
+            });
         },
-
+        
         handleGenerateInvoice(e) {
             e.preventDefault();
             const employee = this.getCurrentEmployee();
@@ -1858,31 +1871,31 @@ document.addEventListener('DOMContentLoaded', () => {
             
             const invoiceId = `inv_${Date.now()}`;
             const salesInPeriod = [];
-            let total = 0;
-
             selectedTxnIds.forEach(txnId => {
                 for (const emp of this.state.employees) {
                     const transaction = (emp.transactions || []).find(t => t.id === txnId);
                     if (transaction) {
                         transaction.invoiced = invoiceId;
                         salesInPeriod.push(transaction);
-                        total += transaction.amount;
                         break;
                     }
                 }
             });
 
+            // LOGIC CHANGE: Totals are now summed from the correctly stored transaction values.
+            const totalNet = salesInPeriod.reduce((sum, sale) => sum + sale.subtotal, 0);
+            const totalDiscount = salesInPeriod.reduce((sum, sale) => sum + (sale.discount || 0), 0);
+            const totalVat = salesInPeriod.reduce((sum, sale) => sum + sale.vatAmount, 0);
+            const grandTotal = salesInPeriod.reduce((sum, sale) => sum + sale.amount, 0);
+
             const invoiceDate = new Date();
-            const invoiceHTML = this.generateInvoiceHtml(store, salesInPeriod, total, invoiceId, invoiceDate);
+            const invoiceHTML = this.generateInvoiceHtml(store, salesInPeriod, { totalNet, totalDiscount, totalVat, grandTotal }, invoiceId, invoiceDate);
 
             const newInvoice = {
-                id: invoiceId,
-                storeId: store.id,
-                storeName: store.name,
+                id: invoiceId, storeId: store.id, storeName: store.name,
                 date: invoiceDate.toISOString(),
-                total: total,
-                transactionIds: selectedTxnIds,
-                htmlContent: invoiceHTML
+                total: grandTotal,
+                transactionIds: selectedTxnIds, htmlContent: invoiceHTML
             };
 
             if (!employee.invoices) employee.invoices = [];
@@ -1890,56 +1903,38 @@ document.addEventListener('DOMContentLoaded', () => {
             this.saveState();
             
             this.showNotification('Invoice created and saved successfully!');
-            
             this.state.activeInvoiceSubTab = 'recent';
             this.setActiveTab('invoices', 'employee');
         },
 
-        generateInvoiceHtml(store, sales, total, invoiceId, invoiceDate) {
-            const salesByDate = sales.reduce((acc, sale) => {
-                const date = new Date(sale.date).toLocaleDateString('en-CA');
-                if (!acc[date]) {
-                    acc[date] = [];
-                }
-                acc[date].push(sale);
-                return acc;
-            }, {});
+        // LOGIC CHANGE: Invoice HTML template completely rewritten for tax-inclusive pricing.
+        generateInvoiceHtml(store, sales, totals, invoiceId, invoiceDate) {
+            const { name: companyName, currency, vatRate } = this.state.companyInfo;
+            const { totalNet, totalDiscount, totalVat, grandTotal } = totals;
 
-            const sortedDates = Object.keys(salesByDate).sort();
+            // This calculates the gross total (pre-discount) for display purposes.
+            const grossTotalPreDiscount = sales.reduce((sum, sale) => sum + sale.amount + (sale.discount || 0), 0);
 
-            const tableRows = sortedDates.flatMap(date => {
-                const salesOnDate = salesByDate[date];
-                const dateRow = `<tr><td colspan="5" style="background-color: #f9f9f9; font-weight: bold; padding: 10px 8px; border-top: 1px solid #eee;">${new Date(date).toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}</td></tr>`;
-
-                const itemRows = salesOnDate.flatMap(sale => {
-                    const employee = this.state.employees.find(e => e.transactions.some(t => t.id === sale.id));
-                    const totalQuantityInSale = sale.items.reduce((sum, i) => sum + i.quantity, 1);
-                    const perItemDiscount = sale.discount > 0 && sale.items.length > 0 ? sale.discount / totalQuantityInSale : 0;
-                    return (sale.items || []).map(item => `
-                        <tr style="page-break-inside: avoid;">
-                            <td style="padding: 8px; border-bottom: 1px solid #eee;">
-                                ${item.name}<br>
-                                <small style="color: #666;">Sold by: ${employee?.name || 'N/A'} | Type: ${sale.saleType}</small>
-                            </td>
-                            <td style="padding: 8px; border-bottom: 1px solid #eee; text-align: right;">${item.quantity}</td>
-                            <td style="padding: 8px; border-bottom: 1px solid #eee; text-align: right;">${item.price.toFixed(2)}</td>
-                            <td style="padding: 8px; border-bottom: 1px solid #eee; text-align: right;">${(perItemDiscount * item.quantity).toFixed(2)}</td>
-                            <td style="padding: 8px; border-bottom: 1px solid #eee; text-align: right; font-weight: 500;">${(item.price * item.quantity - perItemDiscount * item.quantity).toFixed(2)}</td>
-                        </tr>`
-                    );
-                }).join('');
-                return [dateRow, itemRows];
+            const tableRows = sales.flatMap(sale => {
+                const employee = this.state.employees.find(e => e.transactions.some(t => t.id === sale.id));
+                return (sale.items || []).map(item => `
+                    <tr style="page-break-inside: avoid;">
+                        <td style="padding: 8px; border-bottom: 1px solid #eee;">
+                            ${item.name}<br>
+                            <small style="color: #666;">Sold by: ${employee?.name || 'N/A'} | Type: ${sale.saleType}</small>
+                        </td>
+                        <td style="padding: 8px; border-bottom: 1px solid #eee; text-align: right;">${item.quantity}</td>
+                        <td style="padding: 8px; border-bottom: 1px solid #eee; text-align: right;">${item.price.toFixed(2)}</td>
+                        <td style="padding: 8px; border-bottom: 1px solid #eee; text-align: right;">${(item.price * item.quantity).toFixed(2)}</td>
+                    </tr>`
+                );
             }).join('');
-
-            const subTotal = sales.reduce((sum, sale) => sum + sale.items.reduce((s, i) => s + (i.price * i.quantity), 0), 0);
-            const totalDiscount = sales.reduce((sum, sale) => sum + (sale.discount || 0), 0);
 
             return `
             <div style="background-color: #ffffff; color: #111827; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji'; font-size: 14px; line-height: 1.5; margin: auto; max-width: 8.5in; padding: 2rem; border: 1px solid #e5e7eb; box-shadow: 0 1px 3px 0 rgba(0,0,0,0.1), 0 1px 2px 0 rgba(0,0,0,0.06);">
-                
                 <div style="display: flex; justify-content: space-between; align-items: flex-start; border-bottom: 2px solid #111827; padding-bottom: 1rem; margin-bottom: 2rem;">
                     <div>
-                        <h1 style="font-size: 2.25rem; font-weight: 700; margin: 0; color: #111827; line-height: 1;">LEDGERLY</h1>
+                        <h1 style="font-size: 2.25rem; font-weight: 700; margin: 0; color: #111827; line-height: 1;">${companyName}</h1>
                         <p style="margin: 0.25rem 0 0; color: #6b7280;">Sales Division</p>
                     </div>
                     <div style="text-align: right;">
@@ -1947,7 +1942,6 @@ document.addEventListener('DOMContentLoaded', () => {
                         <p style="margin: 0.25rem 0 0; color: #6b7280;">#${invoiceId}</p>
                     </div>
                 </div>
-
                 <div style="display: flex; justify-content: space-between; margin-bottom: 2rem;">
                     <div>
                         <p style="margin: 0; color: #6b7280; font-weight: 500;">BILL TO</p>
@@ -1959,72 +1953,42 @@ document.addEventListener('DOMContentLoaded', () => {
                         <p style="margin: 0.25rem 0 0; color: #6b7280;"><span style="font-weight: 500;">Due Date:</span> On Receipt</p>
                     </div>
                 </div>
-
                 <table style="width: 100%; border-collapse: collapse;">
                     <thead style="background-color: #f3f4f6; color: #374151;">
                         <tr>
-                            <th style="padding: 12px 8px; text-align: left; font-weight: 600; width: 50%;">ITEM DESCRIPTION</th>
+                            <th style="padding: 12px 8px; text-align: left; font-weight: 600; width: 60%;">ITEM DESCRIPTION</th>
                             <th style="padding: 12px 8px; text-align: right; font-weight: 600;">QTY</th>
-                            <th style="padding: 12px 8px; text-align: right; font-weight: 600;">RATE (AED)</th>
-                            <th style="padding: 12px 8px; text-align: right; font-weight: 600;">DISCOUNT (AED)</th>
-                            <th style="padding: 12px 8px; text-align: right; font-weight: 600;">AMOUNT (AED)</th>
+                            <th style="padding: 12px 8px; text-align: right; font-weight: 600;">RATE (VAT Incl.)</th>
+                            <th style="padding: 12px 8px; text-align: right; font-weight: 600;">AMOUNT (VAT Incl.)</th>
                         </tr>
                     </thead>
-                    <tbody>
-                        ${tableRows}
-                    </tbody>
+                    <tbody>${tableRows}</tbody>
                 </table>
-
                 <div style="display: flex; justify-content: flex-end; margin-top: 2rem;">
                     <div style="width: 100%; max-width: 300px;">
-                        <div style="display: flex; justify-content: space-between; padding: 8px 0;">
-                            <span>Subtotal</span>
-                            <span>${subTotal.toFixed(2)}</span>
-                        </div>
-                        <div style="display: flex; justify-content: space-between; padding: 8px 0; color: #ef4444;">
-                            <span>Discount</span>
-                            <span>(${totalDiscount.toFixed(2)})</span>
-                        </div>
-                        <div style="display: flex; justify-content: space-between; padding: 12px 0; border-top: 2px solid #111827; border-bottom: 2px solid #111827; margin-top: 8px; font-weight: 700; font-size: 1.25rem;">
-                            <span>Total Due</span>
-                            <span>AED ${total.toFixed(2)}</span>
-                        </div>
+                        <div style="display: flex; justify-content: space-between; padding: 8px 0;"><span>Subtotal</span><span>${grossTotalPreDiscount.toFixed(2)}</span></div>
+                        <div style="display: flex; justify-content: space-between; padding: 8px 0; color: #ef4444;"><span>Discount</span><span>(${totalDiscount.toFixed(2)})</span></div>
+                        <div style="display: flex; justify-content: space-between; padding: 12px 0; border-top: 2px solid #111827; margin-top: 8px; font-weight: 700; font-size: 1.25rem;"><span>Total Due</span><span>${currency} ${grandTotal.toFixed(2)}</span></div>
+                        <div style="display: flex; justify-content: space-between; padding: 8px 0; border-top: 1px solid #ccc; margin-top: 8px; font-size: 0.9em; color: #6b7280;"><span>Net Amount (Before VAT)</span><span>${(grandTotal - totalVat).toFixed(2)}</span></div>
+                        <div style="display: flex; justify-content: space-between; padding: 8px 0; font-size: 0.9em; color: #6b7280;"><span>VAT (${(vatRate * 100).toFixed(0)}%) Included</span><span>${totalVat.toFixed(2)}</span></div>
                     </div>
                 </div>
-
-                <div style="margin-top: 3rem; text-align: center; color: #6b7280; font-size: 0.875rem;">
-                    <p>Thank you for your business!</p>
-                    <p>All transactions are final. Please contact us for any inquiries.</p>
-                </div>
-            </div>
-                `;
+                <div style="margin-top: 3rem; text-align: center; color: #6b7280; font-size: 0.875rem;"><p>Thank you for your business!</p></div>
+            </div>`;
         },
 
         switchAITab(tabName) {
             document.querySelectorAll('.ai-tab-content').forEach(el => el.classList.add('hidden'));
             document.getElementById(`ai-${tabName}-tab`).classList.remove('hidden');
-            document.querySelectorAll('.ai-tab-btn').forEach(btn => {
-                btn.classList.toggle('active', btn.dataset.tab === tabName);
-            });
+            document.querySelectorAll('.ai-tab-btn').forEach(btn => btn.classList.toggle('active', btn.dataset.tab === tabName));
         },
 
         async getAIResponse(prompt, isChatMessage = false) {
             const contextId = document.getElementById('ai-employee-select').value;
-            let contextData = '';
             let subject = 'the entire company';
-
-            if (contextId === 'company') {
-                contextData = JSON.stringify({
-                    employees: this.state.employees,
-                    masterInventory: this.state.masterInventory,
-                    tasks: this.state.tasks
-                }, null, 2);
-            } else {
+            if (contextId !== 'company') {
                 const employee = this.getEmployee(contextId);
-                if (employee) {
-                    subject = employee.name;
-                    contextData = JSON.stringify(employee, null, 2);
-                }
+                if (employee) subject = employee.name;
             }
 
             const outputArea = isChatMessage ? document.getElementById('ai-chat-history') : document.getElementById('ai-response-area');
@@ -2033,7 +1997,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
             if (isChatMessage) {
                 outputArea.innerHTML += userMessageHTML + thinkingHTML;
-                outputArea.scrollTop = outputArea.scrollHeight; // Scroll to bottom
+                outputArea.scrollTop = outputArea.scrollHeight;
             } else {
                 outputArea.innerHTML = thinkingHTML;
             }
@@ -2043,7 +2007,8 @@ document.addEventListener('DOMContentLoaded', () => {
             const aiResponseHTML = `<div class="prose max-w-none text-light-text dark:text-dark-text">${this.simpleMarkdownToHtml(aiResponse)}</div>`;
             
             if (isChatMessage) {
-                outputArea.lastChild.remove(); // Remove thinking indicator
+                const thinkingNode = outputArea.querySelector('div:last-child');
+                if(thinkingNode) thinkingNode.remove();
                 outputArea.innerHTML += `<div><div class="inline-block bg-light-bg dark:bg-dark-bg p-3 rounded-lg">${aiResponseHTML}</div></div>`;
                 outputArea.scrollTop = outputArea.scrollHeight;
             } else {
@@ -2052,8 +2017,9 @@ document.addEventListener('DOMContentLoaded', () => {
         },
 
         async mockAIApi(prompt, subject) {
-            await new Promise(res => setTimeout(res, 1500)); // Simulate network delay
+            await new Promise(res => setTimeout(res, 1500)); 
             prompt = prompt.toLowerCase();
+            const currency = this.state.companyInfo.currency;
             if (prompt.includes('action plan')) {
                 return `### Action Plan for ${subject}\n\n1. **Identify Top Customers:** Review sales data to find the top 3 stores by revenue.\n2. **Promote High-Margin Products:** Focus sales efforts on products with the best profit margins.\n3. **Follow-up on Outstanding Credit:** Contact stores with significant outstanding credit to ensure timely payments.`;
             } else if (prompt.includes('top product')) {
@@ -2061,7 +2027,7 @@ document.addEventListener('DOMContentLoaded', () => {
             } else if (prompt.includes('cost') || prompt.includes('expense')) {
                 return `### Expense Analysis for ${subject}\n\nThe largest expense category is **"Supplies"**. To reduce costs, consider:\n- Ordering supplies in bulk for a discount.\n- Researching alternative suppliers for better pricing.`;
             } else if (prompt.includes('credit')) {
-                 return `### Store Credit Analysis\n\n**"MegaMart"** has the highest outstanding credit at **AED 4,500**. Their credit limit is AED 5,000. It would be wise to follow up on payment before extending further credit.`;
+                 return `### Store Credit Analysis\n\n**"MegaMart"** has the highest outstanding credit at **${currency} 4,500.00**. Their credit limit is ${currency} 5,000.00. It would be wise to follow up on payment before extending further credit.`;
             } else {
                 return `I can help with that. To give you the best advice about "${prompt}" for ${subject}, I need to analyze the sales transactions, inventory levels, and expense reports. Please ensure all data is up to date.`;
             }
