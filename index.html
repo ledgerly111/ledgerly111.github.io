@@ -232,67 +232,95 @@ document.addEventListener('DOMContentLoaded', () => {
         addEventListeners() {},
 
         attachEmployeeViewEventListeners() {
-            document.getElementById('employee-tabs-container')?.addEventListener('click', e => this.handleTabClick(e, 'employee'));
-            document.getElementById('mobile-tabs')?.addEventListener('change', e => this.handleMobileTabChange(e));
+            const employeeView = document.getElementById('employee-view');
+            if (!employeeView) return;
 
-            const saleForm = document.getElementById('record-sale-form');
-            if(saleForm) {
-                saleForm.addEventListener('submit', e => this.handleRecordSale(e));
-                document.getElementById('add-item-to-sale-btn')?.addEventListener('click', () => this.addToSaleCart());
-                document.getElementById('sale-cart-items')?.addEventListener('click', e => {
-                    if (e.target.closest('.remove-sale-item-btn')) {
-                        const productId = e.target.closest('.remove-sale-item-btn').dataset.productId;
-                        this.removeFromSaleCart(productId);
-                    }
-                });
-                document.getElementById('sale-discount')?.addEventListener('input', () => this.updateSaleCartTotal());
-                document.getElementById('sale-type')?.addEventListener('change', () => this.updateSaleCartTotal());
-            }
-
-            document.getElementById('record-expense-form')?.addEventListener('submit', e => this.handleRecordExpense(e));
-            document.getElementById('employee-add-store-form')?.addEventListener('submit', e => this.handleAddStore(e));
-            document.getElementById('edit-store-form')?.addEventListener('submit', e => this.handleUpdateStore(e));
-            document.getElementById('credit-received-form')?.addEventListener('submit', e => this.handleCreditReceived(e));
-            document.getElementById('request-stock-form')?.addEventListener('submit', e => this.handleRequestStock(e));
-
-            const invoiceForm = document.getElementById('invoice-form');
-            if (invoiceForm) {
-                invoiceForm.addEventListener('submit', e => this.handleGenerateInvoice(e));
-                invoiceForm.addEventListener('change', e => {
-                    if (e.target.id === 'invoice-store') {
-                        this.renderInvoiceTransactionList(e.target.value);
-                    } else if (e.target.classList.contains('invoice-txn-checkbox')) {
-                        const generateBtn = invoiceForm.querySelector('button[type="submit"]');
-                        const anyChecked = invoiceForm.querySelector('.invoice-txn-checkbox:checked');
-                        generateBtn.disabled = !anyChecked;
-                    }
-                });
-            }
-
-            document.getElementById('ledger-filter-container')?.addEventListener('click', e => {
-                const button = e.target.closest('.ledger-filter-btn');
-                if (button && button.dataset.filter) {
-                    this.state.ledgerFilter = button.dataset.filter;
-                    this.renderLedger();
+            // --- Event Delegation for Form Submissions ---
+            employeeView.addEventListener('submit', e => {
+                const formId = e.target.id;
+                switch (formId) {
+                    case 'record-sale-form':
+                        this.handleRecordSale(e);
+                        break;
+                    case 'record-expense-form':
+                        this.handleRecordExpense(e);
+                        break;
+                    case 'employee-add-store-form':
+                        this.handleAddStore(e);
+                        break;
+                    case 'request-stock-form':
+                        this.handleRequestStock(e);
+                        break;
+                    case 'invoice-form':
+                        this.handleGenerateInvoice(e);
+                        break;
                 }
             });
             
-            document.getElementById('invoice-sub-nav')?.addEventListener('click', e => {
-                const button = e.target.closest('.invoice-sub-tab-btn');
-                if (button && button.dataset.subTab) {
-                    this.state.activeInvoiceSubTab = button.dataset.subTab;
+            // --- Event Delegation for Clicks ---
+            employeeView.addEventListener('click', e => {
+                const target = e.target;
+                const tabButton = target.closest('.tab-button');
+                if (tabButton && tabButton.dataset.tab) {
+                    this.handleTabClick(e, 'employee');
+                    return;
+                }
+                
+                if (target.closest('#add-item-to-sale-btn')) {
+                    this.addToSaleCart();
+                    return;
+                }
+                const removeBtn = target.closest('.remove-sale-item-btn');
+                if (removeBtn) {
+                    const productId = removeBtn.dataset.productId;
+                    this.removeFromSaleCart(productId);
+                    return;
+                }
+                const ledgerFilterBtn = target.closest('.ledger-filter-btn');
+                if (ledgerFilterBtn && ledgerFilterBtn.dataset.filter) {
+                    this.state.ledgerFilter = ledgerFilterBtn.dataset.filter;
+                    this.renderLedger();
+                    return;
+                }
+                const invoiceSubTabBtn = target.closest('.invoice-sub-tab-btn');
+                if (invoiceSubTabBtn && invoiceSubTabBtn.dataset.subTab) {
+                    this.state.activeInvoiceSubTab = invoiceSubTabBtn.dataset.subTab;
                     this.renderInvoices();
+                    return;
+                }
+                const pendingInvoiceItem = target.closest('.pending-invoice-item');
+                if (pendingInvoiceItem && pendingInvoiceItem.dataset.storeId) {
+                    this.setActiveInvoiceSubTab('create');
+                    document.getElementById('invoice-store').value = pendingInvoiceItem.dataset.storeId;
+                    this.renderInvoiceTransactionList(pendingInvoiceItem.dataset.storeId);
+                    return;
                 }
             });
 
-            document.getElementById('pending-invoice-panel')?.addEventListener('click', e => {
-                const item = e.target.closest('.pending-invoice-item');
-                if (item && item.dataset.storeId) {
-                    this.setActiveInvoiceSubTab('create');
-                    document.getElementById('invoice-store').value = item.dataset.storeId;
-                    this.renderInvoiceTransactionList(item.dataset.storeId);
+            // --- Event Delegation for Change/Input events ---
+            employeeView.addEventListener('change', e => {
+                const target = e.target;
+                if (target.id === 'sale-type') {
+                    this.updateSaleCartTotal();
+                } else if (target.id === 'invoice-store') {
+                    this.renderInvoiceTransactionList(target.value);
+                } else if (target.classList.contains('invoice-txn-checkbox')) {
+                    const invoiceForm = target.closest('form');
+                    if (invoiceForm) {
+                        const generateBtn = invoiceForm.querySelector('button[type="submit"]');
+                        const anyChecked = invoiceForm.querySelector('.invoice-txn-checkbox:checked');
+                        if (generateBtn) generateBtn.disabled = !anyChecked;
+                    }
                 }
             });
+            
+            employeeView.addEventListener('input', e => {
+                if (e.target.id === 'sale-discount') {
+                    this.updateSaleCartTotal();
+                }
+            });
+            
+            document.getElementById('mobile-tabs')?.addEventListener('change', e => this.handleMobileTabChange(e));
         },
         
         attachCompanyViewEventListeners() {
@@ -391,14 +419,13 @@ document.addEventListener('DOMContentLoaded', () => {
             this.render();
         },
 
-        // LOGIC CHANGE: Updated Company overview to show Net Revenue and Total VAT.
         getCompanyViewTemplate() {
             let totalNetRevenue = 0, totalVat = 0, totalExpenses = 0;
             this.state.employees.forEach(emp => {
                 if (emp.transactions) {
                     emp.transactions.forEach(t => {
                         if (t.type === 'sale') {
-                            totalNetRevenue += t.subtotal; // `subtotal` now stores the NET amount.
+                            totalNetRevenue += t.subtotal;
                             totalVat += t.vatAmount;
                         } else if (t.type === 'expense') {
                             totalExpenses += t.amount;
@@ -449,7 +476,7 @@ document.addEventListener('DOMContentLoaded', () => {
         getEmployeeViewTemplate() {
             const employee = this.getCurrentEmployee();
             if (!employee) return '';
-            const revenue = employee.transactions.filter(t => t.type === 'sale').reduce((sum, t) => sum + t.subtotal, 0); // subtotal is now net
+            const revenue = employee.transactions.filter(t => t.type === 'sale').reduce((sum, t) => sum + t.subtotal, 0);
             const expenses = employee.transactions.filter(t => t.type === 'expense').reduce((sum, t) => sum + t.amount, 0);
             const profit = revenue - expenses;
             const salesAndExpensesContent = `
@@ -836,7 +863,6 @@ document.addEventListener('DOMContentLoaded', () => {
             this.updateSaleCartTotal();
         },
 
-        // LOGIC CHANGE: Rewritten to handle tax-inclusive pricing.
         updateSaleCartTotal() {
             const grossTotal = this.currentSaleCart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
             const discount = parseFloat(document.getElementById('sale-discount').value) || 0;
@@ -847,7 +873,6 @@ document.addEventListener('DOMContentLoaded', () => {
             
             let vatAmount = 0;
             if (!isDeal && this.state.companyInfo.vatRate > 0) {
-                // Calculate VAT from the final, discounted price.
                 const netAmount = finalTotal / (1 + this.state.companyInfo.vatRate);
                 vatAmount = finalTotal - netAmount;
             }
@@ -885,6 +910,7 @@ document.addEventListener('DOMContentLoaded', () => {
             this.showNotification('Credit payment recorded!');
         },
 
+        // --- START OF FIX: Function is now present ---
         renderTabs(viewType) {
             let tabs = [];
             let containerId = '';
@@ -914,7 +940,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 containerId = 'company-tabs-container';
             }
 
-            document.getElementById(containerId).innerHTML = tabs.map(tab => `<button data-tab="${tab.id}" class="tab-button text-light-text-secondary dark:text-dark-text-secondary hover:text-light-text dark:hover:text-dark-text border-b-2 border-transparent py-3 px-1 sm:px-4 font-medium text-sm"><i class="fas ${tab.icon} mr-0 sm:mr-2"></i><span class="hidden sm:inline">${tab.name}</span></button>`).join('');
+            const container = document.getElementById(containerId);
+            if(container) {
+                container.innerHTML = tabs.map(tab => `<button data-tab="${tab.id}" class="tab-button text-light-text-secondary dark:text-dark-text-secondary hover:text-light-text dark:hover:text-dark-text border-b-2 border-transparent py-3 px-1 sm:px-4 font-medium text-sm"><i class="fas ${tab.icon} mr-0 sm:mr-2"></i><span class="hidden sm:inline">${tab.name}</span></button>`).join('');
+            }
             
             if (mobileTabsId) {
                 const mobileSelect = document.getElementById(mobileTabsId);
@@ -923,6 +952,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             }
         },
+        // --- END OF FIX ---
 
         toggleSidenav() { 
             document.getElementById('side-panel').classList.toggle('-translate-x-full');
@@ -1148,21 +1178,46 @@ document.addEventListener('DOMContentLoaded', () => {
 
             contentEl.innerHTML = currentInventoryHTML + pendingDeliveriesHTML;
         },
+        
+        /**
+         * =================================================================
+         * FIXED FUNCTION
+         * =================================================================
+         * This function now checks if the employee has any available stock.
+         * If not, it disables the sale form and provides a clear message
+         * in the product dropdown to prevent user confusion and errors.
+         */
         renderSalesAndExpenses() {
             const employee = this.getCurrentEmployee();
-            if(!employee) return;
+            if (!employee) return;
             document.getElementById('sale-type').innerHTML = `<option value="Cash">Cash</option><option value="Credit">Credit</option><option value="Deal">Deal</option>`;
             document.getElementById('sale-store').innerHTML = employee.stores.map(s => `<option value="${s.id}">${s.name}</option>`).join('') || `<option disabled>Add a store first</option>`;
+            
+            // --- START OF FIX ---
             const availableInventory = employee.inventory?.filter(item => item.stock > 0 && this.getProduct(item.productId)?.isActive) || [];
-            document.getElementById('add-sale-product').innerHTML = `<option value="">-- Select Product --</option>` + availableInventory.map(item => {
-                const product = this.getProduct(item.productId);
-                return `<option value="${product.id}">${product.name} (Stock: ${item.stock})</option>`
-            }).join('');
+            const productSelect = document.getElementById('add-sale-product');
+            const quantityInput = document.getElementById('add-sale-quantity');
+            const addItemBtn = document.getElementById('add-item-to-sale-btn');
+            const saleFormElements = [productSelect, quantityInput, addItemBtn, document.getElementById('sale-discount'), document.getElementById('sale-type'), document.getElementById('sale-store')];
+
+            if (availableInventory.length === 0) {
+                productSelect.innerHTML = `<option value="">No stock available to sell</option>`;
+                saleFormElements.forEach(el => { if(el) el.disabled = true; });
+                const recordSaleBtn = document.getElementById('record-sale-btn');
+                if (recordSaleBtn) recordSaleBtn.disabled = true;
+            } else {
+                productSelect.innerHTML = `<option value="">-- Select Product --</option>` + availableInventory.map(item => {
+                    const product = this.getProduct(item.productId);
+                    return `<option value="${product.id}">${product.name} (Stock: ${item.stock})</option>`
+                }).join('');
+                saleFormElements.forEach(el => { if(el) el.disabled = false; });
+            }
+            // --- END OF FIX ---
             
             this.currentSaleCart = [];
             this.renderSaleCart();
 
-            document.getElementById('expense-category').innerHTML=this.state.expenseCategories.map(c=>`<option value="${c.id}">${c.name}</option>`).join('')||`<option disabled>Add a category first</option>`;
+            document.getElementById('expense-category').innerHTML = this.state.expenseCategories.map(c => `<option value="${c.id}">${c.name}</option>`).join('') || `<option disabled>Add a category first</option>`;
             const expenseBtn = document.querySelector('#record-expense-form button');
             if (expenseBtn) expenseBtn.disabled = this.state.expenseCategories.length === 0;
         },
@@ -1398,7 +1453,8 @@ document.addEventListener('DOMContentLoaded', () => {
             document.getElementById('delegate-stock-form')?.addEventListener('submit', e => this.handleDelegateStock(e));
             document.getElementById('create-task-form')?.addEventListener('submit', e => this.handleCreateTask(e));
             document.getElementById('decline-stock-form')?.addEventListener('submit', e => this.handleDeclineStock(e));
-
+            document.getElementById('edit-store-form')?.addEventListener('submit', e => this.handleUpdateStore(e));
+            document.getElementById('credit-received-form')?.addEventListener('submit', e => this.handleCreditReceived(e));
         },
         getGenericModalHTML(id, title, content, dialogClass = 'max-w-md') {
             return `<div id="${id}" onclick="app.closeModal('${id}')" class="fixed inset-0 z-50 flex items-center justify-center p-4 hidden modal-backdrop">
@@ -1754,7 +1810,6 @@ document.addEventListener('DOMContentLoaded', () => {
             this.showNotification('Stock request submitted successfully!');
             e.target.reset();
         },
-        // LOGIC CHANGE: Rewritten to calculate Net and VAT from a tax-inclusive price.
         handleRecordSale(e){
             e.preventDefault();
             const form=e.target;
@@ -1882,7 +1937,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             });
 
-            // LOGIC CHANGE: Totals are now summed from the correctly stored transaction values.
             const totalNet = salesInPeriod.reduce((sum, sale) => sum + sale.subtotal, 0);
             const totalDiscount = salesInPeriod.reduce((sum, sale) => sum + (sale.discount || 0), 0);
             const totalVat = salesInPeriod.reduce((sum, sale) => sum + sale.vatAmount, 0);
@@ -1907,12 +1961,10 @@ document.addEventListener('DOMContentLoaded', () => {
             this.setActiveTab('invoices', 'employee');
         },
 
-        // LOGIC CHANGE: Invoice HTML template completely rewritten for tax-inclusive pricing.
         generateInvoiceHtml(store, sales, totals, invoiceId, invoiceDate) {
             const { name: companyName, currency, vatRate } = this.state.companyInfo;
             const { totalNet, totalDiscount, totalVat, grandTotal } = totals;
 
-            // This calculates the gross total (pre-discount) for display purposes.
             const grossTotalPreDiscount = sales.reduce((sum, sale) => sum + sale.amount + (sale.discount || 0), 0);
 
             const tableRows = sales.flatMap(sale => {
