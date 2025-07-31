@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ledgerly Sales - Advanced Business Management</title>
+    <title>Ledgerly Sales - Smart Business Management</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -38,8 +38,11 @@
             margin: 0;
             padding: 0;
             overflow-x: hidden;
+            -webkit-text-size-adjust: 100%;
+            text-size-adjust: 100%;
         }
 
+        /* Mobile-First Design */
         .app-container {
             min-height: 100vh;
             display: flex;
@@ -49,6 +52,7 @@
         .navbar {
             background: linear-gradient(90deg, var(--bg-secondary) 0%, rgba(26, 31, 46, 0.95) 100%);
             backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
             border-bottom: 1px solid var(--border-color);
             padding: 1rem;
             position: sticky;
@@ -64,6 +68,7 @@
             overflow-x: hidden;
         }
 
+        /* Mobile Sidebar */
         .mobile-sidebar {
             position: fixed;
             top: 0;
@@ -72,6 +77,7 @@
             height: 100vh;
             background: linear-gradient(180deg, var(--bg-tertiary) 0%, rgba(36, 41, 56, 0.95) 100%);
             backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
             border-right: 1px solid var(--border-color);
             transition: left 0.3s ease;
             z-index: 2000;
@@ -100,6 +106,7 @@
             visibility: visible;
         }
 
+        /* Desktop Sidebar */
         .desktop-sidebar {
             display: none;
         }
@@ -123,6 +130,7 @@
                 height: 100vh;
                 background: linear-gradient(180deg, var(--bg-tertiary) 0%, rgba(36, 41, 56, 0.95) 100%);
                 backdrop-filter: blur(10px);
+                -webkit-backdrop-filter: blur(10px);
                 border-right: 1px solid var(--border-color);
                 overflow-y: auto;
                 z-index: 100;
@@ -133,6 +141,7 @@
             }
         }
 
+        /* Burger Menu Button */
         .burger-menu {
             display: flex;
             align-items: center;
@@ -157,9 +166,11 @@
             }
         }
 
+        /* Enhanced Cards */
         .perplexity-card {
             background: rgba(36, 41, 56, 0.9);
             backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
             border: 1px solid var(--border-color);
             border-radius: 16px;
             box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
@@ -171,6 +182,7 @@
             transform: translateY(-2px);
         }
 
+        /* Enhanced Buttons */
         .perplexity-button {
             background: linear-gradient(135deg, var(--accent-primary) 0%, var(--accent-secondary) 100%);
             border: none;
@@ -234,68 +246,7 @@
             cursor: pointer;
         }
 
-        .quick-sale-button {
-            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
-            border: none;
-            border-radius: 20px;
-            color: white;
-            font-weight: 700;
-            font-size: 18px;
-            padding: 20px 40px;
-            box-shadow: 0 8px 30px rgba(16, 185, 129, 0.4);
-            transition: all 0.3s ease;
-            cursor: pointer;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .quick-sale-button:hover {
-            transform: translateY(-4px);
-            box-shadow: 0 12px 40px rgba(16, 185, 129, 0.6);
-        }
-
-        .quick-sale-button::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: -100%;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
-            transition: left 0.5s;
-        }
-
-        .quick-sale-button:hover::before {
-            left: 100%;
-        }
-
-        /* Storage Status Indicator */
-        .storage-status {
-            position: fixed;
-            bottom: 20px;
-            right: 20px;
-            background: rgba(36, 41, 56, 0.95);
-            backdrop-filter: blur(15px);
-            border: 1px solid var(--border-color);
-            border-radius: 12px;
-            padding: 12px 16px;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            z-index: 1000;
-            transition: all 0.3s ease;
-        }
-
-        .storage-status.active {
-            border-color: var(--positive-color);
-            box-shadow: 0 0 20px rgba(59, 130, 246, 0.3);
-        }
-
-        .storage-status.saving {
-            border-color: var(--gold-color);
-            box-shadow: 0 0 20px rgba(245, 158, 11, 0.3);
-        }
-
+        /* Menu Items */
         .menu-item {
             width: 100%;
             text-align: left;
@@ -331,6 +282,60 @@
             font-size: 18px;
         }
 
+        /* Special Cards */
+        .ai-card {
+            background: linear-gradient(135deg, rgba(139, 92, 246, 0.15) 0%, rgba(168, 85, 247, 0.15) 100%);
+            border: 1px solid rgba(139, 92, 246, 0.4);
+            border-radius: 16px;
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+        }
+
+        .bot-card {
+            background: linear-gradient(135deg, rgba(16, 185, 129, 0.15) 0%, rgba(5, 150, 105, 0.15) 100%);
+            border: 1px solid rgba(16, 185, 129, 0.4);
+            border-radius: 16px;
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+        }
+
+        .expenses-card {
+            background: linear-gradient(135deg, rgba(245, 158, 11, 0.15) 0%, rgba(217, 119, 6, 0.15) 100%);
+            border: 1px solid rgba(245, 158, 11, 0.4);
+            border-radius: 16px;
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+        }
+
+        /* Animations */
+        .fade-in {
+            animation: fadeIn 0.6s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .ai-pulse {
+            animation: aiPulse 2s infinite;
+        }
+
+        .bot-pulse {
+            animation: botPulse 2s infinite;
+        }
+
+        @keyframes aiPulse {
+            0%, 100% { box-shadow: 0 4px 15px rgba(139, 92, 246, 0.3); }
+            50% { box-shadow: 0 8px 30px rgba(139, 92, 246, 0.6); }
+        }
+
+        @keyframes botPulse {
+            0%, 100% { box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3); }
+            50% { box-shadow: 0 8px 30px rgba(16, 185, 129, 0.6); }
+        }
+
+        /* Notification System */
         .notification-container {
             position: fixed;
             top: 20px;
@@ -342,6 +347,7 @@
         .notification {
             background: rgba(36, 41, 56, 0.95);
             backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
             border: 1px solid var(--border-color);
             border-radius: 12px;
             padding: 16px;
@@ -382,6 +388,7 @@
             }
         }
 
+        /* Forms */
         .form-input {
             background: rgba(15, 20, 25, 0.8) !important;
             border: 1px solid var(--border-color) !important;
@@ -400,6 +407,7 @@
             outline: none !important;
         }
 
+        /* Tables */
         .responsive-table {
             overflow-x: auto;
             -webkit-overflow-scrolling: touch;
@@ -424,6 +432,7 @@
             }
         }
 
+        /* Modal Improvements */
         .modal-overlay {
             position: fixed;
             inset: 0;
@@ -438,11 +447,12 @@
         .modal-content {
             background: rgba(36, 41, 56, 0.95);
             backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
             border: 1px solid var(--border-color);
             border-radius: 20px;
             padding: 32px;
             width: 100%;
-            max-width: 600px;
+            max-width: 500px;
             max-height: 90vh;
             overflow-y: auto;
             box-shadow: 0 20px 60px rgba(0, 0, 0, 0.6);
@@ -456,6 +466,7 @@
             }
         }
 
+        /* User Selection Cards */
         .user-selection-card {
             background: rgba(36, 41, 56, 0.8);
             border: 2px solid transparent;
@@ -480,72 +491,29 @@
             box-shadow: 0 20px 40px rgba(0, 212, 170, 0.3);
         }
 
-        .fade-in {
-            animation: fadeIn 0.6s ease-out;
+        /* Gradient Text Effects */
+        .gradient-text {
+            background: linear-gradient(135deg, var(--accent-primary) 0%, var(--accent-secondary) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
         }
 
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(30px); }
-            to { opacity: 1; transform: translateY(0); }
+        .ai-gradient-text {
+            background: linear-gradient(135deg, var(--ai-color) 0%, #a855f7 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
         }
 
-        .sales-wizard {
-            background: linear-gradient(135deg, rgba(16, 185, 129, 0.1) 0%, rgba(5, 150, 105, 0.1) 100%);
-            border: 1px solid rgba(16, 185, 129, 0.3);
-            border-radius: 20px;
-            padding: 30px;
-            margin: 20px 0;
+        .bot-gradient-text {
+            background: linear-gradient(135deg, var(--bot-color) 0%, #059669 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
         }
 
-        .sales-step {
-            display: none;
-            animation: slideIn 0.3s ease-out;
-        }
-
-        .sales-step.active {
-            display: block;
-        }
-
-        @keyframes slideIn {
-            from { opacity: 0; transform: translateX(20px); }
-            to { opacity: 1; transform: translateX(0); }
-        }
-
-        .product-selector {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-            gap: 15px;
-            margin: 20px 0;
-        }
-
-        .product-card {
-            background: rgba(55, 65, 81, 0.6);
-            border: 2px solid transparent;
-            border-radius: 15px;
-            padding: 20px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            text-align: center;
-        }
-
-        .product-card:hover {
-            border-color: var(--accent-primary);
-            background: rgba(55, 65, 81, 0.8);
-            transform: translateY(-5px);
-        }
-
-        .product-card.selected {
-            border-color: var(--positive-color);
-            background: rgba(59, 130, 246, 0.1);
-            box-shadow: 0 0 20px rgba(59, 130, 246, 0.3);
-        }
-
-        .chart-container {
-            position: relative;
-            height: 300px;
-            width: 100%;
-        }
-
+        /* Mobile Improvements */
         @media (max-width: 768px) {
             .notification-container {
                 top: 10px;
@@ -567,23 +535,51 @@
             .main-content {
                 padding: 12px;
             }
+        }
 
-            .storage-status {
-                bottom: 10px;
-                right: 10px;
-                left: 10px;
-                justify-content: center;
-            }
+        /* Chart Container */
+        .chart-container {
+            position: relative;
+            height: 300px;
+            width: 100%;
+        }
+
+        /* Toggle Switch */
+        .toggle-switch {
+            position: relative;
+            width: 60px;
+            height: 30px;
+            background: linear-gradient(135deg, #374151 0%, #4b5563 100%);
+            border-radius: 15px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        .toggle-switch.active {
+            background: linear-gradient(135deg, var(--bot-color) 0%, #059669 100%);
+            box-shadow: 0 0 20px rgba(16, 185, 129, 0.4);
+        }
+
+        .toggle-knob {
+            position: absolute;
+            top: 3px;
+            left: 3px;
+            width: 24px;
+            height: 24px;
+            background: linear-gradient(135deg, #ffffff 0%, #f3f4f6 100%);
+            border-radius: 50%;
+            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+
+        .toggle-switch.active .toggle-knob {
+            transform: translateX(30px);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
         }
     </style>
 </head>
 <body>
-    <!-- Storage Status Indicator -->
-    <div id="storage-status" class="storage-status active">
-        <i id="storage-icon" class="fas fa-database text-blue-400"></i>
-        <span id="storage-text" class="text-white text-sm font-medium">Advanced Storage Active</span>
-    </div>
-
     <!-- Notification Container -->
     <div id="notification-container" class="notification-container"></div>
     
@@ -608,287 +604,6 @@
             'BH': { name: 'Bahrain', currency: 'BHD', symbol: '.د.ب', rate: 0.38, tax: 0.10, taxName: 'VAT' },
             'OM': { name: 'Oman', currency: 'OMR', symbol: '﷼', rate: 0.38, tax: 0.05, taxName: 'VAT' }
         };
-
-        // Advanced Multi-Tier Storage System
-        class AdvancedStorageManager {
-            constructor() {
-                this.dbName = 'LedgerlyAdvancedDB';
-                this.version = 1;
-                this.db = null;
-                this.opfsRoot = null;
-                this.activeStorage = null;
-                this.compressionEnabled = true;
-            }
-
-            async init() {
-                // Try storage methods in order of preference
-                try {
-                    // 1. Try OPFS first (fastest, no permission needed)
-                    if ('storage' in navigator && 'getDirectory' in navigator.storage) {
-                        this.opfsRoot = await navigator.storage.getDirectory();
-                        this.activeStorage = 'OPFS';
-                        await this.requestPersistentStorage();
-                        this.updateStorageStatus('OPFS - Ultra Fast Storage');
-                        console.log('✅ OPFS storage initialized successfully');
-                        return 'OPFS';
-                    }
-                } catch (error) {
-                    console.log('OPFS not available, trying IndexedDB...');
-                }
-
-                try {
-                    // 2. Try IndexedDB (excellent capacity)
-                    await this.initIndexedDB();
-                    this.activeStorage = 'IndexedDB';
-                    await this.requestPersistentStorage();
-                    this.updateStorageStatus('IndexedDB - High Capacity Storage');
-                    console.log('✅ IndexedDB storage initialized successfully');
-                    return 'IndexedDB';
-                } catch (error) {
-                    console.error('❌ All storage methods failed:', error);
-                    throw new Error('No storage options available');
-                }
-            }
-
-            async initIndexedDB() {
-                return new Promise((resolve, reject) => {
-                    const request = indexedDB.open(this.dbName, this.version);
-                    
-                    request.onerror = () => reject(request.error);
-                    request.onsuccess = () => {
-                        this.db = request.result;
-                        resolve(this.db);
-                    };
-                    
-                    request.onupgradeneeded = (event) => {
-                        const db = event.target.result;
-                        if (!db.objectStoreNames.contains('businessData')) {
-                            const store = db.createObjectStore('businessData', { keyPath: 'id' });
-                            store.createIndex('timestamp', 'timestamp', { unique: false });
-                        }
-                    };
-                });
-            }
-
-            async requestPersistentStorage() {
-                if ('storage' in navigator && 'persist' in navigator.storage) {
-                    const isPersistent = await navigator.storage.persist();
-                    if (isPersistent) {
-                        console.log('✅ Persistent storage granted - data protected from eviction');
-                    } else {
-                        console.log('⚠️ Persistent storage denied - data may be cleared');
-                    }
-                    return isPersistent;
-                }
-                return false;
-            }
-
-            compress(data) {
-                if (!this.compressionEnabled) return data;
-                
-                try {
-                    // Simple compression by removing empty fields and optimizing structure
-                    const optimized = this.optimizeData(data);
-                    return JSON.stringify(optimized);
-                } catch (error) {
-                    console.warn('Compression failed, using raw data:', error);
-                    return JSON.stringify(data);
-                }
-            }
-
-            decompress(data) {
-                if (!this.compressionEnabled) return data;
-                
-                try {
-                    return typeof data === 'string' ? JSON.parse(data) : data;
-                } catch (error) {
-                    console.warn('Decompression failed:', error);
-                    return data;
-                }
-            }
-
-            optimizeData(data) {
-                const optimized = {};
-                for (const [key, value] of Object.entries(data)) {
-                    if (value != null && value !== '' && !(Array.isArray(value) && value.length === 0)) {
-                        if (Array.isArray(value)) {
-                            optimized[key] = value.filter(item => item != null);
-                        } else if (typeof value === 'object') {
-                            const cleanedObj = this.optimizeData(value);
-                            if (Object.keys(cleanedObj).length > 0) {
-                                optimized[key] = cleanedObj;
-                            }
-                        } else {
-                            optimized[key] = value;
-                        }
-                    }
-                }
-                return optimized;
-            }
-
-            async save(data) {
-                this.updateStorageStatus('Saving...', true);
-                
-                try {
-                    const compressedData = this.compress(data);
-                    const saveData = {
-                        id: 'ledgerlyData',
-                        data: compressedData,
-                        timestamp: Date.now(),
-                        version: '2.0',
-                        storage: this.activeStorage
-                    };
-
-                    if (this.activeStorage === 'OPFS' && this.opfsRoot) {
-                        await this.saveToOPFS(saveData);
-                    } else if (this.activeStorage === 'IndexedDB' && this.db) {
-                        await this.saveToIndexedDB(saveData);
-                    } else {
-                        throw new Error('No active storage available');
-                    }
-
-                    this.updateStorageStatus(`Saved ${new Date().toLocaleTimeString()}`);
-                    console.log(`💾 Data saved successfully using ${this.activeStorage}`);
-                    return true;
-                } catch (error) {
-                    console.error('❌ Save failed:', error);
-                    this.updateStorageStatus('Save failed', false, true);
-                    throw error;
-                }
-            }
-
-            async saveToOPFS(data) {
-                const fileHandle = await this.opfsRoot.getFileHandle('ledgerly-data.json', { create: true });
-                const writable = await fileHandle.createWritable();
-                await writable.write(JSON.stringify(data));
-                await writable.close();
-            }
-
-            async saveToIndexedDB(data) {
-                const transaction = this.db.transaction(['businessData'], 'readwrite');
-                const store = transaction.objectStore('businessData');
-                await store.put(data);
-                
-                return new Promise((resolve, reject) => {
-                    transaction.oncomplete = () => resolve(true);
-                    transaction.onerror = () => reject(transaction.error);
-                });
-            }
-
-            async load() {
-                try {
-                    let data;
-                    
-                    if (this.activeStorage === 'OPFS' && this.opfsRoot) {
-                        data = await this.loadFromOPFS();
-                    } else if (this.activeStorage === 'IndexedDB' && this.db) {
-                        data = await this.loadFromIndexedDB();
-                    } else {
-                        return null;
-                    }
-
-                    if (data && data.data) {
-                        const decompressedData = this.decompress(data.data);
-                        console.log(`📂 Data loaded successfully using ${this.activeStorage}`);
-                        return decompressedData;
-                    }
-                    
-                    return null;
-                } catch (error) {
-                    console.error('❌ Load failed:', error);
-                    return null;
-                }
-            }
-
-            async loadFromOPFS() {
-                try {
-                    const fileHandle = await this.opfsRoot.getFileHandle('ledgerly-data.json');
-                    const file = await fileHandle.getFile();
-                    const text = await file.text();
-                    return JSON.parse(text);
-                } catch (error) {
-                    if (error.name === 'NotFoundError') return null;
-                    throw error;
-                }
-            }
-
-            async loadFromIndexedDB() {
-                const transaction = this.db.transaction(['businessData'], 'readonly');
-                const store = transaction.objectStore('businessData');
-                const request = store.get('ledgerlyData');
-                
-                return new Promise((resolve, reject) => {
-                    request.onsuccess = () => resolve(request.result);
-                    request.onerror = () => reject(request.error);
-                });
-            }
-
-            async getStorageInfo() {
-                const info = {
-                    activeStorage: this.activeStorage,
-                    persistent: false,
-                    usage: 0,
-                    quota: 0
-                };
-
-                try {
-                    if ('storage' in navigator) {
-                        const estimate = await navigator.storage.estimate();
-                        const persistent = await navigator.storage.persisted();
-                        
-                        info.persistent = persistent;
-                        info.usage = estimate.usage || 0;
-                        info.quota = estimate.quota || 0;
-                        info.available = info.quota - info.usage;
-                        info.usagePercentage = info.quota > 0 ? (info.usage / info.quota) * 100 : 0;
-                    }
-                } catch (error) {
-                    console.warn('Could not get storage estimate:', error);
-                }
-
-                return info;
-            }
-
-            updateStorageStatus(text, saving = false, error = false) {
-                const statusEl = document.getElementById('storage-status');
-                const iconEl = document.getElementById('storage-icon');
-                const textEl = document.getElementById('storage-text');
-
-                if (!statusEl) return;
-
-                textEl.textContent = text;
-                
-                if (saving) {
-                    statusEl.className = 'storage-status saving';
-                    iconEl.className = 'fas fa-circle-notch fa-spin text-yellow-400';
-                } else if (error) {
-                    statusEl.className = 'storage-status error';
-                    iconEl.className = 'fas fa-exclamation-triangle text-red-400';
-                } else {
-                    statusEl.className = 'storage-status active';
-                    iconEl.className = 'fas fa-database text-blue-400';
-                }
-
-                // Auto-hide success message after 3 seconds
-                if (!saving && !error) {
-                    setTimeout(() => {
-                        if (textEl.textContent === text) {
-                            textEl.textContent = `${this.activeStorage} - Storage Active`;
-                        }
-                    }, 3000);
-                }
-            }
-
-            // Automatic backup with throttling
-            saveThrottled(data, delay = 1000) {
-                clearTimeout(this.saveTimeout);
-                this.saveTimeout = setTimeout(() => {
-                    this.save(data).catch(error => {
-                        console.error('Auto-save failed:', error);
-                    });
-                }, delay);
-            }
-        }
 
         // Enhanced Notification System
         class NotificationSystem {
@@ -934,6 +649,31 @@
             static error(message) { this.show(message, 'error'); }
             static warning(message) { this.show(message, 'warning'); }
             static info(message) { this.show(message, 'info'); }
+        }
+
+        // Enhanced Data Storage
+        class DataStorage {
+            static save(key, data) {
+                try {
+                    const dataString = JSON.stringify(data);
+                    localStorage.setItem(key, dataString);
+                    return true;
+                } catch (error) {
+                    console.error('Storage failed:', error);
+                    NotificationSystem.error('Storage failed. Data not saved.');
+                    return false;
+                }
+            }
+            
+            static load(key) {
+                try {
+                    const data = localStorage.getItem(key);
+                    return data ? JSON.parse(data) : null;
+                } catch (error) {
+                    console.error('Data loading failed:', error);
+                    return null;
+                }
+            }
         }
 
         // AccuraAI Implementation
@@ -1034,6 +774,151 @@
             }
         };
 
+        // AccuraBot Implementation
+        const AccuraBot = {
+            analyzeApp(state) {
+                return {
+                    overview: this.getAppOverview(state),
+                    alerts: this.getAlerts(state),
+                    recommendations: this.getRecommendations(state),
+                    quickActions: this.getQuickActions(state)
+                };
+            },
+
+            getAppOverview(state) {
+                const totalRevenue = state.sales.reduce((sum, sale) => sum + sale.total, 0);
+                const totalExpenses = state.expenses.reduce((sum, expense) => sum + expense.amount, 0);
+                const lowStockCount = state.products.filter(p => p.stock <= state.lowStockThreshold).length;
+                const unreadMessages = state.messages.filter(m => m.to === state.currentUser.id && !m.read).length;
+
+                return {
+                    revenue: totalRevenue,
+                    expenses: totalExpenses,
+                    netProfit: totalRevenue - totalExpenses,
+                    products: state.products.length,
+                    customers: state.customers.length,
+                    employees: state.users.length,
+                    lowStock: lowStockCount,
+                    unreadMessages: unreadMessages,
+                    healthScore: this.calculateHealthScore(state)
+                };
+            },
+
+            calculateHealthScore(state) {
+                let score = 0;
+                
+                const revenue = state.sales.reduce((sum, sale) => sum + sale.total, 0);
+                const expenses = state.expenses.reduce((sum, expense) => sum + expense.amount, 0);
+                const netProfit = revenue - expenses;
+                
+                if (netProfit > 50000) score += 30;
+                else if (netProfit > 10000) score += 25;
+                else if (netProfit > 0) score += 15;
+                else score += 5;
+
+                const lowStockProducts = state.products.filter(p => p.stock <= state.lowStockThreshold).length;
+                const stockRatio = state.products.length > 0 ? lowStockProducts / state.products.length : 0;
+                if (stockRatio === 0) score += 25;
+                else if (stockRatio < 0.1) score += 20;
+                else if (stockRatio < 0.25) score += 15;
+                else score += 5;
+
+                if (state.customers.length > 100) score += 20;
+                else if (state.customers.length > 50) score += 15;
+                else if (state.customers.length > 20) score += 10;
+                else score += 5;
+
+                if (state.products.length > 0 && state.customers.length > 0 && state.sales.length > 0) score += 25;
+                else score += 10;
+
+                return Math.min(score, 100);
+            },
+
+            getAlerts(state) {
+                const alerts = [];
+
+                const lowStockProducts = state.products.filter(p => p.stock <= state.lowStockThreshold);
+                if (lowStockProducts.length > 0) {
+                    alerts.push({
+                        type: 'urgent',
+                        icon: '🚨',
+                        title: 'Critical Stock Alert',
+                        message: `${lowStockProducts.length} products critically low on stock`,
+                        action: 'products'
+                    });
+                }
+
+                const unreadMessages = state.messages.filter(m => m.to === state.currentUser.id && !m.read);
+                if (unreadMessages.length > 5) {
+                    alerts.push({
+                        type: 'info',
+                        icon: '📧',
+                        title: 'Unread Messages',
+                        message: `${unreadMessages.length} unread messages require attention`,
+                        action: 'inbox'
+                    });
+                }
+
+                return alerts;
+            },
+
+            getRecommendations(state) {
+                const recommendations = [];
+                const totalRevenue = state.sales.reduce((sum, sale) => sum + sale.total, 0);
+                const avgSale = totalRevenue / state.sales.length || 0;
+
+                if (avgSale < 100 && state.sales.length > 10) {
+                    recommendations.push({
+                        type: 'growth',
+                        icon: '📈',
+                        title: 'Boost Average Sale Value',
+                        message: `Current average sale shows growth potential`,
+                        tip: 'Implement cross-selling and upselling strategies to increase transaction values'
+                    });
+                }
+
+                if (state.customers.length < 10) {
+                    recommendations.push({
+                        type: 'expansion',
+                        icon: '👥',
+                        title: 'Expand Customer Base',
+                        message: 'Growing your customer base will drive sustainable revenue growth',
+                        tip: 'Focus on marketing and customer acquisition strategies'
+                    });
+                }
+
+                return recommendations;
+            },
+
+            getQuickActions(state) {
+                const actions = [];
+
+                if (state.currentUser.role === 'admin') {
+                    actions.push(
+                        { id: 'add-employee', icon: 'fas fa-user-plus', label: 'Add Employee', color: 'blue' },
+                        { id: 'view-reports', icon: 'fas fa-chart-bar', label: 'View Reports', color: 'purple' },
+                        { id: 'settings', icon: 'fas fa-cog', label: 'Settings', color: 'gray' }
+                    );
+                }
+
+                if (['admin', 'manager'].includes(state.currentUser.role)) {
+                    actions.push(
+                        { id: 'add-product', icon: 'fas fa-box', label: 'Add Product', color: 'green' },
+                        { id: 'view-employees', icon: 'fas fa-users', label: 'View Team', color: 'blue' }
+                    );
+                }
+
+                actions.push(
+                    { id: 'add-sale', icon: 'fas fa-shopping-cart', label: 'Record Sale', color: 'green' },
+                    { id: 'add-expense', icon: 'fas fa-receipt', label: 'Add Expense', color: 'yellow' },
+                    { id: 'add-customer', icon: 'fas fa-handshake', label: 'Add Customer', color: 'blue' },
+                    { id: 'view-products', icon: 'fas fa-inventory', label: 'View Inventory', color: 'gray' }
+                );
+
+                return actions;
+            }
+        };
+
         // Main Application
         const app = {
             state: {
@@ -1070,68 +955,27 @@
                 expenseCategories: ['Office Supplies', 'Marketing', 'Utilities', 'Rent', 'Transportation', 'Meals & Entertainment', 'Equipment', 'Professional Services', 'Other'],
                 charts: {},
                 aiInsights: [],
-                lastAIUpdate: null,
-                quickSale: {
-                    step: 1,
-                    selectedProduct: null,
-                    selectedCustomer: null,
-                    quantity: 1,
-                    discount: 0
-                }
+            botAnalysis: {},
+                lastAIUpdate: null
             },
 
-            storageManager: new AdvancedStorageManager(),
-
-            async init() {
-                try {
-                    // Initialize advanced storage
-                    const storageType = await this.storageManager.init();
-                    console.log(`🚀 Ledgerly initialized with ${storageType} storage`);
-                    
-                    // Show storage info
-                    const storageInfo = await this.storageManager.getStorageInfo();
-                    console.log('Storage Info:', storageInfo);
-                    
-                    // Load existing data
-                    await this.loadData();
-                    
-                    NotificationSystem.success(`🎉 Ledgerly loaded with ${storageType} storage!`);
-                } catch (error) {
-                    console.error('Storage initialization failed:', error);
-                    NotificationSystem.error('❌ Storage initialization failed. Some features may be limited.');
-                }
-                
+            init() {
+                this.loadData();
                 this.render();
                 this.bindEvents();
                 this.updateAIInsights();
+                this.updateBotAnalysis();
             },
 
-            async loadData() {
-                try {
-                    const data = await this.storageManager.load();
-                    if (data) {
-                        this.state = { ...this.state, ...data };
-                        console.log('✅ Business data loaded successfully');
-                    }
-                } catch (error) {
-                    console.error('❌ Data loading failed:', error);
+            loadData() {
+                const saved = DataStorage.load('ledgerlyData');
+                if (saved) {
+                    this.state = { ...this.state, ...saved };
                 }
             },
 
-            async saveData() {
-                try {
-                    await this.storageManager.save(this.state);
-                    return true;
-                } catch (error) {
-                    console.error('❌ Save failed:', error);
-                    NotificationSystem.error('❌ Failed to save data. Please try again.');
-                    return false;
-                }
-            },
-
-            // Auto-save with throttling
-            autoSave() {
-                this.storageManager.saveThrottled(this.state, 500);
+            saveData() {
+                return DataStorage.save('ledgerlyData', this.state);
             },
 
             toggleMobileSidebar() {
@@ -1166,7 +1010,14 @@
                         this.state.expenses
                     );
                     this.state.lastAIUpdate = new Date().toISOString();
-                    this.autoSave();
+                    this.saveData();
+                }
+            },
+
+            updateBotAnalysis() {
+                if (this.state.currentUser) {
+                    this.state.botAnalysis = AccuraBot.analyzeApp(this.state);
+                    this.saveData();
                 }
             },
 
@@ -1190,11 +1041,6 @@
                     if (window.innerWidth >= 1024 && this.state.mobileMenuOpen) {
                         this.closeMobileSidebar();
                     }
-                });
-
-                // Auto-save on page unload
-                window.addEventListener('beforeunload', () => {
-                    this.storageManager.save(this.state);
                 });
             },
 
@@ -1224,7 +1070,6 @@
                     'add-customer': () => this.showModal('add-customer'),
                     'edit-customer': () => this.showModal('edit-customer', id),
                     'delete-customer': () => this.deleteCustomer(id),
-                    'quick-sale': () => this.showModal('quick-sale'),
                     'add-sale': () => this.showModal('add-sale'),
                     'add-expense': () => this.showModal('add-expense'),
                     'edit-expense': () => this.showModal('edit-expense', id),
@@ -1239,11 +1084,8 @@
                     'compose-message': () => this.showModal('compose-message'),
                     'mark-read': () => this.markMessageRead(id),
                     'refresh-ai': () => { this.updateAIInsights(); this.render(); },
-                    'select-product': () => this.selectProductForSale(id),
-                    'select-customer': () => this.selectCustomerForSale(id),
-                    'next-step': () => this.nextSalesStep(),
-                    'prev-step': () => this.prevSalesStep(),
-                    'complete-sale': () => this.completeSale()
+                    'refresh-bot': () => { this.updateBotAnalysis(); this.render(); },
+                    'bot-quick-action': () => this.handleBotQuickAction(id)
                 };
 
                 if (actions[action]) {
@@ -1260,7 +1102,7 @@
 
             toggleAIMode() {
                 this.state.aiMode = this.state.aiMode === 'ai' ? 'bot' : 'ai';
-                this.autoSave();
+                this.saveData();
                 this.render();
                 NotificationSystem.success(`Switched to Accura${this.state.aiMode === 'ai' ? 'AI' : 'Bot'} mode`);
             },
@@ -1268,7 +1110,7 @@
             changeCountry(countryCode) {
                 if (['admin', 'manager'].includes(this.state.currentUser.role)) {
                     this.state.selectedCountry = countryCode;
-                    this.autoSave();
+                    this.saveData();
                     this.render();
                     NotificationSystem.success(`Currency changed to ${GCC_COUNTRIES[countryCode].currency}`);
                 }
@@ -1280,7 +1122,8 @@
                     this.state.currentUser = user;
                     this.setView('dashboard');
                     this.updateAIInsights();
-                    this.autoSave();
+                    this.updateBotAnalysis();
+                    this.saveData();
                     NotificationSystem.success(`Welcome back, ${user.name}! 🎉`);
                 }
             },
@@ -1381,8 +1224,9 @@
                 }
 
                 this.closeModal();
-                this.autoSave();
+                this.saveData();
                 this.updateAIInsights();
+                this.updateBotAnalysis();
                 this.render();
             },
 
@@ -1410,8 +1254,9 @@
                 }
 
                 this.closeModal();
-                this.autoSave();
+                this.saveData();
                 this.updateAIInsights();
+                this.updateBotAnalysis();
                 this.render();
             },
 
@@ -1462,11 +1307,12 @@
 
                 this.state.sales.push(sale);
                 this.closeModal();
-                this.autoSave();
+                this.saveData();
                 this.updateAIInsights();
+                this.updateBotAnalysis();
                 this.render();
                 
-                NotificationSystem.success(`🎉 Sale completed! Total: ${this.formatCurrency(sale.total)} | Commission: ${this.formatCurrency(commission)}`);
+                NotificationSystem.success(`🎉 Sale recorded! Total: ${this.formatCurrency(sale.total)} | Commission: ${this.formatCurrency(commission)}`);
             },
 
             handleExpenseForm(data) {
@@ -1491,8 +1337,9 @@
                 }
 
                 this.closeModal();
-                this.autoSave();
+                this.saveData();
                 this.updateAIInsights();
+                this.updateBotAnalysis();
                 this.render();
             },
 
@@ -1521,8 +1368,9 @@
                 }
 
                 this.closeModal();
-                this.autoSave();
+                this.saveData();
                 this.updateAIInsights();
+                this.updateBotAnalysis();
                 this.render();
             },
 
@@ -1541,7 +1389,8 @@
 
                 this.state.messages.push(message);
                 this.closeModal();
-                this.autoSave();
+                this.saveData();
+                this.updateBotAnalysis();
                 this.render();
                 NotificationSystem.success('📧 Message sent with AI analysis!');
             },
@@ -1550,7 +1399,7 @@
                 this.state.companyName = data.companyName || 'Your Company';
                 this.state.lowStockThreshold = parseInt(data.lowStockThreshold) || 10;
                 
-                this.autoSave();
+                this.saveData();
                 this.render();
                 NotificationSystem.success('⚙️ Company settings updated successfully!');
             },
@@ -1572,95 +1421,6 @@
                 return this.state.messages.filter(m => m.to === this.state.currentUser.id && !m.read).length;
             },
 
-            // Enhanced Sales Workflow Methods
-            selectProductForSale(productId) {
-                this.state.quickSale.selectedProduct = this.state.products.find(p => p.id === parseInt(productId));
-                this.state.quickSale.step = 2;
-                this.renderQuickSaleModal();
-            },
-
-            selectCustomerForSale(customerId) {
-                this.state.quickSale.selectedCustomer = this.state.customers.find(c => c.id === parseInt(customerId));
-                this.state.quickSale.step = 3;
-                this.renderQuickSaleModal();
-            },
-
-            nextSalesStep() {
-                this.state.quickSale.step++;
-                this.renderQuickSaleModal();
-            },
-
-            prevSalesStep() {
-                this.state.quickSale.step--;
-                this.renderQuickSaleModal();
-            },
-
-            completeSale() {
-                const { selectedProduct, selectedCustomer, quantity, discount } = this.state.quickSale;
-                
-                if (!selectedProduct || !selectedCustomer) {
-                    NotificationSystem.error('Please select both product and customer');
-                    return;
-                }
-
-                const sale = {
-                    id: Date.now(),
-                    customerId: selectedCustomer.id,
-                    productId: selectedProduct.id,
-                    quantity: quantity,
-                    unitPrice: selectedProduct.price,
-                    discount: discount,
-                    subtotal: (selectedProduct.price * quantity) - discount,
-                    taxRate: this.getTaxInfo().rate,
-                    taxAmount: 0,
-                    total: 0,
-                    date: new Date().toISOString().split('T')[0],
-                    salesPersonId: this.state.currentUser.id,
-                    status: 'completed',
-                    country: this.state.selectedCountry,
-                    currency: GCC_COUNTRIES[this.state.selectedCountry].currency
-                };
-
-                // Calculate tax and total
-                sale.taxAmount = sale.subtotal * sale.taxRate;
-                sale.total = sale.subtotal + sale.taxAmount;
-
-                // Update product stock
-                selectedProduct.stock -= quantity;
-
-                // Update customer balance
-                selectedCustomer.balance += sale.total;
-
-                // Calculate commission
-                const profit = (sale.unitPrice - selectedProduct.cost) * sale.quantity;
-                const commission = profit * 0.1;
-                
-                const userIndex = this.state.users.findIndex(u => u.id === this.state.currentUser.id);
-                if (userIndex !== -1) {
-                    this.state.users[userIndex].commission = (this.state.users[userIndex].commission || 0) + commission;
-                    this.state.currentUser.commission = this.state.users[userIndex].commission;
-                }
-
-                // Add sale to state
-                this.state.sales.push(sale);
-
-                // Reset quick sale state
-                this.state.quickSale = {
-                    step: 1,
-                    selectedProduct: null,
-                    selectedCustomer: null,
-                    quantity: 1,
-                    discount: 0
-                };
-
-                this.closeModal();
-                this.autoSave();
-                this.updateAIInsights();
-                this.render();
-                
-                NotificationSystem.success(`🎉 Sale completed! Total: ${this.formatCurrency(sale.total)} | Commission: ${this.formatCurrency(commission)}`);
-            },
-
             // Modal functions
             showModal(type, id = null) {
                 const modal = this.getModal(type, id);
@@ -1668,18 +1428,6 @@
                 
                 if (id && type.includes('edit')) {
                     this.prefillEditForm(type, parseInt(id));
-                }
-
-                // Initialize quick sale modal if needed
-                if (type === 'quick-sale') {
-                    this.state.quickSale = {
-                        step: 1,
-                        selectedProduct: null,
-                        selectedCustomer: null,
-                        quantity: 1,
-                        discount: 0
-                    };
-                    this.renderQuickSaleModal();
                 }
             },
 
@@ -1720,8 +1468,9 @@
             deleteProduct(id) {
                 if (confirm('Are you sure you want to delete this product?')) {
                     this.state.products = this.state.products.filter(p => p.id !== parseInt(id));
-                    this.autoSave();
+                    this.saveData();
                     this.updateAIInsights();
+                    this.updateBotAnalysis();
                     this.render();
                     NotificationSystem.success('🗑️ Product deleted successfully!');
                 }
@@ -1730,8 +1479,9 @@
             deleteCustomer(id) {
                 if (confirm('Are you sure you want to delete this customer?')) {
                     this.state.customers = this.state.customers.filter(c => c.id !== parseInt(id));
-                    this.autoSave();
+                    this.saveData();
                     this.updateAIInsights();
+                    this.updateBotAnalysis();
                     this.render();
                     NotificationSystem.success('🗑️ Customer deleted successfully!');
                 }
@@ -1740,8 +1490,9 @@
             deleteExpense(id) {
                 if (confirm('Are you sure you want to delete this expense?')) {
                     this.state.expenses = this.state.expenses.filter(e => e.id !== parseInt(id));
-                    this.autoSave();
+                    this.saveData();
                     this.updateAIInsights();
+                    this.updateBotAnalysis();
                     this.render();
                     NotificationSystem.success('🗑️ Expense deleted successfully!');
                 }
@@ -1750,8 +1501,9 @@
             deleteUser(id) {
                 if (confirm('Are you sure you want to delete this employee?')) {
                     this.state.users = this.state.users.filter(u => u.id !== parseInt(id));
-                    this.autoSave();
+                    this.saveData();
                     this.updateAIInsights();
+                    this.updateBotAnalysis();
                     this.render();
                     NotificationSystem.success('🗑️ Employee deleted successfully!');
                 }
@@ -1796,46 +1548,47 @@
 
                 this.state.invoices = this.state.invoices || [];
                 this.state.invoices.push(invoice);
-                this.autoSave();
+                this.saveData();
                 this.render();
                 NotificationSystem.success('📄 Professional invoice generated successfully!');
             },
 
-            async exportData() {
-                try {
-                    const storageInfo = await this.storageManager.getStorageInfo();
-                    const exportData = {
-                        ...this.state,
-                        exportInfo: {
-                            timestamp: new Date().toISOString(),
-                            version: '2.0',
-                            storageType: storageInfo.activeStorage,
-                            companyName: this.state.companyName
-                        }
-                    };
-
-                    const dataStr = JSON.stringify(exportData, null, 2);
-                    const dataBlob = new Blob([dataStr], { type: 'application/json' });
-                    const url = URL.createObjectURL(dataBlob);
-                    const link = document.createElement('a');
-                    link.href = url;
-                    link.download = `${this.state.companyName.replace(/\s+/g, '-').toLowerCase()}-backup-${new Date().toISOString().split('T')[0]}.json`;
-                    link.click();
-                    URL.revokeObjectURL(url);
-                    
-                    NotificationSystem.success('📤 Business data exported successfully!');
-                } catch (error) {
-                    console.error('Export failed:', error);
-                    NotificationSystem.error('❌ Export failed. Please try again.');
-                }
+            exportData() {
+                const dataStr = JSON.stringify(this.state, null, 2);
+                const dataBlob = new Blob([dataStr], { type: 'application/json' });
+                const url = URL.createObjectURL(dataBlob);
+                const link = document.createElement('a');
+                link.href = url;
+                link.download = `${this.state.companyName.replace(/\s+/g, '-').toLowerCase()}-data.json`;
+                link.click();
+                URL.revokeObjectURL(url);
+                NotificationSystem.success('📤 Business data exported successfully!');
             },
 
             markMessageRead(id) {
                 const message = this.state.messages.find(m => m.id === parseInt(id));
                 if (message) {
                     message.read = true;
-                    this.autoSave();
+                    this.saveData();
                     this.render();
+                }
+            },
+
+            handleBotQuickAction(actionId) {
+                const quickActions = {
+                    'add-employee': () => this.showModal('add-employee'),
+                    'view-reports': () => this.navigateToView('reports'),
+                    'settings': () => this.navigateToView('settings'),
+                    'add-product': () => this.showModal('add-product'),
+                    'view-employees': () => this.navigateToView('employees'),
+                    'add-sale': () => this.showModal('add-sale'),
+                    'add-expense': () => this.showModal('add-expense'),
+                    'add-customer': () => this.showModal('add-customer'),
+                    'view-products': () => this.navigateToView('products')
+                };
+
+                if (quickActions[actionId]) {
+                    quickActions[actionId]();
                 }
             },
 
@@ -1922,80 +1675,46 @@
                     const { jsPDF } = window.jspdf;
                     const doc = new jsPDF();
 
-                    // Clean and professional invoice design
-                    doc.setFontSize(24);
+                    doc.setFontSize(20);
                     doc.setTextColor(0, 212, 170);
                     doc.text(invoice.companyName, 20, 30);
                     
-                    doc.setFontSize(18);
+                    doc.setFontSize(16);
                     doc.setTextColor(0, 0, 0);
                     doc.text('INVOICE', 150, 30);
                     
                     doc.setFontSize(12);
-                    doc.text(`Invoice Number: ${invoice.invoiceNumber}`, 150, 40);
+                    doc.text(`Invoice #: ${invoice.invoiceNumber}`, 150, 40);
                     doc.text(`Date: ${invoice.date}`, 150, 50);
-                    doc.text(`Due Date: ${invoice.dueDate}`, 150, 60);
 
-                    // Customer information
                     doc.setFontSize(14);
-                    doc.text('Bill To:', 20, 80);
+                    doc.text('Bill To:', 20, 70);
                     doc.setFontSize(12);
-                    doc.text(invoice.customer.name, 20, 90);
-                    doc.text(invoice.customer.address, 20, 100);
-                    doc.text(`Email: ${invoice.customer.email}`, 20, 110);
-                    doc.text(`Phone: ${invoice.customer.phone}`, 20, 120);
+                    doc.text(invoice.customer.name, 20, 80);
+                    doc.text(invoice.customer.address, 20, 90);
 
-                    // Items table
-                    let y = 150;
-                    doc.setFontSize(14);
+                    let y = 120;
                     doc.text('Items:', 20, y);
-                    y += 15;
+                    y += 10;
                     
-                    // Table header
-                    doc.setFontSize(10);
-                    doc.text('Product', 20, y);
-                    doc.text('Qty', 100, y);
-                    doc.text('Unit Price', 130, y);
-                    doc.text('Total', 170, y);
-                    
-                    doc.line(20, y + 5, 190, y + 5);
-                    y += 15;
-                    
-                    // Items
                     invoice.items.forEach(item => {
-                        doc.text(item.name, 20, y);
-                        doc.text(item.quantity.toString(), 100, y);
-                        doc.text(`${invoice.currencySymbol} ${item.unitPrice.toFixed(2)}`, 130, y);
-                        doc.text(`${invoice.currencySymbol} ${item.subtotal.toFixed(2)}`, 170, y);
+                        doc.text(`${item.name} - Qty: ${item.quantity} - ${invoice.currencySymbol} ${item.subtotal.toFixed(2)}`, 20, y);
                         y += 10;
                     });
 
-                    // Totals
                     y += 10;
-                    doc.line(130, y, 190, y);
+                    doc.text(`Subtotal: ${invoice.currencySymbol} ${invoice.subtotal.toFixed(2)}`, 120, y);
                     y += 10;
-                    
-                    doc.text(`Subtotal: ${invoice.currencySymbol} ${invoice.subtotal.toFixed(2)}`, 130, y);
-                    y += 10;
-                    
                     if (invoice.taxAmount > 0) {
-                        doc.text(`${invoice.taxName}: ${invoice.currencySymbol} ${invoice.taxAmount.toFixed(2)}`, 130, y);
+                        doc.text(`${invoice.taxName}: ${invoice.currencySymbol} ${invoice.taxAmount.toFixed(2)}`, 120, y);
                         y += 10;
                     }
-                    
-                    doc.setFontSize(12);
-                    doc.text(`TOTAL: ${invoice.currencySymbol} ${invoice.total.toFixed(2)}`, 130, y);
+                    doc.setFontSize(14);
+                    doc.text(`TOTAL: ${invoice.currencySymbol} ${invoice.total.toFixed(2)}`, 120, y);
 
-                    // Footer
-                    doc.setFontSize(10);
-                    doc.text(`Generated by Ledgerly Sales - ${new Date().toLocaleString()}`, 20, 280);
-
-                    const filename = `${invoice.companyName.replace(/\s+/g, '-')}-${invoice.invoiceNumber}.pdf`;
-                    doc.save(filename);
-                    
+                    doc.save(`${invoice.companyName.replace(/\s+/g, '-')}-${invoice.invoiceNumber}.pdf`);
                     NotificationSystem.success('📥 Invoice downloaded successfully!');
                 } catch (error) {
-                    console.error('PDF generation failed:', error);
                     NotificationSystem.error('❌ Error generating PDF. Please try again.');
                 }
             },
@@ -2047,15 +1766,15 @@
                                         <i class="fas fa-chart-line text-white text-3xl"></i>
                                     </div>
                                 </div>
-                                <h1 class="text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-teal-400 to-blue-500 mb-2">Ledgerly</h1>
+                                <h1 class="text-4xl font-bold gradient-text mb-2">Ledgerly</h1>
                                 <p class="text-xl font-semibold text-gray-300 mb-1">Sales</p>
-                                <p class="text-gray-400 mb-2">Advanced Business Management</p>
+                                <p class="text-gray-400 mb-2">AI-Powered Business Management</p>
                                 <div class="flex items-center justify-center space-x-2 text-sm">
                                     <span class="text-purple-400">✨ AccuraAI</span>
                                     <span class="text-gray-500">•</span>
-                                    <span class="text-blue-400">💾 Advanced Storage</span>
+                                    <span class="text-green-400">🤖 AccuraBot</span>
                                     <span class="text-gray-500">•</span>
-                                    <span class="text-green-400">⚡ Ultra Fast</span>
+                                    <span class="text-yellow-400">💰 GCC Support</span>
                                 </div>
                             </div>
                             
@@ -2066,7 +1785,7 @@
                                     <p class="text-gray-400 text-sm mb-3">Complete system control with AI insights</p>
                                     <div class="flex justify-center space-x-2">
                                         <span class="px-2 py-1 bg-red-500/20 text-red-400 rounded-full text-xs">Full Access</span>
-                                        <span class="px-2 py-1 bg-blue-500/20 text-blue-400 rounded-full text-xs">Advanced Storage</span>
+                                        <span class="px-2 py-1 bg-yellow-500/20 text-yellow-400 rounded-full text-xs">GCC Currency</span>
                                     </div>
                                 </div>
                                 
@@ -2092,7 +1811,7 @@
                             </div>
                             
                             <div class="mt-6 text-center text-xs text-gray-500">
-                                Advanced storage eliminates data limitations
+                                Experience the future of business management
                             </div>
                         </div>
                     </div>
@@ -2101,7 +1820,7 @@
 
             getNavbar() {
                 const unreadCount = this.getUnreadMessageCount();
-                const aiButtonClass = this.state.aiMode === 'ai' ? 'ai-button' : 'bot-button';
+                const aiButtonClass = this.state.aiMode === 'ai' ? 'ai-button ai-pulse' : 'bot-button bot-pulse';
                 const aiIcon = this.state.aiMode === 'ai' ? 'fas fa-brain' : 'fas fa-robot';
                 const aiText = this.state.aiMode === 'ai' ? 'AccuraAI' : 'AccuraBot';
                 const countryInfo = GCC_COUNTRIES[this.state.selectedCountry];
@@ -2120,7 +1839,7 @@
                                             <i class="fas fa-chart-line text-white text-lg"></i>
                                         </div>
                                         <div class="hidden sm:block">
-                                            <h1 class="text-xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-teal-400 to-blue-500 leading-tight">Ledgerly</h1>
+                                            <h1 class="text-xl font-bold gradient-text leading-tight">Ledgerly</h1>
                                             <p class="text-xs text-gray-400 leading-none">Sales</p>
                                         </div>
                                     </div>
@@ -2148,10 +1867,6 @@
                             </div>
                             
                             <div class="flex items-center space-x-2">
-                                <button data-action="quick-sale" class="quick-sale-button px-6 py-3 rounded-2xl text-white font-bold text-sm">
-                                    <i class="fas fa-zap mr-2"></i>Quick Sale
-                                </button>
-                                
                                 <button data-action="ai-assistant" class="${aiButtonClass} px-3 py-2 rounded-lg text-sm font-medium" title="${aiText}">
                                     <i class="${aiIcon} text-lg"></i>
                                     <span class="hidden sm:inline ml-2">${aiText}</span>
@@ -2205,7 +1920,7 @@
                                     <i class="fas fa-chart-line text-white text-xl"></i>
                                 </div>
                                 <div>
-                                    <h1 class="text-xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-teal-400 to-blue-500">Ledgerly</h1>
+                                    <h1 class="text-xl font-bold gradient-text">Ledgerly</h1>
                                     <p class="text-sm text-gray-400">Sales</p>
                                 </div>
                             </div>
@@ -2215,7 +1930,7 @@
                             ${visibleItems.map(item => `
                                 <li>
                                     <button data-action="${item.key}" 
-                                            class="menu-item ${this.state.currentView === item.key ? 'active' : ''}">
+                                            class="menu-item ${this.state.currentView === item.key ? 'active' : ''} ${item.key === 'ai-assistant' && this.state.aiMode === 'ai' ? 'ai-pulse' : item.key === 'ai-assistant' && this.state.aiMode === 'bot' ? 'bot-pulse' : ''}">
                                         <i class="${item.icon}"></i>
                                         <span class="font-medium">${item.label}</span>
                                         ${item.key === 'inbox' && unreadCount > 0 ? `<span class="ml-auto bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">${unreadCount}</span>` : ''}
@@ -2228,9 +1943,9 @@
                         <div class="mt-8 p-4 bg-gradient-to-r from-gray-800/50 to-gray-700/50 rounded-xl border border-gray-600/50">
                             <div class="text-center">
                                 <h4 class="text-lg font-bold bg-gradient-to-r from-yellow-500 to-orange-500 bg-clip-text text-transparent mb-1">${this.state.companyName}</h4>
-                                <p class="text-gray-400 text-xs mb-2">Advanced Business Management</p>
-                                <div class="text-xs text-blue-400">
-                                    💾 ${this.storageManager.activeStorage || 'Advanced'} Storage Active
+                                <p class="text-gray-400 text-xs">Powered by AccuraAI</p>
+                                <div class="mt-2 text-xs text-gray-500">
+                                    ${GCC_COUNTRIES[this.state.selectedCountry].currency} • ${GCC_COUNTRIES[this.state.selectedCountry].name.split(' ')[0]}
                                 </div>
                             </div>
                         </div>
@@ -2267,7 +1982,7 @@
                         <div class="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4">
                             <div>
                                 <h2 class="text-2xl lg:text-3xl font-bold text-white mb-2">AI-Powered Dashboard</h2>
-                                <p class="text-gray-400">Welcome back, ${currentUser.name}! 🚀 Advanced storage active with unlimited capacity</p>
+                                <p class="text-gray-400">Welcome back, ${currentUser.name}!</p>
                             </div>
                             <div class="flex items-center space-x-3">
                                 ${['admin', 'manager'].includes(this.state.currentUser.role) ? this.getCountrySelector() : ''}
@@ -2282,7 +1997,7 @@
                                 <div class="flex items-center justify-between mb-4">
                                     <h3 class="text-xl font-bold text-white flex items-center">
                                         <i class="fas fa-coins text-teal-400 mr-2"></i>
-                                        Live Earnings Tracker
+                                        Live Earnings
                                     </h3>
                                     <div class="flex items-center space-x-2">
                                         <div class="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
@@ -2372,7 +2087,7 @@
                         </div>
 
                         ${this.state.aiInsights.length > 0 ? `
-                            <div class="${this.state.aiMode === 'ai' ? 'ai-card' : 'bot-card'} p-6">
+                            <div class="${this.state.aiMode === 'ai' ? 'ai-card' : 'bot-card'} p-6 slide-up">
                                 <div class="flex items-center justify-between mb-6">
                                     <h3 class="text-xl font-bold text-white flex items-center">
                                         <i class="fas ${this.state.aiMode === 'ai' ? 'fa-brain text-purple-400' : 'fa-robot text-green-400'} mr-2"></i>
@@ -2430,10 +2145,10 @@
                                     Quick Actions
                                 </h3>
                                 <div class="grid grid-cols-2 gap-4">
-                                    <button data-action="quick-sale" class="quick-sale-button p-4 rounded-xl text-center hover:scale-105 transition-all duration-300">
-                                        <i class="fas fa-zap text-xl mb-2"></i>
-                                        <div class="font-medium">Quick Sale</div>
-                                        <div class="text-xs opacity-80 mt-1">Lightning Fast</div>
+                                    <button data-action="add-sale" class="perplexity-button p-4 rounded-xl text-center hover:scale-105 transition-all duration-300">
+                                        <i class="fas fa-plus text-xl mb-2"></i>
+                                        <div class="font-medium">New Sale</div>
+                                        <div class="text-xs opacity-80 mt-1">Multi-product</div>
                                     </button>
                                     <button data-action="add-expense" class="expenses-button p-4 rounded-xl text-center hover:scale-105 transition-all duration-300">
                                         <i class="fas fa-receipt text-xl mb-2"></i>
@@ -2490,8 +2205,8 @@
                                     <div class="text-center py-8 text-gray-400">
                                         <i class="fas fa-chart-line text-3xl mb-3 opacity-50"></i>
                                         <p class="mb-2">No recent sales</p>
-                                        <button data-action="quick-sale" class="quick-sale-button px-6 py-3 rounded-xl">
-                                            <i class="fas fa-zap mr-2"></i>Quick Sale
+                                        <button data-action="add-sale" class="perplexity-button px-4 py-2 rounded-xl">
+                                            <i class="fas fa-plus mr-2"></i>Record Sale
                                         </button>
                                     </div>
                                 `}
@@ -2551,6 +2266,14 @@
             },
 
             getAIAssistantView() {
+                if (this.state.aiMode === 'ai') {
+                    return this.getAccuraAIView();
+                } else {
+                    return this.getAccuraBotView();
+                }
+            },
+
+            getAccuraAIView() {
                 const recommendations = AccuraAI.getPerformanceRecommendations(
                     this.state.currentUser.role, 
                     this.state.currentUser.commission || 0, 
@@ -2561,12 +2284,12 @@
                     <div class="space-y-6 fade-in">
                         <div class="flex items-center justify-between">
                             <div class="flex items-center space-x-4">
-                                <div class="w-14 h-14 bg-gradient-to-r from-purple-500 to-pink-500 rounded-2xl flex items-center justify-center">
+                                <div class="w-14 h-14 bg-gradient-to-r from-purple-500 to-pink-500 rounded-2xl flex items-center justify-center ai-pulse">
                                     <i class="fas fa-brain text-white text-2xl"></i>
                                 </div>
                                 <div>
-                                    <h2 class="text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-pink-500">AccuraAI Assistant</h2>
-                                    <p class="text-gray-400">Your intelligent business companion with unlimited storage</p>
+                                    <h2 class="text-2xl font-bold ai-gradient-text">AccuraAI Assistant</h2>
+                                    <p class="text-gray-400">Your intelligent business companion</p>
                                 </div>
                             </div>
                             <div class="flex items-center space-x-4">
@@ -2583,14 +2306,14 @@
                             </div>
                         </div>
 
-                        <div class="perplexity-card p-6 bg-gradient-to-r from-purple-500/10 to-pink-500/10 border border-purple-500/30">
+                        <div class="ai-card p-6">
                             <div class="flex items-start space-x-6">
                                 <div class="w-14 h-14 rounded-full bg-gradient-to-r from-purple-500 to-pink-500 flex items-center justify-center flex-shrink-0">
                                     <i class="fas fa-brain text-white text-xl"></i>
                                 </div>
                                 <div class="flex-1">
                                     <h3 class="text-xl font-bold text-white mb-3">Hello ${this.state.currentUser.name}! 👋</h3>
-                                    <p class="text-gray-300 mb-4 leading-relaxed">I'm AccuraAI, your intelligent business assistant. I analyze your sales data, provide multi-currency insights for GCC markets, and help optimize your business performance with advanced AI analytics. Your data is now stored with unlimited capacity using ${this.storageManager.activeStorage} technology!</p>
+                                    <p class="text-gray-300 mb-4 leading-relaxed">I'm AccuraAI, your intelligent business assistant. I analyze your sales data, provide multi-currency insights for GCC markets, and help optimize your business performance with advanced AI analytics.</p>
                                     <div class="grid grid-cols-2 lg:grid-cols-4 gap-3">
                                         <div class="bg-purple-500/10 border border-purple-500/30 rounded-xl p-3 text-center">
                                             <div class="text-xl mb-1">🧠</div>
@@ -2605,8 +2328,8 @@
                                             <div class="text-purple-400 font-semibold text-sm">Smart Insights</div>
                                         </div>
                                         <div class="bg-purple-500/10 border border-purple-500/30 rounded-xl p-3 text-center">
-                                            <div class="text-xl mb-1">💾</div>
-                                            <div class="text-purple-400 font-semibold text-sm">Unlimited Storage</div>
+                                            <div class="text-xl mb-1">📈</div>
+                                            <div class="text-purple-400 font-semibold text-sm">Growth Tips</div>
                                         </div>
                                     </div>
                                 </div>
@@ -2662,10 +2385,10 @@
                             <div class="perplexity-card p-6 hover:scale-105 transition-all duration-300">
                                 <div class="text-center">
                                     <div class="w-16 h-16 mx-auto mb-4 bg-gradient-to-r from-purple-500/20 to-pink-500/20 rounded-2xl flex items-center justify-center">
-                                        <i class="fas fa-database text-purple-400 text-2xl"></i>
+                                        <i class="fas fa-comments text-purple-400 text-2xl"></i>
                                     </div>
-                                    <h3 class="text-lg font-bold text-white mb-3">Unlimited Storage</h3>
-                                    <p class="text-gray-400 text-sm leading-relaxed">Advanced ${this.storageManager.activeStorage} storage with unlimited capacity, real-time auto-save and data protection.</p>
+                                    <h3 class="text-lg font-bold text-white mb-3">Sentiment Analysis</h3>
+                                    <p class="text-gray-400 text-sm leading-relaxed">AI analysis of team communications with emotional intelligence and behavioral insights.</p>
                                 </div>
                             </div>
                         </div>
@@ -2673,14 +2396,184 @@
                 `;
             },
 
-            // Add all remaining view methods...
+            getAccuraBotView() {
+                const analysis = this.state.botAnalysis;
+                const overview = analysis.overview || {};
+                const alerts = analysis.alerts || [];
+                const recommendations = analysis.recommendations || [];
+                const quickActions = analysis.quickActions || [];
+
+                return `
+                    <div class="space-y-6 fade-in">
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center space-x-4">
+                                <div class="w-14 h-14 bg-gradient-to-r from-green-500 to-emerald-500 rounded-2xl flex items-center justify-center bot-pulse">
+                                    <i class="fas fa-robot text-white text-2xl"></i>
+                                </div>
+                                <div>
+                                    <h2 class="text-2xl font-bold bot-gradient-text">AccuraBot</h2>
+                                    <p class="text-gray-400">Real-time business monitoring</p>
+                                </div>
+                            </div>
+                            <div class="flex items-center space-x-4">
+                                <div class="flex items-center space-x-2">
+                                    <span class="text-sm text-gray-400">AI</span>
+                                    <div class="toggle-switch ${this.state.aiMode === 'bot' ? 'active' : ''}" data-action="toggle-ai-mode">
+                                        <div class="toggle-knob"></div>
+                                    </div>
+                                    <span class="text-sm text-gray-400">Bot</span>
+                                </div>
+                                <button data-action="refresh-bot" class="bot-button px-4 py-2 rounded-xl">
+                                    <i class="fas fa-sync-alt mr-2"></i>Refresh
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="bot-card p-6">
+                            <div class="flex items-start space-x-6">
+                                <div class="w-14 h-14 rounded-full bg-gradient-to-r from-green-500 to-emerald-500 flex items-center justify-center flex-shrink-0">
+                                    <i class="fas fa-robot text-white text-xl"></i>
+                                </div>
+                                <div class="flex-1">
+                                    <h3 class="text-xl font-bold text-white mb-3">AccuraBot Monitoring Active! 🤖</h3>
+                                    <p class="text-gray-300 mb-4 leading-relaxed">I'm continuously monitoring your Ledgerly Sales application, tracking GCC currency fluctuations, analyzing sales performance, and providing real-time actionable business intelligence.</p>
+                                    <div class="grid grid-cols-2 lg:grid-cols-4 gap-3">
+                                        <div class="bg-green-500/10 border border-green-500/30 rounded-xl p-3 text-center">
+                                            <div class="text-xl mb-1">💱</div>
+                                            <div class="text-green-400 font-semibold text-sm">Currency Monitor</div>
+                                        </div>
+                                        <div class="bg-green-500/10 border border-green-500/30 rounded-xl p-3 text-center">
+                                            <div class="text-xl mb-1">📦</div>
+                                            <div class="text-green-400 font-semibold text-sm">Inventory</div>
+                                        </div>
+                                        <div class="bg-green-500/10 border border-green-500/30 rounded-xl p-3 text-center">
+                                            <div class="text-xl mb-1">🚨</div>
+                                            <div class="text-green-400 font-semibold text-sm">Smart Alerts</div>
+                                        </div>
+                                        <div class="bg-green-500/10 border border-green-500/30 rounded-xl p-3 text-center">
+                                            <div class="text-xl mb-1">📊</div>
+                                            <div class="text-green-400 font-semibold text-sm">Live Analysis</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="bot-card p-6">
+                            <div class="flex items-center justify-between mb-4">
+                                <h3 class="text-xl font-bold text-white flex items-center">
+                                    <i class="fas fa-heartbeat text-green-400 mr-2"></i>
+                                    Business Health Score
+                                </h3>
+                                <div class="text-right">
+                                    <div class="text-3xl font-bold text-green-400">${overview.healthScore || 0}/100</div>
+                                    <div class="text-sm text-gray-400">Overall Performance</div>
+                                </div>
+                            </div>
+                            <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+                                <div class="text-center p-3 bg-gray-800/50 rounded-xl">
+                                    <div class="text-xl font-bold text-green-400">${this.formatCurrency(overview.revenue || 0, false)}</div>
+                                    <div class="text-xs text-gray-400 mt-1">Revenue</div>
+                                </div>
+                                <div class="text-center p-3 bg-gray-800/50 rounded-xl">
+                                    <div class="text-xl font-bold text-red-400">${this.formatCurrency(overview.expenses || 0, false)}</div>
+                                    <div class="text-xs text-gray-400 mt-1">Expenses</div>
+                                </div>
+                                <div class="text-center p-3 bg-gray-800/50 rounded-xl">
+                                    <div class="text-xl font-bold ${(overview.netProfit || 0) >= 0 ? 'text-blue-400' : 'text-red-400'}">${this.formatCurrency(overview.netProfit || 0, false)}</div>
+                                    <div class="text-xs text-gray-400 mt-1">Net Profit</div>
+                                </div>
+                                <div class="text-center p-3 bg-gray-800/50 rounded-xl">
+                                    <div class="text-xl font-bold text-blue-400">${overview.products || 0}</div>
+                                    <div class="text-xs text-gray-400 mt-1">Products</div>
+                                </div>
+                                <div class="text-center p-3 bg-gray-800/50 rounded-xl">
+                                    <div class="text-xl font-bold text-purple-400">${overview.customers || 0}</div>
+                                    <div class="text-xs text-gray-400 mt-1">Customers</div>
+                                </div>
+                                <div class="text-center p-3 bg-gray-800/50 rounded-xl">
+                                    <div class="text-xl font-bold text-yellow-400">${overview.employees || 0}</div>
+                                    <div class="text-xs text-gray-400 mt-1">Team</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        ${alerts.length > 0 ? `
+                            <div class="perplexity-card p-6">
+                                <h3 class="text-xl font-bold text-white mb-4 flex items-center">
+                                    <i class="fas fa-exclamation-circle text-red-400 mr-2 animate-pulse"></i>
+                                    System Alerts
+                                </h3>
+                                <div class="space-y-3">
+                                    ${alerts.map(alert => `
+                                        <div class="flex items-center justify-between p-4 bg-${alert.type === 'urgent' ? 'red' : alert.type === 'warning' ? 'yellow' : 'blue'}-500/10 border border-${alert.type === 'urgent' ? 'red' : alert.type === 'warning' ? 'yellow' : 'blue'}-500/30 rounded-xl">
+                                            <div class="flex items-center space-x-3">
+                                                <div class="text-2xl">${alert.icon}</div>
+                                                <div>
+                                                    <h4 class="font-bold text-white">${alert.title}</h4>
+                                                    <p class="text-gray-300 text-sm">${alert.message}</p>
+                                                </div>
+                                            </div>
+                                            <button data-action="${alert.action}" class="bot-button px-3 py-1 rounded-lg text-sm">
+                                                <i class="fas fa-arrow-right mr-1"></i>Action
+                                            </button>
+                                        </div>
+                                    `).join('')}
+                                </div>
+                            </div>
+                        ` : ''}
+
+                        <div class="perplexity-card p-6">
+                            <h3 class="text-xl font-bold text-white mb-4 flex items-center">
+                                <i class="fas fa-bolt text-green-400 mr-2"></i>
+                                Bot Quick Actions
+                            </h3>
+                            <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                                ${quickActions.map(action => `
+                                    <button data-action="bot-quick-action" data-id="${action.id}" class="p-4 bg-gray-800/50 hover:bg-gray-700/50 border border-gray-600/50 hover:border-${action.color}-500/50 rounded-xl transition-all duration-300 text-center group">
+                                        <i class="${action.icon} text-${action.color}-400 text-2xl mb-3 group-hover:scale-110 transition-transform"></i>
+                                        <div class="text-white font-medium text-sm">${action.label}</div>
+                                    </button>
+                                `).join('')}
+                            </div>
+                        </div>
+
+                        ${recommendations.length > 0 ? `
+                            <div class="perplexity-card p-6">
+                                <h3 class="text-xl font-bold text-white mb-4 flex items-center">
+                                    <i class="fas fa-lightbulb text-green-400 mr-2"></i>
+                                    Bot Intelligence Recommendations
+                                </h3>
+                                <div class="space-y-4">
+                                    ${recommendations.map(rec => `
+                                        <div class="bg-gradient-to-r from-green-500/15 to-emerald-500/15 border border-green-500/30 rounded-xl p-4">
+                                            <div class="flex items-start space-x-4">
+                                                <div class="text-2xl">${rec.icon}</div>
+                                                <div class="flex-1">
+                                                    <h4 class="font-bold text-white mb-2">${rec.title}</h4>
+                                                    <p class="text-gray-300 mb-3 leading-relaxed">${rec.message}</p>
+                                                    <div class="bg-green-500/10 border-l-4 border-green-500 p-3 rounded-r-xl">
+                                                        <p class="text-green-400 font-medium text-sm">🤖 Bot Insight: ${rec.tip}</p>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    `).join('')}
+                                </div>
+                            </div>
+                        ` : ''}
+                    </div>
+                `;
+            },
+
+            // Add all the missing view methods here
             getProductsView() {
                 return `
                     <div class="space-y-6 fade-in">
                         <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                             <div>
                                 <h2 class="text-2xl font-bold text-white mb-2">Product Management</h2>
-                                <p class="text-gray-400">Manage your inventory with advanced tracking • ${this.storageManager.activeStorage} storage active</p>
+                                <p class="text-gray-400">Manage your inventory with advanced tracking</p>
                             </div>
                             ${this.canManageProducts() ? `
                                 <button data-action="add-product" class="perplexity-button px-4 py-2 rounded-xl font-medium">
@@ -2801,7 +2694,7 @@
                         <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                             <div>
                                 <h2 class="text-2xl font-bold text-white mb-2">Customer Management</h2>
-                                <p class="text-gray-400">Build and maintain strong customer relationships • ${this.storageManager.activeStorage} storage active</p>
+                                <p class="text-gray-400">Build and maintain strong customer relationships</p>
                             </div>
                             <button data-action="add-customer" class="perplexity-button px-4 py-2 rounded-xl font-medium">
                                 <i class="fas fa-plus mr-2"></i>Add Customer
@@ -2924,16 +2817,11 @@
                         <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                             <div>
                                 <h2 class="text-2xl font-bold text-white mb-2">Sales Management</h2>
-                                <p class="text-gray-400">Track and manage all sales with commission tracking • ${this.storageManager.activeStorage} storage active</p>
+                                <p class="text-gray-400">Track and manage all sales with commission tracking</p>
                             </div>
-                            <div class="flex space-x-3">
-                                <button data-action="quick-sale" class="quick-sale-button px-6 py-3 rounded-xl font-bold">
-                                    <i class="fas fa-zap mr-2"></i>Quick Sale
-                                </button>
-                                <button data-action="add-sale" class="perplexity-button px-4 py-2 rounded-xl font-medium">
-                                    <i class="fas fa-plus mr-2"></i>Record Sale
-                                </button>
-                            </div>
+                            <button data-action="add-sale" class="perplexity-button px-4 py-2 rounded-xl font-medium">
+                                <i class="fas fa-plus mr-2"></i>Record Sale
+                            </button>
                         </div>
 
                         <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
@@ -3032,9 +2920,9 @@
                                                     <div class="text-gray-400">
                                                         <i class="fas fa-shopping-cart text-4xl mb-4 opacity-50"></i>
                                                         <p class="text-lg mb-2">No sales recorded yet</p>
-                                                        <p class="text-sm mb-4">Start recording your first sale!</p>
-                                                        <button data-action="quick-sale" class="quick-sale-button px-8 py-4 rounded-xl text-lg">
-                                                            <i class="fas fa-zap mr-2"></i>Quick Sale
+                                                        <p class="text-sm">Start recording your first sale!</p>
+                                                        <button data-action="add-sale" class="perplexity-button px-6 py-3 rounded-xl mt-4">
+                                                            <i class="fas fa-plus mr-2"></i>Record First Sale
                                                         </button>
                                                     </div>
                                                 </td>
@@ -3057,7 +2945,7 @@
                         <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                             <div>
                                 <h2 class="text-2xl font-bold text-white mb-2">Expense Management</h2>
-                                <p class="text-gray-400">Track and analyze your business expenses • ${this.storageManager.activeStorage} storage active</p>
+                                <p class="text-gray-400">Track and analyze your business expenses</p>
                             </div>
                             <button data-action="add-expense" class="expenses-button px-4 py-2 rounded-xl font-medium">
                                 <i class="fas fa-plus mr-2"></i>Add Expense
@@ -3065,7 +2953,7 @@
                         </div>
 
                         <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-                            <div class="perplexity-card p-4 bg-gradient-to-r from-yellow-500/10 to-orange-500/10 border border-yellow-500/30">
+                            <div class="expenses-card p-4">
                                 <div class="flex items-center justify-between">
                                     <div>
                                         <p class="text-gray-400 text-sm mb-1">Total</p>
@@ -3076,7 +2964,7 @@
                                     </div>
                                 </div>
                             </div>
-                            <div class="perplexity-card p-4 bg-gradient-to-r from-orange-500/10 to-red-500/10 border border-orange-500/30">
+                            <div class="expenses-card p-4">
                                 <div class="flex items-center justify-between">
                                     <div>
                                         <p class="text-gray-400 text-sm mb-1">This Month</p>
@@ -3087,7 +2975,7 @@
                                     </div>
                                 </div>
                             </div>
-                            <div class="perplexity-card p-4">
+                            <div class="expenses-card p-4">
                                 <div class="flex items-center justify-between">
                                     <div>
                                         <p class="text-gray-400 text-sm mb-1">Records</p>
@@ -3098,7 +2986,7 @@
                                     </div>
                                 </div>
                             </div>
-                            <div class="perplexity-card p-4">
+                            <div class="expenses-card p-4">
                                 <div class="flex items-center justify-between">
                                     <div>
                                         <p class="text-gray-400 text-sm mb-1">Categories</p>
@@ -3193,7 +3081,7 @@
                         <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                             <div>
                                 <h2 class="text-2xl font-bold text-white mb-2">Employee Management</h2>
-                                <p class="text-gray-400">Manage your team with real-time performance tracking • ${this.storageManager.activeStorage} storage active</p>
+                                <p class="text-gray-400">Manage your team with real-time performance tracking</p>
                             </div>
                             <button data-action="add-employee" class="perplexity-button px-4 py-2 rounded-xl font-medium">
                                 <i class="fas fa-plus mr-2"></i>Add Employee
@@ -3324,7 +3212,7 @@
                         <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                             <div>
                                 <h2 class="text-2xl font-bold text-white mb-2">Professional Invoices</h2>
-                                <p class="text-gray-400">Generate and manage invoices with GCC tax compliance • ${this.storageManager.activeStorage} storage active</p>
+                                <p class="text-gray-400">Generate and manage invoices with GCC tax compliance</p>
                             </div>
                         </div>
 
@@ -3390,7 +3278,7 @@
                                     <table class="w-full">
                                         <thead>
                                             <tr class="border-b border-gray-600">
-                                                <th class="px-6 py-4 text-left text-xs font-medium uppercase tracking-wider text-gray-300">Invoice</th>
+                                                <th class="px-6 py-4 text-left text-xs font-medium uppercase tracking-wider text-gray-300">Invoice #</th>
                                                 <th class="px-6 py-4 text-left text-xs font-medium uppercase tracking-wider text-gray-300">Customer</th>
                                                 <th class="px-6 py-4 text-left text-xs font-medium uppercase tracking-wider text-gray-300">Date</th>
                                                 <th class="px-6 py-4 text-left text-xs font-medium uppercase tracking-wider text-gray-300">Total</th>
@@ -3447,7 +3335,7 @@
                     <div class="space-y-6 fade-in">
                         <div>
                             <h2 class="text-2xl font-bold text-white mb-2">Business Reports</h2>
-                            <p class="text-gray-400">Comprehensive analytics and insights • ${this.storageManager.activeStorage} storage active</p>
+                            <p class="text-gray-400">Comprehensive analytics and insights</p>
                         </div>
 
                         <div class="perplexity-card p-8 text-center">
@@ -3469,7 +3357,7 @@
                     <div class="space-y-6 fade-in">
                         <div>
                             <h2 class="text-2xl font-bold text-white mb-2">Settings</h2>
-                            <p class="text-gray-400">Configure your business preferences • ${this.storageManager.activeStorage} storage active</p>
+                            <p class="text-gray-400">Configure your business preferences</p>
                         </div>
 
                         <div class="perplexity-card p-6">
@@ -3492,21 +3380,12 @@
                         </div>
 
                         <div class="perplexity-card p-6">
-                            <h3 class="text-xl font-bold text-white mb-4">Storage Management</h3>
+                            <h3 class="text-xl font-bold text-white mb-4">Data Management</h3>
                             <div class="space-y-4">
-                                <div class="flex justify-between items-center p-4 bg-green-800/30 border border-green-500/30 rounded-xl">
-                                    <div>
-                                        <h4 class="text-white font-medium">💾 ${this.storageManager.activeStorage} Storage Active</h4>
-                                        <p class="text-gray-400 text-sm">Your data is stored with unlimited capacity and advanced protection</p>
-                                    </div>
-                                    <div class="text-green-400">
-                                        <i class="fas fa-check-circle text-2xl"></i>
-                                    </div>
-                                </div>
                                 <div class="flex justify-between items-center p-4 bg-gray-800/50 rounded-xl">
                                     <div>
                                         <h4 class="text-white font-medium">Export Business Data</h4>
-                                        <p class="text-gray-400 text-sm">Create a comprehensive backup file with all your business data</p>
+                                        <p class="text-gray-400 text-sm">Download all your data as JSON backup</p>
                                     </div>
                                     <button data-action="export-data" class="perplexity-button px-4 py-2 rounded-xl">
                                         <i class="fas fa-download mr-2"></i>Export
@@ -3524,7 +3403,7 @@
                         <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                             <div>
                                 <h2 class="text-2xl font-bold text-white mb-2">Team Inbox</h2>
-                                <p class="text-gray-400">AI-powered communication with sentiment analysis • ${this.storageManager.activeStorage} storage active</p>
+                                <p class="text-gray-400">AI-powered communication with sentiment analysis</p>
                             </div>
                             <button data-action="compose-message" class="perplexity-button px-4 py-2 rounded-xl font-medium">
                                 <i class="fas fa-plus mr-2"></i>Compose Message
@@ -3595,7 +3474,7 @@
                 `;
             },
 
-            // Modal methods
+            // Add modal methods
             getModal(type, id = null) {
                 const modals = {
                     'add-product': this.getProductModal(),
@@ -3603,7 +3482,6 @@
                     'add-customer': this.getCustomerModal(),
                     'edit-customer': this.getCustomerModal(id),
                     'add-sale': this.getSaleModal(),
-                    'quick-sale': this.getQuickSaleModal(),
                     'add-expense': this.getExpenseModal(),
                     'edit-expense': this.getExpenseModal(id),
                     'add-employee': this.getEmployeeModal(),
@@ -3612,282 +3490,6 @@
                 };
 
                 return modals[type] || '';
-            },
-
-            // Enhanced Quick Sale Modal with Wizard
-            getQuickSaleModal() {
-                return `
-                    <div class="modal-overlay">
-                        <div class="modal-content" style="max-width: 800px;">
-                            <div class="flex items-center justify-between mb-6">
-                                <h3 class="text-2xl font-bold text-white flex items-center">
-                                    <i class="fas fa-zap text-green-400 mr-3"></i>
-                                    Quick Sale Wizard
-                                </h3>
-                                <div class="flex items-center space-x-2">
-                                    <span class="text-sm text-gray-400">Step ${this.state.quickSale.step} of 4</span>
-                                    <button data-action="close-modal" class="text-gray-400 hover:text-white">
-                                        <i class="fas fa-times"></i>
-                                    </button>
-                                </div>
-                            </div>
-
-                            <div class="mb-6">
-                                <div class="flex justify-between items-center">
-                                    ${[1, 2, 3, 4].map(step => `
-                                        <div class="flex items-center ${step < 4 ? 'flex-1' : ''}">
-                                            <div class="w-8 h-8 rounded-full flex items-center justify-center ${step <= this.state.quickSale.step ? 'bg-green-500 text-white' : 'bg-gray-600 text-gray-400'}">
-                                                ${step}
-                                            </div>
-                                            ${step < 4 ? `<div class="flex-1 h-1 mx-2 ${step < this.state.quickSale.step ? 'bg-green-500' : 'bg-gray-600'}"></div>` : ''}
-                                        </div>
-                                    `).join('')}
-                                </div>
-                                <div class="flex justify-between text-xs text-gray-400 mt-2">
-                                    <span>Product</span>
-                                    <span>Customer</span>
-                                    <span>Details</span>
-                                    <span>Complete</span>
-                                </div>
-                            </div>
-
-                            <div id="quick-sale-content" class="sales-wizard">
-                                ${this.getQuickSaleStep()}
-                            </div>
-                        </div>
-                    </div>
-                `;
-            },
-
-            getQuickSaleStep() {
-                switch (this.state.quickSale.step) {
-                    case 1:
-                        return `
-                            <div class="sales-step active">
-                                <h4 class="text-lg font-bold text-white mb-4">Select Product</h4>
-                                <div class="product-selector">
-                                    ${this.state.products.map(product => `
-                                        <div class="product-card ${this.state.quickSale.selectedProduct?.id === product.id ? 'selected' : ''}" data-action="select-product" data-id="${product.id}">
-                                            <div class="text-2xl mb-2">📦</div>
-                                            <h5 class="font-bold text-white text-sm mb-1">${product.name}</h5>
-                                            <p class="text-gray-400 text-xs mb-2">${this.formatCurrency(product.price)}</p>
-                                            <p class="text-xs ${product.stock <= this.state.lowStockThreshold ? 'text-red-400' : 'text-green-400'}">${product.stock} in stock</p>
-                                        </div>
-                                    `).join('')}
-                                </div>
-                                ${this.state.quickSale.selectedProduct ? `
-                                    <div class="mt-6 text-center">
-                                        <button data-action="next-step" class="perplexity-button px-8 py-3 rounded-xl">
-                                            Next: Select Customer <i class="fas fa-arrow-right ml-2"></i>
-                                        </button>
-                                    </div>
-                                ` : ''}
-                            </div>
-                        `;
-                    case 2:
-                        return `
-                            <div class="sales-step active">
-                                <h4 class="text-lg font-bold text-white mb-4">Select Customer</h4>
-                                <div class="product-selector">
-                                    ${this.state.customers.map(customer => `
-                                        <div class="product-card ${this.state.quickSale.selectedCustomer?.id === customer.id ? 'selected' : ''}" data-action="select-customer" data-id="${customer.id}">
-                                            <div class="text-2xl mb-2">${customer.type === 'Business' ? '🏢' : '👤'}</div>
-                                            <h5 class="font-bold text-white text-sm mb-1">${customer.name}</h5>
-                                            <p class="text-gray-400 text-xs mb-2">${customer.type}</p>
-                                            <p class="text-xs text-blue-400">Credit: ${this.formatCurrency(customer.creditLimit)}</p>
-                                        </div>
-                                    `).join('')}
-                                </div>
-                                <div class="mt-6 flex justify-between">
-                                    <button data-action="prev-step" class="text-gray-400 hover:text-white px-4 py-2">
-                                        <i class="fas fa-arrow-left mr-2"></i>Back
-                                    </button>
-                                    ${this.state.quickSale.selectedCustomer ? `
-                                        <button data-action="next-step" class="perplexity-button px-8 py-3 rounded-xl">
-                                            Next: Sale Details <i class="fas fa-arrow-right ml-2"></i>
-                                        </button>
-                                    ` : ''}
-                                </div>
-                            </div>
-                        `;
-                    case 3:
-                        const { selectedProduct, selectedCustomer } = this.state.quickSale;
-                        const subtotal = (selectedProduct.price * this.state.quickSale.quantity) - this.state.quickSale.discount;
-                        const taxAmount = subtotal * this.getTaxInfo().rate;
-                        const total = subtotal + taxAmount;
-
-                        return `
-                            <div class="sales-step active">
-                                <h4 class="text-lg font-bold text-white mb-4">Sale Details</h4>
-                                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                    <div class="space-y-4">
-                                        <div>
-                                            <label class="block text-sm font-medium text-gray-300 mb-2">Quantity</label>
-                                            <input type="number" id="sale-quantity" min="1" max="${selectedProduct.stock}" value="${this.state.quickSale.quantity}" 
-                                                   class="form-input w-full" onchange="app.updateQuickSaleDetails('quantity', this.value)">
-                                        </div>
-                                        <div>
-                                            <label class="block text-sm font-medium text-gray-300 mb-2">Discount (${GCC_COUNTRIES[this.state.selectedCountry].currency})</label>
-                                            <input type="number" id="sale-discount" min="0" step="0.01" value="${this.state.quickSale.discount}" 
-                                                   class="form-input w-full" onchange="app.updateQuickSaleDetails('discount', this.value)">
-                                        </div>
-                                        <div class="bg-gray-800/50 rounded-xl p-4">
-                                            <h5 class="text-white font-medium mb-2">Selected Items</h5>
-                                            <div class="flex items-center justify-between mb-2">
-                                                <span class="text-gray-400">Product:</span>
-                                                <span class="text-white font-medium">${selectedProduct.name}</span>
-                                            </div>
-                                            <div class="flex items-center justify-between">
-                                                <span class="text-gray-400">Customer:</span>
-                                                <span class="text-white font-medium">${selectedCustomer.name}</span>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div class="space-y-4">
-                                        <div class="bg-gradient-to-r from-green-500/10 to-blue-500/10 border border-green-500/30 rounded-xl p-6">
-                                            <h5 class="text-white font-medium mb-4">Sale Summary</h5>
-                                            <div class="space-y-3">
-                                                <div class="flex justify-between">
-                                                    <span class="text-gray-400">Unit Price:</span>
-                                                    <span class="text-white">${this.formatCurrency(selectedProduct.price)}</span>
-                                                </div>
-                                                <div class="flex justify-between">
-                                                    <span class="text-gray-400">Quantity:</span>
-                                                    <span class="text-white">${this.state.quickSale.quantity}</span>
-                                                </div>
-                                                <div class="flex justify-between">
-                                                    <span class="text-gray-400">Subtotal:</span>
-                                                    <span class="text-white">${this.formatCurrency(selectedProduct.price * this.state.quickSale.quantity)}</span>
-                                                </div>
-                                                <div class="flex justify-between">
-                                                    <span class="text-gray-400">Discount:</span>
-                                                    <span class="text-red-400">-${this.formatCurrency(this.state.quickSale.discount)}</span>
-                                                </div>
-                                                <div class="flex justify-between">
-                                                    <span class="text-gray-400">Tax (${(this.getTaxInfo().rate * 100).toFixed(1)}%):</span>
-                                                    <span class="text-white">${this.formatCurrency(taxAmount)}</span>
-                                                </div>
-                                                <div class="border-t border-gray-600 pt-3">
-                                                    <div class="flex justify-between">
-                                                        <span class="text-white font-bold">Total:</span>
-                                                        <span class="text-green-400 font-bold text-xl">${this.formatCurrency(total)}</span>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="mt-6 flex justify-between">
-                                    <button data-action="prev-step" class="text-gray-400 hover:text-white px-4 py-2">
-                                        <i class="fas fa-arrow-left mr-2"></i>Back
-                                    </button>
-                                    <button data-action="next-step" class="perplexity-button px-8 py-3 rounded-xl">
-                                        Complete Sale <i class="fas fa-check ml-2"></i>
-                                    </button>
-                                </div>
-                            </div>
-                        `;
-                    case 4:
-                        const finalProduct = this.state.quickSale.selectedProduct;
-                        const finalCustomer = this.state.quickSale.selectedCustomer;
-                        const finalSubtotal = (finalProduct.price * this.state.quickSale.quantity) - this.state.quickSale.discount;
-                        const finalTaxAmount = finalSubtotal * this.getTaxInfo().rate;
-                        const finalTotal = finalSubtotal + finalTaxAmount;
-                        const profit = (finalProduct.price - finalProduct.cost) * this.state.quickSale.quantity;
-                        const commission = profit * 0.1;
-
-                        return `
-                            <div class="sales-step active">
-                                <div class="text-center mb-6">
-                                    <div class="w-20 h-20 bg-gradient-to-r from-green-500 to-emerald-500 rounded-full flex items-center justify-center mx-auto mb-4">
-                                        <i class="fas fa-check text-white text-3xl"></i>
-                                    </div>
-                                    <h4 class="text-2xl font-bold text-white mb-2">Sale Ready!</h4>
-                                    <p class="text-gray-400">Review and complete your sale</p>
-                                </div>
-
-                                <div class="bg-gradient-to-r from-green-500/10 to-emerald-500/10 border border-green-500/30 rounded-xl p-6 mb-6">
-                                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                        <div>
-                                            <h5 class="text-white font-bold mb-3 flex items-center">
-                                                <i class="fas fa-info-circle text-blue-400 mr-2"></i>
-                                                Sale Details
-                                            </h5>
-                                            <div class="space-y-2 text-sm">
-                                                <div class="flex justify-between">
-                                                    <span class="text-gray-400">Product:</span>
-                                                    <span class="text-white font-medium">${finalProduct.name}</span>
-                                                </div>
-                                                <div class="flex justify-between">
-                                                    <span class="text-gray-400">Customer:</span>
-                                                    <span class="text-white font-medium">${finalCustomer.name}</span>
-                                                </div>
-                                                <div class="flex justify-between">
-                                                    <span class="text-gray-400">Quantity:</span>
-                                                    <span class="text-white">${this.state.quickSale.quantity}</span>
-                                                </div>
-                                                <div class="flex justify-between">
-                                                    <span class="text-gray-400">Unit Price:</span>
-                                                    <span class="text-white">${this.formatCurrency(finalProduct.price)}</span>
-                                                </div>
-                                            </div>
-                                        </div>
-                                        <div>
-                                            <h5 class="text-white font-bold mb-3 flex items-center">
-                                                <i class="fas fa-calculator text-green-400 mr-2"></i>
-                                                Financial Summary
-                                            </h5>
-                                            <div class="space-y-2 text-sm">
-                                                <div class="flex justify-between">
-                                                    <span class="text-gray-400">Subtotal:</span>
-                                                    <span class="text-white">${this.formatCurrency(finalSubtotal)}</span>
-                                                </div>
-                                                <div class="flex justify-between">
-                                                    <span class="text-gray-400">Tax:</span>
-                                                    <span class="text-white">${this.formatCurrency(finalTaxAmount)}</span>
-                                                </div>
-                                                <div class="flex justify-between border-t border-gray-600 pt-2">
-                                                    <span class="text-white font-bold">Total:</span>
-                                                    <span class="text-green-400 font-bold">${this.formatCurrency(finalTotal)}</span>
-                                                </div>
-                                                <div class="flex justify-between">
-                                                    <span class="text-gray-400">Your Commission:</span>
-                                                    <span class="text-blue-400 font-bold">${this.formatCurrency(commission)}</span>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <div class="flex justify-between">
-                                    <button data-action="prev-step" class="text-gray-400 hover:text-white px-4 py-2">
-                                        <i class="fas fa-arrow-left mr-2"></i>Back
-                                    </button>
-                                    <button data-action="complete-sale" class="quick-sale-button px-10 py-4 rounded-xl text-lg font-bold">
-                                        <i class="fas fa-zap mr-2"></i>Complete Sale
-                                    </button>
-                                </div>
-                            </div>
-                        `;
-                    default:
-                        return '';
-                }
-            },
-
-            renderQuickSaleModal() {
-                const contentEl = document.getElementById('quick-sale-content');
-                if (contentEl) {
-                    contentEl.innerHTML = this.getQuickSaleStep();
-                }
-            },
-
-            updateQuickSaleDetails(field, value) {
-                if (field === 'quantity') {
-                    this.state.quickSale.quantity = parseInt(value) || 1;
-                } else if (field === 'discount') {
-                    this.state.quickSale.discount = parseFloat(value) || 0;
-                }
-                this.renderQuickSaleModal();
             },
 
             getProductModal(id = null) {
@@ -4026,7 +3628,9 @@
                                     </div>
                                     <div>
                                         <label class="block text-sm font-medium text-gray-300 mb-2">Product</label>
-                                        <select id="productId" name="productId" onchange="app.updateSalePrice()" required class="form-input w-full">
+                                        <select id="productId" name="productId" on
+
+change="app.updateSalePrice()" required class="form-input w-full">
                                             <option value="">Select product...</option>
                                             ${this.state.products.map(product => `<option value="${product.id}" data-price="${product.price}">${product.name} (${product.stock} in stock)</option>`).join('')}
                                         </select>
@@ -4213,7 +3817,6 @@
                                                 <p>✨ Automatic sentiment analysis</p>
                                                 <p>🎯 Smart message categorization</p>
                                                 <p>🔍 AI-powered insights generation</p>
-                                                <p>💾 Auto-saved with ${this.storageManager.activeStorage} storage</p>
                                             </div>
                                         </div>
                                     </div>
@@ -4241,24 +3844,19 @@
                 const taxAmount = subtotal * taxRate;
                 const total = subtotal + taxAmount;
                 
-                const subtotalEl = document.getElementById('sale-subtotal');
-                const taxEl = document.getElementById('sale-tax');
-                const totalEl = document.getElementById('sale-total');
-                
-                if (subtotalEl) subtotalEl.textContent = this.formatCurrency(subtotal);
-                if (taxEl) taxEl.textContent = this.formatCurrency(taxAmount);
-                if (totalEl) totalEl.textContent = this.formatCurrency(total);
+                document.getElementById('sale-subtotal').textContent = this.formatCurrency(subtotal);
+                document.getElementById('sale-tax').textContent = this.formatCurrency(taxAmount);
+                document.getElementById('sale-total').textContent = this.formatCurrency(total);
             }
         };
 
-        // Initialize the application when DOM is ready
+        // Initialize the application
         document.addEventListener('DOMContentLoaded', () => {
             app.init();
         });
 
-        // Make app globally available for modal functions
+        // Make updateSalePrice available globally
         window.app = app;
     </script>
 </body>
 </html>
-
