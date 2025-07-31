@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ledgerly Sales - Smart Business Management</title>
+    <title>Ledgerly - Smart Business Management</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -589,7 +589,7 @@
     <div id="app" class="app-container"></div>
 
     <script>
-        // Suppress console warnings
+        // Suppress console warnings for Tailwind JIT
         console.warn = function(msg) {
             if (msg.includes('cdn.tailwindcss.com')) return;
             console.log('Warning:', msg);
@@ -921,6 +921,7 @@
 
         // Main Application
         const app = {
+            charts: {},
             state: {
                 currentUser: null,
                 currentView: 'login',
@@ -953,9 +954,8 @@
                 messages: [],
                 categories: ['Electronics', 'Accessories', 'Software', 'Services', 'Other'],
                 expenseCategories: ['Office Supplies', 'Marketing', 'Utilities', 'Rent', 'Transportation', 'Meals & Entertainment', 'Equipment', 'Professional Services', 'Other'],
-                charts: {},
                 aiInsights: [],
-            botAnalysis: {},
+                botAnalysis: {},
                 lastAIUpdate: null
             },
 
@@ -1597,8 +1597,8 @@
                 const ctx = document.getElementById(canvasId);
                 if (!ctx) return;
 
-                if (this.state.charts[canvasId]) {
-                    this.state.charts[canvasId].destroy();
+                if (this.charts[canvasId]) {
+                    this.charts[canvasId].destroy();
                 }
 
                 const defaultOptions = {
@@ -1614,7 +1614,7 @@
                     }
                 };
 
-                this.state.charts[canvasId] = new Chart(ctx, {
+                this.charts[canvasId] = new Chart(ctx, {
                     type: type,
                     data: data,
                     options: { ...defaultOptions, ...options }
@@ -3628,9 +3628,7 @@
                                     </div>
                                     <div>
                                         <label class="block text-sm font-medium text-gray-300 mb-2">Product</label>
-                                        <select id="productId" name="productId" on
-
-change="app.updateSalePrice()" required class="form-input w-full">
+                                        <select id="productId" name="productId" onchange="app.updateSalePrice()" required class="form-input w-full">
                                             <option value="">Select product...</option>
                                             ${this.state.products.map(product => `<option value="${product.id}" data-price="${product.price}">${product.name} (${product.stock} in stock)</option>`).join('')}
                                         </select>
@@ -3835,8 +3833,17 @@ change="app.updateSalePrice()" required class="form-input w-full">
 
             // Helper function to update sale price in modal
             updateSalePrice() {
+                const productSelect = document.getElementById('productId');
+                const selectedOption = productSelect.options[productSelect.selectedIndex];
+                const price = parseFloat(selectedOption.getAttribute('data-price')) || 0;
+                
+                const unitPriceInput = document.getElementById('unitPrice');
+                if (price > 0) {
+                    unitPriceInput.value = price;
+                }
+
                 const quantity = parseInt(document.getElementById('quantity')?.value) || 0;
-                const unitPrice = parseFloat(document.getElementById('unitPrice')?.value) || 0;
+                const unitPrice = parseFloat(unitPriceInput.value) || 0;
                 const discount = parseFloat(document.getElementById('discount')?.value) || 0;
                 
                 const subtotal = (quantity * unitPrice) - discount;
@@ -3855,7 +3862,7 @@ change="app.updateSalePrice()" required class="form-input w-full">
             app.init();
         });
 
-        // Make updateSalePrice available globally
+        // Make app object available globally for event handlers
         window.app = app;
     </script>
 </body>
