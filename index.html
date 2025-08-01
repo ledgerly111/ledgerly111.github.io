@@ -7,6 +7,7 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
         :root {
@@ -580,10 +581,8 @@
     </style>
 </head>
 <body>
-    <!-- Notification Container -->
     <div id="notification-container" class="notification-container"></div>
     
-    <!-- Mobile Sidebar Overlay -->
     <div id="sidebar-overlay" class="sidebar-overlay" onclick="app.toggleMobileSidebar()"></div>
     
     <div id="app" class="app-container"></div>
@@ -699,12 +698,15 @@
                 return 'neutral';
             },
 
-            generateBusinessInsights(salesData, products, customers, expenses) {
+            generateBusinessInsights(state) {
                 const insights = [];
-                const totalRevenue = salesData.reduce((sum, sale) => sum + sale.total, 0);
-                const totalExpenses = expenses.reduce((sum, expense) => sum + expense.amount, 0);
-                const netProfit = totalRevenue - totalExpenses;
+                const totalRevenue = app.getAccountBalance('sales-revenue');
+                const totalCOGS = app.getAccountBalance('cogs');
+                const grossProfit = totalRevenue - totalCOGS;
                 
+                const operatingExpenses = app.getAccountBalance('rent-expense') + app.getAccountBalance('salary-expense') + app.getAccountBalance('commission-expense');
+                const netProfit = grossProfit - operatingExpenses;
+
                 if (netProfit > 10000) {
                     insights.push({
                         type: 'success',
@@ -723,7 +725,7 @@
                     });
                 }
                 
-                const lowStockProducts = products.filter(p => p.stock <= 10);
+                const lowStockProducts = state.products.filter(p => p.stock <= 10);
                 if (lowStockProducts.length > 0) {
                     insights.push({
                         type: 'alert',
@@ -734,12 +736,12 @@
                     });
                 }
 
-                if (customers.length > 50) {
+                if (state.customers.length > 50) {
                     insights.push({
                         type: 'info',
                         icon: '👥',
                         title: 'Growing Customer Base',
-                        message: `Impressive! You have ${customers.length} customers in your database.`,
+                        message: `Impressive! You have ${state.customers.length} customers in your database.`,
                         action: 'Implement loyalty programs to maximize customer lifetime value and retention.'
                     });
                 }
@@ -786,15 +788,16 @@
             },
 
             getAppOverview(state) {
-                const totalRevenue = state.sales.reduce((sum, sale) => sum + sale.total, 0);
-                const totalExpenses = state.expenses.reduce((sum, expense) => sum + expense.amount, 0);
+                const totalRevenue = app.getAccountBalance('sales-revenue');
+                const totalExpenses = Object.values(state.chartOfAccounts.expenses).reduce((sum, acc) => sum + app.getAccountBalance(acc.id), 0);
+                const netProfit = totalRevenue - totalExpenses;
                 const lowStockCount = state.products.filter(p => p.stock <= state.lowStockThreshold).length;
                 const unreadMessages = state.messages.filter(m => m.to === state.currentUser.id && !m.read).length;
 
                 return {
                     revenue: totalRevenue,
                     expenses: totalExpenses,
-                    netProfit: totalRevenue - totalExpenses,
+                    netProfit: netProfit,
                     products: state.products.length,
                     customers: state.customers.length,
                     employees: state.users.length,
@@ -807,8 +810,8 @@
             calculateHealthScore(state) {
                 let score = 0;
                 
-                const revenue = state.sales.reduce((sum, sale) => sum + sale.total, 0);
-                const expenses = state.expenses.reduce((sum, expense) => sum + expense.amount, 0);
+                const revenue = app.getAccountBalance('sales-revenue');
+                const expenses = Object.values(state.chartOfAccounts.expenses).reduce((sum, acc) => sum + app.getAccountBalance(acc.id), 0);
                 const netProfit = revenue - expenses;
                 
                 if (netProfit > 50000) score += 30;
@@ -864,7 +867,7 @@
 
             getRecommendations(state) {
                 const recommendations = [];
-                const totalRevenue = state.sales.reduce((sum, sale) => sum + sale.total, 0);
+                const totalRevenue = app.getAccountBalance('sales-revenue');
                 const avgSale = totalRevenue / state.sales.length || 0;
 
                 if (avgSale < 100 && state.sales.length > 10) {
@@ -922,6 +925,7 @@
         // Main Application
         const app = {
             charts: {},
+            currentSaleCart: [],
             state: {
                 currentUser: null,
                 currentView: 'login',
@@ -930,6 +934,8 @@
                 selectedCountry: 'AE',
                 companyName: 'Your Company',
                 lowStockThreshold: 10,
+                chartOfAccounts: {}, // Will be initialized
+                journal: [],
                 users: [
                     { id: 1, username: 'admin', role: 'admin', name: 'Administrator', email: 'admin@company.com', phone: '+971501234567', address: 'Business Bay, Dubai', hireDate: '2023-01-01', salary: 75000, commission: 0 },
                     { id: 2, username: 'manager', role: 'manager', name: 'John Manager', email: 'manager@company.com', phone: '+971501234568', address: 'Downtown Dubai', hireDate: '2023-02-01', salary: 60000, commission: 0 },
@@ -945,7 +951,7 @@
                     { id: 2, name: 'Ahmed Al Rashid', email: 'ahmed.alrashid@email.com', phone: '+971501234571', address: 'Jumeirah, Dubai, UAE', type: 'Individual', taxId: '', creditLimit: 5000, balance: 0 }
                 ],
                 sales: [
-                    { id: 1, customerId: 1, productId: 1, quantity: 2, unitPrice: 1299.99, total: 2599.98, date: '2024-01-15', salesPersonId: 3, subtotal: 2599.98, taxAmount: 0, taxRate: 0 }
+                    { id: 1, customerId: 1, items: [{productId: 1, quantity: 2, unitPrice: 1299.99}], total: 2599.98, date: '2024-01-15', salesPersonId: 3, subtotal: 2599.98, taxAmount: 0, taxRate: 0, saleType: 'Credit' }
                 ],
                 expenses: [
                     { id: 1, description: 'Office Rent', amount: 5000, category: 'Rent', date: '2024-01-01', addedBy: 1, notes: 'Monthly office rent payment' }
@@ -961,10 +967,49 @@
 
             init() {
                 this.loadData();
+                this.initChartOfAccounts();
                 this.render();
                 this.bindEvents();
                 this.updateAIInsights();
                 this.updateBotAnalysis();
+            },
+            
+            initChartOfAccounts() {
+                if (Object.keys(this.state.chartOfAccounts).length > 0) return;
+
+                const coa = {
+                    assets: {
+                        'cash': { id: 'cash', name: 'Cash', type: 'asset', normalBalance: 'debit' },
+                        'accounts-receivable': { id: 'accounts-receivable', name: 'Accounts Receivable', type: 'asset', normalBalance: 'debit' },
+                        'inventory': { id: 'inventory', name: 'Inventory', type: 'asset', normalBalance: 'debit' }
+                    },
+                    liabilities: {
+                        'vat-payable': { id: 'vat-payable', name: 'VAT Payable', type: 'liability', normalBalance: 'credit' },
+                        'commissions-payable': { id: 'commissions-payable', name: 'Commissions Payable', type: 'liability', normalBalance: 'credit' }
+                    },
+                    equity: {
+                        'retained-earnings': { id: 'retained-earnings', name: 'Retained Earnings', type: 'equity', normalBalance: 'credit' }
+                    },
+                    revenue: {
+                        'sales-revenue': { id: 'sales-revenue', name: 'Sales Revenue', type: 'revenue', normalBalance: 'credit' }
+                    },
+                    expenses: {
+                        'cogs': { id: 'cogs', name: 'Cost of Goods Sold', type: 'expense', normalBalance: 'debit' },
+                        'rent-expense': { id: 'rent-expense', name: 'Rent Expense', type: 'expense', normalBalance: 'debit' },
+                        'salary-expense': { id: 'salary-expense', name: 'Salary Expense', type: 'expense', normalBalance: 'debit' },
+                        'commission-expense': { id: 'commission-expense', name: 'Commission Expense', type: 'expense', normalBalance: 'debit' }
+                    }
+                };
+
+                // Add expense categories to COA
+                this.state.expenseCategories.forEach(cat => {
+                    const id = cat.toLowerCase().replace(/ & /g, '-').replace(/ /g, '-');
+                    if (!coa.expenses[id]) {
+                        coa.expenses[id] = { id, name: `${cat} Expense`, type: 'expense', normalBalance: 'debit' };
+                    }
+                });
+                
+                this.state.chartOfAccounts = coa;
             },
 
             loadData() {
@@ -1003,12 +1048,7 @@
 
             updateAIInsights() {
                 if (this.state.currentUser) {
-                    this.state.aiInsights = AccuraAI.generateBusinessInsights(
-                        this.state.sales, 
-                        this.state.products, 
-                        this.state.customers,
-                        this.state.expenses
-                    );
+                    this.state.aiInsights = AccuraAI.generateBusinessInsights(this.state);
                     this.state.lastAIUpdate = new Date().toISOString();
                     this.saveData();
                 }
@@ -1058,6 +1098,7 @@
                     'expenses': () => this.navigateToView('expenses'),
                     'employees': () => this.navigateToView('employees'),
                     'invoices': () => this.navigateToView('invoices'),
+                    'journal': () => this.navigateToView('journal'),
                     'reports': () => this.navigateToView('reports'),
                     'settings': () => this.navigateToView('settings'),
                     'inbox': () => this.navigateToView('inbox'),
@@ -1261,50 +1302,91 @@
             },
 
             handleSaleForm(data) {
+                if (this.currentSaleCart.length === 0) {
+                    NotificationSystem.error('Cannot record a sale with an empty cart.');
+                    return;
+                }
+
+                const saleId = Date.now();
+                const subtotal = this.currentSaleCart.reduce((sum, item) => sum + (item.unitPrice * item.quantity), 0);
+                const discount = parseFloat(data.discount) || 0;
+                const totalBeforeTax = subtotal - discount;
+                const taxInfo = this.getTaxInfo();
+                const taxAmount = totalBeforeTax * taxInfo.rate;
+                const total = totalBeforeTax + taxAmount;
+                const costOfGoodsSold = this.currentSaleCart.reduce((sum, item) => {
+                    const product = this.state.products.find(p => p.id === item.productId);
+                    return sum + ((product.cost || 0) * item.quantity);
+                }, 0);
+                
                 const sale = {
-                    id: Date.now(),
+                    id: saleId,
                     customerId: parseInt(data.customerId),
-                    productId: parseInt(data.productId),
-                    quantity: parseInt(data.quantity),
-                    unitPrice: parseFloat(data.unitPrice),
-                    discount: parseFloat(data.discount) || 0,
-                    subtotal: (parseFloat(data.unitPrice) * parseInt(data.quantity)) - (parseFloat(data.discount) || 0),
-                    taxRate: this.getTaxInfo().rate,
-                    taxAmount: 0,
-                    total: (parseFloat(data.unitPrice) * parseInt(data.quantity)) - (parseFloat(data.discount) || 0),
+                    items: this.currentSaleCart,
+                    total: total,
                     date: data.date,
                     salesPersonId: this.state.currentUser.id,
-                    status: 'completed',
+                    subtotal: subtotal,
+                    taxAmount: taxAmount,
+                    taxRate: taxInfo.rate,
+                    saleType: data.saleType,
                     country: this.state.selectedCountry,
                     currency: GCC_COUNTRIES[this.state.selectedCountry].currency
                 };
 
-                // Calculate tax
-                sale.taxAmount = sale.subtotal * sale.taxRate;
-                sale.total = sale.subtotal + sale.taxAmount;
-
-                // Update product stock
-                const product = this.state.products.find(p => p.id === sale.productId);
-                if (product) {
-                    product.stock -= sale.quantity;
+                // Journal Entries for Sale
+                const saleEntries = [];
+                if (sale.saleType === 'Credit') {
+                    saleEntries.push({ accountId: 'accounts-receivable', type: 'debit', amount: total });
+                } else {
+                    saleEntries.push({ accountId: 'cash', type: 'debit', amount: total });
                 }
-
-                // Update customer balance
-                const customer = this.state.customers.find(c => c.id === sale.customerId);
-                if (customer) {
-                    customer.balance += sale.total;
+                saleEntries.push({ accountId: 'sales-revenue', type: 'credit', amount: totalBeforeTax });
+                if (taxAmount > 0) {
+                    saleEntries.push({ accountId: 'vat-payable', type: 'credit', amount: taxAmount });
                 }
-
-                // Calculate commission (10% of profit)
-                const profit = (sale.unitPrice - product.cost) * sale.quantity;
-                const commission = profit * 0.1;
                 
-                const userIndex = this.state.users.findIndex(u => u.id === this.state.currentUser.id);
-                if (userIndex !== -1) {
-                    this.state.users[userIndex].commission = (this.state.users[userIndex].commission || 0) + commission;
-                    this.state.currentUser.commission = this.state.users[userIndex].commission;
+                // Journal Entries for Cost of Goods Sold
+                const cogsEntries = [
+                    { accountId: 'cogs', type: 'debit', amount: costOfGoodsSold },
+                    { accountId: 'inventory', type: 'credit', amount: costOfGoodsSold }
+                ];
+
+                const customerName = this.state.customers.find(c => c.id === sale.customerId)?.name || 'Customer';
+                this.postTransaction({
+                    date: sale.date,
+                    description: `Sale to ${customerName}`,
+                    entries: [...saleEntries, ...cogsEntries],
+                    refId: `SALE-${saleId}`
+                });
+
+                // Update stock and customer balance
+                this.currentSaleCart.forEach(item => {
+                    const product = this.state.products.find(p => p.id === item.productId);
+                    if (product) product.stock -= item.quantity;
+                });
+                if (sale.saleType === 'Credit') {
+                    const customer = this.state.customers.find(c => c.id === sale.customerId);
+                    if (customer) customer.balance += total;
                 }
 
+                // Calculate and handle commission
+                const profit = totalBeforeTax - costOfGoodsSold;
+                const commission = profit * 0.1; // 10% commission on profit
+                const user = this.state.users.find(u => u.id === this.state.currentUser.id);
+                if (user) {
+                    user.commission = (user.commission || 0) + commission;
+                    this.postTransaction({
+                        date: sale.date,
+                        description: `Commission for ${user.name} on sale ${saleId}`,
+                        entries: [
+                            { accountId: 'commission-expense', type: 'debit', amount: commission },
+                            { accountId: 'commissions-payable', type: 'credit', amount: commission }
+                        ],
+                        refId: `COMM-${saleId}`
+                    });
+                }
+                
                 this.state.sales.push(sale);
                 this.closeModal();
                 this.saveData();
@@ -1312,13 +1394,14 @@
                 this.updateBotAnalysis();
                 this.render();
                 
-                NotificationSystem.success(`🎉 Sale recorded! Total: ${this.formatCurrency(sale.total)} | Commission: ${this.formatCurrency(commission)}`);
+                NotificationSystem.success(`🎉 Sale recorded! Total: ${this.formatCurrency(total)}`);
             },
 
             handleExpenseForm(data) {
                 const isEdit = document.getElementById('expense-id').value;
+                const expenseId = isEdit ? parseInt(isEdit) : Date.now();
                 const expense = {
-                    id: isEdit ? parseInt(isEdit) : Date.now(),
+                    id: expenseId,
                     description: data.description,
                     amount: parseFloat(data.amount),
                     category: data.category,
@@ -1326,6 +1409,17 @@
                     addedBy: this.state.currentUser.id,
                     notes: data.notes || ''
                 };
+                
+                const expenseAccountId = data.category.toLowerCase().replace(/ & /g, '-').replace(/ /g, '-');
+                this.postTransaction({
+                    date: expense.date,
+                    description: expense.description,
+                    entries: [
+                        { accountId: expenseAccountId, type: 'debit', amount: expense.amount },
+                        { accountId: 'cash', type: 'credit', amount: expense.amount }
+                    ],
+                    refId: `EXP-${expenseId}`
+                });
 
                 if (isEdit) {
                     const index = this.state.expenses.findIndex(e => e.id === expense.id);
@@ -1403,6 +1497,60 @@
                 this.render();
                 NotificationSystem.success('⚙️ Company settings updated successfully!');
             },
+            
+            // ----- DOUBLE ENTRY ACCOUNTING CORE -----
+            postTransaction(transactionData) {
+                const { date, description, entries, refId } = transactionData;
+                
+                const debits = entries.filter(e => e.type === 'debit').reduce((sum, e) => sum + e.amount, 0);
+                const credits = entries.filter(e => e.type === 'credit').reduce((sum, e) => sum + e.amount, 0);
+
+                if (Math.abs(debits - credits) > 0.001) {
+                    console.error('Transaction out of balance:', transactionData);
+                    NotificationSystem.error('Accounting Error: Transaction is not balanced.');
+                    return false;
+                }
+
+                this.state.journal.push({
+                    id: Date.now(),
+                    refId,
+                    date,
+                    description,
+                    entries
+                });
+                return true;
+            },
+
+            getAccountBalance(accountId) {
+                const account = this.findAccountById(accountId);
+                if (!account) return 0;
+
+                let balance = 0;
+                this.state.journal.forEach(transaction => {
+                    transaction.entries.forEach(entry => {
+                        if (entry.accountId === accountId) {
+                            if (entry.type === account.normalBalance) {
+                                balance += entry.amount;
+                            } else {
+                                balance -= entry.amount;
+                            }
+                        }
+                    });
+                });
+                return balance;
+            },
+
+            findAccountById(accountId) {
+                for (const type in this.state.chartOfAccounts) {
+                    for (const acc in this.state.chartOfAccounts[type]) {
+                        if (this.state.chartOfAccounts[type][acc].id === accountId) {
+                            return this.state.chartOfAccounts[type][acc];
+                        }
+                    }
+                }
+                return null;
+            },
+            // ----- END DOUBLE ENTRY ACCOUNTING CORE -----
 
             // Permission methods
             canManageProducts() {
@@ -1426,6 +1574,7 @@
                 const modal = this.getModal(type, id);
                 document.body.insertAdjacentHTML('beforeend', modal);
                 
+                if (type === 'add-sale') this.bindSaleModalEvents();
                 if (id && type.includes('edit')) {
                     this.prefillEditForm(type, parseInt(id));
                 }
@@ -1436,6 +1585,7 @@
                 if (modal) {
                     modal.remove();
                 }
+                this.currentSaleCart = [];
             },
 
             prefillEditForm(type, id) {
@@ -1514,7 +1664,6 @@
                 if (!sale) return;
 
                 const customer = this.state.customers.find(c => c.id === sale.customerId);
-                const product = this.state.products.find(p => p.id === sale.productId);
                 const salesperson = this.state.users.find(u => u.id === sale.salesPersonId);
                 const countryInfo = GCC_COUNTRIES[sale.country || this.state.selectedCountry];
 
@@ -1525,14 +1674,10 @@
                     date: new Date().toISOString().split('T')[0],
                     dueDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
                     customer: customer,
-                    items: [{
-                        productId: sale.productId,
-                        name: product?.name || 'Product',
-                        quantity: sale.quantity,
-                        unitPrice: sale.unitPrice,
-                        discount: sale.discount || 0,
-                        subtotal: sale.subtotal
-                    }],
+                    items: sale.items.map(item => {
+                        const product = this.state.products.find(p => p.id === item.productId);
+                        return { ...item, name: product?.name || 'Product' };
+                    }),
                     subtotal: sale.subtotal,
                     taxRate: sale.taxRate || 0,
                     taxAmount: sale.taxAmount || 0,
@@ -1550,6 +1695,7 @@
                 this.state.invoices.push(invoice);
                 this.saveData();
                 this.render();
+                this.downloadInvoice(invoice.id);
                 NotificationSystem.success('📄 Professional invoice generated successfully!');
             },
 
@@ -1643,14 +1789,15 @@
 
                 this.createChart('salesChart', 'line', salesData);
 
-                // Revenue vs Expenses
-                const totalRevenue = this.state.sales.reduce((sum, sale) => sum + sale.total, 0);
-                const totalExpenses = this.state.expenses.reduce((sum, expense) => sum + expense.amount, 0);
+                // Revenue vs Expenses from Journal
+                const totalRevenue = this.getAccountBalance('sales-revenue');
+                const totalExpenses = Object.values(this.state.chartOfAccounts.expenses).reduce((sum, acc) => sum + this.getAccountBalance(acc.id), 0);
+                const netProfit = totalRevenue - totalExpenses;
 
                 const financeData = {
                     labels: ['Revenue', 'Expenses', 'Net Profit'],
                     datasets: [{
-                        data: [totalRevenue, totalExpenses, totalRevenue - totalExpenses],
+                        data: [totalRevenue, totalExpenses, netProfit],
                         backgroundColor: [
                             'rgba(0, 212, 170, 0.8)',
                             'rgba(239, 68, 68, 0.8)',
@@ -1671,52 +1818,83 @@
                 const invoice = this.state.invoices.find(i => i.id === parseInt(invoiceId));
                 if (!invoice) return;
 
-                try {
-                    const { jsPDF } = window.jspdf;
-                    const doc = new jsPDF();
+                const invoiceHTML = this.generateInvoiceHtml(invoice);
 
-                    doc.setFontSize(20);
-                    doc.setTextColor(0, 212, 170);
-                    doc.text(invoice.companyName, 20, 30);
-                    
-                    doc.setFontSize(16);
-                    doc.setTextColor(0, 0, 0);
-                    doc.text('INVOICE', 150, 30);
-                    
-                    doc.setFontSize(12);
-                    doc.text(`Invoice #: ${invoice.invoiceNumber}`, 150, 40);
-                    doc.text(`Date: ${invoice.date}`, 150, 50);
+                const element = document.createElement('div');
+                element.innerHTML = invoiceHTML;
+                const elementToCapture = element.firstElementChild;
 
-                    doc.setFontSize(14);
-                    doc.text('Bill To:', 20, 70);
-                    doc.setFontSize(12);
-                    doc.text(invoice.customer.name, 20, 80);
-                    doc.text(invoice.customer.address, 20, 90);
+                const opt = {
+                    margin: 0.5,
+                    filename: `Invoice_${invoice.invoiceNumber}.pdf`,
+                    image: { type: 'jpeg', quality: 0.98 },
+                    html2canvas: { scale: 2, useCORS: true },
+                    jsPDF: { unit: 'in', format: 'letter', orientation: 'portrait' }
+                };
 
-                    let y = 120;
-                    doc.text('Items:', 20, y);
-                    y += 10;
-                    
-                    invoice.items.forEach(item => {
-                        doc.text(`${item.name} - Qty: ${item.quantity} - ${invoice.currencySymbol} ${item.subtotal.toFixed(2)}`, 20, y);
-                        y += 10;
-                    });
+                html2pdf().set(opt).from(elementToCapture).save().then(() => {
+                    NotificationSystem.success('Invoice downloaded!');
+                }).catch(err => {
+                    NotificationSystem.error('Error generating PDF.');
+                    console.error('PDF Generation Error:', err);
+                });
+            },
 
-                    y += 10;
-                    doc.text(`Subtotal: ${invoice.currencySymbol} ${invoice.subtotal.toFixed(2)}`, 120, y);
-                    y += 10;
-                    if (invoice.taxAmount > 0) {
-                        doc.text(`${invoice.taxName}: ${invoice.currencySymbol} ${invoice.taxAmount.toFixed(2)}`, 120, y);
-                        y += 10;
-                    }
-                    doc.setFontSize(14);
-                    doc.text(`TOTAL: ${invoice.currencySymbol} ${invoice.total.toFixed(2)}`, 120, y);
+            generateInvoiceHtml(invoice) {
+                const { companyName, currency, currencySymbol, taxName } = invoice;
 
-                    doc.save(`${invoice.companyName.replace(/\s+/g, '-')}-${invoice.invoiceNumber}.pdf`);
-                    NotificationSystem.success('📥 Invoice downloaded successfully!');
-                } catch (error) {
-                    NotificationSystem.error('❌ Error generating PDF. Please try again.');
-                }
+                const tableRows = invoice.items.map(item => `
+                    <tr style="page-break-inside: avoid;">
+                        <td style="padding: 8px; border-bottom: 1px solid #374151;">${item.name}</td>
+                        <td style="padding: 8px; border-bottom: 1px solid #374151; text-align: right;">${item.quantity}</td>
+                        <td style="padding: 8px; border-bottom: 1px solid #374151; text-align: right;">${item.unitPrice.toFixed(2)}</td>
+                        <td style="padding: 8px; border-bottom: 1px solid #374151; text-align: right;">${(item.unitPrice * item.quantity).toFixed(2)}</td>
+                    </tr>`
+                ).join('');
+
+                return `
+                <div style="background-color: #ffffff; color: #111827; font-family: 'Inter', sans-serif; font-size: 14px; line-height: 1.5; margin: auto; max-width: 8.5in; padding: 2rem; border: 1px solid #e5e7eb; box-shadow: 0 1px 3px 0 rgba(0,0,0,0.1), 0 1px 2px 0 rgba(0,0,0,0.06);">
+                    <div style="display: flex; justify-content: space-between; align-items: flex-start; border-bottom: 2px solid #00d4aa; padding-bottom: 1rem; margin-bottom: 2rem;">
+                        <div>
+                            <h1 style="font-size: 2.25rem; font-weight: 700; margin: 0; color: #00d4aa; line-height: 1;">${companyName}</h1>
+                            <p style="margin: 0.25rem 0 0; color: #6b7280;">Sales Division</p>
+                        </div>
+                        <div style="text-align: right;">
+                            <h2 style="font-size: 1.875rem; font-weight: 600; margin: 0;">INVOICE</h2>
+                            <p style="margin: 0.25rem 0 0; color: #6b7280;">#${invoice.invoiceNumber}</p>
+                        </div>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 2rem;">
+                        <div>
+                            <p style="margin: 0; color: #6b7280; font-weight: 500;">BILL TO</p>
+                            <p style="margin: 0.25rem 0 0; font-weight: 600; font-size: 1.125rem;">${invoice.customer.name}</p>
+                            <p style="margin: 0.25rem 0 0; color: #6b7280;">${invoice.customer.address}</p>
+                        </div>
+                        <div style="text-align: right;">
+                            <p style="margin: 0; color: #6b7280;"><span style="font-weight: 500;">Invoice Date:</span> ${new Date(invoice.date).toLocaleDateString()}</p>
+                            <p style="margin: 0.25rem 0 0; color: #6b7280;"><span style="font-weight: 500;">Due Date:</span> ${new Date(invoice.dueDate).toLocaleDateString()}</p>
+                        </div>
+                    </div>
+                    <table style="width: 100%; border-collapse: collapse;">
+                        <thead style="background-color: #f3f4f6; color: #374151;">
+                            <tr>
+                                <th style="padding: 12px 8px; text-align: left; font-weight: 600; width: 60%;">ITEM DESCRIPTION</th>
+                                <th style="padding: 12px 8px; text-align: right; font-weight: 600;">QTY</th>
+                                <th style="padding: 12px 8px; text-align: right; font-weight: 600;">RATE</th>
+                                <th style="padding: 12px 8px; text-align: right; font-weight: 600;">AMOUNT</th>
+                            </tr>
+                        </thead>
+                        <tbody>${tableRows}</tbody>
+                    </table>
+                    <div style="display: flex; justify-content: flex-end; margin-top: 2rem;">
+                        <div style="width: 100%; max-width: 300px;">
+                            <div style="display: flex; justify-content: space-between; padding: 8px 0;"><span>Subtotal</span><span>${invoice.subtotal.toFixed(2)}</span></div>
+                            <div style="display: flex; justify-content: space-between; padding: 8px 0;"><span>${taxName} (${(invoice.taxRate * 100).toFixed(0)}%)</span><span>${invoice.taxAmount.toFixed(2)}</span></div>
+                            <div style="display: flex; justify-content: space-between; padding: 12px 0; border-top: 2px solid #00d4aa; margin-top: 8px; font-weight: 700; font-size: 1.25rem;"><span>Total Due</span><span>${currencySymbol} ${invoice.total.toFixed(2)}</span></div>
+                        </div>
+                    </div>
+                    <div style="margin-top: 3rem; text-align: center; color: #6b7280; font-size: 0.875rem;"><p>Thank you for your business!</p></div>
+                </div>`;
             },
 
             // View rendering methods
@@ -1736,6 +1914,7 @@
                     'expenses': this.getExpensesView(),
                     'employees': this.getEmployeesView(),
                     'invoices': this.getInvoicesView(),
+                    'journal': this.getJournalView(),
                     'reports': this.getReportsView(),
                     'settings': this.getSettingsView(),
                     'inbox': this.getInboxView(),
@@ -1903,6 +2082,7 @@
                     { key: 'expenses', icon: 'fas fa-receipt', label: 'Expenses', roles: ['admin', 'manager', 'worker'] },
                     { key: 'invoices', icon: 'fas fa-file-invoice', label: 'Invoices', roles: ['admin', 'manager', 'worker'] },
                     { key: 'inbox', icon: 'fas fa-envelope', label: 'Inbox', roles: ['admin', 'manager', 'worker'] },
+                    { key: 'journal', icon: 'fas fa-book', label: 'Journal', roles: ['admin', 'manager'] },
                     { key: 'employees', icon: 'fas fa-user-tie', label: 'Employees', roles: ['admin', 'manager'] },
                     { key: 'reports', icon: 'fas fa-chart-bar', label: 'Reports', roles: ['admin', 'manager'] },
                     { key: 'settings', icon: 'fas fa-cog', label: 'Settings', roles: ['admin'] }
@@ -1967,9 +2147,11 @@
                 const totalProducts = this.state.products.length;
                 const totalCustomers = this.state.customers.length;
                 const totalSales = this.state.sales.length;
-                const totalRevenue = this.state.sales.reduce((sum, sale) => sum + sale.total, 0);
-                const totalExpenses = this.state.expenses.reduce((sum, expense) => sum + expense.amount, 0);
+                
+                const totalRevenue = this.getAccountBalance('sales-revenue');
+                const totalExpenses = Object.values(this.state.chartOfAccounts.expenses).reduce((sum, acc) => sum + this.getAccountBalance(acc.id), 0);
                 const netProfit = totalRevenue - totalExpenses;
+                
                 const lowStockProducts = this.state.products.filter(p => p.stock <= this.state.lowStockThreshold);
                 const recentSales = this.state.sales.slice(-5).reverse();
 
@@ -2179,7 +2361,7 @@
                                     <div class="space-y-3">
                                         ${recentSales.map(sale => {
                                             const customer = this.state.customers.find(c => c.id === sale.customerId);
-                                            const product = this.state.products.find(p => p.id === sale.productId);
+                                            const itemSummary = sale.items.length > 1 ? `${sale.items.length} items` : `${sale.items[0].quantity} x ${this.state.products.find(p => p.id === sale.items[0].productId)?.name}`;
                                             return `
                                                 <div class="flex justify-between items-center p-3 bg-gray-800/50 rounded-xl border border-gray-600/30 hover:border-teal-500/50 transition-all duration-300">
                                                     <div class="flex items-center space-x-3">
@@ -2187,7 +2369,7 @@
                                                             <i class="fas fa-shopping-bag text-white text-sm"></i>
                                                         </div>
                                                         <div>
-                                                            <p class="text-white font-medium text-sm">${product ? product.name : 'Product'}</p>
+                                                            <p class="text-white font-medium text-sm">${itemSummary}</p>
                                                             <p class="text-gray-400 text-xs">${customer ? customer.name : 'Customer'}</p>
                                                         </div>
                                                     </div>
@@ -2878,7 +3060,7 @@
                                         <tr class="border-b border-gray-600">
                                             <th class="px-6 py-4 text-left text-xs font-medium uppercase tracking-wider text-gray-300">Date</th>
                                             <th class="px-6 py-4 text-left text-xs font-medium uppercase tracking-wider text-gray-300">Customer</th>
-                                            <th class="px-6 py-4 text-left text-xs font-medium uppercase tracking-wider text-gray-300">Product</th>
+                                            <th class="px-6 py-4 text-left text-xs font-medium uppercase tracking-wider text-gray-300">Items</th>
                                             <th class="px-6 py-4 text-left text-xs font-medium uppercase tracking-wider text-gray-300">Total</th>
                                             <th class="px-6 py-4 text-left text-xs font-medium uppercase tracking-wider text-gray-300">Actions</th>
                                         </tr>
@@ -2886,7 +3068,7 @@
                                     <tbody class="divide-y divide-gray-600">
                                         ${filteredSales.length > 0 ? filteredSales.reverse().map(sale => {
                                             const customer = this.state.customers.find(c => c.id === sale.customerId);
-                                            const product = this.state.products.find(p => p.id === sale.productId);
+                                            const itemSummary = sale.items.length > 1 ? `${sale.items.length} items` : `${sale.items[0].quantity} x ${this.state.products.find(p => p.id === sale.items[0].productId)?.name}`;
                                             
                                             return `
                                                 <tr class="hover:bg-gray-800/50 transition-colors">
@@ -2896,15 +3078,7 @@
                                                         <div class="text-gray-400 text-sm">${customer ? customer.type : ''}</div>
                                                     </td>
                                                     <td class="px-6 py-4">
-                                                        <div class="flex items-center space-x-3">
-                                                            <div class="w-8 h-8 bg-gradient-to-r from-teal-500 to-blue-500 rounded-lg flex items-center justify-center">
-                                                                <span class="text-white font-bold text-sm">${sale.quantity}</span>
-                                                            </div>
-                                                            <div>
-                                                                <div class="text-white font-medium">${product ? product.name : 'Product'}</div>
-                                                                <div class="text-gray-400 text-sm">Qty: ${sale.quantity}</div>
-                                                            </div>
-                                                        </div>
+                                                        <div class="text-white font-medium">${itemSummary}</div>
                                                     </td>
                                                     <td class="px-6 py-4 text-green-400 font-bold text-lg">${this.formatCurrency(sale.total)}</td>
                                                     <td class="px-6 py-4">
@@ -3319,34 +3493,126 @@
                     </div>
                 `;
             },
-
-            getReportsView() {
+            
+            getJournalView() {
                 if (!this.canViewReports()) {
-                    return `
-                        <div class="text-center py-16 fade-in">
-                            <i class="fas fa-lock text-6xl text-gray-500 mb-4"></i>
-                            <h3 class="text-2xl font-bold text-gray-400 mb-2">Access Restricted</h3>
-                            <p class="text-gray-500">Reports require manager or admin privileges.</p>
-                        </div>
-                    `;
+                    return `<div class="text-center py-16 fade-in"><i class="fas fa-lock text-6xl text-gray-500 mb-4"></i><h3 class="text-2xl font-bold text-gray-400 mb-2">Access Restricted</h3></div>`;
                 }
 
                 return `
                     <div class="space-y-6 fade-in">
                         <div>
+                            <h2 class="text-2xl font-bold text-white mb-2">General Journal</h2>
+                            <p class="text-gray-400">Complete log of all double-entry transactions</p>
+                        </div>
+                        <div class="perplexity-card overflow-hidden">
+                            <div class="responsive-table">
+                                <table class="w-full">
+                                    <thead>
+                                        <tr class="border-b border-gray-600">
+                                            <th class="px-6 py-4 text-left text-xs font-medium uppercase tracking-wider text-gray-300">Date</th>
+                                            <th class="px-6 py-4 text-left text-xs font-medium uppercase tracking-wider text-gray-300">Description</th>
+                                            <th class="px-6 py-4 text-left text-xs font-medium uppercase tracking-wider text-gray-300">Account</th>
+                                            <th class="px-6 py-4 text-right text-xs font-medium uppercase tracking-wider text-gray-300">Debit</th>
+                                            <th class="px-6 py-4 text-right text-xs font-medium uppercase tracking-wider text-gray-300">Credit</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody class="divide-y divide-gray-700">
+                                        ${this.state.journal.length > 0 ? [...this.state.journal].reverse().map(transaction => `
+                                            <tr class="bg-gray-800/20">
+                                                <td class="px-6 py-3 font-medium text-white">${transaction.date}</td>
+                                                <td class="px-6 py-3 font-medium text-white" colspan="4">${transaction.description}</td>
+                                            </tr>
+                                            ${transaction.entries.map(entry => `
+                                                <tr class="hover:bg-gray-800/50">
+                                                    <td class="px-6 py-3"></td>
+                                                    <td class="px-6 py-3"></td>
+                                                    <td class="px-6 py-3 text-gray-300 ${entry.type === 'credit' ? 'pl-12' : ''}">${this.findAccountById(entry.accountId)?.name || 'Unknown'}</td>
+                                                    <td class="px-6 py-3 text-right text-green-400">${entry.type === 'debit' ? this.formatCurrency(entry.amount) : ''}</td>
+                                                    <td class="px-6 py-3 text-right text-yellow-400">${entry.type === 'credit' ? this.formatCurrency(entry.amount) : ''}</td>
+                                                </tr>
+                                            `).join('')}
+                                        `).join('') : `
+                                            <tr><td colspan="5" class="text-center py-16 text-gray-500">No journal entries yet.</td></tr>
+                                        `}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            },
+
+            getReportsView() {
+                if (!this.canViewReports()) {
+                    return `<div class="text-center py-16 fade-in"><i class="fas fa-lock text-6xl text-gray-500 mb-4"></i><h3 class="text-2xl font-bold text-gray-400 mb-2">Access Restricted</h3></div>`;
+                }
+                
+                let totalDebits = 0;
+                let totalCredits = 0;
+                const allAccounts = Object.values(this.state.chartOfAccounts).flatMap(type => Object.values(type));
+
+                const trialBalanceRows = allAccounts.map(account => {
+                    const balance = this.getAccountBalance(account.id);
+                    let debit = 0;
+                    let credit = 0;
+
+                    if (balance !== 0) {
+                        if (account.normalBalance === 'debit') {
+                            debit = balance;
+                        } else {
+                            credit = balance;
+                        }
+                    }
+                    totalDebits += debit;
+                    totalCredits += credit;
+                    
+                    return `
+                        <tr class="hover:bg-gray-800/50">
+                            <td class="px-6 py-4 text-white">${account.name}</td>
+                            <td class="px-6 py-4 text-right text-green-400">${debit !== 0 ? this.formatCurrency(debit) : ''}</td>
+                            <td class="px-6 py-4 text-right text-yellow-400">${credit !== 0 ? this.formatCurrency(credit) : ''}</td>
+                        </tr>
+                    `;
+                }).join('');
+
+                return `
+                    <div class="space-y-6 fade-in">
+                        <div>
                             <h2 class="text-2xl font-bold text-white mb-2">Business Reports</h2>
-                            <p class="text-gray-400">Comprehensive analytics and insights</p>
+                            <p class="text-gray-400">Double-entry powered financial statements</p>
                         </div>
 
-                        <div class="perplexity-card p-8 text-center">
-                            <i class="fas fa-chart-bar text-6xl text-teal-400 mb-4"></i>
-                            <h3 class="text-xl font-bold text-white mb-2">Advanced Reports Coming Soon</h3>
-                            <p class="text-gray-400 mb-4">Detailed financial reports, analytics, and insights will be available in the next update.</p>
-                            <div class="flex justify-center space-x-4">
-                                <button data-action="export-data" class="perplexity-button px-6 py-3 rounded-xl">
-                                    <i class="fas fa-download mr-2"></i>Export Data
-                                </button>
+                        <div class="perplexity-card overflow-hidden">
+                             <div class="p-6 border-b border-gray-700">
+                                <h3 class="text-xl font-bold text-white">Trial Balance</h3>
+                                <p class="text-gray-400">As of ${new Date().toLocaleDateString()}</p>
                             </div>
+                            <div class="responsive-table">
+                                <table class="w-full">
+                                    <thead>
+                                        <tr class="border-b border-gray-600">
+                                            <th class="px-6 py-4 text-left text-xs font-medium uppercase tracking-wider text-gray-300">Account</th>
+                                            <th class="px-6 py-4 text-right text-xs font-medium uppercase tracking-wider text-gray-300">Debit</th>
+                                            <th class="px-6 py-4 text-right text-xs font-medium uppercase tracking-wider text-gray-300">Credit</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody class="divide-y divide-gray-700">
+                                        ${trialBalanceRows}
+                                    </tbody>
+                                    <tfoot>
+                                        <tr class="border-t-2 border-teal-500 bg-gray-800">
+                                            <th class="px-6 py-4 text-left font-bold text-white">Totals</th>
+                                            <th class="px-6 py-4 text-right font-bold text-green-400">${this.formatCurrency(totalDebits)}</th>
+                                            <th class="px-6 py-4 text-right font-bold text-yellow-400">${this.formatCurrency(totalCredits)}</th>
+                                        </tr>
+                                    </tfoot>
+                                </table>
+                            </div>
+                            ${Math.abs(totalDebits - totalCredits) < 0.001 ? 
+                                `<div class="p-4 text-center bg-green-500/20 text-green-400 text-sm font-medium"><i class="fas fa-check-circle mr-2"></i>Accounts are balanced.</div>` :
+                                `<div class="p-4 text-center bg-red-500/20 text-red-400 text-sm font-medium"><i class="fas fa-exclamation-triangle mr-2"></i>Error: Accounts are not balanced!</div>`
+                            }
                         </div>
                     </div>
                 `;
@@ -3450,9 +3716,9 @@
                                             ${message.aiAnalysis ? `
                                                 <div class="bg-purple-500/10 border border-purple-500/20 rounded-xl p-4">
                                                     <div class="flex items-start space-x-3">
-                                                        <i class="fas fa-robot text-purple-400"></i>
+                                                        <i class="fas ${this.state.aiMode === 'ai' ? 'fa-brain text-purple-400' : 'fa-robot text-green-400'}"></i>
                                                         <div>
-                                                            <p class="text-xs font-medium text-purple-400 mb-2">🤖 AccuraAI Analysis</p>
+                                                            <p class="text-xs font-medium ${this.state.aiMode === 'ai' ? 'text-purple-400' : 'text-green-400'} mb-2">🤖 AccuraAI Analysis</p>
                                                             <p class="text-sm text-gray-300">${message.aiAnalysis}</p>
                                                         </div>
                                                     </div>
@@ -3611,250 +3877,6 @@
                     </div>
                 `;
             },
-
-            getSaleModal() {
-                return `
-                    <div class="modal-overlay">
-                        <div class="modal-content">
-                            <h3 class="text-xl font-bold text-white mb-6">Record New Sale</h3>
-                            <form id="sale-form" class="space-y-4">
-                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                    <div>
-                                        <label class="block text-sm font-medium text-gray-300 mb-2">Customer</label>
-                                        <select id="customerId" name="customerId" required class="form-input w-full">
-                                            <option value="">Select customer...</option>
-                                            ${this.state.customers.map(customer => `<option value="${customer.id}">${customer.name}</option>`).join('')}
-                                        </select>
-                                    </div>
-                                    <div>
-                                        <label class="block text-sm font-medium text-gray-300 mb-2">Product</label>
-                                        <select id="productId" name="productId" onchange="app.updateSalePrice()" required class="form-input w-full">
-                                            <option value="">Select product...</option>
-                                            ${this.state.products.map(product => `<option value="${product.id}" data-price="${product.price}">${product.name} (${product.stock} in stock)</option>`).join('')}
-                                        </select>
-                                    </div>
-                                </div>
-                                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                                    <div>
-                                        <label class="block text-sm font-medium text-gray-300 mb-2">Quantity</label>
-                                        <input type="number" id="quantity" name="quantity" min="1" required class="form-input w-full" onchange="app.updateSalePrice()">
-                                    </div>
-                                    <div>
-                                        <label class="block text-sm font-medium text-gray-300 mb-2">Unit Price (${GCC_COUNTRIES[this.state.selectedCountry].currency})</label>
-                                        <input type="number" id="unitPrice" name="unitPrice" step="0.01" required class="form-input w-full" onchange="app.updateSalePrice()">
-                                    </div>
-                                    <div>
-                                        <label class="block text-sm font-medium text-gray-300 mb-2">Discount (${GCC_COUNTRIES[this.state.selectedCountry].currency})</label>
-                                        <input type="number" id="discount" name="discount" step="0.01" value="0" class="form-input w-full" onchange="app.updateSalePrice()">
-                                    </div>
-                                </div>
-                                <div>
-                                    <label class="block text-sm font-medium text-gray-300 mb-2">Sale Date</label>
-                                    <input type="date" id="date" name="date" required class="form-input w-full" value="${new Date().toISOString().split('T')[0]}">
-                                </div>
-                                <div class="bg-gray-800/50 p-4 rounded-xl">
-                                    <h4 class="text-white font-medium mb-3">Sale Summary</h4>
-                                    <div class="space-y-2 text-sm">
-                                        <div class="flex justify-between">
-                                            <span class="text-gray-400">Subtotal:</span>
-                                            <span class="text-white" id="sale-subtotal">${this.formatCurrency(0)}</span>
-                                        </div>
-                                        <div class="flex justify-between">
-                                            <span class="text-gray-400">Tax (${(this.getTaxInfo().rate * 100).toFixed(1)}%):</span>
-                                            <span class="text-white" id="sale-tax">${this.formatCurrency(0)}</span>
-                                        </div>
-                                        <div class="flex justify-between border-t border-gray-600 pt-2">
-                                            <span class="text-white font-medium">Total:</span>
-                                            <span class="text-green-400 font-bold text-lg" id="sale-total">${this.formatCurrency(0)}</span>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="flex justify-end space-x-4 pt-4">
-                                    <button type="button" data-action="close-modal" class="px-6 py-2 text-gray-400 hover:text-white transition-colors">Cancel</button>
-                                    <button type="submit" class="perplexity-button px-6 py-2">Record Sale</button>
-                                </div>
-                            </form>
-                        </div>
-                    </div>
-                `;
-            },
-
-            getExpenseModal(id = null) {
-                const isEdit = id !== null;
-                return `
-                    <div class="modal-overlay">
-                        <div class="modal-content">
-                            <h3 class="text-xl font-bold text-white mb-6">${isEdit ? 'Edit' : 'Add'} Expense</h3>
-                            <form id="expense-form" class="space-y-4">
-                                <input type="hidden" id="expense-id" value="${id || ''}">
-                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                    <div>
-                                        <label class="block text-sm font-medium text-gray-300 mb-2">Description</label>
-                                        <input type="text" id="description" name="description" required class="form-input w-full">
-                                    </div>
-                                    <div>
-                                        <label class="block text-sm font-medium text-gray-300 mb-2">Amount (${GCC_COUNTRIES[this.state.selectedCountry].currency})</label>
-                                        <input type="number" id="amount" name="amount" step="0.01" required class="form-input w-full">
-                                    </div>
-                                </div>
-                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                    <div>
-                                        <label class="block text-sm font-medium text-gray-300 mb-2">Category</label>
-                                        <select id="category" name="category" required class="form-input w-full">
-                                            <option value="">Select category...</option>
-                                            ${this.state.expenseCategories.map(cat => `<option value="${cat}">${cat}</option>`).join('')}
-                                        </select>
-                                    </div>
-                                    <div>
-                                        <label class="block text-sm font-medium text-gray-300 mb-2">Date</label>
-                                        <input type="date" id="date" name="date" required class="form-input w-full" value="${new Date().toISOString().split('T')[0]}">
-                                    </div>
-                                </div>
-                                <div>
-                                    <label class="block text-sm font-medium text-gray-300 mb-2">Notes (Optional)</label>
-                                    <textarea id="notes" name="notes" rows="3" class="form-input w-full"></textarea>
-                                </div>
-                                <div class="flex justify-end space-x-4 pt-4">
-                                    <button type="button" data-action="close-modal" class="px-6 py-2 text-gray-400 hover:text-white transition-colors">Cancel</button>
-                                    <button type="submit" class="expenses-button px-6 py-2">${isEdit ? 'Update' : 'Add'} Expense</button>
-                                </div>
-                            </form>
-                        </div>
-                    </div>
-                `;
-            },
-
-            getEmployeeModal(id = null) {
-                const isEdit = id !== null;
-                return `
-                    <div class="modal-overlay">
-                        <div class="modal-content">
-                            <h3 class="text-xl font-bold text-white mb-6">${isEdit ? 'Edit' : 'Add'} Employee</h3>
-                            <form id="employee-form" class="space-y-4">
-                                <input type="hidden" id="employee-id" value="${id || ''}">
-                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                    <div>
-                                        <label class="block text-sm font-medium text-gray-300 mb-2">Full Name</label>
-                                        <input type="text" id="name" name="name" required class="form-input w-full">
-                                    </div>
-                                    <div>
-                                        <label class="block text-sm font-medium text-gray-300 mb-2">Username</label>
-                                        <input type="text" id="username" name="username" required class="form-input w-full">
-                                    </div>
-                                </div>
-                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                    <div>
-                                        <label class="block text-sm font-medium text-gray-300 mb-2">Role</label>
-                                        <select id="role" name="role" required class="form-input w-full">
-                                            <option value="worker">Sales Worker</option>
-                                            <option value="manager">Manager</option>
-                                            ${this.state.currentUser.role === 'admin' ? '<option value="admin">Administrator</option>' : ''}
-                                        </select>
-                                    </div>
-                                    <div>
-                                        <label class="block text-sm font-medium text-gray-300 mb-2">Hire Date</label>
-                                        <input type="date" id="hireDate" name="hireDate" required class="form-input w-full" value="${new Date().toISOString().split('T')[0]}">
-                                    </div>
-                                </div>
-                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                    <div>
-                                        <label class="block text-sm font-medium text-gray-300 mb-2">Email Address</label>
-                                        <input type="email" id="email" name="email" required class="form-input w-full">
-                                    </div>
-                                    <div>
-                                        <label class="block text-sm font-medium text-gray-300 mb-2">Phone Number</label>
-                                        <input type="tel" id="phone" name="phone" required class="form-input w-full">
-                                    </div>
-                                </div>
-                                <div>
-                                    <label class="block text-sm font-medium text-gray-300 mb-2">Address</label>
-                                    <textarea id="address" name="address" rows="2" required class="form-input w-full"></textarea>
-                                </div>
-                                <div>
-                                    <label class="block text-sm font-medium text-gray-300 mb-2">Annual Salary (${GCC_COUNTRIES[this.state.selectedCountry].currency})</label>
-                                    <input type="number" id="salary" name="salary" required class="form-input w-full">
-                                </div>
-                                <div class="flex justify-end space-x-4 pt-4">
-                                    <button type="button" data-action="close-modal" class="px-6 py-2 text-gray-400 hover:text-white transition-colors">Cancel</button>
-                                    <button type="submit" class="perplexity-button px-6 py-2">${isEdit ? 'Update' : 'Add'} Employee</button>
-                                </div>
-                            </form>
-                        </div>
-                    </div>
-                `;
-            },
-
-            getMessageModal() {
-                const otherUsers = this.state.users.filter(u => u.id !== this.state.currentUser.id);
-                return `
-                    <div class="modal-overlay">
-                        <div class="modal-content">
-                            <h3 class="text-xl font-bold text-white mb-6">Compose AI-Enhanced Message</h3>
-                            <form id="message-form" class="space-y-4">
-                                <div>
-                                    <label class="block text-sm font-medium text-gray-300 mb-2">Recipient</label>
-                                    <select id="recipient" name="recipient" required class="form-input w-full">
-                                        <option value="">Select recipient...</option>
-                                        ${otherUsers.map(user => `<option value="${user.id}">${user.name} (${user.role})</option>`).join('')}
-                                    </select>
-                                </div>
-                                <div>
-                                    <label class="block text-sm font-medium text-gray-300 mb-2">Subject</label>
-                                    <input type="text" id="subject" name="subject" required class="form-input w-full" placeholder="Enter message subject">
-                                </div>
-                                <div>
-                                    <label class="block text-sm font-medium text-gray-300 mb-2">Message</label>
-                                    <textarea id="content" name="content" rows="6" required class="form-input w-full" placeholder="Type your message here..."></textarea>
-                                </div>
-                                <div class="${this.state.aiMode === 'ai' ? 'ai-card' : 'bot-card'} p-4">
-                                    <div class="flex items-start space-x-3">
-                                        <i class="fas ${this.state.aiMode === 'ai' ? 'fa-brain text-purple-400' : 'fa-robot text-green-400'}"></i>
-                                        <div>
-                                            <p class="text-sm font-medium ${this.state.aiMode === 'ai' ? 'text-purple-400' : 'text-green-400'} mb-2">Accura${this.state.aiMode === 'ai' ? 'AI' : 'Bot'} Features</p>
-                                            <div class="space-y-1 text-xs text-gray-300">
-                                                <p>✨ Automatic sentiment analysis</p>
-                                                <p>🎯 Smart message categorization</p>
-                                                <p>🔍 AI-powered insights generation</p>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="flex justify-end space-x-4 pt-4">
-                                    <button type="button" data-action="close-modal" class="px-6 py-2 text-gray-400 hover:text-white transition-colors">Cancel</button>
-                                    <button type="submit" class="perplexity-button px-6 py-2">
-                                        <i class="fas fa-paper-plane mr-2"></i>Send Message
-                                    </button>
-                                </div>
-                            </form>
-                        </div>
-                    </div>
-                `;
-            },
-
-            // Helper function to update sale price in modal
-            updateSalePrice() {
-                const productSelect = document.getElementById('productId');
-                const selectedOption = productSelect.options[productSelect.selectedIndex];
-                const price = parseFloat(selectedOption.getAttribute('data-price')) || 0;
-                
-                const unitPriceInput = document.getElementById('unitPrice');
-                if (price > 0) {
-                    unitPriceInput.value = price;
-                }
-
-                const quantity = parseInt(document.getElementById('quantity')?.value) || 0;
-                const unitPrice = parseFloat(unitPriceInput.value) || 0;
-                const discount = parseFloat(document.getElementById('discount')?.value) || 0;
-                
-                const subtotal = (quantity * unitPrice) - discount;
-                const taxRate = this.getTaxInfo().rate;
-                const taxAmount = subtotal * taxRate;
-                const total = subtotal + taxAmount;
-                
-                document.getElementById('sale-subtotal').textContent = this.formatCurrency(subtotal);
-                document.getElementById('sale-tax').textContent = this.formatCurrency(taxAmount);
-                document.getElementById('sale-total').textContent = this.formatCurrency(total);
-            }
         };
 
         // Initialize the application
