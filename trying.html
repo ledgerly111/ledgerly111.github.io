@@ -581,10 +581,8 @@ box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
 </style>
 </head>
 <body>
-<!-- Notification Container -->
 <div id="notification-container" class="notification-container"></div>
 
-<!-- Mobile Sidebar Overlay -->
 <div id="sidebar-overlay" class="sidebar-overlay" onclick="app.toggleMobileSidebar()"></div>
 
 <div id="app" class="app-container"></div>
@@ -596,22 +594,22 @@ if (msg.includes('cdn.tailwindcss.com')) return;
 console.log('Warning:', msg);
 };
 
-// FIXED: Precision Math Library for Financial Calculations
+// CORRECTED: Precision Math Library for all financial calculations to avoid floating-point errors.
 class PrecisionMath {
 static round(value, decimals = 2) {
 return Math.round((value + Number.EPSILON) * Math.pow(10, decimals)) / Math.pow(10, decimals);
 }
 
 static add(a, b) {
-return this.round((a * 100 + b * 100) / 100);
+return this.round(((a * 100) + (b * 100)) / 100);
 }
 
 static subtract(a, b) {
-return this.round((a * 100 - b * 100) / 100);
+return this.round(((a * 100) - (b * 100)) / 100);
 }
 
 static multiply(a, b) {
-return this.round((a * 10000 * b) / 10000);
+return this.round((a * b));
 }
 
 static divide(a, b) {
@@ -638,6 +636,7 @@ const GCC_COUNTRIES = {
 class NotificationSystem {
 static show(message, type = 'info', duration = 4000) {
 const container = document.getElementById('notification-container');
+if (!container) return;
 const notification = document.createElement('div');
 notification.className = `notification ${type}`;
 
@@ -680,7 +679,7 @@ static warning(message) { this.show(message, 'warning'); }
 static info(message) { this.show(message, 'info'); }
 }
 
-// Enhanced Data Storage
+// Enhanced Data Storage with Error Handling
 class DataStorage {
 static save(key, data) {
 try {
@@ -705,7 +704,7 @@ return null;
 }
 }
 
-// AccuraAI Implementation
+// AccuraAI Mock Implementation
 const AccuraAI = {
 analyzeSentiment(text) {
 const positiveWords = ['great', 'excellent', 'good', 'amazing', 'wonderful', 'fantastic', 'awesome', 'love', 'perfect', 'happy', 'success'];
@@ -730,7 +729,7 @@ return 'neutral';
 generateBusinessInsights(salesData, products, customers, expenses) {
 const insights = [];
 
-// FIXED: Use PrecisionMath for accurate calculations
+// CORRECTED: Ensure PrecisionMath is used for all financial calculations.
 const totalRevenue = salesData.reduce((sum, sale) => PrecisionMath.add(sum, sale.total), 0);
 const totalExpenses = expenses.reduce((sum, expense) => PrecisionMath.add(sum, expense.amount), 0);
 const netProfit = PrecisionMath.subtract(totalRevenue, totalExpenses);
@@ -804,7 +803,7 @@ return recommendations;
 }
 };
 
-// AccuraBot Implementation
+// AccuraBot Mock Implementation
 const AccuraBot = {
 analyzeApp(state) {
 return {
@@ -816,7 +815,7 @@ quickActions: this.getQuickActions(state)
 },
 
 getAppOverview(state) {
-// FIXED: Use PrecisionMath for accurate calculations
+// CORRECTED: Ensure PrecisionMath is used for all financial calculations.
 const totalRevenue = state.sales.reduce((sum, sale) => PrecisionMath.add(sum, sale.total), 0);
 const totalExpenses = state.expenses.reduce((sum, expense) => PrecisionMath.add(sum, expense.amount), 0);
 const lowStockCount = state.products.filter(p => p.stock <= state.lowStockThreshold).length;
@@ -838,7 +837,7 @@ healthScore: this.calculateHealthScore(state)
 calculateHealthScore(state) {
 let score = 0;
 
-// FIXED: Use PrecisionMath for accurate calculations
+// CORRECTED: Ensure PrecisionMath is used for all financial calculations.
 const revenue = state.sales.reduce((sum, sale) => PrecisionMath.add(sum, sale.total), 0);
 const expenses = state.expenses.reduce((sum, expense) => PrecisionMath.add(sum, expense.amount), 0);
 const netProfit = PrecisionMath.subtract(revenue, expenses);
@@ -897,7 +896,7 @@ return alerts;
 
 getRecommendations(state) {
 const recommendations = [];
-// FIXED: Use PrecisionMath for accurate calculations
+// CORRECTED: Ensure PrecisionMath is used for all financial calculations.
 const totalRevenue = state.sales.reduce((sum, sale) => PrecisionMath.add(sum, sale.total), 0);
 const avgSale = state.sales.length > 0 ? PrecisionMath.divide(totalRevenue, state.sales.length) : 0;
 
@@ -1028,6 +1027,7 @@ overlay?.classList.remove('open');
 },
 
 closeMobileSidebar() {
+if (!this.state.mobileMenuOpen) return;
 this.state.mobileMenuOpen = false;
 const sidebar = document.getElementById('mobile-sidebar');
 const overlay = document.getElementById('sidebar-overlay');
@@ -1057,8 +1057,8 @@ this.saveData();
 
 bindEvents() {
 document.addEventListener('click', (e) => {
-if (e.target.matches('[data-action]') || e.target.closest('[data-action]')) {
-const actionElement = e.target.matches('[data-action]') ? e.target : e.target.closest('[data-action]');
+const actionElement = e.target.closest('[data-action]');
+if (actionElement) {
 const action = actionElement.getAttribute('data-action');
 const id = actionElement.getAttribute('data-id');
 this.handleAction(action, id, e);
@@ -1068,7 +1068,9 @@ this.handleAction(action, id, e);
 document.addEventListener('submit', (e) => {
 e.preventDefault();
 const formId = e.target.id;
+if (formId) {
 this.handleFormSubmit(formId, e.target);
+}
 });
 
 window.addEventListener('resize', () => {
@@ -1174,34 +1176,36 @@ this.state.currentView = view;
 this.render();
 },
 
-// FIXED: Currency conversion utilities with precision
+// CORRECTED: Currency conversion utilities using PrecisionMath
 convertCurrency(amount, fromCurrency = 'USD', toCurrency = null) {
 if (!toCurrency) {
 toCurrency = GCC_COUNTRIES[this.state.selectedCountry].currency;
 }
 if (fromCurrency === toCurrency) return amount;
 
+const countryInfo = GCC_COUNTRIES[this.state.selectedCountry];
 if (fromCurrency === 'USD') {
-const rate = GCC_COUNTRIES[this.state.selectedCountry].rate;
-return PrecisionMath.multiply(amount, rate);
+return PrecisionMath.multiply(amount, countryInfo.rate);
 }
 
 if (toCurrency === 'USD') {
-const rate = GCC_COUNTRIES[this.state.selectedCountry].rate;
-return PrecisionMath.divide(amount, rate);
+return PrecisionMath.divide(amount, countryInfo.rate);
 }
 
-return amount;
+// Fallback for non-USD conversions (can be expanded)
+return amount; 
 },
 
 formatCurrency(amount, showSymbol = true) {
 const countryInfo = GCC_COUNTRIES[this.state.selectedCountry];
-const convertedAmount = this.convertCurrency(amount);
+const options = {
+style: 'decimal',
+minimumFractionDigits: 2,
+maximumFractionDigits: 2,
+};
+const formattedAmount = Number(amount).toLocaleString('en-US', options);
 
-if (showSymbol) {
-return `${countryInfo.symbol} ${PrecisionMath.round(convertedAmount, 2)}`;
-}
-return `${PrecisionMath.round(convertedAmount, 2)} ${countryInfo.currency}`;
+return showSymbol ? `${countryInfo.symbol} ${formattedAmount}` : `${formattedAmount} ${countryInfo.currency}`;
 },
 
 getTaxInfo() {
@@ -1293,7 +1297,7 @@ this.updateBotAnalysis();
 this.render();
 },
 
-// FIXED: Sale form handling with accurate calculations
+// CORRECTED: Sale form handling with accurate calculations via PrecisionMath
 handleSaleForm(data) {
 // Calculate subtotal with precision
 const subtotal = this.currentSaleCart.reduce((sum, item) => 
@@ -1342,7 +1346,7 @@ customer.balance = PrecisionMath.add(customer.balance, sale.total);
 }
 }
 
-// FIXED: Calculate commission properly based on profit margin
+// CORRECTED: Calculate commission properly based on profit margin
 const profit = this.currentSaleCart.reduce((sum, item) => {
 const product = this.state.products.find(p => p.id === item.productId);
 const itemProfit = PrecisionMath.multiply(
@@ -1352,7 +1356,7 @@ item.quantity
 return PrecisionMath.add(sum, itemProfit);
 }, 0);
 
-// Commission: 10% of profit (industry standard)
+// Commission: 10% of profit
 const commission = PrecisionMath.multiply(profit, 0.1);
 const userIndex = this.state.users.findIndex(u => u.id === this.state.currentUser.id);
 if (userIndex !== -1) {
@@ -1497,20 +1501,27 @@ modal.remove();
 
 prefillEditForm(type, id) {
 let item;
+let formId;
 if (type === 'edit-product') {
 item = this.state.products.find(p => p.id === id);
+formId = 'product-form';
 } else if (type === 'edit-customer') {
 item = this.state.customers.find(c => c.id === id);
+formId = 'customer-form';
 } else if (type === 'edit-employee') {
 item = this.state.users.find(u => u.id === id);
+formId = 'employee-form';
 } else if (type === 'edit-expense') {
 item = this.state.expenses.find(e => e.id === id);
+formId = 'expense-form';
 }
 
 if (item) {
 setTimeout(() => {
+const form = document.getElementById(formId);
+if (!form) return;
 Object.keys(item).forEach(key => {
-const input = document.getElementById(key);
+const input = form.elements[key];
 if (input) {
 input.value = item[key];
 }
@@ -1565,7 +1576,7 @@ NotificationSystem.success('🗑️ Employee deleted successfully!');
 }
 },
 
-// FIXED: Invoice generation with accurate calculations
+// CORRECTED: Invoice generation with accurate calculations
 generateInvoice(saleId) {
 const sale = this.state.sales.find(s => s.id === parseInt(saleId));
 if (!sale) return;
@@ -1676,7 +1687,7 @@ options: { ...defaultOptions, ...options }
 },
 
 createDashboardCharts() {
-// FIXED: Sales trend chart with accurate calculations
+// CORRECTED: Sales trend chart with accurate calculations
 const salesByMonth = {};
 this.state.sales.forEach(sale => {
 const month = sale.date.substring(0, 7);
@@ -1684,10 +1695,10 @@ salesByMonth[month] = PrecisionMath.add(salesByMonth[month] || 0, sale.total);
 });
 
 const salesData = {
-labels: Object.keys(salesByMonth),
+labels: Object.keys(salesByMonth).sort(),
 datasets: [{
 label: `Monthly Sales (${GCC_COUNTRIES[this.state.selectedCountry].currency})`,
-data: Object.values(salesByMonth),
+data: Object.keys(salesByMonth).sort().map(month => salesByMonth[month]),
 borderColor: '#00d4aa',
 backgroundColor: 'rgba(0, 212, 170, 0.1)',
 tension: 0.4,
@@ -1697,7 +1708,7 @@ fill: true
 
 this.createChart('salesChart', 'line', salesData);
 
-// FIXED: Revenue vs Expenses with precision
+// CORRECTED: Revenue vs Expenses with precision
 const totalRevenue = this.state.sales.reduce((sum, sale) => PrecisionMath.add(sum, sale.total), 0);
 const totalExpenses = this.state.expenses.reduce((sum, expense) => PrecisionMath.add(sum, expense.amount), 0);
 const netProfit = PrecisionMath.subtract(totalRevenue, totalExpenses);
@@ -1747,15 +1758,15 @@ console.error('PDF Generation Error:', err);
 });
 },
 
-// FIXED: Invoice HTML generation with proper calculations
+// CORRECTED: Invoice HTML generation with proper calculations
 generateInvoiceHtml(invoice) {
-const { companyName, currency, currencySymbol, taxName } = invoice;
+const { companyName, currencySymbol, taxName } = invoice;
 const tableRows = invoice.items.map(item => `
 <tr style="page-break-inside: avoid;">
 <td style="padding: 8px; border-bottom: 1px solid #374151;">${item.name}</td>
 <td style="padding: 8px; border-bottom: 1px solid #374151; text-align: right;">${item.quantity}</td>
-<td style="padding: 8px; border-bottom: 1px solid #374151; text-align: right;">${PrecisionMath.round(item.unitPrice, 2)}</td>
-<td style="padding: 8px; border-bottom: 1px solid #374151; text-align: right;">${PrecisionMath.round(PrecisionMath.multiply(item.unitPrice, item.quantity), 2)}</td>
+<td style="padding: 8px; border-bottom: 1px solid #374151; text-align: right;">${PrecisionMath.round(item.unitPrice, 2).toFixed(2)}</td>
+<td style="padding: 8px; border-bottom: 1px solid #374151; text-align: right;">${PrecisionMath.round(PrecisionMath.multiply(item.unitPrice, item.quantity), 2).toFixed(2)}</td>
 </tr>`
 ).join('');
 
@@ -1795,19 +1806,20 @@ return `
 </table>
 <div style="display: flex; justify-content: flex-end; margin-top: 2rem;">
 <div style="width: 100%; max-width: 300px;">
-<div style="display: flex; justify-content: space-between; padding: 8px 0;"><span>Subtotal</span><span>${PrecisionMath.round(invoice.subtotal, 2)}</span></div>
-${invoice.discount > 0 ? `<div style="display: flex; justify-content: space-between; padding: 8px 0;"><span>Discount</span><span>-${PrecisionMath.round(invoice.discount, 2)}</span></div>` : ''}
-<div style="display: flex; justify-content: space-between; padding: 8px 0;"><span>${taxName} (${PrecisionMath.round(PrecisionMath.multiply(invoice.taxRate, 100), 0)}%)</span><span>${PrecisionMath.round(invoice.taxAmount, 2)}</span></div>
-<div style="display: flex; justify-content: space-between; padding: 12px 0; border-top: 2px solid #00d4aa; margin-top: 8px; font-weight: 700; font-size: 1.25rem;"><span>Total Due</span><span>${currencySymbol} ${PrecisionMath.round(invoice.total, 2)}</span></div>
+<div style="display: flex; justify-content: space-between; padding: 8px 0;"><span>Subtotal</span><span>${PrecisionMath.round(invoice.subtotal, 2).toFixed(2)}</span></div>
+${invoice.discount > 0 ? `<div style="display: flex; justify-content: space-between; padding: 8px 0;"><span>Discount</span><span>-${PrecisionMath.round(invoice.discount, 2).toFixed(2)}</span></div>` : ''}
+<div style="display: flex; justify-content: space-between; padding: 8px 0;"><span>${taxName} (${PrecisionMath.round(PrecisionMath.multiply(invoice.taxRate, 100), 0)}%)</span><span>${PrecisionMath.round(invoice.taxAmount, 2).toFixed(2)}</span></div>
+<div style="display: flex; justify-content: space-between; padding: 12px 0; border-top: 2px solid #00d4aa; margin-top: 8px; font-weight: 700; font-size: 1.25rem;"><span>Total Due</span><span>${currencySymbol} ${PrecisionMath.round(invoice.total, 2).toFixed(2)}</span></div>
 </div>
 </div>
 <div style="margin-top: 3rem; text-align: center; color: #6b7280; font-size: 0.875rem;"><p>Thank you for your business!</p></div>
 </div>`;
 },
 
-// Continue with the remaining view rendering methods...
 render() {
 const appContainer = document.getElementById('app');
+if (!appContainer) return;
+
 if (!this.state.currentUser) {
 appContainer.innerHTML = this.getLoginView();
 return;
@@ -1830,13 +1842,13 @@ const views = {
 appContainer.innerHTML = `
 ${this.getNavbar()}
 ${this.getSidebar()}
-<div class="main-content">
+<main class="main-content">
 ${views[this.state.currentView] || this.getDashboardView()}
-</div>
+</main>
 `;
 
 // Initialize charts if needed
-if (this.state.currentView === 'dashboard') {
+if (this.state.currentView === 'dashboard' || this.state.currentView === 'reports') {
 setTimeout(() => this.createDashboardCharts(), 100);
 }
 },
@@ -1907,7 +1919,7 @@ const aiText = this.state.aiMode === 'ai' ? 'AccuraAI' : 'AccuraBot';
 const countryInfo = GCC_COUNTRIES[this.state.selectedCountry];
 
 return `
-<div class="navbar">
+<nav class="navbar">
 <div class="flex justify-between items-center">
 <div class="flex items-center space-x-4">
 <div class="burger-menu" data-action="toggle-mobile-menu">
@@ -1919,7 +1931,7 @@ return `
 <i class="fas fa-chart-line text-white text-lg"></i>
 </div>
 <div class="hidden sm:block">
-<h1 class="text-xl font-bold gradient-text leading-tight">Ledgerly</h1>
+<h1 class="text-xl font-bold gradient-text leading-tight">${this.state.companyName}</h1>
 <p class="text-xs text-gray-400 leading-none">Sales</p>
 </div>
 </div>
@@ -1957,7 +1969,7 @@ ${unreadCount > 0 ? `<span class="absolute -top-1 -right-1 bg-red-500 text-white
 </button>
 </div>
 </div>
-</div>
+</nav>
 `;
 },
 
@@ -2000,23 +2012,21 @@ ${item.badge ? `<span class="bg-red-500 text-white text-xs rounded-full px-2 py-
 `;
 
 return `
-<!-- Mobile Sidebar -->
-<div id="mobile-sidebar" class="mobile-sidebar">
+<aside id="mobile-sidebar" class="mobile-sidebar">
 ${sidebarContent}
-</div>
+</aside>
 
-<!-- Desktop Sidebar -->
-<div class="desktop-sidebar">
+<aside class="desktop-sidebar">
 ${sidebarContent}
-</div>
+</aside>
 `;
 },
 
-// FIXED: Dashboard view with accurate calculations
+// CORRECTED: Dashboard view with all calculations using PrecisionMath for accuracy.
 getDashboardView() {
 const currentUser = this.state.currentUser;
 
-// FIXED: Use PrecisionMath for all financial calculations
+// CORRECTED: Use PrecisionMath for all financial calculations.
 const totalRevenue = this.state.sales.reduce((sum, sale) => PrecisionMath.add(sum, sale.total), 0);
 const totalExpenses = this.state.expenses.reduce((sum, expense) => PrecisionMath.add(sum, expense.amount), 0);
 const netProfit = PrecisionMath.subtract(totalRevenue, totalExpenses);
@@ -2024,7 +2034,7 @@ const totalProducts = this.state.products.length;
 const totalCustomers = this.state.customers.length;
 const totalSales = this.state.sales.length;
 
-// FIXED: Accurate monthly earnings calculation
+// CORRECTED: Accurate monthly earnings calculation.
 const monthlyEarnings = PrecisionMath.divide(currentUser.salary, 12);
 const totalEarnings = PrecisionMath.add(monthlyEarnings, currentUser.commission || 0);
 
@@ -2593,7 +2603,7 @@ ${sale.saleType}
 },
 
 getExpensesView() {
-// FIXED: Accurate expense calculations
+// CORRECTED: Accurate expense calculations
 const totalExpenses = this.state.expenses.reduce((sum, expense) => PrecisionMath.add(sum, expense.amount), 0);
 const monthlyExpenses = this.state.expenses.filter(e => 
 e.date.startsWith(new Date().toISOString().substring(0, 7))
@@ -2947,7 +2957,7 @@ ${this.state.invoices.map(invoice => `
 <div class="text-sm font-medium text-white">${invoice.customer.name}</div>
 <div class="text-sm text-gray-400">${invoice.customer.type}</div>
 </td>
-<td class="px-6 py-4 text-sm text-white font-medium">${invoice.currencySymbol} ${PrecisionMath.round(invoice.total, 2)}</td>
+<td class="px-6 py-4 text-sm text-white font-medium">${invoice.currencySymbol} ${PrecisionMath.round(invoice.total, 2).toFixed(2)}</td>
 <td class="px-6 py-4 text-sm text-gray-300">${new Date(invoice.date).toLocaleDateString()}</td>
 <td class="px-6 py-4">
 <span class="px-2 py-1 text-xs font-medium rounded-full ${
@@ -2990,7 +3000,7 @@ if (!this.canViewReports()) {
 return '<div class="text-center text-gray-400 py-12">You do not have permission to view this page.</div>';
 }
 
-// FIXED: Accurate report calculations
+// CORRECTED: Accurate report calculations
 const totalRevenue = this.state.sales.reduce((sum, sale) => PrecisionMath.add(sum, sale.total), 0);
 const totalExpenses = this.state.expenses.reduce((sum, expense) => PrecisionMath.add(sum, expense.amount), 0);
 const netProfit = PrecisionMath.subtract(totalRevenue, totalExpenses);
@@ -3215,9 +3225,9 @@ ${this.state.selectedCountry === code ? '<i class="fas fa-check text-teal-400"><
 },
 
 getInboxView() {
-const messages = this.state.messages.filter(m => 
+const messages = [...this.state.messages].filter(m => 
 m.to === this.state.currentUser.id || m.from === this.state.currentUser.id
-);
+).sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
 
 return `
 <div class="space-y-6 fade-in">
@@ -3363,7 +3373,7 @@ ${this.state.aiInsights.length > 0 ? this.state.aiInsights.map(insight => `
 <p class="text-gray-300 text-sm mb-2">${insight.message}</p>
 <p class="text-${insight.type === 'success' ? 'green' : insight.type === 'warning' ? 'yellow' : 'blue'}-400 text-sm">${insight.action}</p>
 </div>
-`) : `
+`).join('') : `
 <div class="text-center text-gray-400 py-8">
 <i class="fas fa-chart-line text-4xl mb-4"></i>
 <p>Processing business data...</p>
@@ -3390,7 +3400,7 @@ ${recommendations.length > 0 ? recommendations.map(rec => `
 <p class="text-gray-300 text-sm mb-2">${rec.message}</p>
 <p class="text-${rec.type === 'celebration' ? 'green' : 'blue'}-400 text-sm">${rec.tip}</p>
 </div>
-`) : `
+`).join('') : `
 <div class="text-center text-gray-400 py-8">
 <i class="fas fa-trophy text-4xl mb-4"></i>
 <p>Keep working to unlock performance insights!</p>
@@ -3400,7 +3410,7 @@ ${recommendations.length > 0 ? recommendations.map(rec => `
 </div>
 </div>
 
-<div class="bg-gray-800/30 rounded-xl p-6">
+<div class="mt-6 bg-gray-800/30 rounded-xl p-6">
 <h3 class="text-lg font-semibold text-white mb-4 flex items-center">
 <i class="fas fa-cog text-gray-400 mr-2"></i>
 AI Features
@@ -3426,7 +3436,10 @@ AI Features
 </div>
 </div>
 `;
-} else {
+} 
+// --- Pausing code here before the 'else' block for the next message ---
+else {
+// This is the AccuraBot view
 return `
 <div class="space-y-6 fade-in">
 <div class="bot-card p-8">
@@ -3438,7 +3451,7 @@ return `
 <p class="text-gray-300">Real-time business monitoring and automated alerts</p>
 </div>
 
-${Object.keys(this.state.botAnalysis).length > 0 ? `
+${Object.keys(this.state.botAnalysis).length > 0 && this.state.botAnalysis.overview ? `
 <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
 <div class="lg:col-span-2 space-y-6">
 <div class="bg-gray-800/30 rounded-xl p-6">
@@ -3562,7 +3575,6 @@ const modals = {
 'edit-employee': this.getEmployeeModal(true),
 'compose-message': this.getMessageModal()
 };
-
 return modals[type] || '';
 },
 
@@ -3577,50 +3589,50 @@ return `
 </button>
 </div>
 <form id="product-form" class="space-y-4">
-<input type="hidden" id="product-id" value="">
+<input type="hidden" id="product-id" name="id" value="">
 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
 <div>
 <label class="block text-gray-400 text-sm font-medium mb-2">Product Name *</label>
-<input type="text" id="name" name="name" class="form-input w-full" required>
+<input type="text" name="name" class="form-input w-full" required>
 </div>
 <div>
 <label class="block text-gray-400 text-sm font-medium mb-2">SKU *</label>
-<input type="text" id="sku" name="sku" class="form-input w-full" required>
+<input type="text" name="sku" class="form-input w-full" required>
 </div>
 </div>
 <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
 <div>
 <label class="block text-gray-400 text-sm font-medium mb-2">Price (${GCC_COUNTRIES[this.state.selectedCountry].currency}) *</label>
-<input type="number" id="price" name="price" step="0.01" min="0" class="form-input w-full" required>
+<input type="number" name="price" step="0.01" min="0" class="form-input w-full" required>
 </div>
 <div>
 <label class="block text-gray-400 text-sm font-medium mb-2">Cost *</label>
-<input type="number" id="cost" name="cost" step="0.01" min="0" class="form-input w-full" required>
+<input type="number" name="cost" step="0.01" min="0" class="form-input w-full" required>
 </div>
 <div>
 <label class="block text-gray-400 text-sm font-medium mb-2">Stock *</label>
-<input type="number" id="stock" name="stock" min="0" class="form-input w-full" required>
+<input type="number" name="stock" min="0" class="form-input w-full" required>
 </div>
 </div>
 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
 <div>
 <label class="block text-gray-400 text-sm font-medium mb-2">Category *</label>
-<select id="category" name="category" class="form-input w-full" required>
+<select name="category" class="form-input w-full" required>
 ${this.state.categories.map(cat => `<option value="${cat}">${cat}</option>`).join('')}
 </select>
 </div>
 <div>
 <label class="block text-gray-400 text-sm font-medium mb-2">Reorder Level</label>
-<input type="number" id="reorderLevel" name="reorderLevel" min="0" value="10" class="form-input w-full">
+<input type="number" name="reorderLevel" min="0" value="10" class="form-input w-full">
 </div>
 </div>
 <div>
 <label class="block text-gray-400 text-sm font-medium mb-2">Supplier</label>
-<input type="text" id="supplier" name="supplier" class="form-input w-full">
+<input type="text" name="supplier" class="form-input w-full">
 </div>
 <div>
 <label class="block text-gray-400 text-sm font-medium mb-2">Description</label>
-<textarea id="description" name="description" rows="3" class="form-input w-full"></textarea>
+<textarea name="description" rows="3" class="form-input w-full"></textarea>
 </div>
 <div class="flex justify-end space-x-4 pt-4">
 <button type="button" data-action="close-modal" class="px-6 py-2 border border-gray-600 text-gray-400 rounded-lg hover:bg-gray-700 transition-colors">Cancel</button>
@@ -3645,15 +3657,15 @@ return `
 </button>
 </div>
 <form id="customer-form" class="space-y-4">
-<input type="hidden" id="customer-id" value="">
+<input type="hidden" id="customer-id" name="id" value="">
 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
 <div>
 <label class="block text-gray-400 text-sm font-medium mb-2">Customer Name *</label>
-<input type="text" id="name" name="name" class="form-input w-full" required>
+<input type="text" name="name" class="form-input w-full" required>
 </div>
 <div>
 <label class="block text-gray-400 text-sm font-medium mb-2">Type *</label>
-<select id="type" name="type" class="form-input w-full" required>
+<select name="type" class="form-input w-full" required>
 <option value="Individual">Individual</option>
 <option value="Business">Business</option>
 </select>
@@ -3662,25 +3674,25 @@ return `
 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
 <div>
 <label class="block text-gray-400 text-sm font-medium mb-2">Email *</label>
-<input type="email" id="email" name="email" class="form-input w-full" required>
+<input type="email" name="email" class="form-input w-full" required>
 </div>
 <div>
 <label class="block text-gray-400 text-sm font-medium mb-2">Phone *</label>
-<input type="tel" id="phone" name="phone" class="form-input w-full" required>
+<input type="tel" name="phone" class="form-input w-full" required>
 </div>
 </div>
 <div>
 <label class="block text-gray-400 text-sm font-medium mb-2">Address *</label>
-<textarea id="address" name="address" rows="2" class="form-input w-full" required></textarea>
+<textarea name="address" rows="2" class="form-input w-full" required></textarea>
 </div>
 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
 <div>
 <label class="block text-gray-400 text-sm font-medium mb-2">Tax ID / TRN</label>
-<input type="text" id="taxId" name="taxId" class="form-input w-full" placeholder="Optional for individuals">
+<input type="text" name="taxId" class="form-input w-full" placeholder="Optional for individuals">
 </div>
 <div>
 <label class="block text-gray-400 text-sm font-medium mb-2">Credit Limit (${GCC_COUNTRIES[this.state.selectedCountry].currency})</label>
-<input type="number" id="creditLimit" name="creditLimit" step="0.01" min="0" value="0" class="form-input w-full">
+<input type="number" name="creditLimit" step="0.01" min="0" value="0" class="form-input w-full">
 </div>
 </div>
 <div class="flex justify-end space-x-4 pt-4">
@@ -3695,8 +3707,10 @@ return `
 `;
 },
 
-// FIXED: Sale modal with proper calculations
+// CORRECTED: Sale modal with calculations handled by main app functions.
 getSaleModal() {
+// This modal is interactive; its state is managed by functions on the main `app` object.
+setTimeout(() => this.addCartRow(), 0); // Add the first row after the modal is rendered.
 return `
 <div class="modal-overlay">
 <div class="modal-content" style="max-width: 800px;">
@@ -3733,25 +3747,19 @@ ${this.state.customers.map(customer => `
 <div class="border border-gray-600 rounded-lg p-4">
 <div class="flex justify-between items-center mb-4">
 <h4 class="text-lg font-semibold text-white">Products</h4>
-<button type="button" onclick="app.addProductToCart()" class="perplexity-button text-sm px-3 py-1">
-<i class="fas fa-plus mr-1"></i>Add Product
+<button type="button" onclick="app.addCartRow()" class="perplexity-button text-sm px-3 py-1">
+<i class="fas fa-plus mr-1"></i>Add Item
 </button>
 </div>
 <div id="sale-cart">
-<div class="grid grid-cols-12 gap-2 text-gray-400 text-sm font-medium mb-2">
+<div class="grid grid-cols-12 gap-2 text-gray-400 text-sm font-medium mb-2 px-2">
 <div class="col-span-5">Product</div>
-<div class="col-span-2">Quantity</div>
-<div class="col-span-2">Unit Price</div>
-<div class="col-span-2">Total</div>
-<div class="col-span-1">Action</div>
+<div class="col-span-2 text-center">Quantity</div>
+<div class="col-span-2 text-right">Unit Price</div>
+<div class="col-span-2 text-right">Total</div>
+<div class="col-span-1"></div>
 </div>
-<div id="cart-items">
-<!-- Cart items will be populated here -->
-</div>
-<div class="flex justify-between items-center mt-4">
-<button type="button" onclick="app.addCartRow()" class="text-blue-400 hover:text-blue-300 text-sm">
-<i class="fas fa-plus mr-1"></i>Add Item
-</button>
+<div id="cart-items" class="space-y-2">
 </div>
 </div>
 </div>
@@ -3761,10 +3769,7 @@ ${this.state.customers.map(customer => `
 <label class="block text-gray-400 text-sm font-medium mb-2">Discount (${GCC_COUNTRIES[this.state.selectedCountry].currency})</label>
 <input type="number" name="discount" step="0.01" min="0" value="0" class="form-input w-full" oninput="app.updateSaleTotal()">
 </div>
-<div class="space-y-2">
-<div id="sale-summary" class="text-right">
-<div class="text-gray-400">Calculating...</div>
-</div>
+<div id="sale-summary" class="text-right space-y-2 p-4 bg-gray-800/50 rounded-lg">
 </div>
 </div>
 
@@ -3777,78 +3782,6 @@ ${this.state.customers.map(customer => `
 </form>
 </div>
 </div>
-
-<script>
-app.addCartRow = function() {
-const cartItems = document.getElementById('cart-items');
-const row = document.createElement('div');
-row.className = 'grid grid-cols-12 gap-2 mb-2';
-row.innerHTML = \`
-<div class="col-span-5">
-<select class="form-input w-full text-sm" onchange="app.updateProductPrice(this)" required>
-<option value="">Select Product</option>
-\${app.state.products.map(product => \`
-<option value="\${product.id}" data-price="\${product.price}">\${product.name} (Stock: \${product.stock})</option>
-\`).join('')}
-</select>
-</div>
-<div class="col-span-2">
-<input type="number" class="form-input w-full text-sm" min="1" value="1" onchange="app.updateSaleTotal()" required>
-</div>
-<div class="col-span-2">
-<input type="number" class="form-input w-full text-sm" step="0.01" min="0" onchange="app.updateSaleTotal()" required>
-</div>
-<div class="col-span-2">
-<input type="text" class="form-input w-full text-sm bg-gray-700" readonly>
-</div>
-<div class="col-span-1">
-<button type="button" onclick="this.parentElement.parentElement.remove(); app.updateSaleTotal()" class="text-red-400 hover:text-red-300 p-1">
-<i class="fas fa-trash text-sm"></i>
-</button>
-</div>
-\`;
-cartItems.appendChild(row);
-app.updateSaleTotal();
-};
-
-app.updateProductPrice = function(select) {
-const price = select.options[select.selectedIndex]?.dataset.price || 0;
-const priceInput = select.parentElement.nextElementSibling.nextElementSibling.querySelector('input');
-if (priceInput) {
-priceInput.value = price;
-app.updateSaleTotal();
-}
-};
-
-app.updateSaleTotal = function() {
-const cartRows = document.querySelectorAll('#cart-items > div');
-let subtotal = 0;
-
-cartRows.forEach(row => {
-const quantity = parseFloat(row.children[1].querySelector('input').value) || 0;
-const price = parseFloat(row.children[2].querySelector('input').value) || 0;
-const lineTotal = app.PrecisionMath ? app.PrecisionMath.multiply(quantity, price) : quantity * price;
-row.children[3].querySelector('input').value = app.formatCurrency ? app.formatCurrency(lineTotal, false) : lineTotal.toFixed(2);
-subtotal = app.PrecisionMath ? app.PrecisionMath.add(subtotal, lineTotal) : subtotal + lineTotal;
-});
-
-const discount = parseFloat(document.querySelector('input[name="discount"]').value) || 0;
-const discountedSubtotal = app.PrecisionMath ? app.PrecisionMath.subtract(subtotal, discount) : subtotal - discount;
-const taxInfo = app.getTaxInfo();
-const taxAmount = app.PrecisionMath ? app.PrecisionMath.multiply(discountedSubtotal, taxInfo.rate) : discountedSubtotal * taxInfo.rate;
-const total = app.PrecisionMath ? app.PrecisionMath.add(discountedSubtotal, taxAmount) : discountedSubtotal + taxAmount;
-
-document.getElementById('sale-summary').innerHTML = \`
-<div class="text-gray-400 mb-1">Subtotal: <span class="text-white">\${app.formatCurrency ? app.formatCurrency(subtotal) : subtotal.toFixed(2)}</span></div>
-\${discount > 0 ? \`<div class="text-gray-400 mb-1">Discount: <span class="text-red-400">-\${app.formatCurrency ? app.formatCurrency(discount) : discount.toFixed(2)}</span></div>\` : ''}
-<div class="text-gray-400 mb-1">\${taxInfo.name}: <span class="text-white">\${app.formatCurrency ? app.formatCurrency(taxAmount) : taxAmount.toFixed(2)}</span></div>
-<div class="text-lg font-bold text-green-400 pt-2 border-t border-gray-600">Total: \${app.formatCurrency ? app.formatCurrency(total) : total.toFixed(2)}</div>
-\`;
-};
-
-// Initialize with one row
-app.addCartRow();
-</script>
 `;
 },
 
@@ -3863,30 +3796,30 @@ return `
 </button>
 </div>
 <form id="expense-form" class="space-y-4">
-<input type="hidden" id="expense-id" value="">
+<input type="hidden" id="expense-id" name="id" value="">
 <div>
 <label class="block text-gray-400 text-sm font-medium mb-2">Description *</label>
-<input type="text" id="description" name="description" class="form-input w-full" required>
+<input type="text" name="description" class="form-input w-full" required>
 </div>
 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
 <div>
 <label class="block text-gray-400 text-sm font-medium mb-2">Amount (${GCC_COUNTRIES[this.state.selectedCountry].currency}) *</label>
-<input type="number" id="amount" name="amount" step="0.01" min="0" class="form-input w-full" required>
+<input type="number" name="amount" step="0.01" min="0" class="form-input w-full" required>
 </div>
 <div>
 <label class="block text-gray-400 text-sm font-medium mb-2">Category *</label>
-<select id="category" name="category" class="form-input w-full" required>
+<select name="category" class="form-input w-full" required>
 ${this.state.expenseCategories.map(cat => `<option value="${cat}">${cat}</option>`).join('')}
 </select>
 </div>
 </div>
 <div>
 <label class="block text-gray-400 text-sm font-medium mb-2">Date *</label>
-<input type="date" id="date" name="date" value="${new Date().toISOString().split('T')[0]}" class="form-input w-full" required>
+<input type="date" name="date" value="${new Date().toISOString().split('T')[0]}" class="form-input w-full" required>
 </div>
 <div>
 <label class="block text-gray-400 text-sm font-medium mb-2">Notes</label>
-<textarea id="notes" name="notes" rows="3" class="form-input w-full" placeholder="Additional details about this expense"></textarea>
+<textarea name="notes" rows="3" class="form-input w-full" placeholder="Additional details about this expense"></textarea>
 </div>
 <div class="flex justify-end space-x-4 pt-4">
 <button type="button" data-action="close-modal" class="px-6 py-2 border border-gray-600 text-gray-400 rounded-lg hover:bg-gray-700 transition-colors">Cancel</button>
@@ -3911,35 +3844,35 @@ return `
 </button>
 </div>
 <form id="employee-form" class="space-y-4">
-<input type="hidden" id="employee-id" value="">
+<input type="hidden" id="employee-id" name="id" value="">
 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
 <div>
 <label class="block text-gray-400 text-sm font-medium mb-2">Full Name *</label>
-<input type="text" id="name" name="name" class="form-input w-full" required>
+<input type="text" name="name" class="form-input w-full" required>
 </div>
 <div>
 <label class="block text-gray-400 text-sm font-medium mb-2">Username *</label>
-<input type="text" id="username" name="username" class="form-input w-full" required>
+<input type="text" name="username" class="form-input w-full" required>
 </div>
 </div>
 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
 <div>
 <label class="block text-gray-400 text-sm font-medium mb-2">Email *</label>
-<input type="email" id="email" name="email" class="form-input w-full" required>
+<input type="email" name="email" class="form-input w-full" required>
 </div>
 <div>
 <label class="block text-gray-400 text-sm font-medium mb-2">Phone *</label>
-<input type="tel" id="phone" name="phone" class="form-input w-full" required>
+<input type="tel" name="phone" class="form-input w-full" required>
 </div>
 </div>
 <div>
 <label class="block text-gray-400 text-sm font-medium mb-2">Address</label>
-<textarea id="address" name="address" rows="2" class="form-input w-full"></textarea>
+<textarea name="address" rows="2" class="form-input w-full"></textarea>
 </div>
 <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
 <div>
 <label class="block text-gray-400 text-sm font-medium mb-2">Role *</label>
-<select id="role" name="role" class="form-input w-full" required>
+<select name="role" class="form-input w-full" required>
 <option value="worker">Worker</option>
 <option value="manager">Manager</option>
 <option value="admin">Admin</option>
@@ -3947,12 +3880,11 @@ return `
 </div>
 <div>
 <label class="block text-gray-400 text-sm font-medium mb-2">Hire Date *</label>
-<input type="date" id="hireDate" name="hireDate" value="${new Date().toISOString().split('T')[0]
-}" class="form-input w-full" required>
+<input type="date" name="hireDate" value="${new Date().toISOString().split('T')[0]}" class="form-input w-full" required>
 </div>
 <div>
 <label class="block text-gray-400 text-sm font-medium mb-2">Annual Salary (${GCC_COUNTRIES[this.state.selectedCountry].currency}) *</label>
-<input type="number" id="salary" name="salary" step="0.01" min="0" class="form-input w-full" required>
+<input type="number" name="salary" step="0.01" min="0" class="form-input w-full" required>
 </div>
 </div>
 <div class="flex justify-end space-x-4 pt-4">
@@ -4015,17 +3947,13 @@ ${this.state.users.filter(u => u.id !== this.state.currentUser.id).map(user => `
 }
 };
 
-// Enhanced sale cart handling
-app.addProductToCart = function() {
-this.addCartRow();
-};
-
+// Enhanced sale cart handling methods
 app.addCartRow = function() {
 const cartItems = document.getElementById('cart-items');
 if (!cartItems) return;
 
 const row = document.createElement('div');
-row.className = 'grid grid-cols-12 gap-2 mb-2';
+row.className = 'grid grid-cols-12 gap-2 mb-2 items-center';
 row.innerHTML = `
 <div class="col-span-5">
 <select class="form-input w-full text-sm" onchange="app.updateProductPrice(this)" required>
@@ -4036,17 +3964,17 @@ ${this.state.products.map(product => `
 </select>
 </div>
 <div class="col-span-2">
-<input type="number" class="form-input w-full text-sm" min="1" value="1" onchange="app.updateSaleTotal()" required>
+<input type="number" class="form-input w-full text-sm text-center" min="1" value="1" oninput="app.updateSaleTotal()" required>
 </div>
 <div class="col-span-2">
-<input type="number" class="form-input w-full text-sm" step="0.01" min="0" onchange="app.updateSaleTotal()" required>
+<input type="number" class="form-input w-full text-sm text-right" step="0.01" min="0" oninput="app.updateSaleTotal()" required>
 </div>
 <div class="col-span-2">
-<input type="text" class="form-input w-full text-sm bg-gray-700" readonly>
+<input type="text" class="form-input w-full text-sm text-right bg-gray-700" readonly>
 </div>
-<div class="col-span-1">
-<button type="button" onclick="this.parentElement.parentElement.remove(); app.updateSaleTotal()" class="text-red-400 hover:text-red-300 p-1">
-<i class="fas fa-trash text-sm"></i>
+<div class="col-span-1 text-center">
+<button type="button" onclick="this.closest('.grid').remove(); app.updateSaleTotal()" class="text-red-400 hover:text-red-300 p-1">
+<i class="fas fa-trash text-base"></i>
 </button>
 </div>
 `;
@@ -4056,34 +3984,32 @@ this.updateSaleTotal();
 
 app.updateProductPrice = function(select) {
 const price = select.options[select.selectedIndex]?.dataset.price || 0;
-const priceInput = select.parentElement.nextElementSibling.nextElementSibling.querySelector('input');
+const priceInput = select.closest('.grid').querySelector('input[type="number"][step="0.01"]');
 if (priceInput) {
 priceInput.value = price;
 this.updateSaleTotal();
 }
 };
 
-// FIXED: Sale total calculation with proper precision
+// CORRECTED: Sale total calculation with proper precision
 app.updateSaleTotal = function() {
 const cartRows = document.querySelectorAll('#cart-items > div');
 let subtotal = 0;
-
-// Update cart for form submission
 this.currentSaleCart = [];
 
 cartRows.forEach(row => {
-const productSelect = row.children[0].querySelector('select');
-const quantityInput = row.children[1].querySelector('input');
-const priceInput = row.children[2].querySelector('input');
-const totalInput = row.children[3].querySelector('input');
+const productSelect = row.querySelector('select');
+const quantityInput = row.querySelector('input[min="1"]');
+const priceInput = row.querySelector('input[step="0.01"]');
+const totalInput = row.querySelector('input[readonly]');
 
 const productId = parseInt(productSelect.value);
 const quantity = parseFloat(quantityInput.value) || 0;
 const price = parseFloat(priceInput.value) || 0;
 
-if (productId && quantity > 0 && price > 0) {
+if (productId && quantity > 0 && price >= 0) {
 const lineTotal = PrecisionMath.multiply(quantity, price);
-totalInput.value = this.formatCurrency(lineTotal, false);
+totalInput.value = PrecisionMath.round(lineTotal, 2).toFixed(2);
 subtotal = PrecisionMath.add(subtotal, lineTotal);
 
 this.currentSaleCart.push({
@@ -4091,6 +4017,8 @@ productId: productId,
 quantity: quantity,
 unitPrice: price
 });
+} else {
+totalInput.value = '0.00';
 }
 });
 
@@ -4104,10 +4032,10 @@ const total = PrecisionMath.add(discountedSubtotal, taxAmount);
 const summaryElement = document.getElementById('sale-summary');
 if (summaryElement) {
 summaryElement.innerHTML = `
-<div class="text-gray-400 mb-1">Subtotal: <span class="text-white">${this.formatCurrency(subtotal)}</span></div>
-${discount > 0 ? `<div class="text-gray-400 mb-1">Discount: <span class="text-red-400">-${this.formatCurrency(discount)}</span></div>` : ''}
-<div class="text-gray-400 mb-1">${taxInfo.name} (${PrecisionMath.round(PrecisionMath.multiply(taxInfo.rate, 100), 0)}%): <span class="text-white">${this.formatCurrency(taxAmount)}</span></div>
-<div class="text-lg font-bold text-green-400 pt-2 border-t border-gray-600">Total: ${this.formatCurrency(total)}</div>
+<div class="flex justify-between text-gray-400"><span>Subtotal:</span> <span class="text-white font-medium">${this.formatCurrency(subtotal)}</span></div>
+${discount > 0 ? `<div class="flex justify-between text-gray-400"><span>Discount:</span> <span class="text-red-400 font-medium">-${this.formatCurrency(discount)}</span></div>` : ''}
+<div class="flex justify-between text-gray-400"><span>${taxInfo.name} (${PrecisionMath.round(PrecisionMath.multiply(taxInfo.rate, 100), 0)}%):</span> <span class="text-white font-medium">${this.formatCurrency(taxAmount)}</span></div>
+<div class="flex justify-between text-lg font-bold text-green-400 pt-2 border-t border-gray-600 mt-2"><span>Total:</span> <span>${this.formatCurrency(total)}</span></div>
 `;
 }
 };
@@ -4121,20 +4049,18 @@ app.init();
 window.app = app;
 window.PrecisionMath = PrecisionMath;
 
-// Service Worker Registration (optional)
+// Service Worker Registration (optional for PWA features)
 if ('serviceWorker' in navigator) {
 window.addEventListener('load', () => {
 navigator.serviceWorker.register('/sw.js')
 .then((registration) => {
-console.log('SW registered: ', registration);
+console.log('ServiceWorker registration successful with scope: ', registration.scope);
 })
-.catch((registrationError) => {
-console.log('SW registration failed: ', registrationError);
+.catch((err) => {
+console.log('ServiceWorker registration failed: ', err);
 });
 });
 }
-
 </script>
 </body>
 </html>
-
