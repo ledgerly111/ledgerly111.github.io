@@ -39,8 +39,11 @@ font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
 margin: 0;
 padding: 0;
 overflow-x: hidden;
+-webkit-text-size-adjust: 100%;
+text-size-adjust: 100%;
 }
 
+/* Mobile-First Design */
 .app-container {
 min-height: 100vh;
 display: flex;
@@ -50,6 +53,7 @@ flex-direction: column;
 .navbar {
 background: linear-gradient(90deg, var(--bg-secondary) 0%, rgba(26, 31, 46, 0.95) 100%);
 backdrop-filter: blur(15px);
+-webkit-backdrop-filter: blur(15px);
 border-bottom: 1px solid var(--border-color);
 padding: 1rem;
 position: sticky;
@@ -65,6 +69,7 @@ max-width: 100vw;
 overflow-x: hidden;
 }
 
+/* Mobile Sidebar */
 .mobile-sidebar {
 position: fixed;
 top: 0;
@@ -73,6 +78,7 @@ width: 280px;
 height: 100vh;
 background: linear-gradient(180deg, var(--bg-tertiary) 0%, rgba(36, 41, 56, 0.95) 100%);
 backdrop-filter: blur(10px);
+-webkit-backdrop-filter: blur(10px);
 border-right: 1px solid var(--border-color);
 transition: left 0.3s ease;
 z-index: 2000;
@@ -101,6 +107,7 @@ opacity: 1;
 visibility: visible;
 }
 
+/* Desktop Sidebar */
 .desktop-sidebar {
 display: none;
 }
@@ -124,6 +131,7 @@ width: 280px;
 height: 100vh;
 background: linear-gradient(180deg, var(--bg-tertiary) 0%, rgba(36, 41, 56, 0.95) 100%);
 backdrop-filter: blur(10px);
+-webkit-backdrop-filter: blur(10px);
 border-right: 1px solid var(--border-color);
 overflow-y: auto;
 z-index: 100;
@@ -134,6 +142,7 @@ margin-left: 280px;
 }
 }
 
+/* Burger Menu Button */
 .burger-menu {
 display: flex;
 align-items: center;
@@ -158,9 +167,11 @@ display: none;
 }
 }
 
+/* Enhanced Cards */
 .perplexity-card {
 background: rgba(36, 41, 56, 0.9);
 backdrop-filter: blur(15px);
+-webkit-backdrop-filter: blur(15px);
 border: 1px solid var(--border-color);
 border-radius: 16px;
 box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
@@ -172,6 +183,7 @@ box-shadow: 0 12px 40px rgba(0, 0, 0, 0.5);
 transform: translateY(-2px);
 }
 
+/* Enhanced Buttons */
 .perplexity-button {
 background: linear-gradient(135deg, var(--accent-primary) 0%, var(--accent-secondary) 100%);
 border: none;
@@ -187,6 +199,7 @@ padding: 12px 24px;
 display: inline-flex;
 align-items: center;
 justify-content: center;
+touch-action: manipulation;
 cursor: pointer;
 }
 
@@ -234,6 +247,7 @@ padding: 12px 24px;
 cursor: pointer;
 }
 
+/* Menu Items */
 .menu-item {
 width: 100%;
 text-align: left;
@@ -247,6 +261,7 @@ display: flex;
 align-items: center;
 font-size: 16px;
 min-height: 56px;
+touch-action: manipulation;
 cursor: pointer;
 }
 
@@ -268,11 +283,13 @@ margin-right: 12px;
 font-size: 18px;
 }
 
+/* Special Cards */
 .ai-card {
 background: linear-gradient(135deg, rgba(139, 92, 246, 0.15) 0%, rgba(168, 85, 247, 0.15) 100%);
 border: 1px solid rgba(139, 92, 246, 0.4);
 border-radius: 16px;
 backdrop-filter: blur(10px);
+-webkit-backdrop-filter: blur(10px);
 }
 
 .bot-card {
@@ -280,6 +297,7 @@ background: linear-gradient(135deg, rgba(16, 185, 129, 0.15) 0%, rgba(5, 150, 10
 border: 1px solid rgba(16, 185, 129, 0.4);
 border-radius: 16px;
 backdrop-filter: blur(10px);
+-webkit-backdrop-filter: blur(10px);
 }
 
 .expenses-card {
@@ -287,8 +305,10 @@ background: linear-gradient(135deg, rgba(245, 158, 11, 0.15) 0%, rgba(217, 119, 
 border: 1px solid rgba(245, 158, 11, 0.4);
 border-radius: 16px;
 backdrop-filter: blur(10px);
+-webkit-backdrop-filter: blur(10px);
 }
 
+/* Animations */
 .fade-in {
 animation: fadeIn 0.6s ease-out;
 }
@@ -316,6 +336,7 @@ animation: botPulse 2s infinite;
 50% { box-shadow: 0 8px 30px rgba(16, 185, 129, 0.6); }
 }
 
+/* Notification System */
 .notification-container {
 position: fixed;
 top: 20px;
@@ -327,6 +348,7 @@ pointer-events: none;
 .notification {
 background: rgba(36, 41, 56, 0.95);
 backdrop-filter: blur(15px);
+-webkit-backdrop-filter: blur(15px);
 border: 1px solid var(--border-color);
 border-radius: 12px;
 padding: 16px;
@@ -367,6 +389,7 @@ opacity: 1;
 }
 }
 
+/* Forms */
 .form-input {
 background: rgba(15, 20, 25, 0.8) !important;
 border: 1px solid var(--border-color) !important;
@@ -385,8 +408,10 @@ background: rgba(15, 20, 25, 0.9) !important;
 outline: none !important;
 }
 
+/* Tables */
 .responsive-table {
 overflow-x: auto;
+-webkit-overflow-scrolling: touch;
 }
 
 .responsive-table table {
@@ -408,6 +433,7 @@ font-size: 16px;
 }
 }
 
+/* Modal Improvements */
 .modal-overlay {
 position: fixed;
 inset: 0;
@@ -422,6 +448,7 @@ padding: 16px;
 .modal-content {
 background: rgba(36, 41, 56, 0.95);
 backdrop-filter: blur(20px);
+-webkit-backdrop-filter: blur(20px);
 border: 1px solid var(--border-color);
 border-radius: 20px;
 padding: 32px;
@@ -440,6 +467,7 @@ border-radius: 16px;
 }
 }
 
+/* User Selection Cards */
 .user-selection-card {
 background: rgba(36, 41, 56, 0.8);
 border: 2px solid transparent;
@@ -464,6 +492,7 @@ transform: translateY(-8px) scale(1.02);
 box-shadow: 0 20px 40px rgba(0, 212, 170, 0.3);
 }
 
+/* Gradient Text Effects */
 .gradient-text {
 background: linear-gradient(135deg, var(--accent-primary) 0%, var(--accent-secondary) 100%);
 -webkit-background-clip: text;
@@ -485,6 +514,7 @@ background: linear-gradient(135deg, var(--bot-color) 0%, #059669 100%);
 background-clip: text;
 }
 
+/* Mobile Improvements */
 @media (max-width: 768px) {
 .notification-container {
 top: 10px;
@@ -508,12 +538,14 @@ padding: 12px;
 }
 }
 
+/* Chart Container */
 .chart-container {
 position: relative;
 height: 300px;
 width: 100%;
 }
 
+/* Toggle Switch */
 .toggle-switch {
 position: relative;
 width: 60px;
@@ -549,11 +581,16 @@ box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
 </style>
 </head>
 <body>
+<!-- Notification Container -->
 <div id="notification-container" class="notification-container"></div>
+
+<!-- Mobile Sidebar Overlay -->
 <div id="sidebar-overlay" class="sidebar-overlay" onclick="app.toggleMobileSidebar()"></div>
+
 <div id="app" class="app-container"></div>
 
 <script>
+// Suppress console warnings for Tailwind JIT
 console.warn = function(msg) {
 if (msg.includes('cdn.tailwindcss.com')) return;
 console.log('Warning:', msg);
@@ -1867,6 +1904,7 @@ const unreadCount = this.getUnreadMessageCount();
 const aiButtonClass = this.state.aiMode === 'ai' ? 'ai-button ai-pulse' : 'bot-button bot-pulse';
 const aiIcon = this.state.aiMode === 'ai' ? 'fas fa-brain' : 'fas fa-robot';
 const aiText = this.state.aiMode === 'ai' ? 'AccuraAI' : 'AccuraBot';
+const countryInfo = GCC_COUNTRIES[this.state.selectedCountry];
 
 return `
 <div class="navbar">
@@ -1962,9 +2000,12 @@ ${item.badge ? `<span class="bg-red-500 text-white text-xs rounded-full px-2 py-
 `;
 
 return `
+<!-- Mobile Sidebar -->
 <div id="mobile-sidebar" class="mobile-sidebar">
 ${sidebarContent}
 </div>
+
+<!-- Desktop Sidebar -->
 <div class="desktop-sidebar">
 ${sidebarContent}
 </div>
@@ -2098,6 +2139,78 @@ Live Earnings
 </div>
 </div>
 
+${this.state.aiMode === 'bot' && Object.keys(overview).length > 0 ? `
+<div class="bot-card p-6">
+<div class="flex items-center justify-between mb-6">
+<h3 class="text-xl font-bold text-white flex items-center">
+<i class="fas fa-robot text-green-400 mr-3"></i>
+AccuraBot Business Analysis
+</h3>
+<div class="flex items-center space-x-2">
+<div class="text-sm font-medium px-3 py-1 rounded-full ${
+overview.healthScore >= 80 ? 'bg-green-500/20 text-green-400' :
+overview.healthScore >= 60 ? 'bg-yellow-500/20 text-yellow-400' :
+'bg-red-500/20 text-red-400'
+}">
+Health Score: ${overview.healthScore}%
+</div>
+</div>
+</div>
+
+${alerts.length > 0 ? `
+<div class="mb-6">
+<h4 class="text-lg font-semibold text-white mb-3">🚨 Active Alerts</h4>
+<div class="grid gap-3">
+${alerts.map(alert => `
+<div class="flex items-center p-3 bg-red-500/10 border border-red-500/20 rounded-lg">
+<span class="text-2xl mr-3">${alert.icon}</span>
+<div class="flex-1">
+<p class="text-white font-medium">${alert.title}</p>
+<p class="text-gray-400 text-sm">${alert.message}</p>
+</div>
+<button data-action="${alert.action}" class="text-red-400 hover:text-red-300">
+<i class="fas fa-arrow-right"></i>
+</button>
+</div>
+`).join('')}
+</div>
+</div>
+` : ''}
+
+${quickActions.length > 0 ? `
+<div class="mb-6">
+<h4 class="text-lg font-semibold text-white mb-3">⚡ Quick Actions</h4>
+<div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+${quickActions.map(action => `
+<button data-action="bot-quick-action" data-id="${action.id}" class="p-3 bg-gray-800/50 border border-gray-700 hover:border-gray-600 rounded-lg transition-all text-center">
+<i class="${action.icon} text-${action.color}-400 text-xl mb-2"></i>
+<p class="text-white text-sm font-medium">${action.label}</p>
+</button>
+`).join('')}
+</div>
+</div>
+` : ''}
+
+${recommendations.length > 0 ? `
+<div>
+<h4 class="text-lg font-semibold text-white mb-3">💡 AI Recommendations</h4>
+<div class="space-y-3">
+${recommendations.map(rec => `
+<div class="p-4 bg-blue-500/10 border border-blue-500/20 rounded-lg">
+<div class="flex items-center mb-2">
+<span class="text-xl mr-2">${rec.icon}</span>
+<h5 class="text-white font-medium">${rec.title}</h5>
+</div>
+<p class="text-gray-300 text-sm mb-2">${rec.message}</p>
+<p class="text-blue-400 text-sm">${rec.tip}</p>
+</div>
+`).join('')}
+</div>
+</div>
+` : ''}
+</div>
+` : ''}
+
 <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
 <div class="perplexity-card p-6">
 <h3 class="text-xl font-bold text-white mb-4 flex items-center">
@@ -2148,9 +2261,6 @@ ${this.state.aiInsights.map(insight => `
 `;
 },
 
-// All other view methods would continue here...
-// For brevity, I'll provide the essential methods to complete the functional app
-
 getProductsView() {
 const lowStockProducts = this.state.products.filter(p => p.stock <= this.state.lowStockThreshold);
 
@@ -2174,7 +2284,12 @@ ${lowStockProducts.length > 0 ? `
 <i class="fas fa-exclamation-triangle text-red-400 mr-2"></i>
 <h3 class="text-lg font-semibold text-red-400">Low Stock Alert</h3>
 </div>
-<p class="text-gray-300 mb-3">${lowStockProducts.length} products are running low on stock.</p>
+<p class="text-gray-300 mb-3">${lowStockProducts.length} products are running low on stock and need immediate attention.</p>
+<div class="flex flex-wrap gap-2">
+${lowStockProducts.map(product => `
+<span class="px-3 py-1 bg-red-500/20 text-red-400 rounded-full text-sm">${product.name} (${product.stock} left)</span>
+`).join('')}
+</div>
 </div>
 ` : ''}
 
@@ -2186,31 +2301,165 @@ ${lowStockProducts.length > 0 ? `
 <table class="min-w-full">
 <thead class="bg-gray-800/50">
 <tr>
-<th class="px-6 py-4 text-left text-xs font-medium text-gray-400 uppercase">Product</th>
-<th class="px-6 py-4 text-left text-xs font-medium text-gray-400 uppercase">Price</th>
-<th class="px-6 py-4 text-left text-xs font-medium text-gray-400 uppercase">Stock</th>
-${this.canManageProducts() ? '<th class="px-6 py-4 text-left text-xs font-medium text-gray-400 uppercase">Actions</th>' : ''}
+<th class="px-6 py-4 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Product</th>
+<th class="px-6 py-4 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Category</th>
+<th class="px-6 py-4 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Price</th>
+<th class="px-6 py-4 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Stock</th>
+<th class="px-6 py-4 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Status</th>
+${this.canManageProducts() ? '<th class="px-6 py-4 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Actions</th>' : ''}
 </tr>
 </thead>
 <tbody class="divide-y divide-gray-700">
 ${this.state.products.map(product => `
 <tr class="hover:bg-gray-800/30 transition-colors">
 <td class="px-6 py-4">
+<div class="flex items-center">
+<div class="w-10 h-10 bg-gradient-to-r from-blue-500 to-purple-500 rounded-lg flex items-center justify-center mr-3">
+<i class="fas fa-box text-white"></i>
+</div>
+<div>
 <div class="text-sm font-medium text-white">${product.name}</div>
-<div class="text-sm text-gray-400">${product.category}</div>
+<div class="text-sm text-gray-400">SKU: ${product.sku}</div>
+</div>
+</div>
 </td>
-<td class="px-6 py-4 text-sm text-white">${this.formatCurrency(product.price)}</td>
+<td class="px-6 py-4 text-sm text-gray-300">${product.category}</td>
+<td class="px-6 py-4 text-sm text-white font-medium">${this.formatCurrency(product.price)}</td>
 <td class="px-6 py-4 text-sm ${product.stock <= this.state.lowStockThreshold ? 'text-red-400' : 'text-white'}">${product.stock}</td>
+<td class="px-6 py-4">
+<span class="px-2 py-1 text-xs font-medium rounded-full ${
+product.stock <= this.state.lowStockThreshold 
+? 'bg-red-500/20 text-red-400' 
+: product.stock <= product.reorderLevel 
+? 'bg-yellow-500/20 text-yellow-400'
+: 'bg-green-500/20 text-green-400'
+}">
+${product.stock <= this.state.lowStockThreshold ? 'Low Stock' : product.stock <= product.reorderLevel ? 'Reorder' : 'In Stock'}
+</span>
+</td>
 ${this.canManageProducts() ? `
 <td class="px-6 py-4 text-sm">
-<button data-action="edit-product" data-id="${product.id}" class="text-blue-400 hover:text-blue-300 mr-3">
+<div class="flex space-x-2">
+<button data-action="edit-product" data-id="${product.id}" class="text-blue-400 hover:text-blue-300">
 <i class="fas fa-edit"></i>
 </button>
 <button data-action="delete-product" data-id="${product.id}" class="text-red-400 hover:text-red-300">
 <i class="fas fa-trash"></i>
 </button>
+</div>
 </td>
 ` : ''}
+</tr>
+`).join('')}
+</tbody>
+</table>
+</div>
+</div>
+</div>
+`;
+},
+
+getCustomersView() {
+return `
+<div class="space-y-6 fade-in">
+<div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+<div>
+<h2 class="text-3xl font-bold text-white mb-2">Customer Management</h2>
+<p class="text-gray-400">Build strong relationships with your customers</p>
+</div>
+<button data-action="add-customer" class="perplexity-button">
+<i class="fas fa-user-plus mr-2"></i>Add Customer
+</button>
+</div>
+
+<div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+<div class="perplexity-card p-6">
+<div class="flex items-center justify-between">
+<div>
+<p class="text-gray-400 text-sm mb-1">Total Customers</p>
+<p class="text-3xl font-bold text-white">${this.state.customers.length}</p>
+</div>
+<div class="w-12 h-12 bg-blue-500/20 rounded-xl flex items-center justify-center">
+<i class="fas fa-users text-blue-400 text-xl"></i>
+</div>
+</div>
+</div>
+<div class="perplexity-card p-6">
+<div class="flex items-center justify-between">
+<div>
+<p class="text-gray-400 text-sm mb-1">Business Customers</p>
+<p class="text-3xl font-bold text-white">${this.state.customers.filter(c => c.type === 'Business').length}</p>
+</div>
+<div class="w-12 h-12 bg-green-500/20 rounded-xl flex items-center justify-center">
+<i class="fas fa-building text-green-400 text-xl"></i>
+</div>
+</div>
+</div>
+<div class="perplexity-card p-6">
+<div class="flex items-center justify-between">
+<div>
+<p class="text-gray-400 text-sm mb-1">Individual Customers</p>
+<p class="text-3xl font-bold text-white">${this.state.customers.filter(c => c.type === 'Individual').length}</p>
+</div>
+<div class="w-12 h-12 bg-purple-500/20 rounded-xl flex items-center justify-center">
+<i class="fas fa-user text-purple-400 text-xl"></i>
+</div>
+</div>
+</div>
+</div>
+
+<div class="perplexity-card">
+<div class="p-6 border-b border-gray-700">
+<h3 class="text-xl font-bold text-white">Customer Directory</h3>
+</div>
+<div class="responsive-table">
+<table class="min-w-full">
+<thead class="bg-gray-800/50">
+<tr>
+<th class="px-6 py-4 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Customer</th>
+<th class="px-6 py-4 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Type</th>
+<th class="px-6 py-4 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Contact</th>
+<th class="px-6 py-4 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Balance</th>
+<th class="px-6 py-4 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Actions</th>
+</tr>
+</thead>
+<tbody class="divide-y divide-gray-700">
+${this.state.customers.map(customer => `
+<tr class="hover:bg-gray-800/30 transition-colors">
+<td class="px-6 py-4">
+<div class="flex items-center">
+<div class="w-10 h-10 bg-gradient-to-r ${customer.type === 'Business' ? 'from-green-500 to-emerald-500' : 'from-purple-500 to-pink-500'} rounded-lg flex items-center justify-center mr-3">
+<i class="fas ${customer.type === 'Business' ? 'fa-building' : 'fa-user'} text-white"></i>
+</div>
+<div>
+<div class="text-sm font-medium text-white">${customer.name}</div>
+<div class="text-sm text-gray-400">${customer.email}</div>
+</div>
+</div>
+</td>
+<td class="px-6 py-4">
+<span class="px-2 py-1 text-xs font-medium rounded-full ${
+customer.type === 'Business' 
+? 'bg-green-500/20 text-green-400' 
+: 'bg-purple-500/20 text-purple-400'
+}">
+${customer.type}
+</span>
+</td>
+<td class="px-6 py-4 text-sm text-gray-300">${customer.phone}</td>
+<td class="px-6 py-4 text-sm ${customer.balance > 0 ? 'text-yellow-400' : 'text-green-400'} font-medium">
+${this.formatCurrency(customer.balance)}
+</td>
+<td class="px-6 py-4 text-sm">
+<div class="flex space-x-2">
+<button data-action="edit-customer" data-id="${customer.id}" class="text-blue-400 hover:text-blue-300">
+<i class="fas fa-edit"></i>
+</button>
+<button data-action="delete-customer" data-id="${customer.id}" class="text-red-400 hover:text-red-300">
+<i class="fas fa-trash"></i>
+</button>
+</div>
+</td>
 </tr>
 `).join('')}
 </tbody>
@@ -2224,35 +2473,113 @@ ${this.canManageProducts() ? `
 getSalesView() {
 return `
 <div class="space-y-6 fade-in">
-<div class="flex justify-between items-center">
-<h2 class="text-3xl font-bold text-white">Sales Management</h2>
+<div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+<div>
+<h2 class="text-3xl font-bold text-white mb-2">Sales Management</h2>
+<p class="text-gray-400">Record and track your sales with accurate calculations</p>
+</div>
 <button data-action="add-sale" class="perplexity-button">
 <i class="fas fa-plus mr-2"></i>Record Sale
 </button>
 </div>
+
+<div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-6">
+<div class="perplexity-card p-6">
+<div class="flex items-center justify-between">
+<div>
+<p class="text-gray-400 text-sm mb-1">Total Sales</p>
+<p class="text-3xl font-bold text-white">${this.state.sales.length}</p>
+</div>
+<div class="w-12 h-12 bg-purple-500/20 rounded-xl flex items-center justify-center">
+<i class="fas fa-shopping-cart text-purple-400 text-xl"></i>
+</div>
+</div>
+</div>
+<div class="perplexity-card p-6">
+<div class="flex items-center justify-between">
+<div>
+<p class="text-gray-400 text-sm mb-1">Total Revenue</p>
+<p class="text-2xl font-bold text-green-400">${this.formatCurrency(this.state.sales.reduce((sum, sale) => PrecisionMath.add(sum, sale.total), 0))}</p>
+</div>
+<div class="w-12 h-12 bg-green-500/20 rounded-xl flex items-center justify-center">
+<i class="fas fa-dollar-sign text-green-400 text-xl"></i>
+</div>
+</div>
+</div>
+<div class="perplexity-card p-6">
+<div class="flex items-center justify-between">
+<div>
+<p class="text-gray-400 text-sm mb-1">Average Sale</p>
+<p class="text-xl font-bold text-blue-400">
+${this.formatCurrency(this.state.sales.length > 0 ? 
+PrecisionMath.divide(this.state.sales.reduce((sum, sale) => PrecisionMath.add(sum, sale.total), 0), this.state.sales.length) : 0)}
+</p>
+</div>
+<div class="w-12 h-12 bg-blue-500/20 rounded-xl flex items-center justify-center">
+<i class="fas fa-chart-bar text-blue-400 text-xl"></i>
+</div>
+</div>
+</div>
+<div class="perplexity-card p-6">
+<div class="flex items-center justify-between">
+<div>
+<p class="text-gray-400 text-sm mb-1">This Month</p>
+<p class="text-xl font-bold text-teal-400">
+${this.formatCurrency(this.state.sales.filter(s => 
+s.date.startsWith(new Date().toISOString().substring(0, 7))
+).reduce((sum, sale) => PrecisionMath.add(sum, sale.total), 0))}
+</p>
+</div>
+<div class="w-12 h-12 bg-teal-500/20 rounded-xl flex items-center justify-center">
+<i class="fas fa-calendar-alt text-teal-400 text-xl"></i>
+</div>
+</div>
+</div>
+</div>
+
 <div class="perplexity-card">
+<div class="p-6 border-b border-gray-700">
+<h3 class="text-xl font-bold text-white">Sales History</h3>
+</div>
 <div class="responsive-table">
 <table class="min-w-full">
 <thead class="bg-gray-800/50">
 <tr>
-<th class="px-6 py-4 text-left">Customer</th>
-<th class="px-6 py-4 text-left">Total</th>
-<th class="px-6 py-4 text-left">Date</th>
-<th class="px-6 py-4 text-left">Actions</th>
+<th class="px-6 py-4 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Customer</th>
+<th class="px-6 py-4 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Items</th>
+<th class="px-6 py-4 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Total</th>
+<th class="px-6 py-4 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Date</th>
+<th class="px-6 py-4 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Type</th>
+<th class="px-6 py-4 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Actions</th>
 </tr>
 </thead>
-<tbody>
+<tbody class="divide-y divide-gray-700">
 ${this.state.sales.map(sale => {
 const customer = this.state.customers.find(c => c.id === sale.customerId);
 return `
-<tr>
-<td class="px-6 py-4">${customer ? customer.name : 'Unknown'}</td>
-<td class="px-6 py-4 text-white font-medium">${this.formatCurrency(sale.total)}</td>
-<td class="px-6 py-4">${new Date(sale.date).toLocaleDateString()}</td>
+<tr class="hover:bg-gray-800/30 transition-colors">
 <td class="px-6 py-4">
+<div class="text-sm font-medium text-white">${customer ? customer.name : 'Unknown Customer'}</div>
+<div class="text-sm text-gray-400">${customer ? customer.type : ''}</div>
+</td>
+<td class="px-6 py-4 text-sm text-gray-300">${sale.items.length} item(s)</td>
+<td class="px-6 py-4 text-sm text-white font-medium">${this.formatCurrency(sale.total)}</td>
+<td class="px-6 py-4 text-sm text-gray-300">${new Date(sale.date).toLocaleDateString()}</td>
+<td class="px-6 py-4">
+<span class="px-2 py-1 text-xs font-medium rounded-full ${
+sale.saleType === 'Cash' 
+? 'bg-green-500/20 text-green-400' 
+: 'bg-yellow-500/20 text-yellow-400'
+}">
+${sale.saleType}
+</span>
+</td>
+<td class="px-6 py-4 text-sm">
+<div class="flex space-x-2">
 <button data-action="generate-invoice" data-id="${sale.id}" class="text-blue-400 hover:text-blue-300">
 <i class="fas fa-file-invoice"></i>
 </button>
+</div>
 </td>
 </tr>
 `;
@@ -2265,38 +2592,1041 @@ return `
 `;
 },
 
-// Modal Methods
+getExpensesView() {
+// FIXED: Accurate expense calculations
+const totalExpenses = this.state.expenses.reduce((sum, expense) => PrecisionMath.add(sum, expense.amount), 0);
+const monthlyExpenses = this.state.expenses.filter(e => 
+e.date.startsWith(new Date().toISOString().substring(0, 7))
+).reduce((sum, expense) => PrecisionMath.add(sum, expense.amount), 0);
+
+const expensesByCategory = {};
+this.state.expenses.forEach(expense => {
+expensesByCategory[expense.category] = PrecisionMath.add(
+expensesByCategory[expense.category] || 0, 
+expense.amount
+);
+});
+
+return `
+<div class="space-y-6 fade-in">
+<div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+<div>
+<h2 class="text-3xl font-bold text-white mb-2">Expense Management</h2>
+<p class="text-gray-400">Track and categorize your business expenses</p>
+</div>
+<button data-action="add-expense" class="expenses-button">
+<i class="fas fa-plus mr-2"></i>Add Expense
+</button>
+</div>
+
+<div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+<div class="perplexity-card p-6">
+<div class="flex items-center justify-between">
+<div>
+<p class="text-gray-400 text-sm mb-1">Total Expenses</p>
+<p class="text-3xl font-bold text-red-400">${this.formatCurrency(totalExpenses)}</p>
+</div>
+<div class="w-12 h-12 bg-red-500/20 rounded-xl flex items-center justify-center">
+<i class="fas fa-credit-card text-red-400 text-xl"></i>
+</div>
+</div>
+</div>
+<div class="perplexity-card p-6">
+<div class="flex items-center justify-between">
+<div>
+<p class="text-gray-400 text-sm mb-1">This Month</p>
+<p class="text-2xl font-bold text-yellow-400">${this.formatCurrency(monthlyExpenses)}</p>
+</div>
+<div class="w-12 h-12 bg-yellow-500/20 rounded-xl flex items-center justify-center">
+<i class="fas fa-calendar-check text-yellow-400 text-xl"></i>
+</div>
+</div>
+</div>
+<div class="perplexity-card p-6">
+<div class="flex items-center justify-between">
+<div>
+<p class="text-gray-400 text-sm mb-1">Categories</p>
+<p class="text-2xl font-bold text-blue-400">${Object.keys(expensesByCategory).length}</p>
+</div>
+<div class="w-12 h-12 bg-blue-500/20 rounded-xl flex items-center justify-center">
+<i class="fas fa-tags text-blue-400 text-xl"></i>
+</div>
+</div>
+</div>
+</div>
+
+${Object.keys(expensesByCategory).length > 0 ? `
+<div class="expenses-card p-6 mb-6">
+<h3 class="text-xl font-bold text-white mb-4 flex items-center">
+<i class="fas fa-chart-pie text-yellow-400 mr-2"></i>
+Expenses by Category
+</h3>
+<div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+${Object.entries(expensesByCategory).map(([category, amount]) => `
+<div class="text-center p-4 bg-gray-800/30 rounded-lg">
+<div class="text-yellow-400 text-2xl mb-2">💰</div>
+<p class="text-gray-400 text-sm mb-1">${category}</p>
+<p class="text-lg font-bold text-yellow-400">${this.formatCurrency(amount)}</p>
+</div>
+`).join('')}
+</div>
+</div>
+` : ''}
+
+<div class="perplexity-card">
+<div class="p-6 border-b border-gray-700">
+<h3 class="text-xl font-bold text-white">Expense Records</h3>
+</div>
+<div class="responsive-table">
+<table class="min-w-full">
+<thead class="bg-gray-800/50">
+<tr>
+<th class="px-6 py-4 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Description</th>
+<th class="px-6 py-4 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Category</th>
+<th class="px-6 py-4 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Amount</th>
+<th class="px-6 py-4 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Date</th>
+<th class="px-6 py-4 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Actions</th>
+</tr>
+</thead>
+<tbody class="divide-y divide-gray-700">
+${this.state.expenses.map(expense => {
+const user = this.state.users.find(u => u.id === expense.addedBy);
+return `
+<tr class="hover:bg-gray-800/30 transition-colors">
+<td class="px-6 py-4">
+<div class="text-sm font-medium text-white">${expense.description}</div>
+<div class="text-sm text-gray-400">Added by: ${user ? user.name : 'Unknown'}</div>
+</td>
+<td class="px-6 py-4">
+<span class="px-2 py-1 text-xs font-medium rounded-full bg-gray-500/20 text-gray-400">
+${expense.category}
+</span>
+</td>
+<td class="px-6 py-4 text-sm text-red-400 font-medium">${this.formatCurrency(expense.amount)}</td>
+<td class="px-6 py-4 text-sm text-gray-300">${new Date(expense.date).toLocaleDateString()}</td>
+<td class="px-6 py-4 text-sm">
+<div class="flex space-x-2">
+<button data-action="edit-expense" data-id="${expense.id}" class="text-blue-400 hover:text-blue-300">
+<i class="fas fa-edit"></i>
+</button>
+<button data-action="delete-expense" data-id="${expense.id}" class="text-red-400 hover:text-red-300">
+<i class="fas fa-trash"></i>
+</button>
+</div>
+</td>
+</tr>
+`;
+}).join('')}
+</tbody>
+</table>
+</div>
+</div>
+</div>
+`;
+},
+
+getEmployeesView() {
+if (!this.canManageEmployees()) {
+return '<div class="text-center text-gray-400 py-12">You do not have permission to view this page.</div>';
+}
+
+return `
+<div class="space-y-6 fade-in">
+<div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+<div>
+<h2 class="text-3xl font-bold text-white mb-2">Employee Management</h2>
+<p class="text-gray-400">Manage your team and track performance</p>
+</div>
+<button data-action="add-employee" class="perplexity-button">
+<i class="fas fa-user-plus mr-2"></i>Add Employee
+</button>
+</div>
+
+<div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+<div class="perplexity-card p-6">
+<div class="flex items-center justify-between">
+<div>
+<p class="text-gray-400 text-sm mb-1">Total Employees</p>
+<p class="text-3xl font-bold text-white">${this.state.users.length}</p>
+</div>
+<div class="w-12 h-12 bg-blue-500/20 rounded-xl flex items-center justify-center">
+<i class="fas fa-users text-blue-400 text-xl"></i>
+</div>
+</div>
+</div>
+<div class="perplexity-card p-6">
+<div class="flex items-center justify-between">
+<div>
+<p class="text-gray-400 text-sm mb-1">Total Payroll</p>
+<p class="text-2xl font-bold text-green-400">
+${this.formatCurrency(this.state.users.reduce((sum, user) => 
+PrecisionMath.add(sum, PrecisionMath.add(PrecisionMath.divide(user.salary, 12), user.commission || 0)), 0))}
+</p>
+</div>
+<div class="w-12 h-12 bg-green-500/20 rounded-xl flex items-center justify-center">
+<i class="fas fa-dollar-sign text-green-400 text-xl"></i>
+</div>
+</div>
+</div>
+<div class="perplexity-card p-6">
+<div class="flex items-center justify-between">
+<div>
+<p class="text-gray-400 text-sm mb-1">Total Commission</p>
+<p class="text-2xl font-bold text-purple-400">
+${this.formatCurrency(this.state.users.reduce((sum, user) => PrecisionMath.add(sum, user.commission || 0), 0))}
+</p>
+</div>
+<div class="w-12 h-12 bg-purple-500/20 rounded-xl flex items-center justify-center">
+<i class="fas fa-trophy text-purple-400 text-xl"></i>
+</div>
+</div>
+</div>
+</div>
+
+<div class="perplexity-card">
+<div class="p-6 border-b border-gray-700">
+<h3 class="text-xl font-bold text-white">Team Directory</h3>
+</div>
+<div class="responsive-table">
+<table class="min-w-full">
+<thead class="bg-gray-800/50">
+<tr>
+<th class="px-6 py-4 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Employee</th>
+<th class="px-6 py-4 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Role</th>
+<th class="px-6 py-4 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Monthly Salary</th>
+<th class="px-6 py-4 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Commission</th>
+<th class="px-6 py-4 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Total Earnings</th>
+<th class="px-6 py-4 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Actions</th>
+</tr>
+</thead>
+<tbody class="divide-y divide-gray-700">
+${this.state.users.map(user => {
+const monthlySalary = PrecisionMath.divide(user.salary, 12);
+const totalEarnings = PrecisionMath.add(monthlySalary, user.commission || 0);
+return `
+<tr class="hover:bg-gray-800/30 transition-colors">
+<td class="px-6 py-4">
+<div class="flex items-center">
+<div class="w-10 h-10 bg-gradient-to-r ${
+user.role === 'admin' ? 'from-red-500 to-pink-500' :
+user.role === 'manager' ? 'from-blue-500 to-purple-500' :
+'from-green-500 to-teal-500'
+} rounded-lg flex items-center justify-center mr-3">
+<span class="text-white font-bold">${user.name.charAt(0)}</span>
+</div>
+<div>
+<div class="text-sm font-medium text-white">${user.name}</div>
+<div class="text-sm text-gray-400">${user.email}</div>
+</div>
+</div>
+</td>
+<td class="px-6 py-4">
+<span class="px-2 py-1 text-xs font-medium rounded-full ${
+user.role === 'admin' ? 'bg-red-500/20 text-red-400' :
+user.role === 'manager' ? 'bg-blue-500/20 text-blue-400' :
+'bg-green-500/20 text-green-400'
+}">
+${user.role.charAt(0).toUpperCase() + user.role.slice(1)}
+</span>
+</td>
+<td class="px-6 py-4 text-sm text-white font-medium">${this.formatCurrency(monthlySalary)}</td>
+<td class="px-6 py-4 text-sm text-blue-400 font-medium">${this.formatCurrency(user.commission || 0)}</td>
+<td class="px-6 py-4 text-sm text-green-400 font-bold">${this.formatCurrency(totalEarnings)}</td>
+<td class="px-6 py-4 text-sm">
+<div class="flex space-x-2">
+<button data-action="edit-employee" data-id="${user.id}" class="text-blue-400 hover:text-blue-300">
+<i class="fas fa-edit"></i>
+</button>
+${user.id !== this.state.currentUser.id ? `
+<button data-action="delete-employee" data-id="${user.id}" class="text-red-400 hover:text-red-300">
+<i class="fas fa-trash"></i>
+</button>
+` : ''}
+</div>
+</td>
+</tr>
+`;
+}).join('')}
+</tbody>
+</table>
+</div>
+</div>
+</div>
+`;
+},
+
+getInvoicesView() {
+this.state.invoices = this.state.invoices || [];
+
+return `
+<div class="space-y-6 fade-in">
+<div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+<div>
+<h2 class="text-3xl font-bold text-white mb-2">Invoice Management</h2>
+<p class="text-gray-400">Professional invoices with GCC tax compliance</p>
+</div>
+</div>
+
+<div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-6">
+<div class="perplexity-card p-6">
+<div class="flex items-center justify-between">
+<div>
+<p class="text-gray-400 text-sm mb-1">Total Invoices</p>
+<p class="text-3xl font-bold text-white">${this.state.invoices.length}</p>
+</div>
+<div class="w-12 h-12 bg-blue-500/20 rounded-xl flex items-center justify-center">
+<i class="fas fa-file-invoice text-blue-400 text-xl"></i>
+</div>
+</div>
+</div>
+<div class="perplexity-card p-6">
+<div class="flex items-center justify-between">
+<div>
+<p class="text-gray-400 text-sm mb-1">Total Value</p>
+<p class="text-2xl font-bold text-green-400">
+${this.formatCurrency(this.state.invoices.reduce((sum, invoice) => PrecisionMath.add(sum, invoice.total), 0))}
+</p>
+</div>
+<div class="w-12 h-12 bg-green-500/20 rounded-xl flex items-center justify-center">
+<i class="fas fa-dollar-sign text-green-400 text-xl"></i>
+</div>
+</div>
+</div>
+<div class="perplexity-card p-6">
+<div class="flex items-center justify-between">
+<div>
+<p class="text-gray-400 text-sm mb-1">Pending</p>
+<p class="text-2xl font-bold text-yellow-400">
+${this.state.invoices.filter(i => i.status === 'pending').length}
+</p>
+</div>
+<div class="w-12 h-12 bg-yellow-500/20 rounded-xl flex items-center justify-center">
+<i class="fas fa-clock text-yellow-400 text-xl"></i>
+</div>
+</div>
+</div>
+<div class="perplexity-card p-6">
+<div class="flex items-center justify-between">
+<div>
+<p class="text-gray-400 text-sm mb-1">This Month</p>
+<p class="text-xl font-bold text-teal-400">
+${this.state.invoices.filter(i => 
+i.date.startsWith(new Date().toISOString().substring(0, 7))
+).length}
+</p>
+</div>
+<div class="w-12 h-12 bg-teal-500/20 rounded-xl flex items-center justify-center">
+<i class="fas fa-calendar-alt text-teal-400 text-xl"></i>
+</div>
+</div>
+</div>
+</div>
+
+<div class="perplexity-card">
+<div class="p-6 border-b border-gray-700">
+<h3 class="text-xl font-bold text-white">Invoice History</h3>
+</div>
+${this.state.invoices.length > 0 ? `
+<div class="responsive-table">
+<table class="min-w-full">
+<thead class="bg-gray-800/50">
+<tr>
+<th class="px-6 py-4 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Invoice #</th>
+<th class="px-6 py-4 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Customer</th>
+<th class="px-6 py-4 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Amount</th>
+<th class="px-6 py-4 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Date</th>
+<th class="px-6 py-4 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Status</th>
+<th class="px-6 py-4 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Actions</th>
+</tr>
+</thead>
+<tbody class="divide-y divide-gray-700">
+${this.state.invoices.map(invoice => `
+<tr class="hover:bg-gray-800/30 transition-colors">
+<td class="px-6 py-4 text-sm font-medium text-white">${invoice.invoiceNumber}</td>
+<td class="px-6 py-4">
+<div class="text-sm font-medium text-white">${invoice.customer.name}</div>
+<div class="text-sm text-gray-400">${invoice.customer.type}</div>
+</td>
+<td class="px-6 py-4 text-sm text-white font-medium">${invoice.currencySymbol} ${PrecisionMath.round(invoice.total, 2)}</td>
+<td class="px-6 py-4 text-sm text-gray-300">${new Date(invoice.date).toLocaleDateString()}</td>
+<td class="px-6 py-4">
+<span class="px-2 py-1 text-xs font-medium rounded-full ${
+invoice.status === 'paid' ? 'bg-green-500/20 text-green-400' : 'bg-yellow-500/20 text-yellow-400'
+}">
+${invoice.status.charAt(0).toUpperCase() + invoice.status.slice(1)}
+</span>
+</td>
+<td class="px-6 py-4 text-sm">
+<div class="flex space-x-2">
+<button data-action="download-invoice" data-id="${invoice.id}" class="text-blue-400 hover:text-blue-300">
+<i class="fas fa-download"></i>
+</button>
+</div>
+</td>
+</tr>
+`).join('')}
+</tbody>
+</table>
+</div>
+` : `
+<div class="p-12 text-center">
+<div class="w-16 h-16 bg-gray-800 rounded-full flex items-center justify-center mx-auto mb-4">
+<i class="fas fa-file-invoice text-gray-600 text-2xl"></i>
+</div>
+<h3 class="text-lg font-medium text-gray-400 mb-2">No invoices yet</h3>
+<p class="text-gray-500 mb-4">Generate invoices from your sales to see them here</p>
+<button data-action="sales" class="perplexity-button">
+<i class="fas fa-shopping-cart mr-2"></i>Go to Sales
+</button>
+</div>
+`}
+</div>
+</div>
+`;
+},
+
+getReportsView() {
+if (!this.canViewReports()) {
+return '<div class="text-center text-gray-400 py-12">You do not have permission to view this page.</div>';
+}
+
+// FIXED: Accurate report calculations
+const totalRevenue = this.state.sales.reduce((sum, sale) => PrecisionMath.add(sum, sale.total), 0);
+const totalExpenses = this.state.expenses.reduce((sum, expense) => PrecisionMath.add(sum, expense.amount), 0);
+const netProfit = PrecisionMath.subtract(totalRevenue, totalExpenses);
+const profitMargin = totalRevenue > 0 ? PrecisionMath.multiply(PrecisionMath.divide(netProfit, totalRevenue), 100) : 0;
+
+const topProducts = this.state.products
+.map(product => {
+const sales = this.state.sales.reduce((total, sale) => {
+const productSales = sale.items.filter(item => item.productId === product.id);
+return total + productSales.reduce((sum, item) => sum + item.quantity, 0);
+}, 0);
+return { ...product, totalSold: sales };
+})
+.sort((a, b) => b.totalSold - a.totalSold)
+.slice(0, 5);
+
+return `
+<div class="space-y-6 fade-in">
+<div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+<div>
+<h2 class="text-3xl font-bold text-white mb-2">Business Reports</h2>
+<p class="text-gray-400">Comprehensive analytics and insights</p>
+</div>
+<button data-action="export-data" class="perplexity-button">
+<i class="fas fa-download mr-2"></i>Export Data
+</button>
+</div>
+
+<div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-6">
+<div class="perplexity-card p-6">
+<div class="flex items-center justify-between">
+<div>
+<p class="text-gray-400 text-sm mb-1">Net Profit</p>
+<p class="text-2xl font-bold ${netProfit >= 0 ? 'text-green-400' : 'text-red-400'}">${this.formatCurrency(netProfit)}</p>
+</div>
+<div class="w-12 h-12 ${netProfit >= 0 ? 'bg-green-500/20' : 'bg-red-500/20'} rounded-xl flex items-center justify-center">
+<i class="fas ${netProfit >= 0 ? 'fa-arrow-up text-green-400' : 'fa-arrow-down text-red-400'} text-xl"></i>
+</div>
+</div>
+</div>
+<div class="perplexity-card p-6">
+<div class="flex items-center justify-between">
+<div>
+<p class="text-gray-400 text-sm mb-1">Profit Margin</p>
+<p class="text-2xl font-bold ${profitMargin >= 0 ? 'text-blue-400' : 'text-red-400'}">${PrecisionMath.round(profitMargin, 1)}%</p>
+</div>
+<div class="w-12 h-12 bg-blue-500/20 rounded-xl flex items-center justify-center">
+<i class="fas fa-percentage text-blue-400 text-xl"></i>
+</div>
+</div>
+</div>
+<div class="perplexity-card p-6">
+<div class="flex items-center justify-between">
+<div>
+<p class="text-gray-400 text-sm mb-1">Revenue</p>
+<p class="text-2xl font-bold text-green-400">${this.formatCurrency(totalRevenue)}</p>
+</div>
+<div class="w-12 h-12 bg-green-500/20 rounded-xl flex items-center justify-center">
+<i class="fas fa-chart-line text-green-400 text-xl"></i>
+</div>
+</div>
+</div>
+<div class="perplexity-card p-6">
+<div class="flex items-center justify-between">
+<div>
+<p class="text-gray-400 text-sm mb-1">Expenses</p>
+<p class="text-2xl font-bold text-red-400">${this.formatCurrency(totalExpenses)}</p>
+</div>
+<div class="w-12 h-12 bg-red-500/20 rounded-xl flex items-center justify-center">
+<i class="fas fa-credit-card text-red-400 text-xl"></i>
+</div>
+</div>
+</div>
+</div>
+
+<div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+<div class="perplexity-card p-6">
+<h3 class="text-xl font-bold text-white mb-4 flex items-center">
+<i class="fas fa-trophy text-yellow-400 mr-2"></i>
+Top Selling Products
+</h3>
+<div class="space-y-3">
+${topProducts.map((product, index) => `
+<div class="flex items-center justify-between p-3 bg-gray-800/30 rounded-lg">
+<div class="flex items-center">
+<div class="w-8 h-8 bg-gradient-to-r from-yellow-500 to-orange-500 rounded-lg flex items-center justify-center mr-3 text-white font-bold text-sm">
+${index + 1}
+</div>
+<div>
+<div class="text-sm font-medium text-white">${product.name}</div>
+<div class="text-sm text-gray-400">${product.category}</div>
+</div>
+</div>
+<div class="text-right">
+<div class="text-sm font-bold text-white">${product.totalSold} sold</div>
+<div class="text-sm text-gray-400">${this.formatCurrency(product.price)}</div>
+</div>
+</div>
+`).join('')}
+</div>
+</div>
+
+<div class="perplexity-card p-6">
+<h3 class="text-xl font-bold text-white mb-4 flex items-center">
+<i class="fas fa-users text-blue-400 mr-2"></i>
+Team Performance
+</h3>
+<div class="space-y-3">
+${this.state.users.filter(u => u.role === 'worker' || u.role === 'manager').map(user => {
+const userSales = this.state.sales.filter(s => s.salesPersonId === user.id);
+const userRevenue = userSales.reduce((sum, sale) => PrecisionMath.add(sum, sale.total), 0);
+return `
+<div class="flex items-center justify-between p-3 bg-gray-800/30 rounded-lg">
+<div class="flex items-center">
+<div class="w-8 h-8 bg-gradient-to-r from-blue-500 to-purple-500 rounded-lg flex items-center justify-center mr-3">
+<span class="text-white font-bold text-sm">${user.name.charAt(0)}</span>
+</div>
+<div>
+<div class="text-sm font-medium text-white">${user.name}</div>
+<div class="text-sm text-gray-400">${user.role}</div>
+</div>
+</div>
+<div class="text-right">
+<div class="text-sm font-bold text-white">${userSales.length} sales</div>
+<div class="text-sm text-green-400">${this.formatCurrency(userRevenue)}</div>
+</div>
+</div>
+`;
+}).join('')}
+</div>
+</div>
+</div>
+</div>
+`;
+},
+
+getSettingsView() {
+if (!this.canViewReports()) {
+return '<div class="text-center text-gray-400 py-12">You do not have permission to view this page.</div>';
+}
+
+return `
+<div class="space-y-6 fade-in">
+<div>
+<h2 class="text-3xl font-bold text-white mb-2">Settings</h2>
+<p class="text-gray-400">Configure your business preferences</p>
+</div>
+
+<div class="perplexity-card p-6">
+<h3 class="text-xl font-bold text-white mb-6">Company Settings</h3>
+<form id="company-settings-form" class="space-y-4">
+<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+<div>
+<label class="block text-gray-400 text-sm font-medium mb-2">Company Name</label>
+<input type="text" name="companyName" value="${this.state.companyName}" class="form-input w-full" required>
+</div>
+<div>
+<label class="block text-gray-400 text-sm font-medium mb-2">Low Stock Threshold</label>
+<input type="number" name="lowStockThreshold" value="${this.state.lowStockThreshold}" class="form-input w-full" min="1" required>
+</div>
+</div>
+<div class="flex justify-end">
+<button type="submit" class="perplexity-button">
+<i class="fas fa-save mr-2"></i>Save Settings
+</button>
+</div>
+</form>
+</div>
+
+<div class="perplexity-card p-6">
+<h3 class="text-xl font-bold text-white mb-6">GCC Currency Settings</h3>
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+${Object.entries(GCC_COUNTRIES).map(([code, country]) => `
+<div class="p-4 border border-gray-700 rounded-lg ${this.state.selectedCountry === code ? 'border-teal-400 bg-teal-500/10' : ''}">
+<div class="flex items-center justify-between mb-2">
+<h4 class="font-medium text-white">${country.name}</h4>
+${this.state.selectedCountry === code ? '<i class="fas fa-check text-teal-400"></i>' : ''}
+</div>
+<p class="text-gray-400 text-sm mb-1">Currency: ${country.currency} (${country.symbol})</p>
+<p class="text-gray-400 text-sm mb-1">Exchange Rate: ${country.rate}</p>
+<p class="text-gray-400 text-sm">${country.taxName}: ${PrecisionMath.round(PrecisionMath.multiply(country.tax, 100), 0)}%</p>
+</div>
+`).join('')}
+</div>
+</div>
+
+<div class="perplexity-card p-6">
+<h3 class="text-xl font-bold text-white mb-6">Data Management</h3>
+<div class="space-y-4">
+<div class="flex items-center justify-between p-4 border border-gray-700 rounded-lg">
+<div>
+<h4 class="font-medium text-white">Export Business Data</h4>
+<p class="text-gray-400 text-sm">Download all your business data as JSON</p>
+</div>
+<button data-action="export-data" class="perplexity-button">
+<i class="fas fa-download mr-2"></i>Export
+</button>
+</div>
+</div>
+</div>
+
+<div class="perplexity-card p-6">
+<h3 class="text-xl font-bold text-white mb-6">AI Configuration</h3>
+<div class="space-y-4">
+<div class="flex items-center justify-between p-4 border border-gray-700 rounded-lg">
+<div>
+<h4 class="font-medium text-white">AccuraAI vs AccuraBot</h4>
+<p class="text-gray-400 text-sm">Choose your preferred AI assistant mode</p>
+</div>
+<div class="flex items-center space-x-3">
+<span class="text-gray-400 text-sm">AccuraAI</span>
+<div class="toggle-switch ${this.state.aiMode === 'bot' ? 'active' : ''}" data-action="toggle-ai-mode">
+<div class="toggle-knob"></div>
+</div>
+<span class="text-gray-400 text-sm">AccuraBot</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+`;
+},
+
+getInboxView() {
+const messages = this.state.messages.filter(m => 
+m.to === this.state.currentUser.id || m.from === this.state.currentUser.id
+);
+
+return `
+<div class="space-y-6 fade-in">
+<div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+<div>
+<h2 class="text-3xl font-bold text-white mb-2">Team Inbox</h2>
+<p class="text-gray-400">AI-enhanced internal messaging with sentiment analysis</p>
+</div>
+<button data-action="compose-message" class="perplexity-button">
+<i class="fas fa-plus mr-2"></i>Compose Message
+</button>
+</div>
+
+<div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
+<div class="lg:col-span-1">
+<div class="perplexity-card p-4">
+<h3 class="text-lg font-bold text-white mb-4">Quick Stats</h3>
+<div class="space-y-3">
+<div class="flex justify-between">
+<span class="text-gray-400">Total Messages</span>
+<span class="text-white font-medium">${messages.length}</span>
+</div>
+<div class="flex justify-between">
+<span class="text-gray-400">Unread</span>
+<span class="text-red-400 font-medium">${this.getUnreadMessageCount()}</span>
+</div>
+<div class="flex justify-between">
+<span class="text-gray-400">Sent</span>
+<span class="text-blue-400 font-medium">${messages.filter(m => m.from === this.state.currentUser.id).length}</span>
+</div>
+</div>
+</div>
+</div>
+
+<div class="lg:col-span-3">
+<div class="perplexity-card">
+<div class="p-6 border-b border-gray-700">
+<h3 class="text-xl font-bold text-white">Messages</h3>
+</div>
+${messages.length > 0 ? `
+<div class="max-h-96 overflow-y-auto">
+${messages.map(message => {
+const sender = this.state.users.find(u => u.id === message.from);
+const recipient = this.state.users.find(u => u.id === message.to);
+const isFromUser = message.from === this.state.currentUser.id;
+return `
+<div class="p-4 border-b border-gray-700 ${!message.read && !isFromUser ? 'bg-blue-500/5' : ''} hover:bg-gray-800/30 transition-colors">
+<div class="flex items-start justify-between mb-2">
+<div class="flex items-center space-x-3">
+<div class="w-8 h-8 bg-gradient-to-r ${
+isFromUser ? 'from-green-500 to-teal-500' : 'from-blue-500 to-purple-500'
+} rounded-lg flex items-center justify-center">
+<span class="text-white font-bold text-sm">${(sender?.name || 'Unknown').charAt(0)}</span>
+</div>
+<div>
+<div class="text-sm font-medium text-white">
+${isFromUser ? `To: ${recipient?.name || 'Unknown'}` : `From: ${sender?.name || 'Unknown'}`}
+</div>
+<div class="text-xs text-gray-400">${new Date(message.timestamp).toLocaleString()}</div>
+</div>
+</div>
+<div class="flex items-center space-x-2">
+${!message.read && !isFromUser ? `
+<button data-action="mark-read" data-id="${message.id}" class="text-blue-400 hover:text-blue-300 text-xs">
+Mark as Read
+</button>
+` : ''}
+<span class="px-2 py-1 text-xs font-medium rounded-full ${
+message.sentiment === 'positive' ? 'bg-green-500/20 text-green-400' :
+message.sentiment === 'negative' ? 'bg-red-500/20 text-red-400' :
+'bg-gray-500/20 text-gray-400'
+}">
+${message.sentiment}
+</span>
+</div>
+</div>
+<h4 class="font-medium text-white mb-2">${message.subject}</h4>
+<p class="text-gray-300 text-sm mb-3">${message.content}</p>
+${message.aiAnalysis ? `
+<div class="p-3 bg-purple-500/10 border border-purple-500/20 rounded-lg">
+<div class="flex items-center mb-1">
+<i class="fas fa-brain text-purple-400 mr-2 text-sm"></i>
+<span class="text-purple-400 text-xs font-medium">AI Analysis</span>
+</div>
+<p class="text-gray-300 text-xs">${message.aiAnalysis}</p>
+</div>
+` : ''}
+</div>
+`;
+}).join('')}
+</div>
+` : `
+<div class="p-12 text-center">
+<div class="w-16 h-16 bg-gray-800 rounded-full flex items-center justify-center mx-auto mb-4">
+<i class="fas fa-envelope text-gray-600 text-2xl"></i>
+</div>
+<h3 class="text-lg font-medium text-gray-400 mb-2">No messages yet</h3>
+<p class="text-gray-500 mb-4">Start conversations with your team</p>
+<button data-action="compose-message" class="perplexity-button">
+<i class="fas fa-plus mr-2"></i>Send First Message
+</button>
+</div>
+`}
+</div>
+</div>
+</div>
+</div>
+`;
+},
+
+getAIAssistantView() {
+const recommendations = AccuraAI.getPerformanceRecommendations(
+this.state.currentUser.role,
+this.state.currentUser.commission || 0,
+this.state.currentUser.salary
+);
+
+if (this.state.aiMode === 'ai') {
+return `
+<div class="space-y-6 fade-in">
+<div class="ai-card p-8">
+<div class="text-center mb-8">
+<div class="w-20 h-20 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full flex items-center justify-center mx-auto mb-4 ai-pulse">
+<i class="fas fa-brain text-white text-3xl"></i>
+</div>
+<h2 class="text-3xl font-bold ai-gradient-text mb-2">AccuraAI Assistant</h2>
+<p class="text-gray-300">Your intelligent business companion with advanced analytics</p>
+</div>
+
+<div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+<div class="bg-gray-800/30 rounded-xl p-6">
+<h3 class="text-lg font-semibold text-white mb-4 flex items-center">
+<i class="fas fa-lightbulb text-yellow-400 mr-2"></i>
+Business Insights
+</h3>
+<div class="space-y-4">
+${this.state.aiInsights.length > 0 ? this.state.aiInsights.map(insight => `
+<div class="p-4 bg-${insight.type === 'success' ? 'green' : insight.type === 'warning' ? 'yellow' : 'blue'}-500/10 border border-${insight.type === 'success' ? 'green' : insight.type === 'warning' ? 'yellow' : 'blue'}-500/20 rounded-lg">
+<div class="flex items-center mb-2">
+<span class="text-xl mr-2">${insight.icon}</span>
+<h4 class="text-white font-medium">${insight.title}</h4>
+</div>
+<p class="text-gray-300 text-sm mb-2">${insight.message}</p>
+<p class="text-${insight.type === 'success' ? 'green' : insight.type === 'warning' ? 'yellow' : 'blue'}-400 text-sm">${insight.action}</p>
+</div>
+`) : `
+<div class="text-center text-gray-400 py-8">
+<i class="fas fa-chart-line text-4xl mb-4"></i>
+<p>Processing business data...</p>
+<button data-action="refresh-ai" class="ai-button mt-4 px-4 py-2 rounded-lg text-sm">
+<i class="fas fa-sync-alt mr-2"></i>Generate Insights
+</button>
+</div>
+`}
+</div>
+</div>
+
+<div class="bg-gray-800/30 rounded-xl p-6">
+<h3 class="text-lg font-semibold text-white mb-4 flex items-center">
+<i class="fas fa-user-chart text-blue-400 mr-2"></i>
+Performance Analysis
+</h3>
+<div class="space-y-4">
+${recommendations.length > 0 ? recommendations.map(rec => `
+<div class="p-4 bg-${rec.type === 'celebration' ? 'green' : 'blue'}-500/10 border border-${rec.type === 'celebration' ? 'green' : 'blue'}-500/20 rounded-lg">
+<div class="flex items-center mb-2">
+<span class="text-xl mr-2">${rec.icon}</span>
+<h4 class="text-white font-medium">${rec.title}</h4>
+</div>
+<p class="text-gray-300 text-sm mb-2">${rec.message}</p>
+<p class="text-${rec.type === 'celebration' ? 'green' : 'blue'}-400 text-sm">${rec.tip}</p>
+</div>
+`) : `
+<div class="text-center text-gray-400 py-8">
+<i class="fas fa-trophy text-4xl mb-4"></i>
+<p>Keep working to unlock performance insights!</p>
+</div>
+`}
+</div>
+</div>
+</div>
+
+<div class="bg-gray-800/30 rounded-xl p-6">
+<h3 class="text-lg font-semibold text-white mb-4 flex items-center">
+<i class="fas fa-cog text-gray-400 mr-2"></i>
+AI Features
+</h3>
+<div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+<div class="text-center p-4 bg-purple-500/10 rounded-lg border border-purple-500/20">
+<i class="fas fa-chart-bar text-purple-400 text-2xl mb-2"></i>
+<h4 class="text-white font-medium mb-1">Smart Analytics</h4>
+<p class="text-gray-400 text-sm">Real-time business intelligence</p>
+</div>
+<div class="text-center p-4 bg-blue-500/10 rounded-lg border border-blue-500/20">
+<i class="fas fa-brain text-blue-400 text-2xl mb-2"></i>
+<h4 class="text-white font-medium mb-1">Predictive Insights</h4>
+<p class="text-gray-400 text-sm">Future trend analysis</p>
+</div>
+<div class="text-center p-4 bg-green-500/10 rounded-lg border border-green-500/20">
+<i class="fas fa-comments text-green-400 text-2xl mb-2"></i>
+<h4 class="text-white font-medium mb-1">Sentiment Analysis</h4>
+<p class="text-gray-400 text-sm">Team communication insights</p>
+</div>
+</div>
+</div>
+</div>
+</div>
+`;
+} else {
+return `
+<div class="space-y-6 fade-in">
+<div class="bot-card p-8">
+<div class="text-center mb-8">
+<div class="w-20 h-20 bg-gradient-to-r from-green-500 to-teal-500 rounded-full flex items-center justify-center mx-auto mb-4 bot-pulse">
+<i class="fas fa-robot text-white text-3xl"></i>
+</div>
+<h2 class="text-3xl font-bold bot-gradient-text mb-2">AccuraBot Monitor</h2>
+<p class="text-gray-300">Real-time business monitoring and automated alerts</p>
+</div>
+
+${Object.keys(this.state.botAnalysis).length > 0 ? `
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+<div class="lg:col-span-2 space-y-6">
+<div class="bg-gray-800/30 rounded-xl p-6">
+<h3 class="text-lg font-semibold text-white mb-4 flex items-center">
+<i class="fas fa-tachometer-alt text-green-400 mr-2"></i>
+System Overview
+</h3>
+<div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+<div class="text-center">
+<div class="text-2xl font-bold text-green-400">${this.state.botAnalysis.overview.healthScore}%</div>
+<div class="text-gray-400 text-sm">Health Score</div>
+</div>
+<div class="text-center">
+<div class="text-2xl font-bold text-blue-400">${this.state.botAnalysis.overview.products}</div>
+<div class="text-gray-400 text-sm">Products</div>
+</div>
+<div class="text-center">
+<div class="text-2xl font-bold text-purple-400">${this.state.botAnalysis.overview.customers}</div>
+<div class="text-gray-400 text-sm">Customers</div>
+</div>
+<div class="text-center">
+<div class="text-2xl font-bold text-yellow-400">${this.state.botAnalysis.overview.lowStock}</div>
+<div class="text-gray-400 text-sm">Low Stock</div>
+</div>
+</div>
+</div>
+
+${this.state.botAnalysis.alerts && this.state.botAnalysis.alerts.length > 0 ? `
+<div class="bg-gray-800/30 rounded-xl p-6">
+<h3 class="text-lg font-semibold text-white mb-4 flex items-center">
+<i class="fas fa-exclamation-triangle text-red-400 mr-2"></i>
+Active Alerts
+</h3>
+<div class="space-y-3">
+${this.state.botAnalysis.alerts.map(alert => `
+<div class="flex items-center justify-between p-3 bg-red-500/10 border border-red-500/20 rounded-lg">
+<div class="flex items-center">
+<span class="text-xl mr-3">${alert.icon}</span>
+<div>
+<div class="text-white font-medium">${alert.title}</div>
+<div class="text-gray-400 text-sm">${alert.message}</div>
+</div>
+</div>
+<button data-action="${alert.action}" class="text-red-400 hover:text-red-300">
+<i class="fas fa-arrow-right"></i>
+</button>
+</div>
+`).join('')}
+</div>
+</div>
+` : ''}
+</div>
+
+<div class="space-y-6">
+<div class="bg-gray-800/30 rounded-xl p-6">
+<h3 class="text-lg font-semibold text-white mb-4 flex items-center">
+<i class="fas fa-bolt text-yellow-400 mr-2"></i>
+Quick Actions
+</h3>
+<div class="grid grid-cols-1 gap-3">
+${this.state.botAnalysis.quickActions ? this.state.botAnalysis.quickActions.map(action => `
+<button data-action="bot-quick-action" data-id="${action.id}" class="flex items-center p-3 bg-gray-700/50 hover:bg-gray-700 rounded-lg transition-all text-left w-full">
+<i class="${action.icon} text-${action.color}-400 mr-3"></i>
+<span class="text-white">${action.label}</span>
+</button>
+`).join('') : ''}
+</div>
+</div>
+
+${this.state.botAnalysis.recommendations && this.state.botAnalysis.recommendations.length > 0 ? `
+<div class="bg-gray-800/30 rounded-xl p-6">
+<h3 class="text-lg font-semibold text-white mb-4 flex items-center">
+<i class="fas fa-lightbulb text-blue-400 mr-2"></i>
+Recommendations
+</h3>
+<div class="space-y-3">
+${this.state.botAnalysis.recommendations.map(rec => `
+<div class="p-3 bg-blue-500/10 border border-blue-500/20 rounded-lg">
+<div class="flex items-center mb-2">
+<span class="text-lg mr-2">${rec.icon}</span>
+<div class="text-white font-medium">${rec.title}</div>
+</div>
+<div class="text-gray-300 text-sm mb-1">${rec.message}</div>
+<div class="text-blue-400 text-sm">${rec.tip}</div>
+</div>
+`).join('')}
+</div>
+</div>
+` : ''}
+</div>
+</div>
+` : `
+<div class="text-center py-12">
+<div class="w-16 h-16 bg-gray-800 rounded-full flex items-center justify-center mx-auto mb-4">
+<i class="fas fa-robot text-gray-600 text-2xl"></i>
+</div>
+<h3 class="text-lg font-medium text-gray-400 mb-2">AccuraBot is analyzing...</h3>
+<p class="text-gray-500 mb-4">Processing your business data for insights</p>
+<button data-action="refresh-bot" class="bot-button px-4 py-2 rounded-lg text-sm">
+<i class="fas fa-sync-alt mr-2"></i>Refresh Analysis
+</button>
+</div>
+`}
+</div>
+</div>
+`;
+}
+},
+
+// Modal generation methods
 getModal(type, id = null) {
 const modals = {
 'add-product': this.getProductModal(),
-'add-sale': this.getSaleModal(),
+'edit-product': this.getProductModal(true),
 'add-customer': this.getCustomerModal(),
-'add-expense': this.getExpenseModal()
+'edit-customer': this.getCustomerModal(true),
+'add-sale': this.getSaleModal(),
+'add-expense': this.getExpenseModal(),
+'edit-expense': this.getExpenseModal(true),
+'add-employee': this.getEmployeeModal(),
+'edit-employee': this.getEmployeeModal(true),
+'compose-message': this.getMessageModal()
 };
+
 return modals[type] || '';
 },
 
-getProductModal() {
+getProductModal(isEdit = false) {
 return `
 <div class="modal-overlay">
 <div class="modal-content">
-<h3 class="text-xl font-bold text-white mb-6">Add New Product</h3>
+<div class="flex justify-between items-center mb-6">
+<h3 class="text-xl font-bold text-white">${isEdit ? 'Edit Product' : 'Add New Product'}</h3>
+<button data-action="close-modal" class="text-gray-400 hover:text-white">
+<i class="fas fa-times text-xl"></i>
+</button>
+</div>
 <form id="product-form" class="space-y-4">
 <input type="hidden" id="product-id" value="">
-<input type="text" id="name" name="name" placeholder="Product Name" class="form-input w-full" required>
-<input type="number" id="price" name="price" placeholder="Price" step="0.01" class="form-input w-full" required>
-<input type="number" id="cost" name="cost" placeholder="Cost" step="0.01" class="form-input w-full" required>
-<input type="number" id="stock" name="stock" placeholder="Stock" class="form-input w-full" required>
-<input type="text" id="sku" name="sku" placeholder="SKU" class="form-input w-full" required>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+<div>
+<label class="block text-gray-400 text-sm font-medium mb-2">Product Name *</label>
+<input type="text" id="name" name="name" class="form-input w-full" required>
+</div>
+<div>
+<label class="block text-gray-400 text-sm font-medium mb-2">SKU *</label>
+<input type="text" id="sku" name="sku" class="form-input w-full" required>
+</div>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+<div>
+<label class="block text-gray-400 text-sm font-medium mb-2">Price (${GCC_COUNTRIES[this.state.selectedCountry].currency}) *</label>
+<input type="number" id="price" name="price" step="0.01" min="0" class="form-input w-full" required>
+</div>
+<div>
+<label class="block text-gray-400 text-sm font-medium mb-2">Cost *</label>
+<input type="number" id="cost" name="cost" step="0.01" min="0" class="form-input w-full" required>
+</div>
+<div>
+<label class="block text-gray-400 text-sm font-medium mb-2">Stock *</label>
+<input type="number" id="stock" name="stock" min="0" class="form-input w-full" required>
+</div>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+<div>
+<label class="block text-gray-400 text-sm font-medium mb-2">Category *</label>
 <select id="category" name="category" class="form-input w-full" required>
 ${this.state.categories.map(cat => `<option value="${cat}">${cat}</option>`).join('')}
 </select>
-<textarea id="description" name="description" placeholder="Description" class="form-input w-full"></textarea>
-<input type="text" id="supplier" name="supplier" placeholder="Supplier" class="form-input w-full">
-<input type="number" id="reorderLevel" name="reorderLevel" placeholder="Reorder Level" value="10" class="form-input w-full">
+</div>
+<div>
+<label class="block text-gray-400 text-sm font-medium mb-2">Reorder Level</label>
+<input type="number" id="reorderLevel" name="reorderLevel" min="0" value="10" class="form-input w-full">
+</div>
+</div>
+<div>
+<label class="block text-gray-400 text-sm font-medium mb-2">Supplier</label>
+<input type="text" id="supplier" name="supplier" class="form-input w-full">
+</div>
+<div>
+<label class="block text-gray-400 text-sm font-medium mb-2">Description</label>
+<textarea id="description" name="description" rows="3" class="form-input w-full"></textarea>
+</div>
 <div class="flex justify-end space-x-4 pt-4">
-<button type="button" data-action="close-modal" class="px-6 py-2 border border-gray-600 text-gray-400 rounded-lg">Cancel</button>
-<button type="submit" class="perplexity-button">Add Product</button>
+<button type="button" data-action="close-modal" class="px-6 py-2 border border-gray-600 text-gray-400 rounded-lg hover:bg-gray-700 transition-colors">Cancel</button>
+<button type="submit" class="perplexity-button">
+<i class="fas fa-save mr-2"></i>${isEdit ? 'Update Product' : 'Add Product'}
+</button>
 </div>
 </form>
 </div>
@@ -2304,60 +3634,60 @@ ${this.state.categories.map(cat => `<option value="${cat}">${cat}</option>`).joi
 `;
 },
 
-getSaleModal() {
-return `
-<div class="modal-overlay">
-<div class="modal-content" style="max-width: 700px;">
-<h3 class="text-xl font-bold text-white mb-6">Record New Sale</h3>
-<form id="sale-form" class="space-y-4">
-<select name="customerId" class="form-input w-full" required>
-<option value="">Select Customer</option>
-${this.state.customers.map(c => `<option value="${c.id}">${c.name}</option>`).join('')}
-</select>
-<input type="date" name="date" value="${new Date().toISOString().split('T')[0]}" class="form-input w-full" required>
-<select name="saleType" class="form-input w-full" required>
-<option value="Cash">Cash</option>
-<option value="Credit">Credit</option>
-</select>
-<div id="sale-cart">
-<h4 class="text-white font-medium mb-2">Products</h4>
-<div id="cart-items"></div>
-<button type="button" onclick="app.addCartRow()" class="text-blue-400 text-sm">+ Add Item</button>
-</div>
-<input type="number" name="discount" placeholder="Discount" step="0.01" value="0" class="form-input w-full" oninput="app.updateSaleTotal()">
-<div id="sale-summary" class="text-right text-gray-400">
-Total will be calculated...
-</div>
-<div class="flex justify-end space-x-4 pt-4">
-<button type="button" data-action="close-modal" class="px-6 py-2 border border-gray-600 text-gray-400 rounded-lg">Cancel</button>
-<button type="submit" class="perplexity-button">Record Sale</button>
-</div>
-</form>
-</div>
-</div>
-`;
-},
-
-getCustomerModal() {
+getCustomerModal(isEdit = false) {
 return `
 <div class="modal-overlay">
 <div class="modal-content">
-<h3 class="text-xl font-bold text-white mb-6">Add New Customer</h3>
+<div class="flex justify-between items-center mb-6">
+<h3 class="text-xl font-bold text-white">${isEdit ? 'Edit Customer' : 'Add New Customer'}</h3>
+<button data-action="close-modal" class="text-gray-400 hover:text-white">
+<i class="fas fa-times text-xl"></i>
+</button>
+</div>
 <form id="customer-form" class="space-y-4">
 <input type="hidden" id="customer-id" value="">
-<input type="text" id="name" name="name" placeholder="Customer Name" class="form-input w-full" required>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+<div>
+<label class="block text-gray-400 text-sm font-medium mb-2">Customer Name *</label>
+<input type="text" id="name" name="name" class="form-input w-full" required>
+</div>
+<div>
+<label class="block text-gray-400 text-sm font-medium mb-2">Type *</label>
 <select id="type" name="type" class="form-input w-full" required>
 <option value="Individual">Individual</option>
 <option value="Business">Business</option>
 </select>
-<input type="email" id="email" name="email" placeholder="Email" class="form-input w-full" required>
-<input type="tel" id="phone" name="phone" placeholder="Phone" class="form-input w-full" required>
-<textarea id="address" name="address" placeholder="Address" class="form-input w-full" required></textarea>
-<input type="text" id="taxId" name="taxId" placeholder="Tax ID (Optional)" class="form-input w-full">
-<input type="number" id="creditLimit" name="creditLimit" placeholder="Credit Limit" step="0.01" value="0" class="form-input w-full">
+</div>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+<div>
+<label class="block text-gray-400 text-sm font-medium mb-2">Email *</label>
+<input type="email" id="email" name="email" class="form-input w-full" required>
+</div>
+<div>
+<label class="block text-gray-400 text-sm font-medium mb-2">Phone *</label>
+<input type="tel" id="phone" name="phone" class="form-input w-full" required>
+</div>
+</div>
+<div>
+<label class="block text-gray-400 text-sm font-medium mb-2">Address *</label>
+<textarea id="address" name="address" rows="2" class="form-input w-full" required></textarea>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+<div>
+<label class="block text-gray-400 text-sm font-medium mb-2">Tax ID / TRN</label>
+<input type="text" id="taxId" name="taxId" class="form-input w-full" placeholder="Optional for individuals">
+</div>
+<div>
+<label class="block text-gray-400 text-sm font-medium mb-2">Credit Limit (${GCC_COUNTRIES[this.state.selectedCountry].currency})</label>
+<input type="number" id="creditLimit" name="creditLimit" step="0.01" min="0" value="0" class="form-input w-full">
+</div>
+</div>
 <div class="flex justify-end space-x-4 pt-4">
-<button type="button" data-action="close-modal" class="px-6 py-2 border border-gray-600 text-gray-400 rounded-lg">Cancel</button>
-<button type="submit" class="perplexity-button">Add Customer</button>
+<button type="button" data-action="close-modal" class="px-6 py-2 border border-gray-600 text-gray-400 rounded-lg hover:bg-gray-700 transition-colors">Cancel</button>
+<button type="submit" class="perplexity-button">
+<i class="fas fa-save mr-2"></i>${isEdit ? 'Update Customer' : 'Add Customer'}
+</button>
 </div>
 </form>
 </div>
@@ -2365,23 +3695,204 @@ return `
 `;
 },
 
-getExpenseModal() {
+// FIXED: Sale modal with proper calculations
+getSaleModal() {
+return `
+<div class="modal-overlay">
+<div class="modal-content" style="max-width: 800px;">
+<div class="flex justify-between items-center mb-6">
+<h3 class="text-xl font-bold text-white">Record New Sale</h3>
+<button data-action="close-modal" class="text-gray-400 hover:text-white">
+<i class="fas fa-times text-xl"></i>
+</button>
+</div>
+<form id="sale-form" class="space-y-6">
+<div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+<div>
+<label class="block text-gray-400 text-sm font-medium mb-2">Customer *</label>
+<select name="customerId" class="form-input w-full" required>
+<option value="">Select Customer</option>
+${this.state.customers.map(customer => `
+<option value="${customer.id}">${customer.name} (${customer.type})</option>
+`).join('')}
+</select>
+</div>
+<div>
+<label class="block text-gray-400 text-sm font-medium mb-2">Sale Date *</label>
+<input type="date" name="date" value="${new Date().toISOString().split('T')[0]}" class="form-input w-full" required>
+</div>
+<div>
+<label class="block text-gray-400 text-sm font-medium mb-2">Payment Type *</label>
+<select name="saleType" class="form-input w-full" required>
+<option value="Cash">Cash</option>
+<option value="Credit">Credit</option>
+</select>
+</div>
+</div>
+
+<div class="border border-gray-600 rounded-lg p-4">
+<div class="flex justify-between items-center mb-4">
+<h4 class="text-lg font-semibold text-white">Products</h4>
+<button type="button" onclick="app.addProductToCart()" class="perplexity-button text-sm px-3 py-1">
+<i class="fas fa-plus mr-1"></i>Add Product
+</button>
+</div>
+<div id="sale-cart">
+<div class="grid grid-cols-12 gap-2 text-gray-400 text-sm font-medium mb-2">
+<div class="col-span-5">Product</div>
+<div class="col-span-2">Quantity</div>
+<div class="col-span-2">Unit Price</div>
+<div class="col-span-2">Total</div>
+<div class="col-span-1">Action</div>
+</div>
+<div id="cart-items">
+<!-- Cart items will be populated here -->
+</div>
+<div class="flex justify-between items-center mt-4">
+<button type="button" onclick="app.addCartRow()" class="text-blue-400 hover:text-blue-300 text-sm">
+<i class="fas fa-plus mr-1"></i>Add Item
+</button>
+</div>
+</div>
+</div>
+
+<div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+<div>
+<label class="block text-gray-400 text-sm font-medium mb-2">Discount (${GCC_COUNTRIES[this.state.selectedCountry].currency})</label>
+<input type="number" name="discount" step="0.01" min="0" value="0" class="form-input w-full" oninput="app.updateSaleTotal()">
+</div>
+<div class="space-y-2">
+<div id="sale-summary" class="text-right">
+<div class="text-gray-400">Calculating...</div>
+</div>
+</div>
+</div>
+
+<div class="flex justify-end space-x-4 pt-4">
+<button type="button" data-action="close-modal" class="px-6 py-2 border border-gray-600 text-gray-400 rounded-lg hover:bg-gray-700 transition-colors">Cancel</button>
+<button type="submit" class="perplexity-button">
+<i class="fas fa-save mr-2"></i>Record Sale
+</button>
+</div>
+</form>
+</div>
+</div>
+
+<script>
+app.addCartRow = function() {
+const cartItems = document.getElementById('cart-items');
+const row = document.createElement('div');
+row.className = 'grid grid-cols-12 gap-2 mb-2';
+row.innerHTML = \`
+<div class="col-span-5">
+<select class="form-input w-full text-sm" onchange="app.updateProductPrice(this)" required>
+<option value="">Select Product</option>
+\${app.state.products.map(product => \`
+<option value="\${product.id}" data-price="\${product.price}">\${product.name} (Stock: \${product.stock})</option>
+\`).join('')}
+</select>
+</div>
+<div class="col-span-2">
+<input type="number" class="form-input w-full text-sm" min="1" value="1" onchange="app.updateSaleTotal()" required>
+</div>
+<div class="col-span-2">
+<input type="number" class="form-input w-full text-sm" step="0.01" min="0" onchange="app.updateSaleTotal()" required>
+</div>
+<div class="col-span-2">
+<input type="text" class="form-input w-full text-sm bg-gray-700" readonly>
+</div>
+<div class="col-span-1">
+<button type="button" onclick="this.parentElement.parentElement.remove(); app.updateSaleTotal()" class="text-red-400 hover:text-red-300 p-1">
+<i class="fas fa-trash text-sm"></i>
+</button>
+</div>
+\`;
+cartItems.appendChild(row);
+app.updateSaleTotal();
+};
+
+app.updateProductPrice = function(select) {
+const price = select.options[select.selectedIndex]?.dataset.price || 0;
+const priceInput = select.parentElement.nextElementSibling.nextElementSibling.querySelector('input');
+if (priceInput) {
+priceInput.value = price;
+app.updateSaleTotal();
+}
+};
+
+app.updateSaleTotal = function() {
+const cartRows = document.querySelectorAll('#cart-items > div');
+let subtotal = 0;
+
+cartRows.forEach(row => {
+const quantity = parseFloat(row.children[1].querySelector('input').value) || 0;
+const price = parseFloat(row.children[2].querySelector('input').value) || 0;
+const lineTotal = app.PrecisionMath ? app.PrecisionMath.multiply(quantity, price) : quantity * price;
+row.children[3].querySelector('input').value = app.formatCurrency ? app.formatCurrency(lineTotal, false) : lineTotal.toFixed(2);
+subtotal = app.PrecisionMath ? app.PrecisionMath.add(subtotal, lineTotal) : subtotal + lineTotal;
+});
+
+const discount = parseFloat(document.querySelector('input[name="discount"]').value) || 0;
+const discountedSubtotal = app.PrecisionMath ? app.PrecisionMath.subtract(subtotal, discount) : subtotal - discount;
+const taxInfo = app.getTaxInfo();
+const taxAmount = app.PrecisionMath ? app.PrecisionMath.multiply(discountedSubtotal, taxInfo.rate) : discountedSubtotal * taxInfo.rate;
+const total = app.PrecisionMath ? app.PrecisionMath.add(discountedSubtotal, taxAmount) : discountedSubtotal + taxAmount;
+
+document.getElementById('sale-summary').innerHTML = \`
+<div class="text-gray-400 mb-1">Subtotal: <span class="text-white">\${app.formatCurrency ? app.formatCurrency(subtotal) : subtotal.toFixed(2)}</span></div>
+\${discount > 0 ? \`<div class="text-gray-400 mb-1">Discount: <span class="text-red-400">-\${app.formatCurrency ? app.formatCurrency(discount) : discount.toFixed(2)}</span></div>\` : ''}
+<div class="text-gray-400 mb-1">\${taxInfo.name}: <span class="text-white">\${app.formatCurrency ? app.formatCurrency(taxAmount) : taxAmount.toFixed(2)}</span></div>
+<div class="text-lg font-bold text-green-400 pt-2 border-t border-gray-600">Total: \${app.formatCurrency ? app.formatCurrency(total) : total.toFixed(2)}</div>
+\`;
+};
+
+// Initialize with one row
+app.addCartRow();
+</script>
+`;
+},
+
+getExpenseModal(isEdit = false) {
 return `
 <div class="modal-overlay">
 <div class="modal-content">
-<h3 class="text-xl font-bold text-white mb-6">Add New Expense</h3>
+<div class="flex justify-between items-center mb-6">
+<h3 class="text-xl font-bold text-white">${isEdit ? 'Edit Expense' : 'Add New Expense'}</h3>
+<button data-action="close-modal" class="text-gray-400 hover:text-white">
+<i class="fas fa-times text-xl"></i>
+</button>
+</div>
 <form id="expense-form" class="space-y-4">
 <input type="hidden" id="expense-id" value="">
-<input type="text" id="description" name="description" placeholder="Expense Description" class="form-input w-full" required>
-<input type="number" id="amount" name="amount" placeholder="Amount" step="0.01" class="form-input w-full" required>
+<div>
+<label class="block text-gray-400 text-sm font-medium mb-2">Description *</label>
+<input type="text" id="description" name="description" class="form-input w-full" required>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+<div>
+<label class="block text-gray-400 text-sm font-medium mb-2">Amount (${GCC_COUNTRIES[this.state.selectedCountry].currency}) *</label>
+<input type="number" id="amount" name="amount" step="0.01" min="0" class="form-input w-full" required>
+</div>
+<div>
+<label class="block text-gray-400 text-sm font-medium mb-2">Category *</label>
 <select id="category" name="category" class="form-input w-full" required>
 ${this.state.expenseCategories.map(cat => `<option value="${cat}">${cat}</option>`).join('')}
 </select>
+</div>
+</div>
+<div>
+<label class="block text-gray-400 text-sm font-medium mb-2">Date *</label>
 <input type="date" id="date" name="date" value="${new Date().toISOString().split('T')[0]}" class="form-input w-full" required>
-<textarea id="notes" name="notes" placeholder="Notes (Optional)" class="form-input w-full"></textarea>
+</div>
+<div>
+<label class="block text-gray-400 text-sm font-medium mb-2">Notes</label>
+<textarea id="notes" name="notes" rows="3" class="form-input w-full" placeholder="Additional details about this expense"></textarea>
+</div>
 <div class="flex justify-end space-x-4 pt-4">
-<button type="button" data-action="close-modal" class="px-6 py-2 border border-gray-600 text-gray-400 rounded-lg">Cancel</button>
-<button type="submit" class="expenses-button">Add Expense</button>
+<button type="button" data-action="close-modal" class="px-6 py-2 border border-gray-600 text-gray-400 rounded-lg hover:bg-gray-700 transition-colors">Cancel</button>
+<button type="submit" class="expenses-button">
+<i class="fas fa-save mr-2"></i>${isEdit ? 'Update Expense' : 'Add Expense'}
+</button>
 </div>
 </form>
 </div>
@@ -2389,18 +3900,126 @@ ${this.state.expenseCategories.map(cat => `<option value="${cat}">${cat}</option
 `;
 },
 
-// Additional view stubs to complete the app
-getCustomersView() { return '<div class="text-white">Customers View</div>'; },
-getExpensesView() { return '<div class="text-white">Expenses View</div>'; },
-getEmployeesView() { return '<div class="text-white">Employees View</div>'; },
-getInvoicesView() { return '<div class="text-white">Invoices View</div>'; },
-getReportsView() { return '<div class="text-white">Reports View</div>'; },
-getSettingsView() { return '<div class="text-white">Settings View</div>'; },
-getInboxView() { return '<div class="text-white">Inbox View</div>'; },
-getAIAssistantView() { return '<div class="text-white">AI Assistant View</div>'; }
+getEmployeeModal(isEdit = false) {
+return `
+<div class="modal-overlay">
+<div class="modal-content">
+<div class="flex justify-between items-center mb-6">
+<h3 class="text-xl font-bold text-white">${isEdit ? 'Edit Employee' : 'Add New Employee'}</h3>
+<button data-action="close-modal" class="text-gray-400 hover:text-white">
+<i class="fas fa-times text-xl"></i>
+</button>
+</div>
+<form id="employee-form" class="space-y-4">
+<input type="hidden" id="employee-id" value="">
+<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+<div>
+<label class="block text-gray-400 text-sm font-medium mb-2">Full Name *</label>
+<input type="text" id="name" name="name" class="form-input w-full" required>
+</div>
+<div>
+<label class="block text-gray-400 text-sm font-medium mb-2">Username *</label>
+<input type="text" id="username" name="username" class="form-input w-full" required>
+</div>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+<div>
+<label class="block text-gray-400 text-sm font-medium mb-2">Email *</label>
+<input type="email" id="email" name="email" class="form-input w-full" required>
+</div>
+<div>
+<label class="block text-gray-400 text-sm font-medium mb-2">Phone *</label>
+<input type="tel" id="phone" name="phone" class="form-input w-full" required>
+</div>
+</div>
+<div>
+<label class="block text-gray-400 text-sm font-medium mb-2">Address</label>
+<textarea id="address" name="address" rows="2" class="form-input w-full"></textarea>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+<div>
+<label class="block text-gray-400 text-sm font-medium mb-2">Role *</label>
+<select id="role" name="role" class="form-input w-full" required>
+<option value="worker">Worker</option>
+<option value="manager">Manager</option>
+<option value="admin">Admin</option>
+</select>
+</div>
+<div>
+<label class="block text-gray-400 text-sm font-medium mb-2">Hire Date *</label>
+<input type="date" id="hireDate" name="hireDate" value="${new Date().toISOString().split('T')[0]
+}" class="form-input w-full" required>
+</div>
+<div>
+<label class="block text-gray-400 text-sm font-medium mb-2">Annual Salary (${GCC_COUNTRIES[this.state.selectedCountry].currency}) *</label>
+<input type="number" id="salary" name="salary" step="0.01" min="0" class="form-input w-full" required>
+</div>
+</div>
+<div class="flex justify-end space-x-4 pt-4">
+<button type="button" data-action="close-modal" class="px-6 py-2 border border-gray-600 text-gray-400 rounded-lg hover:bg-gray-700 transition-colors">Cancel</button>
+<button type="submit" class="perplexity-button">
+<i class="fas fa-save mr-2"></i>${isEdit ? 'Update Employee' : 'Add Employee'}
+</button>
+</div>
+</form>
+</div>
+</div>
+`;
+},
+
+getMessageModal() {
+return `
+<div class="modal-overlay">
+<div class="modal-content">
+<div class="flex justify-between items-center mb-6">
+<h3 class="text-xl font-bold text-white">Compose Message</h3>
+<button data-action="close-modal" class="text-gray-400 hover:text-white">
+<i class="fas fa-times text-xl"></i>
+</button>
+</div>
+<form id="message-form" class="space-y-4">
+<div>
+<label class="block text-gray-400 text-sm font-medium mb-2">Recipient *</label>
+<select name="recipient" class="form-input w-full" required>
+<option value="">Select Recipient</option>
+${this.state.users.filter(u => u.id !== this.state.currentUser.id).map(user => `
+<option value="${user.id}">${user.name} (${user.role})</option>
+`).join('')}
+</select>
+</div>
+<div>
+<label class="block text-gray-400 text-sm font-medium mb-2">Subject *</label>
+<input type="text" name="subject" class="form-input w-full" required>
+</div>
+<div>
+<label class="block text-gray-400 text-sm font-medium mb-2">Message *</label>
+<textarea name="content" rows="5" class="form-input w-full" placeholder="Your message will be analyzed by AccuraAI for sentiment and context..." required></textarea>
+</div>
+<div class="bg-purple-500/10 border border-purple-500/20 rounded-lg p-3">
+<div class="flex items-center mb-2">
+<i class="fas fa-brain text-purple-400 mr-2"></i>
+<span class="text-purple-400 font-medium text-sm">AI Enhancement</span>
+</div>
+<p class="text-gray-300 text-sm">Your message will be automatically analyzed for sentiment and business context to improve team communication.</p>
+</div>
+<div class="flex justify-end space-x-4 pt-4">
+<button type="button" data-action="close-modal" class="px-6 py-2 border border-gray-600 text-gray-400 rounded-lg hover:bg-gray-700 transition-colors">Cancel</button>
+<button type="submit" class="perplexity-button">
+<i class="fas fa-paper-plane mr-2"></i>Send Message
+</button>
+</div>
+</form>
+</div>
+</div>
+`;
+}
 };
 
-// Cart handling for sales
+// Enhanced sale cart handling
+app.addProductToCart = function() {
+this.addCartRow();
+};
+
 app.addCartRow = function() {
 const cartItems = document.getElementById('cart-items');
 if (!cartItems) return;
@@ -2412,7 +4031,7 @@ row.innerHTML = `
 <select class="form-input w-full text-sm" onchange="app.updateProductPrice(this)" required>
 <option value="">Select Product</option>
 ${this.state.products.map(product => `
-<option value="${product.id}"" data-price="${product.price}">${product.name} (Stock: ${product.stock})</option>
+<option value="${product.id}" data-price="${product.price}">${product.name} (Stock: ${product.stock})</option>
 `).join('')}
 </select>
 </div>
@@ -2498,9 +4117,23 @@ document.addEventListener('DOMContentLoaded', () => {
 app.init();
 });
 
-// Global assignments for inline handlers
+// Global function assignments for inline handlers
 window.app = app;
 window.PrecisionMath = PrecisionMath;
+
+// Service Worker Registration (optional)
+if ('serviceWorker' in navigator) {
+window.addEventListener('load', () => {
+navigator.serviceWorker.register('/sw.js')
+.then((registration) => {
+console.log('SW registered: ', registration);
+})
+.catch((registrationError) => {
+console.log('SW registration failed: ', registrationError);
+});
+});
+}
+
 </script>
 </body>
 </html>
