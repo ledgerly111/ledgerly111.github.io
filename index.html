@@ -1406,14 +1406,21 @@
                     }
 
                     // Calculate commission
-                    const profit = this.currentSaleCart.reduce((sum, item) => {
-                        const product = this.state.products.find(p => p.id === item.productId);
-                        const itemProfitCents = MoneyUtils.multiply(
-                            MoneyUtils.subtract(item.unitPriceCents, product.costCents), 
-                            item.quantity
-                        );
-                        return MoneyUtils.add(sum, itemProfitCents);
-                    }, 0);
+const profit = this.currentSaleCart.reduce((sum, item) => {
+    const product = this.state.products.find(p => p.id === item.productId);
+    
+    // Check if the product exists before calculating profit
+    if (product && product.costCents !== undefined) {
+        const itemProfitCents = MoneyUtils.multiply(
+            MoneyUtils.subtract(item.unitPriceCents, product.costCents),
+            item.quantity
+        );
+        return MoneyUtils.add(sum, itemProfitCents);
+    }
+    
+    // If product is not found, do not add to profit and continue
+    return sum; 
+}, 0);
 
                     const commissionCents = MoneyUtils.multiply(profit, new Big(0.1));
                     
