@@ -1376,7 +1376,9 @@
                         currency: GCC_COUNTRIES[this.state.selectedCountry].currency
                     };
 
-                    const discountCents = MoneyUtils.toCents(parseFloat(data.discount) || 0);
+                    - const discountCents = MoneyUtils.toCents(parseFloat(data.discount) || 0);
++ const discountCents = MoneyUtils.toCents(data.discount ? parseFloat(data.discount) : 0);
+
                     const subtotalAfterDiscount = MoneyUtils.subtract(sale.subtotalCents, discountCents);
                     sale.taxAmountCents = MoneyUtils.multiply(subtotalAfterDiscount, sale.taxRate);
                     sale.totalCents = MoneyUtils.add(subtotalAfterDiscount, sale.taxAmountCents);
