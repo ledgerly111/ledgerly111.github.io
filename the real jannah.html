@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quran App with AI Search</title>
+    
+    <!-- Tailwind CSS for styling -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Google Fonts: Using 'Inter' for UI and 'Amiri' for beautiful Arabic script -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+    <style>
+        /* Custom styles */
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        /* Applying a beautiful, traditional font for the Arabic text */
+        .arabic-text {
+            font-family: 'Amiri', serif;
+            font-size: 1.5rem; /* Larger font size for readability */
+            line-height: 2.5rem; /* Generous line spacing */
+        }
+        /* Custom scrollbar for a cleaner look */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #888;
+            border-radius: 10px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #555;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 text-gray-800">
+
+    <div class="flex h-screen">
+        <!-- Sidebar for Surah List -->
+        <aside class="w-1/3 lg:w-1/4 bg-white border-r border-gray-200 flex flex-col">
+            <div class="p-4 border-b">
+                <h1 class="text-xl font-bold text-teal-700">The Holy Quran</h1>
+                <p class="text-sm text-gray-500">Select a Surah</p>
+            </div>
+            <div id="surah-list" class="flex-grow overflow-y-auto">
+                <!-- Surah list will be populated by JavaScript -->
+                <div class="p-8 text-center text-gray-500">Loading Surahs...</div>
+            </div>
+        </aside>
+
+        <!-- Main Content Area -->
+        <main class="w-2/3 lg:w-3/4 flex flex-col h-screen">
+            <!-- Header with Search and Surah Title -->
+            <header class="bg-white border-b border-gray-200 p-4 shadow-sm">
+                <div class="flex flex-col md:flex-row justify-between items-center">
+                    <div id="surah-title-container" class="mb-4 md:mb-0">
+                        <h2 id="surah-name" class="text-2xl font-bold text-teal-800">Welcome</h2>
+                        <p id="surah-info" class="text-sm text-gray-500">Select a Surah from the list to begin reading.</p>
+                    </div>
+                    <div class="relative w-full md:w-1/2">
+                        <input type="text" id="search-input" placeholder="Search Quran (e.g., 'Allah', 'heaven')..." class="w-full pl-10 pr-4 py-2 border rounded-full focus:outline-none focus:ring-2 focus:ring-teal-500">
+                        <svg class="w-5 h-5 text-gray-400 absolute top-1/2 left-3 transform -translate-y-1/2" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                        </svg>
+                    </div>
+                </div>
+            </header>
+
+            <!-- Content Display -->
+            <div id="content-display" class="flex-grow overflow-y-auto p-6 md:p-8">
+                <!-- Verses or search results will be displayed here -->
+                 <div id="welcome-message" class="text-center text-gray-500">
+                    <p>بِسْمِ ٱللَّهِ ٱلرَّحْمَٰنِ ٱلرَّحِيمِ</p>
+                    <p>"In the name of Allah, the Entirely Merciful, the Especially Merciful."</p>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // --- DATA ---
+            // This is a sample of the Quran data structure.
+            // For your app, you will replace this with a fetch call to your 'quran.json' file.
+            // Make sure your JSON file is structured exactly like this.
+            const quranData = [
+                {
+                    "id": 1,
+                    "name": "Al-Fatihah",
+                    "transliteration": "The Opening",
+                    "total_verses": 7,
+                    "verses": [
+                        { "id": 1, "text": "بِسْمِ ٱللَّهِ ٱلرَّحْمَٰنِ ٱلرَّحِيمِ" },
+                        { "id": 2, "text": "ٱلْحَمْدُ لِلَّهِ رَبِّ ٱلْعَٰلَمِينَ" },
+                        { "id": 3, "text": "ٱلرَّحْمَٰنِ ٱلرَّحِيمِ" },
+                        { "id": 4, "text": "مَٰلِكِ يَوْمِ ٱلدِّينِ" },
+                        { "id": 5, "text": "إِيَّاكَ نَعْبُدُ وَإِيَّاكَ نَسْتَعِينُ" },
+                        { "id": 6, "text": "ٱهْدِنَا ٱلصِّرَٰطَ ٱلْمُسْتَقِيمَ" },
+                        { "id": 7, "text": "صِرَٰطَ ٱلَّذِينَ أَنْعَمْتَ عَلَيْهِمْ غَيْرِ ٱلْمَغْضُوبِ عَلَيْهِمْ وَلَا ٱلضَّآلِّينَ" }
+                    ]
+                },
+                {
+                    "id": 112,
+                    "name": "Al-Ikhlas",
+                    "transliteration": "The Sincerity",
+                    "total_verses": 4,
+                    "verses": [
+                        { "id": 1, "text": "قُلْ هُوَ ٱللَّهُ أَحَدٌ" },
+                        { "id": 2, "text": "ٱللَّهُ ٱلصَّمَدُ" },
+                        { "id": 3, "text": "لَمْ يَلِدْ وَلَمْ يُولَدْ" },
+                        { "id": 4, "text": "وَلَمْ يَكُن لَّهُۥ كُفُوًا أَحَدٌۢ" }
+                    ]
+                },
+                 {
+                    "id": 114,
+                    "name": "An-Nas",
+                    "transliteration": "Mankind",
+                    "total_verses": 6,
+                    "verses": [
+                        { "id": 1, "text": "قُلْ أَعُوذُ بِرَبِّ ٱلنَّاسِ" },
+                        { "id": 2, "text": "مَلِكِ ٱلنَّاسِ" },
+                        { "id": 3, "text": "إِلَٰهِ ٱلنَّاسِ" },
+                        { "id": 4, "text": "مِن شَرِّ ٱلْوَسْوَاسِ ٱلْخَنَّاسِ" },
+                        { "id": 5, "text": "ٱلَّذِى يُوَسْوِسُ فِى صُدُورِ ٱلنَّاسِ" },
+                        { "id": 6, "text": "مِنَ ٱلْجِنَّةِ وَٱلنَّاسِ" }
+                    ]
+                }
+                // Your full list of 114 Surahs would go here
+            ];
+
+            // --- DOM ELEMENTS ---
+            const surahListContainer = document.getElementById('surah-list');
+            const contentDisplay = document.getElementById('content-display');
+            const surahNameEl = document.getElementById('surah-name');
+            const surahInfoEl = document.getElementById('surah-info');
+            const searchInput = document.getElementById('search-input');
+            const welcomeMessage = document.getElementById('welcome-message');
+
+            let fullQuranData = []; // To hold the complete data once loaded
+
+            // --- FUNCTIONS ---
+
+            /**
+             * This is the main function to load and process your Quran data.
+             * It currently uses the sample data.
+             * To load from your file, uncomment the fetch block and remove the sample data block.
+             */
+            async function loadQuran() {
+                try {
+                    // --- BLOCK 1: Load from your actual quran.json file ---
+                    // **IMPORTANT**: Place your 'quran.json' file in the same directory as this HTML file.
+                    /*
+                    const response = await fetch('quran.json');
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+                    fullQuranData = await response.json();
+                    */
+                    
+                    // --- BLOCK 2: Using sample data (REMOVE THIS BLOCK WHEN USING YOUR FILE) ---
+                    fullQuranData = quranData; // Using the sample data for demonstration
+                    // You can expand the sample data above to test with more Surahs.
+                    
+                    if (!fullQuranData || fullQuranData.length === 0) {
+                       throw new Error("Quran data is empty or not loaded correctly.");
+                    }
+                    
+                    populateSurahList(fullQuranData);
+                    // By default, display the first Surah
+                    displaySurah(fullQuranData[0].id);
+
+                } catch (error) {
+                    console.error("Error loading Quran data:", error);
+                    contentDisplay.innerHTML = `<div class="text-center text-red-500 p-8">
+                        <p class="font-bold">Failed to load Quran data.</p>
+                        <p>Please check the console for errors and ensure your 'quran.json' file is correctly formatted and placed.</p>
+                    </div>`;
+                }
+            }
+
+            /**
+             * Populates the sidebar with the list of all Surahs.
+             * @param {Array} surahs - The array of Surah objects.
+             */
+            function populateSurahList(surahs) {
+                surahListContainer.innerHTML = ''; // Clear the "Loading..." message
+                surahs.forEach(surah => {
+                    const div = document.createElement('div');
+                    div.className = 'p-4 border-b cursor-pointer hover:bg-teal-50 transition-colors duration-200';
+                    div.innerHTML = `
+                        <div class="flex justify-between items-center">
+                            <div class="flex items-center">
+                                <span class="text-sm bg-teal-600 text-white rounded-full w-6 h-6 flex items-center justify-center mr-3">${surah.id}</span>
+                                <div>
+                                    <p class="font-semibold">${surah.name}</p>
+                                    <p class="text-xs text-gray-500">${surah.transliteration}</p>
+                                </div>
+                            </div>
+                            <p class="text-lg font-bold arabic-text" dir="rtl">${surah.name}</p>
+                        </div>
+                    `;
+                    div.addEventListener('click', () => displaySurah(surah.id));
+                    surahListContainer.appendChild(div);
+                });
+            }
+
+            /**
+             * Displays the verses of a selected Surah in the main content area.
+             * @param {number} surahId - The ID of the Surah to display.
+             */
+            function displaySurah(surahId) {
+                const surah = fullQuranData.find(s => s.id === surahId);
+                if (!surah) return;
+                
+                // Hide welcome message
+                if(welcomeMessage) welcomeMessage.style.display = 'none';
+
+                surahNameEl.textContent = `${surah.id}. ${surah.name} (${surah.transliteration})`;
+                surahInfoEl.textContent = `Total Verses: ${surah.total_verses}`;
+
+                let versesHtml = `<div class="space-y-6">`;
+                if (surah.id !== 1 && surah.id !== 9) {
+                    versesHtml += `<div class="text-center text-2xl arabic-text py-4">بِسْمِ ٱللَّهِ ٱلرَّحْمَٰنِ ٱلرَّحِيمِ</div>`;
+                }
+                surah.verses.forEach(verse => {
+                    versesHtml += `
+                        <div class="flex items-start space-x-4">
+                            <span class="text-xs bg-gray-200 text-gray-600 rounded-full w-6 h-6 flex items-center justify-center flex-shrink-0 mt-2">${verse.id}</span>
+                            <p class="arabic-text text-right flex-grow" dir="rtl">${verse.text}</p>
+                        </div>
+                    `;
+                });
+                versesHtml += `</div>`;
+
+                contentDisplay.innerHTML = versesHtml;
+                contentDisplay.scrollTop = 0; // Scroll to top
+            }
+
+            /**
+             * Searches the entire Quran for a keyword and displays results.
+             * @param {string} term - The search term.
+             */
+            function performSearch(term) {
+                if (!term || term.trim() === '') {
+                    // If search is cleared, show the first Surah again
+                    displaySurah(fullQuranData[0].id);
+                    return;
+                }
+                
+                if(welcomeMessage) welcomeMessage.style.display = 'none';
+
+                surahNameEl.textContent = `Search Results for "${term}"`;
+                surahInfoEl.textContent = '';
+
+                let resultsHtml = `<div class="space-y-4">`;
+                let resultCount = 0;
+
+                fullQuranData.forEach(surah => {
+                    surah.verses.forEach(verse => {
+                        // A simple text normalization for better matching
+                        const normalizedText = verse.text.replace(/[^\u0621-\u064A\s]/g, '');
+                        if (normalizedText.includes(term)) {
+                            resultCount++;
+                            // Highlight the search term
+                            const highlightedText = verse.text.replace(new RegExp(term, 'g'), `<span class="bg-yellow-200">${term}</span>`);
+                            
+                            resultsHtml += `
+                                <div class="p-4 border rounded-lg bg-white">
+                                    <p class="text-sm text-teal-600 font-semibold mb-2">${surah.name} (${surah.id}:${verse.id})</p>
+                                    <p class="arabic-text text-right" dir="rtl">${highlightedText}</p>
+                                </div>
+                            `;
+                        }
+                    });
+                });
+
+                if (resultCount === 0) {
+                    resultsHtml += `<p class="text-center text-gray-500">No results found for "${term}".</p>`;
+                }
+                
+                surahInfoEl.textContent = `Found ${resultCount} matching verses.`;
+                resultsHtml += `</div>`;
+                contentDisplay.innerHTML = resultsHtml;
+            }
+            
+            // --- EVENT LISTENERS ---
+            let searchTimeout;
+            searchInput.addEventListener('input', (e) => {
+                // Debounce the search to avoid running it on every keystroke
+                clearTimeout(searchTimeout);
+                searchTimeout = setTimeout(() => {
+                    performSearch(e.target.value);
+                }, 300); // Wait 300ms after user stops typing
+            });
+
+
+            // --- INITIALIZATION ---
+            loadQuran();
+        });
+    </script>
+</body>
+</html>
