@@ -1708,39 +1708,50 @@
             },
 
             handleEmployeeForm(data) {
-                const isEdit = document.getElementById('employee-id').value;
-                const employee = {
-                    id: isEdit ? parseInt(isEdit) : Date.now(),
-                    name: data.name,
-                    username: data.username,
-                    role: data.role,
-                    email: data.email,
-                    phone: data.phone,
-                    address: data.address,
-                    hireDate: data.hireDate,
-                    salary: parseFloat(data.salary),
-                    commission: isEdit ? this.state.users.find(u => u.id === parseInt(isEdit))?.commission || 0 : 0
-                };
+    const isEdit = document.getElementById('employee-id').value;
+    const employee = {
+        id: isEdit ? parseInt(isEdit) : Date.now(),
+        name: data.name,
+        username: data.username,
+        role: data.role,
+        email: data.email,
+        phone: data.phone,
+        address: data.address,
+        hireDate: data.hireDate,
+        salary: parseFloat(data.salary) || 0, // Ensure proper parsing
+        commission: isEdit ? (this.state.users.find(u => u.id === parseInt(isEdit))?.commission || 0) : 0
+    };
 
-                if (isEdit) {
-                    const index = this.state.users.findIndex(u => u.id === employee.id);
-                    if (index !== -1) { // Ensure employee exists
-                        this.state.users[index] = { ...this.state.users[index], ...employee };
-                        NotificationSystem.success('✅ Employee updated successfully!');
-                    } else {
-                        NotificationSystem.error('Employee not found for update.');
-                    }
-                } else {
-                    this.state.users.push(employee);
-                    NotificationSystem.success('👨‍💼 Employee added successfully!');
-                }
+    if (isEdit) {
+        const employeeId = parseInt(isEdit);
+        const index = this.state.users.findIndex(u => u.id === employeeId);
+        if (index !== -1) {
+            // Preserve commission but update all other fields including salary
+            employee.commission = this.state.users[index].commission || 0;
+            this.state.users[index] = employee;
+            
+            // Update current user if editing self
+            if (this.state.currentUser.id === employeeId) {
+                this.state.currentUser = { ...employee };
+            }
+            
+            NotificationSystem.success('✅ Employee updated successfully!');
+        } else {
+            NotificationSystem.error('Employee not found for update.');
+            return;
+        }
+    } else {
+        this.state.users.push(employee);
+        NotificationSystem.success('👨‍💼 Employee added successfully!');
+    }
 
-                this.closeModal();
-                this.saveData();
-                this.updateAIInsights();
-                this.updateBotAnalysis();
-                this.render();
-            },
+    this.closeModal();
+    this.saveData();
+    this.updateAIInsights();
+    this.updateBotAnalysis();
+    this.render();
+},
+
 
             handleMessageForm(data) {
                 const message = {
