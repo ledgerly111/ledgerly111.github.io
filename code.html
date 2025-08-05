@@ -4727,5 +4727,84 @@ updateQuickSaleTotal() {
                 if (productSelect && productSelect.selectedIndex > 0) {
                     const selectedOption = productSelect.options[productSelect.selectedIndex];
                     currentProductPrice = parseFloat(selectedOption.getAttribute('data-price')) || 0;
-                    // Set unit price to product's default price if not already set or if product changes
-                    if (unitPriceInput
+                                        // Set unit price to product's default price if not already set or if product changes
+                    if (unitPriceInput.value === '' || unitPriceInput.value === '0') {
+                        unitPriceInput.value = currentProductPrice.toFixed(2);
+                    }
+                }
+
+                const quantity = parseInt(quantityInput.value) || 0;
+                const discount = parseFloat(discountInput.value) || 0;
+
+                // Calculate subtotal
+                const subtotal = (currentProductPrice * quantity) - discount;
+                const taxRate = this.getTaxInfo().rate;
+                const taxAmount = subtotal * taxRate;
+                const total = subtotal + taxAmount;
+
+                // Update the UI with calculated values
+                const subtotalElement = document.getElementById('sale-subtotal');
+                const taxElement = document.getElementById('sale-tax');
+                const totalElement = document.getElementById('sale-total');
+
+                if (subtotalElement) {
+                    subtotalElement.textContent = this.formatCurrency(subtotal);
+                }
+                if (taxElement) {
+                    taxElement.textContent = this.formatCurrency(taxAmount);
+                }
+                if (totalElement) {
+                    totalElement.textContent = this.formatCurrency(total);
+                }
+            },
+
+            // Render function to display the application
+            render() {
+                const appContainer = document.getElementById('app');
+                
+                if (!this.state.currentUser ) {
+                    appContainer.innerHTML = this.getLoginView();
+                    return;
+                }
+
+                if (this.state.quickSale.active) {
+                    appContainer.innerHTML = this.getQuickSaleView();
+                    return;
+                }
+
+                const views = {
+                    'dashboard': this.getDashboardView(),
+                    'products': this.getProductsView(),
+                    'customers': this.getCustomersView(),
+                    'sales': this.getSalesView(),
+                    'expenses': this.getExpensesView(),
+                    'employees': this.getEmployeesView(),
+                    'invoices': this.getInvoicesView(),
+                    'reports': this.getReportsView(),
+                    'settings': this.getSettingsView(),
+                    'inbox': this.getInboxView(),
+                    'ai-assistant': this.getAIAssistantView()
+                };
+
+                appContainer.innerHTML = `
+                    ${this.getNavbar()}
+                    ${this.getSidebar()}
+                    <div class="main-content">
+                        ${views[this.state.currentView] || this.getDashboardView()}
+                    </div>
+                `;
+
+                // Initialize charts if needed
+                if (this.state.currentView === 'dashboard') {
+                    setTimeout(() => this.createDashboardCharts(), 100);
+                }
+            },
+
+            // Other methods remain unchanged...
+        };
+
+        // Initialize the application
+        app.init();
+    </script>
+</body>
+</html>
