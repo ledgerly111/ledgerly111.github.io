@@ -1458,16 +1458,18 @@
                 return amount; 
             },
 
-            formatCurrency(amount, showSymbol = true) {
-                const countryInfo = GCC_COUNTRIES[this.state.selectedCountry];
-                // Ensure amount is converted to the selected country's currency for display
-                const convertedAmount = this.convertCurrency(amount, 'USD', countryInfo.currency);
-                
-                if (showSymbol) {
-                    return `${countryInfo.symbol} ${convertedAmount.toFixed(2)}`;
-                }
-                return `${convertedAmount.toFixed(2)} ${countryInfo.currency}`;
-            },
+            // CORRECTED CODE
+formatCurrency(amount, showSymbol = true) {
+    const countryInfo = GCC_COUNTRIES[this.state.selectedCountry];
+    // The 'amount' variable is already the correct local currency value.
+    // We just need to format it with the correct symbol and decimal places.
+    
+    if (showSymbol) {
+        return `${countryInfo.symbol} ${amount.toFixed(2)}`;
+    }
+    return `${amount.toFixed(2)} ${countryInfo.currency}`;
+},
+
 
             getTaxInfo() {
                 const countryInfo = GCC_COUNTRIES[this.state.selectedCountry];
