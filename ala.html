@@ -2272,57 +2272,77 @@
                 this.render();
             },
 
-            updateQuickSaleQuantity(productId, quantity) {
-                const pId = parseInt(productId);
-                const qty = parseInt(quantity);
-                const product = this.state.products.find(p => p.id === pId);
+            // Update the updateQuickSaleQuantity function
+updateQuickSaleQuantity(productId, quantity) {
+    const pId = parseInt(productId);
+    const qty = parseInt(quantity);
+    const product = this.state.products.find(p => p.id === pId);
 
-                if (!product) return;
+    if (!product) return;
 
-                const itemIndex = this.state.quickSale.selectedProducts.findIndex(item => item.productId === pId);
-                if (itemIndex > -1) {
-                    // Ensure quantity doesn't exceed stock
-                    this.state.quickSale.selectedProducts[itemIndex].quantity = Math.min(qty, product.stock);
-                    this.updateQuickSaleTotal(); // Update total immediately
-                    this.render(); // Re-render to update UI for quantity change
-                }
-            },
+    const itemIndex = this.state.quickSale.selectedProducts.findIndex(item => item.productId === pId);
+    if (itemIndex > -1) {
+        // Ensure quantity doesn't exceed stock and is at least 1
+        this.state.quickSale.selectedProducts[itemIndex].quantity = Math.min(Math.max(qty, 1), product.stock);
+        this.updateQuickSaleTotal(); // Update total immediately without full re-render
+    }
+},
 
-            updateQuickSaleTotal() {
-                let subtotal = 0;
-                this.state.quickSale.selectedProducts.forEach(item => {
-                    subtotal += (item.quantity * item.unitPrice);
-                });
-                this.state.quickSale.subtotal = subtotal;
+// Add this new function for smooth total updates
+updateQuickSaleTotal() {
+    let subtotal = 0;
+    this.state.quickSale.selectedProducts.forEach(item => {
+        subtotal += (item.quantity * item.unitPrice);
+    });
+    this.state.quickSale.subtotal = subtotal;
 
-                const discountInput = document.getElementById('quickSaleDiscount');
-                const discount = parseFloat(discountInput?.value) || 0;
-                this.state.quickSale.discount = discount;
+    const discountInput = document.getElementById('quickSaleDiscount');
+    const discount = parseFloat(discountInput?.value) || 0;
+    this.state.quickSale.discount = discount;
 
-                let finalSubtotal = subtotal - discount;
-                if (finalSubtotal < 0) finalSubtotal = 0; // Prevent negative subtotal
+    let finalSubtotal = subtotal - discount;
+    if (finalSubtotal < 0) finalSubtotal = 0;
 
-                const taxRate = this.getTaxInfo().rate;
-                const taxAmount = finalSubtotal * taxRate;
-                const total = finalSubtotal + taxAmount;
+    const taxRate = this.getTaxInfo().rate;
+    const taxAmount = finalSubtotal * taxRate;
+    const total = finalSubtotal + taxAmount;
 
-                this.state.quickSale.taxAmount = taxAmount;
-                this.state.quickSale.total = total;
+    this.state.quickSale.taxAmount = taxAmount;
+    this.state.quickSale.total = total;
 
-                // Update UI elements directly if they exist
-                const totalElement = document.getElementById('quickSaleFinalTotal');
-                if (totalElement) {
-                    totalElement.textContent = this.formatCurrency(total);
-                }
-                const subtotalElement = document.getElementById('quickSaleFinalSubtotal');
-                if (subtotalElement) {
-                    subtotalElement.textContent = this.formatCurrency(finalSubtotal);
-                }
-                const taxElement = document.getElementById('quickSaleFinalTax');
-                if (taxElement) {
-                    taxElement.textContent = this.formatCurrency(taxAmount);
-                }
-            },
+    // Update UI elements directly without full re-render
+    const totalElement = document.getElementById('quickSaleFinalTotal');
+    if (totalElement) {
+        totalElement.textContent = this.formatCurrency(total);
+    }
+    const subtotalElement = document.getElementById('quickSaleFinalSubtotal');
+    if (subtotalElement) {
+        subtotalElement.textContent = this.formatCurrency(finalSubtotal);
+    }
+    const taxElement = document.getElementById('quickSaleFinalTax');
+    if (taxElement) {
+        taxElement.textContent = this.formatCurrency(taxAmount);
+    }
+    
+    // Update step 3 quantity displays and totals
+    this.state.quickSale.selectedProducts.forEach(item => {
+        const quantityDisplay = document.getElementById(`quantity-display-${item.productId}`);
+        const itemTotal = document.getElementById(`item-total-${item.productId}`);
+        if (quantityDisplay) {
+            quantityDisplay.textContent = item.quantity;
+        }
+        if (itemTotal) {
+            itemTotal.textContent = this.formatCurrency(item.unitPrice * item.quantity);
+        }
+    });
+    
+    // Update step 3 live total
+    const liveTotalElement = document.getElementById('quickSaleLiveTotal');
+    if (liveTotalElement) {
+        liveTotalElement.textContent = this.formatCurrency(total);
+    }
+},
+
 
             finalizeQuickSale() {
                 const customerId = this.state.quickSale.selectedCustomer;
