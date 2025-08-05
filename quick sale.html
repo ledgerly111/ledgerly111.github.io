@@ -7,6 +7,7 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
@@ -29,6 +30,37 @@
             --quick-sale-bg: #0a1a3a; /* Darker blue for quick sale */
             --quick-sale-accent: #3b82f6; /* Shining blue for quick sale */
         }
+
+        /* Light Theme */
+        .theme-light {
+            --bg-primary: #f4f6f8;
+            --bg-secondary: #ffffff;
+            --bg-tertiary: #f8f9fa;
+            --text-primary: #111827;
+            --text-secondary: #374151;
+            --text-muted: #6b7280;
+            --border-color: #e5e7eb;
+            --hover-bg: #f0f2f5;
+        }
+        .theme-light .perplexity-card { background: #ffffff; box-shadow: 0 4px 12px rgba(0,0,0,0.08); }
+        .theme-light .form-input { background: #fdfdff !important; border-color: #d1d5db !important; color: #111827 !important; }
+        .theme-light .form-input:focus { border-color: var(--accent-primary) !important; background: #ffffff !important; }
+        .theme-light .menu-item.active { color: var(--accent-primary); background: rgba(0, 212, 170, 0.1); }
+        .theme-light .navbar, .theme-light .mobile-sidebar, .theme-light .desktop-sidebar { background: linear-gradient(90deg, #ffffff, #f8f9fa); border-bottom-color: #e5e7eb; }
+        .theme-light .quick-sale-container { background: linear-gradient(135deg, #0a1a3a, #000a1a); } /* Keep quick sale dark */
+
+        /* Pitch Black Theme */
+        .theme-black {
+            --bg-primary: #000000;
+            --bg-secondary: #0c0c0c;
+            --bg-tertiary: #141414;
+            --text-primary: #e5e5e5;
+            --text-secondary: #a3a3a3;
+            --border-color: #262626;
+            --hover-bg: #1f1f1f;
+        }
+        .theme-black .perplexity-card { background: #0c0c0c; border: 1px solid var(--border-color); }
+        .theme-black .form-input { background: #141414 !important; }
 
         * {
             box-sizing: border-box;
@@ -672,6 +704,7 @@
             align-items: center;
             justify-content: center;
             text-align: center;
+            position: relative; /* Added for checkmark positioning */
         }
 
         .quick-sale-grid-item.selected {
@@ -714,6 +747,72 @@
             background: var(--quick-sale-accent);
             cursor: pointer;
             box-shadow: 0 0 5px rgba(59, 130, 246, 0.7);
+        }
+
+        /* Bot Chat Specific Styles */
+        .bot-chat-box {
+            height: 300px;
+            overflow-y: auto;
+            background: rgba(15, 20, 25, 0.8);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 1rem;
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+            scroll-behavior: smooth;
+        }
+
+        .bot-chat-message {
+            display: flex;
+            align-items: flex-start;
+            gap: 0.5rem;
+        }
+
+        .bot-chat-message.user .message-bubble {
+            background: linear-gradient(135deg, #3b82f6 0%, #0ea5e9 100%);
+            align-self: flex-end;
+            margin-left: auto;
+        }
+
+        .bot-chat-message.bot .message-bubble {
+            background: linear-gradient(135deg, var(--bot-color) 0%, #059669 100%);
+            align-self: flex-start;
+        }
+
+        .message-bubble {
+            padding: 0.6rem 1rem;
+            border-radius: 1rem;
+            max-width: 80%;
+            word-wrap: break-word;
+            font-size: 0.9rem;
+        }
+
+        .message-bubble.user {
+            border-bottom-right-radius: 0.25rem;
+        }
+
+        .message-bubble.bot {
+            border-bottom-left-radius: 0.25rem;
+        }
+
+        .message-avatar {
+            width: 2rem;
+            height: 2rem;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.8rem;
+            flex-shrink: 0;
+        }
+
+        .message-avatar.user {
+            background-color: #3b82f6;
+        }
+
+        .message-avatar.bot {
+            background-color: var(--bot-color);
         }
     </style>
 </head>
@@ -1054,6 +1153,53 @@
                 );
 
                 return actions;
+            },
+
+            processCommand(command, state) {
+                const lowerCommand = command.toLowerCase().trim();
+                let responseHtml = '';
+
+                switch (lowerCommand) {
+                    case '#credit':
+                        const customersWithBalance = state.customers.filter(c => c.balance > 0);
+                        const totalOutstandingCredit = customersWithBalance.reduce((sum, c) => sum + c.balance, 0);
+
+                        responseHtml += `<p class="text-white font-medium mb-2">Total Outstanding Credit: ${app.formatCurrency(totalOutstandingCredit)}</p>`;
+                        if (customersWithBalance.length > 0) {
+                            responseHtml += `<p class="text-gray-300 mb-1">Customers with outstanding balance:</p>`;
+                            responseHtml += `<ul class="list-disc list-inside text-gray-300">`;
+                            customersWithBalance.forEach(c => {
+                                responseHtml += `<li>${c.name}: ${app.formatCurrency(c.balance)}</li>`;
+                            });
+                            responseHtml += `</ul>`;
+                        } else {
+                            responseHtml += `<p class="text-gray-300">No customers with outstanding credit balance.</p>`;
+                        }
+                        break;
+                    case '#sales':
+                        const totalSalesCount = state.sales.length;
+                        const totalRevenue = state.sales.reduce((sum, sale) => sum + sale.total, 0);
+                        responseHtml += `<p class="text-white font-medium mb-2">Total Sales Recorded: ${totalSalesCount}</p>`;
+                        responseHtml += `<p class="text-white font-medium">Total Revenue: ${app.formatCurrency(totalRevenue)}</p>`;
+                        break;
+                    case '#lowstock':
+                        const lowStockProducts = state.products.filter(p => p.stock <= p.reorderLevel);
+                        if (lowStockProducts.length > 0) {
+                            responseHtml += `<p class="text-white font-medium mb-2">Products critically low on stock (below reorder level):</p>`;
+                            responseHtml += `<ul class="list-disc list-inside text-gray-300">`;
+                            lowStockProducts.forEach(p => {
+                                responseHtml += `<li>${p.name} (SKU: ${p.sku}): ${p.stock} in stock (Reorder Level: ${p.reorderLevel})</li>`;
+                            });
+                            responseHtml += `</ul>`;
+                        } else {
+                            responseHtml += `<p class="text-white font-medium">Great! No products are currently below their reorder level.</p>`;
+                        }
+                        break;
+                    default:
+                        responseHtml = `<p class="text-red-400">Command not recognized. Try #credit, #sales, or #lowstock.</p>`;
+                        break;
+                }
+                return responseHtml;
             }
         };
 
@@ -1113,6 +1259,8 @@
 
             init() {
                 this.loadData();
+                const savedTheme = DataStorage.load('ledgerlyTheme') || 'default';
+                this.setTheme(savedTheme);
                 this.render();
                 this.bindEvents();
                 this.updateAIInsights();
@@ -1175,6 +1323,11 @@
 
             bindEvents() {
                 document.addEventListener('click', (e) => {
+                    const themeOption = e.target.closest('[data-theme]');
+                    if (themeOption) {
+                        this.setTheme(themeOption.getAttribute('data-theme'));
+                    }
+
                     if (e.target.matches('[data-action]') || e.target.closest('[data-action]')) {
                         const actionElement = e.target.matches('[data-action]') ? e.target : e.target.closest('[data-action]');
                         const action = actionElement.getAttribute('data-action');
@@ -1192,6 +1345,23 @@
                 window.addEventListener('resize', () => {
                     if (window.innerWidth >= 1024 && this.state.mobileMenuOpen) {
                         this.closeMobileSidebar();
+                    }
+                });
+
+                // Event listener for AccuraBot chat send button
+                document.addEventListener('DOMContentLoaded', () => {
+                    const botChatSendButton = document.getElementById('bot-chat-send');
+                    if (botChatSendButton) {
+                        botChatSendButton.addEventListener('click', this.handleBotChatCommand.bind(this));
+                    }
+                    const botChatInput = document.getElementById('bot-chat-input');
+                    if (botChatInput) {
+                        botChatInput.addEventListener('keypress', (e) => {
+                            if (e.key === 'Enter') {
+                                e.preventDefault(); // Prevent form submission if input is part of a form
+                                this.handleBotChatCommand();
+                            }
+                        });
                     }
                 });
             },
@@ -1244,7 +1414,7 @@
                     'quick-sale-prev-step': () => this.quickSalePrevStep(),
                     'select-quick-sale-customer': () => this.selectQuickSaleCustomer(id),
                     'toggle-quick-sale-product': () => this.toggleQuickSaleProduct(id),
-                    'update-quick-sale-quantity': (e) => this.updateQuickSaleQuantity(id, event.target.value),
+                    // 'update-quick-sale-quantity': (e) => this.updateQuickSaleQuantity(id, event.target.value), // Removed as per bug fix
                     'finalize-quick-sale': () => this.finalizeQuickSale(),
                     'cancel-quick-sale': () => this.cancelQuickSale()
                 };
@@ -1327,16 +1497,18 @@
                 return amount; 
             },
 
-            formatCurrency(amount, showSymbol = true) {
-                const countryInfo = GCC_COUNTRIES[this.state.selectedCountry];
-                // Ensure amount is converted to the selected country's currency for display
-                const convertedAmount = this.convertCurrency(amount, 'USD', countryInfo.currency);
-                
-                if (showSymbol) {
-                    return `${countryInfo.symbol} ${convertedAmount.toFixed(2)}`;
-                }
-                return `${convertedAmount.toFixed(2)} ${countryInfo.currency}`;
-            },
+            // CORRECTED CODE
+formatCurrency(amount, showSymbol = true) {
+    const countryInfo = GCC_COUNTRIES[this.state.selectedCountry];
+    // The 'amount' variable is already the correct local currency value.
+    // We just need to format it with the correct symbol and decimal places.
+    
+    if (showSymbol) {
+        return `${countryInfo.symbol} ${amount.toFixed(2)}`;
+    }
+    return `${amount.toFixed(2)} ${countryInfo.currency}`;
+},
+
 
             getTaxInfo() {
                 const countryInfo = GCC_COUNTRIES[this.state.selectedCountry];
@@ -1577,35 +1749,50 @@
             },
 
             handleEmployeeForm(data) {
-                const isEdit = document.getElementById('employee-id').value;
-                const employee = {
-                    id: isEdit ? parseInt(isEdit) : Date.now(),
-                    name: data.name,
-                    username: data.username,
-                    role: data.role,
-                    email: data.email,
-                    phone: data.phone,
-                    address: data.address,
-                    hireDate: data.hireDate,
-                    salary: parseFloat(data.salary),
-                    commission: isEdit ? this.state.users.find(u => u.id === parseInt(isEdit))?.commission || 0 : 0
-                };
+    const isEdit = document.getElementById('employee-id').value;
+    const employee = {
+        id: isEdit ? parseInt(isEdit) : Date.now(),
+        name: data.name,
+        username: data.username,
+        role: data.role,
+        email: data.email,
+        phone: data.phone,
+        address: data.address,
+        hireDate: data.hireDate,
+        salary: parseFloat(data.salary) || 0, // Ensure proper parsing
+        commission: isEdit ? (this.state.users.find(u => u.id === parseInt(isEdit))?.commission || 0) : 0
+    };
 
-                if (isEdit) {
-                    const index = this.state.users.findIndex(u => u.id === employee.id);
-                    this.state.users[index] = { ...this.state.users[index], ...employee };
-                    NotificationSystem.success('✅ Employee updated successfully!');
-                } else {
-                    this.state.users.push(employee);
-                    NotificationSystem.success('👨‍💼 Employee added successfully!');
-                }
+    if (isEdit) {
+        const employeeId = parseInt(isEdit);
+        const index = this.state.users.findIndex(u => u.id === employeeId);
+        if (index !== -1) {
+            // Preserve commission but update all other fields including salary
+            employee.commission = this.state.users[index].commission || 0;
+            this.state.users[index] = employee;
+            
+            // Update current user if editing self
+            if (this.state.currentUser.id === employeeId) {
+                this.state.currentUser = { ...employee };
+            }
+            
+            NotificationSystem.success('✅ Employee updated successfully!');
+        } else {
+            NotificationSystem.error('Employee not found for update.');
+            return;
+        }
+    } else {
+        this.state.users.push(employee);
+        NotificationSystem.success('👨‍💼 Employee added successfully!');
+    }
 
-                this.closeModal();
-                this.saveData();
-                this.updateAIInsights();
-                this.updateBotAnalysis();
-                this.render();
-            },
+    this.closeModal();
+    this.saveData();
+    this.updateAIInsights();
+    this.updateBotAnalysis();
+    this.render();
+},
+
 
             handleMessageForm(data) {
                 const message = {
@@ -1843,6 +2030,38 @@
                 if (quickActions[actionId]) {
                     quickActions[actionId]();
                 }
+            },
+
+            handleBotChatCommand() {
+                const chatInput = document.getElementById('bot-chat-input');
+                const chatBox = document.getElementById('bot-chat-box');
+                if (!chatInput || !chatBox) return;
+
+                const command = chatInput.value.trim();
+                if (!command) return;
+
+                // Append user message
+                const userMessageDiv = document.createElement('div');
+                userMessageDiv.className = 'bot-chat-message user';
+                userMessageDiv.innerHTML = `
+                    <div class="message-bubble user">${command}</div>
+                    <div class="message-avatar user">You</div>
+                `;
+                chatBox.appendChild(userMessageDiv);
+
+                // Process command and append bot response
+                const botResponseHtml = AccuraBot.processCommand(command, this.state);
+                const botMessageDiv = document.createElement('div');
+                botMessageDiv.className = 'bot-chat-message bot';
+                botMessageDiv.innerHTML = `
+                    <div class="message-avatar bot">Bot</div>
+                    <div class="message-bubble bot">${botResponseHtml}</div>
+                `;
+                chatBox.appendChild(botMessageDiv);
+
+                // Clear input and scroll to bottom
+                chatInput.value = '';
+                chatBox.scrollTop = chatBox.scrollHeight;
             },
 
             // Chart creation
@@ -2094,60 +2313,82 @@
                 this.render();
             },
 
-            updateQuickSaleQuantity(productId, quantity) {
-                const pId = parseInt(productId);
-                const qty = parseInt(quantity);
-                const product = this.state.products.find(p => p.id === pId);
+            // Update the updateQuickSaleQuantity function
+updateQuickSaleQuantity(productId, quantity) {
+    const pId = parseInt(productId);
+    const qty = parseInt(quantity);
+    const product = this.state.products.find(p => p.id === pId);
 
-                if (!product) return;
+    if (!product) return;
 
-                const itemIndex = this.state.quickSale.selectedProducts.findIndex(item => item.productId === pId);
-                if (itemIndex > -1) {
-                    // Ensure quantity doesn't exceed stock
-                    this.state.quickSale.selectedProducts[itemIndex].quantity = Math.min(qty, product.stock);
-                    this.updateQuickSaleTotal(); // Update total immediately
-                }
-            },
+    const itemIndex = this.state.quickSale.selectedProducts.findIndex(item => item.productId === pId);
+    if (itemIndex > -1) {
+        // Ensure quantity doesn't exceed stock and is at least 1
+        this.state.quickSale.selectedProducts[itemIndex].quantity = Math.min(Math.max(qty, 1), product.stock);
+        this.updateQuickSaleTotal(); // Update total immediately without full re-render
+    }
+},
 
-            updateQuickSaleTotal() {
-                let subtotal = 0;
-                this.state.quickSale.selectedProducts.forEach(item => {
-                    subtotal += (item.quantity * item.unitPrice);
-                });
-                this.state.quickSale.subtotal = subtotal;
+// Add this new function for smooth total updates
+updateQuickSaleTotal() {
+    let subtotal = 0;
+    this.state.quickSale.selectedProducts.forEach(item => {
+        subtotal += (item.quantity * item.unitPrice);
+    });
+    this.state.quickSale.subtotal = subtotal;
 
-                const discount = parseFloat(document.getElementById('quickSaleDiscount')?.value) || 0;
-                this.state.quickSale.discount = discount;
+    const discountInput = document.getElementById('quickSaleDiscount');
+    const discount = parseFloat(discountInput?.value) || 0;
+    this.state.quickSale.discount = discount;
 
-                let finalSubtotal = subtotal - discount;
-                if (finalSubtotal < 0) finalSubtotal = 0; // Prevent negative subtotal
+    let finalSubtotal = subtotal - discount;
+    if (finalSubtotal < 0) finalSubtotal = 0;
 
-                const taxRate = this.getTaxInfo().rate;
-                const taxAmount = finalSubtotal * taxRate;
-                const total = finalSubtotal + taxAmount;
+    const taxRate = this.getTaxInfo().rate;
+    const taxAmount = finalSubtotal * taxRate;
+    const total = finalSubtotal + taxAmount;
 
-                this.state.quickSale.taxAmount = taxAmount;
-                this.state.quickSale.total = total;
+    this.state.quickSale.taxAmount = taxAmount;
+    this.state.quickSale.total = total;
 
-                // Update UI elements directly if they exist
-                const totalElement = document.getElementById('quickSaleFinalTotal');
-                if (totalElement) {
-                    totalElement.textContent = this.formatCurrency(total);
-                }
-                const subtotalElement = document.getElementById('quickSaleFinalSubtotal');
-                if (subtotalElement) {
-                    subtotalElement.textContent = this.formatCurrency(finalSubtotal);
-                }
-                const taxElement = document.getElementById('quickSaleFinalTax');
-                if (taxElement) {
-                    taxElement.textContent = this.formatCurrency(taxAmount);
-                }
-            },
+    // Update UI elements directly without full re-render
+    const totalElement = document.getElementById('quickSaleFinalTotal');
+    if (totalElement) {
+        totalElement.textContent = this.formatCurrency(total);
+    }
+    const subtotalElement = document.getElementById('quickSaleFinalSubtotal');
+    if (subtotalElement) {
+        subtotalElement.textContent = this.formatCurrency(finalSubtotal);
+    }
+    const taxElement = document.getElementById('quickSaleFinalTax');
+    if (taxElement) {
+        taxElement.textContent = this.formatCurrency(taxAmount);
+    }
+    
+    // Update step 3 quantity displays and totals
+    this.state.quickSale.selectedProducts.forEach(item => {
+        const quantityDisplay = document.getElementById(`quantity-display-${item.productId}`);
+        const itemTotal = document.getElementById(`item-total-${item.productId}`);
+        if (quantityDisplay) {
+            quantityDisplay.textContent = item.quantity;
+        }
+        if (itemTotal) {
+            itemTotal.textContent = this.formatCurrency(item.unitPrice * item.quantity);
+        }
+    });
+    
+    // Update step 3 live total
+    const liveTotalElement = document.getElementById('quickSaleLiveTotal');
+    if (liveTotalElement) {
+        liveTotalElement.textContent = this.formatCurrency(total);
+    }
+},
+
 
             finalizeQuickSale() {
                 const customerId = this.state.quickSale.selectedCustomer;
                 const items = this.state.quickSale.selectedProducts;
-                const discount = parseFloat(document.getElementById('quickSaleDiscount').value) || 0;
+                const discount = this.state.quickSale.discount || 0;
                 const paymentType = document.getElementById('quickSalePaymentType').value;
 
                 if (!customerId) {
@@ -2271,6 +2512,49 @@
                 if (this.state.currentView === 'dashboard') {
                     setTimeout(() => this.createDashboardCharts(), 100);
                 }
+                // Re-bind bot chat events if on AI assistant view and bot mode
+                if (this.state.currentView === 'ai-assistant' && this.state.aiMode === 'bot') {
+                    setTimeout(() => {
+                        const botChatSendButton = document.getElementById('bot-chat-send');
+                        if (botChatSendButton) {
+                            botChatSendButton.removeEventListener('click', this.handleBotChatCommand.bind(this)); // Prevent duplicate listeners
+                            botChatSendButton.addEventListener('click', this.handleBotChatCommand.bind(this));
+                        }
+                        const botChatInput = document.getElementById('bot-chat-input');
+                        if (botChatInput) {
+                            botChatInput.removeEventListener('keypress', (e) => { // Prevent duplicate listeners
+                                if (e.key === 'Enter') {
+                                    e.preventDefault();
+                                    this.handleBotChatCommand();
+                                }
+                            });
+                            botChatInput.addEventListener('keypress', (e) => {
+                                if (e.key === 'Enter') {
+                                    e.preventDefault();
+                                    this.handleBotChatCommand();
+                                }
+                            });
+                        }
+                        const chatBox = document.getElementById('bot-chat-box');
+                        if (chatBox) {
+                            chatBox.scrollTop = chatBox.scrollHeight; // Scroll to bottom on render
+                        }
+                    }, 100);
+                }
+            },
+
+            setTheme(themeName) {
+                document.body.className = themeName === 'default' ? '' : themeName;
+                DataStorage.save('ledgerlyTheme', themeName);
+                // Update selection highlight
+                const themeOptions = document.querySelectorAll('#theme-selector > div');
+                themeOptions.forEach(opt => {
+                    if (opt.getAttribute('data-theme') === themeName) {
+                        opt.classList.add('border-accent-primary');
+                    } else {
+                        opt.classList.remove('border-accent-primary');
+                    }
+                });
             },
 
             getLoginView() {
@@ -2336,84 +2620,85 @@
             },
 
             getNavbar() {
-                const unreadCount = this.getUnreadMessageCount();
-                const aiButtonClass = this.state.aiMode === 'ai' ? 'ai-button ai-pulse' : 'bot-button bot-pulse';
-                const aiIcon = this.state.aiMode === 'ai' ? 'fas fa-brain' : 'fas fa-robot';
-                const aiText = this.state.aiMode === 'ai' ? 'AccuraAI' : 'AccuraBot';
-                const countryInfo = GCC_COUNTRIES[this.state.selectedCountry];
-                
-                return `
-                    <div class="navbar">
-                        <div class="flex justify-between items-center">
-                            <div class="flex items-center space-x-4">
-                                <div class="burger-menu" data-action="toggle-mobile-menu">
-                                    <i class="fas fa-bars text-white text-lg"></i>
-                                </div>
-                                
-                                <div class="flex items-center space-x-3">
-                                    <div class="flex items-center">
-                                        <div class="w-10 h-10 rounded-full bg-gradient-to-r from-teal-500 to-blue-500 flex items-center justify-center mr-3">
-                                            <i class="fas fa-chart-line text-white text-lg"></i>
-                                        </div>
-                                        <div class="hidden sm:block">
-                                            <h1 class="text-xl font-bold gradient-text leading-tight">Ledgerly</h1>
-                                            <p class="text-xs text-gray-400 leading-none">Sales</p>
-                                        </div>
-                                    </div>
-                                </div>
-                                
-                                <div class="hidden md:flex items-center space-x-4">
-                                    <span class="text-gray-500">|</span>
-                                    <div class="flex items-center space-x-3">
-                                        <div class="w-8 h-8 rounded-full bg-gradient-to-r from-purple-500 to-pink-500 flex items-center justify-center">
-                                            <span class="text-white font-bold text-sm">${this.state.currentUser.name.charAt(0)}</span>
-                                        </div>
-                                        <div>
-                                            <p class="text-white font-medium text-sm">${this.state.currentUser.name}</p>
-                                            <p class="text-xs text-gray-400 capitalize">${this.state.currentUser.role}</p>
-                                        </div>
-                                    </div>
-                                    ${['admin', 'manager'].includes(this.state.currentUser.role) ? `
-                                        <div class="flex items-center space-x-2">
-                                            <span class="px-3 py-1 bg-gradient-to-r from-yellow-500 to-orange-500 text-white text-xs rounded-full font-medium">
-                                                ${countryInfo.currency} • ${countryInfo.name.split(' ')[0]}
-                                            </span>
-                                        </div>
-                                    ` : ''}
-                                </div>
+    const unreadCount = this.getUnreadMessageCount();
+    const aiButtonClass = this.state.aiMode === 'ai' ? 'ai-button ai-pulse' : 'bot-button bot-pulse';
+    const aiIcon = this.state.aiMode === 'ai' ? 'fas fa-brain' : 'fas fa-robot';
+    const aiText = this.state.aiMode === 'ai' ? 'AccuraAI' : 'AccuraBot';
+    const countryInfo = GCC_COUNTRIES[this.state.selectedCountry];
+    
+    return `
+        <div class="navbar">
+            <div class="flex justify-between items-center">
+                <div class="flex items-center space-x-4">
+                    <div class="burger-menu" data-action="toggle-mobile-menu">
+                        <i class="fas fa-bars text-white text-lg"></i>
+                    </div>
+                    
+                    <div class="flex items-center space-x-3">
+                        <div class="flex items-center space-x-3">
+                            <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-emerald-400 via-teal-500 to-blue-600 flex items-center justify-center shadow-lg transform hover:scale-105 transition-all duration-300">
+                                <i class="fas fa-chart-line text-white text-xl"></i>
                             </div>
-                            
-                            <div class="flex items-center space-x-2">
-                                <button data-action="start-quick-sale" class="quick-sale-button quick-sale-pulse px-3 py-2 rounded-lg text-sm font-medium" title="Quick Sale">
-                                    <i class="fas fa-bolt text-lg"></i>
-                                    <span class="hidden sm:inline ml-2">Quick Sale</span>
-                                </button>
-
-                                <button data-action="ai-assistant" class="${aiButtonClass} px-3 py-2 rounded-lg text-sm font-medium" title="${aiText}">
-                                    <i class="${aiIcon} text-lg"></i>
-                                    <span class="hidden sm:inline ml-2">${aiText}</span>
-                                </button>
-                                
-                                <div class="relative">
-                                    <button data-action="inbox" class="text-gray-400 hover:text-teal-400 transition-colors p-2 rounded-lg hover:bg-gray-700/50" title="Messages">
-                                        <i class="fas fa-envelope text-lg"></i>
-                                        ${unreadCount > 0 ? `<span class="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">${unreadCount}</span>` : ''}
-                                    </button>
-                                </div>
-                                
-                                <button data-action="export-data" class="text-gray-400 hover:text-teal-400 transition-colors p-2 rounded-lg hover:bg-gray-700/50 hidden sm:block" title="Export Data">
-                                    <i class="fas fa-download text-lg"></i>
-                                </button>
-                                
-                                <button data-action="logout" class="bg-red-600 hover:bg-red-700 text-white px-3 py-2 rounded-lg text-sm font-medium transition-all" title="Logout">
-                                    <i class="fas fa-sign-out-alt"></i>
-                                    <span class="hidden sm:inline ml-2">Logout</span>
-                                </button>
+                            <div class="hidden sm:block">
+                                <h1 class="text-xl font-bold bg-gradient-to-r from-emerald-400 to-blue-500 bg-clip-text text-transparent leading-tight">Ledgerly</h1>
+                                <p class="text-xs text-gray-400 leading-none font-medium">Smart Sales Management</p>
                             </div>
                         </div>
                     </div>
-                `;
-            },
+                    
+                    <div class="hidden md:flex items-center space-x-4">
+                        <span class="text-gray-500">|</span>
+                        <div class="flex items-center space-x-3">
+                            <div class="w-8 h-8 rounded-full bg-gradient-to-r from-purple-500 to-pink-500 flex items-center justify-center">
+                                <span class="text-white font-bold text-sm">${this.state.currentUser.name.charAt(0)}</span>
+                            </div>
+                            <div>
+                                <p class="text-white font-medium text-sm">${this.state.currentUser.name}</p>
+                                <p class="text-xs text-gray-400 capitalize">${this.state.currentUser.role}</p>
+                            </div>
+                        </div>
+                        ${['admin', 'manager'].includes(this.state.currentUser.role) ? `
+                            <div class="flex items-center space-x-2">
+                                <span class="px-3 py-1 bg-gradient-to-r from-yellow-500 to-orange-500 text-white text-xs rounded-full font-medium">
+                                    ${countryInfo.currency} • ${countryInfo.name.split(' ')[0]}
+                                </span>
+                            </div>
+                        ` : ''}
+                    </div>
+                </div>
+                
+                <div class="flex items-center space-x-2">
+                    <button data-action="start-quick-sale" class="quick-sale-button quick-sale-pulse px-3 py-2 rounded-lg text-sm font-medium" title="Quick Sale">
+                        <i class="fas fa-bolt text-lg"></i>
+                        <span class="hidden sm:inline ml-2">Quick Sale</span>
+                    </button>
+
+                    <button data-action="ai-assistant" class="${aiButtonClass} px-3 py-2 rounded-lg text-sm font-medium" title="${aiText}">
+                        <i class="${aiIcon} fa-fw text-lg"></i>
+                        <span class="hidden sm:inline ml-2">${aiText}</span>
+                    </button>
+                    
+                    <div class="relative">
+                        <button data-action="inbox" class="text-gray-400 hover:text-teal-400 transition-colors p-2 rounded-lg hover:bg-gray-700/50" title="Messages">
+                            <i class="fas fa-envelope text-lg"></i>
+                            ${unreadCount > 0 ? `<span class="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">${unreadCount}</span>` : ''}
+                        </button>
+                    </div>
+                    
+                    <button data-action="export-data" class="text-gray-400 hover:text-teal-400 transition-colors p-2 rounded-lg hover:bg-gray-700/50 hidden sm:block" title="Export Data">
+                        <i class="fas fa-download text-lg"></i>
+                    </button>
+                    
+                    <button data-action="logout" class="bg-red-600 hover:bg-red-700 text-white px-3 py-2 rounded-lg text-sm font-medium transition-all" title="Logout">
+                        <i class="fas fa-sign-out-alt"></i>
+                        <span class="hidden sm:inline ml-2">Logout</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    `;
+},
+
 
             getSidebar() {
                 const menuItems = [
@@ -2453,7 +2738,7 @@
                                 <li>
                                     <button data-action="${item.key}" 
                                             class="menu-item ${this.state.currentView === item.key ? 'active' : ''} ${item.key === 'ai-assistant' && this.state.aiMode === 'ai' ? 'ai-pulse' : item.key === 'ai-assistant' && this.state.aiMode === 'bot' ? 'bot-pulse' : ''}">
-                                        <i class="${item.icon}"></i>
+                                        <i class="${item.icon} fa-fw"></i>
                                         <span class="font-medium">${item.label}</span>
                                         ${item.key === 'inbox' && unreadCount > 0 ? `<span class="ml-auto bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">${unreadCount}</span>` : ''}
                                         ${item.key === 'ai-assistant' ? `<span class="${this.state.aiMode === 'ai' ? 'text-purple-400' : 'text-green-400'} text-xs ml-auto">✨</span>` : ''}
@@ -2804,10 +3089,10 @@
 
                 return `
                     <div class="space-y-6 fade-in">
-                        <div class="flex items-center justify-between">
+                        <div class="flex items-center justify-between flex-wrap gap-x-4 gap-y-2">
                             <div class="flex items-center space-x-4">
                                 <div class="w-14 h-14 bg-gradient-to-r from-purple-500 to-pink-500 rounded-2xl flex items-center justify-center ai-pulse">
-                                    <i class="fas fa-brain text-white text-2xl"></i>
+                                    <i class="fas fa-brain fa-fw text-white text-2xl"></i>
                                 </div>
                                 <div>
                                     <h2 class="text-2xl font-bold ai-gradient-text">AccuraAI Assistant</h2>
@@ -2831,7 +3116,7 @@
                         <div class="ai-card p-6">
                             <div class="flex items-start space-x-6">
                                 <div class="w-14 h-14 rounded-full bg-gradient-to-r from-purple-500 to-pink-500 flex items-center justify-center flex-shrink-0">
-                                    <i class="fas fa-brain text-white text-xl"></i>
+                                    <i class="fas fa-brain fa-fw text-white text-xl"></i>
                                 </div>
                                 <div class="flex-1">
                                     <h3 class="text-xl font-bold text-white mb-3">Hello ${this.state.currentUser.name}! 👋</h3>
@@ -2927,10 +3212,10 @@
 
                 return `
                     <div class="space-y-6 fade-in">
-                        <div class="flex items-center justify-between">
+                        <div class="flex items-center justify-between flex-wrap gap-x-4 gap-y-2">
                             <div class="flex items-center space-x-4">
                                 <div class="w-14 h-14 bg-gradient-to-r from-green-500 to-emerald-500 rounded-2xl flex items-center justify-center bot-pulse">
-                                    <i class="fas fa-robot text-white text-2xl"></i>
+                                    <i class="fas fa-robot fa-fw text-white text-2xl"></i>
                                 </div>
                                 <div>
                                     <h2 class="text-2xl font-bold bot-gradient-text">AccuraBot</h2>
@@ -2954,7 +3239,7 @@
                         <div class="bot-card p-6">
                             <div class="flex items-start space-x-6">
                                 <div class="w-14 h-14 rounded-full bg-gradient-to-r from-green-500 to-emerald-500 flex items-center justify-center flex-shrink-0">
-                                    <i class="fas fa-robot text-white text-xl"></i>
+                                    <i class="fas fa-robot fa-fw text-white text-xl"></i>
                                 </div>
                                 <div class="flex-1">
                                     <h3 class="text-xl font-bold text-white mb-3">AccuraBot Monitoring Active! 🤖</h3>
@@ -3084,12 +3369,40 @@
                                 </div>
                             </div>
                         ` : ''}
+
+                        <div class="perplexity-card p-6">
+                            <h3 class="text-xl font-bold text-white mb-4 flex items-center">
+                                <i class="fas fa-comments text-green-400 mr-2"></i>
+                                AccuraBot Chat Helper
+                            </h3>
+                            <div id="bot-chat-box" class="bot-chat-box mb-4">
+                                <div class="bot-chat-message bot">
+                                    <div class="message-avatar bot">Bot</div>
+                                    <div class="message-bubble bot">Hello! I'm your AccuraBot Chat Helper. Type a command to get instant insights. Try: <span class="font-bold">#credit</span>, <span class="font-bold">#sales</span>, or <span class="font-bold">#lowstock</span>.</div>
+                                </div>
+                            </div>
+                            <div class="flex gap-2">
+                                <input type="text" id="bot-chat-input" class="form-input flex-1" placeholder="Type your command (e.g., #sales)">
+                                <button id="bot-chat-send" class="bot-button px-4 py-2">Send</button>
+                            </div>
+                        </div>
                     </div>
                 `;
             },
 
             // Add all the missing view methods here
             getProductsView() {
+                const searchTerm = document.getElementById('product-search')?.value.toLowerCase() || '';
+                const categoryFilter = document.getElementById('product-category-filter')?.value || '';
+
+                const filteredProducts = this.state.products.filter(product => {
+                    const matchesSearch = product.name.toLowerCase().includes(searchTerm) ||
+                                          product.sku.toLowerCase().includes(searchTerm) ||
+                                          product.description.toLowerCase().includes(searchTerm);
+                    const matchesCategory = categoryFilter === '' || product.category === categoryFilter;
+                    return matchesSearch && matchesCategory;
+                });
+
                 return `
                     <div class="space-y-6 fade-in">
                         <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
@@ -3104,12 +3417,26 @@
                             ` : ''}
                         </div>
 
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <label for="product-search" class="sr-only">Search Products</label>
+                                <input type="text" id="product-search" placeholder="Search by name or SKU..." class="form-input w-full" onkeyup="app.render()">
+                            </div>
+                            <div>
+                                <label for="product-category-filter" class="sr-only">Filter by Category</label>
+                                <select id="product-category-filter" class="form-input w-full" onchange="app.render()">
+                                    <option value="">All Categories</option>
+                                    ${this.state.categories.map(cat => `<option value="${cat}">${cat}</option>`).join('')}
+                                </select>
+                            </div>
+                        </div>
+
                         <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
                             <div class="perplexity-card p-4">
                                 <div class="flex items-center justify-between">
                                     <div>
                                         <p class="text-gray-400 text-sm mb-1">Total</p>
-                                        <p class="text-2xl font-bold text-white">${this.state.products.length}</p>
+                                        <p class="text-2xl font-bold text-white">${filteredProducts.length}</p>
                                     </div>
                                     <div class="w-10 h-10 bg-blue-500/20 rounded-xl flex items-center justify-center">
                                         <i class="fas fa-box text-blue-400"></i>
@@ -3120,7 +3447,7 @@
                                 <div class="flex items-center justify-between">
                                     <div>
                                         <p class="text-gray-400 text-sm mb-1">Value</p>
-                                        <p class="text-lg font-bold text-green-400">${this.formatCurrency(this.state.products.reduce((sum, p) => sum + (p.price * p.stock), 0), false)}</p>
+                                        <p class="text-lg font-bold text-green-400">${this.formatCurrency(filteredProducts.reduce((sum, p) => sum + (p.price * p.stock), 0), false)}</p>
                                     </div>
                                     <div class="w-10 h-10 bg-green-500/20 rounded-xl flex items-center justify-center">
                                         <i class="fas fa-dollar-sign text-green-400"></i>
@@ -3131,7 +3458,7 @@
                                 <div class="flex items-center justify-between">
                                     <div>
                                         <p class="text-gray-400 text-sm mb-1">Low Stock</p>
-                                        <p class="text-2xl font-bold text-red-400">${this.state.products.filter(p => p.stock <= this.state.lowStockThreshold).length}</p>
+                                        <p class="text-2xl font-bold text-red-400">${filteredProducts.filter(p => p.stock <= this.state.lowStockThreshold).length}</p>
                                     </div>
                                     <div class="w-10 h-10 bg-red-500/20 rounded-xl flex items-center justify-center">
                                         <i class="fas fa-exclamation-triangle text-red-400"></i>
@@ -3142,7 +3469,7 @@
                                 <div class="flex items-center justify-between">
                                     <div>
                                         <p class="text-gray-400 text-sm mb-1">Categories</p>
-                                        <p class="text-2xl font-bold text-purple-400">${[...new Set(this.state.products.map(p => p.category))].length}</p>
+                                        <p class="text-2xl font-bold text-purple-400">${[...new Set(filteredProducts.map(p => p.category))].length}</p>
                                     </div>
                                     <div class="w-10 h-10 bg-purple-500/20 rounded-xl flex items-center justify-center">
                                         <i class="fas fa-tags text-purple-400"></i>
@@ -3164,7 +3491,7 @@
                                         </tr>
                                     </thead>
                                     <tbody class="divide-y divide-gray-600">
-                                        ${this.state.products.map(product => `
+                                        ${filteredProducts.map(product => `
                                             <tr class="hover:bg-gray-800/50 transition-colors">
                                                 <td class="px-6 py-4">
                                                     <div class="flex items-center space-x-3">
@@ -3907,6 +4234,25 @@
                                 </div>
                             </div>
                         </div>
+
+                        <div class="perplexity-card p-6">
+                            <h3 class="text-xl font-bold text-white mb-4">Appearance</h3>
+                            <p class="text-gray-400 mb-4 text-sm">Choose your preferred color theme for the application.</p>
+                            <div class="grid grid-cols-1 md:grid-cols-3 gap-4" id="theme-selector">
+                                <div data-theme="default" class="p-4 rounded-xl border-2 cursor-pointer text-center space-y-2 bg-[#1a1f2e]">
+                                    <div class="w-full h-10 rounded bg-[#0f1419]"></div>
+                                    <span class="font-medium text-white">Default Dark</span>
+                                </div>
+                                <div data-theme="theme-light" class="p-4 rounded-xl border-2 cursor-pointer text-center space-y-2 bg-[#f8f9fa]">
+                                    <div class="w-full h-10 rounded bg-white border"></div>
+                                    <span class="font-medium text-black">Daylight</span>
+                                </div>
+                                <div data-theme="theme-black" class="p-4 rounded-xl border-2 cursor-pointer text-center space-y-2 bg-[#141414]">
+                                    <div class="w-full h-10 rounded bg-black"></div>
+                                    <span class="font-medium text-white">Pitch Black</span>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 `;
             },
@@ -4392,221 +4738,37 @@
                 // Calculate for the currently selected item in the modal
                 const currentItemSubtotal = (quantity * unitPrice);
 
-                // Calculate total for all items in the currentSaleCart
+                                // Calculate total for all items in the currentSaleCart
                 let cartSubtotal = 0;
                 this.currentSaleCart.forEach(item => {
                     cartSubtotal += (item.quantity * item.unitPrice);
                 });
 
-                // Update cart items display
-                if (saleCartItemsList) {
-                    if (this.currentSaleCart.length === 0) {
-                        saleCartItemsList.innerHTML = '<li class="text-gray-400">No items added yet.</li>';
-                    } else {
-                        saleCartItemsList.innerHTML = this.currentSaleCart.map(item => {
-                            const product = this.state.products.find(p => p.id === item.productId);
-                            return `<li class="flex justify-between text-white"><span>${item.quantity} x ${product ? product.name : 'Unknown Product'}</span><span>${this.formatCurrency(item.unitPrice * item.quantity)}</span></li>`;
-                        }).join('');
-                    }
-                }
+                // Update subtotal and total in the modal
+                const subtotalElement = document.getElementById('sale-subtotal');
+                const taxElement = document.getElementById('sale-tax');
+                const totalElement = document.getElementById('sale-total');
 
-                const finalSubtotal = cartSubtotal - discount;
                 const taxRate = this.getTaxInfo().rate;
-                const taxAmount = finalSubtotal * taxRate;
-                const total = finalSubtotal + taxAmount;
-                
-                document.getElementById('sale-subtotal').textContent = this.formatCurrency(finalSubtotal);
-                document.getElementById('sale-tax').textContent = this.formatCurrency(taxAmount);
-                document.getElementById('sale-total').textContent = this.formatCurrency(total);
-            },
+                const taxAmount = cartSubtotal * taxRate;
+                const total = cartSubtotal + taxAmount;
 
-            // Quick Sale View
-            getQuickSaleView() {
-                const stepTitles = [
-                    "Select Customer",
-                    "Select Products",
-                    "Adjust Quantities",
-                    "Finalize Sale"
-                ];
-                const currentStep = this.state.quickSale.step;
-                const progressWidth = (currentStep / stepTitles.length) * 100;
-
-                return `
-                    <div class="quick-sale-container fade-in">
-                        <div class="flex justify-between items-center mb-8">
-                            <h1 class="text-3xl font-bold quick-sale-gradient-text">⚡ Quick Sale</h1>
-                            <button data-action="cancel-quick-sale" class="text-gray-400 hover:text-white transition-colors text-lg">
-                                <i class="fas fa-times"></i>
-                            </button>
-                        </div>
-
-                        <div class="quick-sale-progress-bar">
-                            <div class="quick-sale-progress-fill" style="width: ${progressWidth}%;"></div>
-                        </div>
-                        <div class="text-center text-lg font-medium mb-8">
-                            Step ${currentStep}: ${stepTitles[currentStep - 1]}
-                        </div>
-
-                        <div class="quick-sale-step-content">
-                            ${this.renderQuickSaleStep()}
-                        </div>
-
-                        <div class="flex justify-between mt-8">
-                            <button data-action="quick-sale-prev-step" class="perplexity-button px-6 py-3 rounded-xl ${currentStep === 1 ? 'opacity-50 cursor-not-allowed' : ''}" ${currentStep === 1 ? 'disabled' : ''}>
-                                <i class="fas fa-arrow-left mr-2"></i>Back
-                            </button>
-                            ${currentStep < 4 ? `
-                                <button data-action="quick-sale-next-step" class="quick-sale-button px-6 py-3 rounded-xl">
-                                    Next<i class="fas fa-arrow-right ml-2"></i>
-                                </button>
-                            ` : `
-                                <button data-action="finalize-quick-sale" class="quick-sale-button px-6 py-3 rounded-xl">
-                                    Finalize Sale<i class="fas fa-check ml-2"></i>
-                                </button>
-                            `}
-                        </div>
-                    </div>
-                `;
-            },
-
-            renderQuickSaleStep() {
-                const step = this.state.quickSale.step;
-                let content = '';
-
-                switch (step) {
-                    case 1: // Select Customer
-                        content = `
-                            <h2 class="text-2xl font-bold text-white mb-6">Who is the customer?</h2>
-                            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 w-full max-w-4xl">
-                                ${this.state.customers.map(customer => `
-                                    <div data-action="select-quick-sale-customer" data-id="${customer.id}"
-                                        class="quick-sale-grid-item ${this.state.quickSale.selectedCustomer === customer.id ? 'selected' : ''}">
-                                        <i class="fas ${customer.type === 'Business' ? 'fa-building' : 'fa-user'} text-3xl mb-2 text-blue-300"></i>
-                                        <h3 class="text-lg font-medium text-white">${customer.name}</h3>
-                                        <p class="text-gray-400 text-sm">${customer.type}</p>
-                                    </div>
-                                `).join('')}
-                            </div>
-                        `;
-                        break;
-                    case 2: // Select Products
-                        content = `
-                            <h2 class="text-2xl font-bold text-white mb-6">Select Products for Sale</h2>
-                            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 w-full max-w-4xl">
-                                ${this.state.products.map(product => {
-                                    const isSelected = this.state.quickSale.selectedProducts.some(item => item.productId === product.id);
-                                    return `
-                                        <div data-action="toggle-quick-sale-product" data-id="${product.id}"
-                                            class="quick-sale-grid-item ${isSelected ? 'selected' : ''} ${product.stock === 0 ? 'opacity-50 cursor-not-allowed' : ''}"
-                                            ${product.stock === 0 ? 'disabled' : ''}>
-                                            <i class="fas fa-box text-3xl mb-2 text-green-300"></i>
-                                            <h3 class="text-lg font-medium text-white">${product.name}</h3>
-                                            <p class="text-gray-400 text-sm">${this.formatCurrency(product.price)}</p>
-                                            <p class="text-gray-400 text-xs">${product.stock} in stock</p>
-                                        </div>
-                                    `;
-                                }).join('')}
-                            </div>
-                        `;
-                        break;
-                    case 3: // Adjust Quantities
-                        content = `
-                            <h2 class="text-2xl font-bold text-white mb-6">Adjust Quantities</h2>
-                            <div class="w-full max-w-2xl space-y-6">
-                                ${this.state.quickSale.selectedProducts.map(item => {
-                                    const product = this.state.products.find(p => p.id === item.productId);
-                                    if (!product) return ''; // Should not happen if logic is correct
-
-                                    return `
-                                        <div class="quick-sale-card p-4">
-                                            <div class="flex justify-between items-center mb-3">
-                                                <h3 class="text-lg font-medium text-white">${product.name}</h3>
-                                                <span class="text-lg font-bold text-quick-sale-accent">${this.formatCurrency(item.unitPrice * item.quantity)}</span>
-                                            </div>
-                                            <input type="range" min="1" max="${product.stock}" value="${item.quantity}"
-                                                class="quick-sale-slider"
-                                                data-action="update-quick-sale-quantity" data-id="${product.id}">
-                                            <div class="flex justify-between text-gray-400 text-sm mt-2">
-                                                <span>Quantity: <span class="font-bold text-white">${item.quantity}</span></span>
-                                                <span>Max: ${product.stock}</span>
-                                            </div>
-                                        </div>
-                                    `;
-                                }).join('')}
-                            </div>
-                            <div class="quick-sale-card p-6 mt-8 w-full max-w-2xl">
-                                <div class="flex justify-between items-center">
-                                    <span class="text-xl font-bold text-white">Total:</span>
-                                    <span class="text-3xl font-bold text-quick-sale-accent" id="quickSaleFinalTotal">${this.formatCurrency(0)}</span>
-                                </div>
-                            </div>
-                        `;
-                        break;
-                    case 4: // Finalize Sale
-                        const customer = this.state.customers.find(c => c.id === this.state.quickSale.selectedCustomer);
-                        content = `
-                            <h2 class="text-2xl font-bold text-white mb-6">Finalize Sale</h2>
-                            <div class="quick-sale-card p-6 w-full max-w-2xl space-y-4">
-                                <div class="flex justify-between items-center border-b border-gray-700 pb-3">
-                                    <span class="text-gray-400">Customer:</span>
-                                    <span class="text-white font-medium">${customer ? customer.name : 'N/A'}</span>
-                                </div>
-                                <div class="space-y-2">
-                                    <h3 class="text-lg font-bold text-white">Items:</h3>
-                                    ${this.state.quickSale.selectedProducts.map(item => {
-                                        const product = this.state.products.find(p => p.id === item.productId);
-                                        return `
-                                            <div class="flex justify-between text-gray-300 text-sm">
-                                                <span>${item.quantity} x ${product ? product.name : 'Unknown'}</span>
-                                                <span>${this.formatCurrency(item.unitPrice * item.quantity)}</span>
-                                            </div>
-                                        `;
-                                    }).join('')}
-                                </div>
-                                <div class="border-t border-gray-700 pt-4 space-y-2">
-                                    <div class="flex justify-between">
-                                        <label for="quickSaleDiscount" class="text-gray-400">Discount (${GCC_COUNTRIES[this.state.selectedCountry].currency}):</label>
-                                        <input type="number" id="quickSaleDiscount" name="quickSaleDiscount" step="0.01" value="${this.state.quickSale.discount}"
-                                            class="form-input w-32 text-right" oninput="app.updateQuickSaleTotal()">
-                                    </div>
-                                    <div class="flex justify-between">
-                                        <label for="quickSalePaymentType" class="text-gray-400">Payment Type:</label>
-                                        <select id="quickSalePaymentType" name="quickSalePaymentType" class="form-input w-32 text-right">
-                                            <option value="Cash" ${this.state.quickSale.paymentType === 'Cash' ? 'selected' : ''}>Cash</option>
-                                            <option value="Credit" ${this.state.quickSale.paymentType === 'Credit' ? 'selected' : ''}>Credit</option>
-                                            <option value="Deal" ${this.state.quickSale.paymentType === 'Deal' ? 'selected' : ''}>Deal</option>
-                                        </select>
-                                    </div>
-                                </div>
-                                <div class="border-t border-gray-700 pt-4 space-y-2">
-                                    <div class="flex justify-between text-gray-400">
-                                        <span>Subtotal:</span>
-                                        <span class="text-white" id="quickSaleFinalSubtotal">${this.formatCurrency(0)}</span>
-                                    </div>
-                                    <div class="flex justify-between text-gray-400">
-                                        <span>Tax (${(this.getTaxInfo().rate * 100).toFixed(1)}%):</span>
-                                        <span class="text-white" id="quickSaleFinalTax">${this.formatCurrency(0)}</span>
-                                    </div>
-                                    <div class="flex justify-between items-center pt-2">
-                                        <span class="text-xl font-bold text-white">Total:</span>
-                                        <span class="text-3xl font-bold text-quick-sale-accent" id="quickSaleFinalTotal">${this.formatCurrency(0)}</span>
-                                    </div>
-                                </div>
-                            </div>
-                        `;
-                        break;
+                if (subtotalElement) {
+                    subtotalElement.textContent = this.formatCurrency(cartSubtotal);
                 }
-                return content;
-            }
+                if (taxElement) {
+                    taxElement.textContent = this.formatCurrency(taxAmount);
+                }
+                if (totalElement) {
+                    totalElement.textContent = this.formatCurrency(total);
+                }
+            },
+
+            // Other methods and rendering logic...
         };
 
         // Initialize the application
-        document.addEventListener('DOMContentLoaded', () => {
-            app.init();
-        });
-
-        // Make app object available globally for event handlers
-        window.app = app;
+        app.init();
     </script>
 </body>
 </html>
