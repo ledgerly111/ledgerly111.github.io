@@ -4762,39 +4762,78 @@ updateQuickSaleTotal() {
                         `;
                         break;
                     case 3: // Adjust Quantities
-                        content = `
-                            <h2 class="text-2xl font-bold text-white mb-6">Adjust Quantities</h2>
-                            <div class="w-full max-w-2xl space-y-6">
-                                ${this.state.quickSale.selectedProducts.map(item => {
-                                    const product = this.state.products.find(p => p.id === item.productId);
-                                    if (!product) return ''; // Should not happen if logic is correct
+    content = `
+        <h2 class="text-2xl font-bold text-white mb-6">Adjust Quantities</h2>
+        <div class="w-full max-w-3xl space-y-4">
+            ${this.state.quickSale.selectedProducts.map(item => {
+                const product = this.state.products.find(p => p.id === item.productId);
+                if (!product) return '';
 
-                                    return `
-                                        <div class="quick-sale-card p-4">
-                                            <div class="flex justify-between items-center mb-3">
-                                                <h3 class="text-lg font-medium text-white">${product.name}</h3>
-                                                <span class="text-lg font-bold text-quick-sale-accent">${this.formatCurrency(item.unitPrice * item.quantity)}</span>
-                                            </div>
-
-                                            <div class="flex items-center space-x-4">
-                                                <label class="text-gray-300">Quantity:</label>
-                                                <input type="range" class="quick-sale-slider flex-1"
-                                                    min="1" max="${product.stock}" value="${item.quantity}"
-                                                    oninput="app.updateQuickSaleQuantity(${product.id}, this.value)">
-                                                <span class="text-white font-medium w-12 text-center">${item.quantity}</span>
-                                            </div>
-                                        </div>
-                                    `;
-                                }).join('')}
-                                <div class="quick-sale-card p-4 mt-4">
-                                    <div class="flex justify-between items-center mb-3">
-                                        <label class="text-gray-300">Discount (${GCC_COUNTRIES[this.state.selectedCountry].currency}):</label>
-                                        <input type="number" id="quickSaleDiscount" step="0.01" value="0" class="form-input w-32" oninput="app.updateQuickSaleTotal()">
-                                    </div>
+                return `
+                    <div class="quick-sale-card p-6 hover:shadow-lg transition-all duration-300">
+                        <div class="flex justify-between items-center mb-4">
+                            <div class="flex items-center space-x-4">
+                                <div class="w-12 h-12 bg-gradient-to-r from-blue-500 to-purple-500 rounded-lg flex items-center justify-center">
+                                    <i class="fas fa-box text-white"></i>
+                                </div>
+                                <div>
+                                    <h3 class="text-lg font-medium text-white">${product.name}</h3>
+                                    <p class="text-gray-400 text-sm">${this.formatCurrency(product.price)} each • ${product.stock} available</p>
                                 </div>
                             </div>
-                        `;
-                        break;
+                            <span class="text-xl font-bold text-quick-sale-accent" id="item-total-${product.id}">${this.formatCurrency(item.unitPrice * item.quantity)}</span>
+                        </div>
+
+                        <div class="flex items-center justify-between bg-gray-800/50 rounded-xl p-4">
+                            <label class="text-gray-300 font-medium">Quantity:</label>
+                            <div class="flex items-center space-x-3">
+                                <button onclick="app.updateQuickSaleQuantity(${product.id}, ${Math.max(1, item.quantity - 1)})" 
+                                        class="w-10 h-10 bg-red-500/20 hover:bg-red-500/30 text-red-400 rounded-lg flex items-center justify-center transition-all duration-200 ${item.quantity <= 1 ? 'opacity-50 cursor-not-allowed' : ''}"
+                                        ${item.quantity <= 1 ? 'disabled' : ''}>
+                                    <i class="fas fa-minus"></i>
+                                </button>
+                                
+                                <div class="flex items-center space-x-2">
+                                    <input type="number" 
+                                           value="${item.quantity}" 
+                                           min="1" 
+                                           max="${product.stock}"
+                                           class="form-input w-20 text-center font-bold text-lg"
+                                           onchange="app.updateQuickSaleQuantity(${product.id}, this.value)"
+                                           onkeyup="app.updateQuickSaleQuantity(${product.id}, this.value)">
+                                    <span class="text-gray-400 text-sm">of ${product.stock}</span>
+                                </div>
+                                
+                                <button onclick="app.updateQuickSaleQuantity(${product.id}, ${Math.min(product.stock, item.quantity + 1)})" 
+                                        class="w-10 h-10 bg-green-500/20 hover:bg-green-500/30 text-green-400 rounded-lg flex items-center justify-center transition-all duration-200 ${item.quantity >= product.stock ? 'opacity-50 cursor-not-allowed' : ''}"
+                                        ${item.quantity >= product.stock ? 'disabled' : ''}>
+                                    <i class="fas fa-plus"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('')}
+            
+            <div class="quick-sale-card p-6 bg-gradient-to-r from-gray-800/50 to-gray-700/50">
+                <div class="flex justify-between items-center mb-4">
+                    <label class="text-gray-300 font-medium">Discount (${GCC_COUNTRIES[this.state.selectedCountry].currency}):</label>
+                    <input type="number" id="quickSaleDiscount" step="0.01" value="0" 
+                           class="form-input w-32" 
+                           oninput="app.updateQuickSaleTotal()"
+                           placeholder="0.00">
+                </div>
+                <div class="border-t border-gray-600 pt-4">
+                    <div class="flex justify-between items-center">
+                        <span class="text-xl font-bold text-white">Live Total:</span>
+                        <span class="text-2xl font-bold text-green-400" id="quickSaleLiveTotal">${this.formatCurrency(0)}</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    `;
+    break;
+
                     case 4: // Finalize Sale
                         const customer = this.state.customers.find(c => c.id === this.state.quickSale.selectedCustomer);
                         const subtotal = this.state.quickSale.subtotal || 0;
