@@ -2534,84 +2534,85 @@
             },
 
             getNavbar() {
-                const unreadCount = this.getUnreadMessageCount();
-                const aiButtonClass = this.state.aiMode === 'ai' ? 'ai-button ai-pulse' : 'bot-button bot-pulse';
-                const aiIcon = this.state.aiMode === 'ai' ? 'fas fa-brain' : 'fas fa-robot';
-                const aiText = this.state.aiMode === 'ai' ? 'AccuraAI' : 'AccuraBot';
-                const countryInfo = GCC_COUNTRIES[this.state.selectedCountry];
-                
-                return `
-                    <div class="navbar">
-                        <div class="flex justify-between items-center">
-                            <div class="flex items-center space-x-4">
-                                <div class="burger-menu" data-action="toggle-mobile-menu">
-                                    <i class="fas fa-bars text-white text-lg"></i>
-                                </div>
-                                
-                                <div class="flex items-center space-x-3">
-                                    <div class="flex items-center">
-                                        <div class="w-10 h-10 rounded-full bg-gradient-to-r from-teal-500 to-blue-500 mb-4">
-                                            <i class="fas fa-chart-line text-white text-lg"></i>
-                                        </div>
-                                        <div class="hidden sm:block">
-                                            <h1 class="text-xl font-bold gradient-text leading-tight">Ledgerly</h1>
-                                            <p class="text-xs text-gray-400 leading-none">Sales</p>
-                                        </div>
-                                    </div>
-                                </div>
-                                
-                                <div class="hidden md:flex items-center space-x-4">
-                                    <span class="text-gray-500">|</span>
-                                    <div class="flex items-center space-x-3">
-                                        <div class="w-8 h-8 rounded-full bg-gradient-to-r from-purple-500 to-pink-500 flex items-center justify-center">
-                                            <span class="text-white font-bold text-sm">${this.state.currentUser.name.charAt(0)}</span>
-                                        </div>
-                                        <div>
-                                            <p class="text-white font-medium text-sm">${this.state.currentUser.name}</p>
-                                            <p class="text-xs text-gray-400 capitalize">${this.state.currentUser.role}</p>
-                                        </div>
-                                    </div>
-                                    ${['admin', 'manager'].includes(this.state.currentUser.role) ? `
-                                        <div class="flex items-center space-x-2">
-                                            <span class="px-3 py-1 bg-gradient-to-r from-yellow-500 to-orange-500 text-white text-xs rounded-full font-medium">
-                                                ${countryInfo.currency} • ${countryInfo.name.split(' ')[0]}
-                                            </span>
-                                        </div>
-                                    ` : ''}
-                                </div>
+    const unreadCount = this.getUnreadMessageCount();
+    const aiButtonClass = this.state.aiMode === 'ai' ? 'ai-button ai-pulse' : 'bot-button bot-pulse';
+    const aiIcon = this.state.aiMode === 'ai' ? 'fas fa-brain' : 'fas fa-robot';
+    const aiText = this.state.aiMode === 'ai' ? 'AccuraAI' : 'AccuraBot';
+    const countryInfo = GCC_COUNTRIES[this.state.selectedCountry];
+    
+    return `
+        <div class="navbar">
+            <div class="flex justify-between items-center">
+                <div class="flex items-center space-x-4">
+                    <div class="burger-menu" data-action="toggle-mobile-menu">
+                        <i class="fas fa-bars text-white text-lg"></i>
+                    </div>
+                    
+                    <div class="flex items-center space-x-3">
+                        <div class="flex items-center space-x-3">
+                            <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-emerald-400 via-teal-500 to-blue-600 flex items-center justify-center shadow-lg transform hover:scale-105 transition-all duration-300">
+                                <i class="fas fa-chart-line text-white text-xl"></i>
                             </div>
-                            
-                            <div class="flex items-center space-x-2">
-                                <button data-action="start-quick-sale" class="quick-sale-button quick-sale-pulse px-3 py-2 rounded-lg text-sm font-medium" title="Quick Sale">
-                                    <i class="fas fa-bolt text-lg"></i>
-                                    <span class="hidden sm:inline ml-2">Quick Sale</span>
-                                </button>
-
-                                <button data-action="ai-assistant" class="${aiButtonClass} px-3 py-2 rounded-lg text-sm font-medium" title="${aiText}">
-                                    <i class="${aiIcon} text-lg"></i>
-                                    <span class="hidden sm:inline ml-2">${aiText}</span>
-                                </button>
-                                
-                                <div class="relative">
-                                    <button data-action="inbox" class="text-gray-400 hover:text-teal-400 transition-colors p-2 rounded-lg hover:bg-gray-700/50" title="Messages">
-                                        <i class="fas fa-envelope text-lg"></i>
-                                        ${unreadCount > 0 ? `<span class="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">${unreadCount}</span>` : ''}
-                                    </button>
-                                </div>
-                                
-                                <button data-action="export-data" class="text-gray-400 hover:text-teal-400 transition-colors p-2 rounded-lg hover:bg-gray-700/50 hidden sm:block" title="Export Data">
-                                    <i class="fas fa-download text-lg"></i>
-                                </button>
-                                
-                                <button data-action="logout" class="bg-red-600 hover:bg-red-700 text-white px-3 py-2 rounded-lg text-sm font-medium transition-all" title="Logout">
-                                    <i class="fas fa-sign-out-alt"></i>
-                                    <span class="hidden sm:inline ml-2">Logout</span>
-                                </button>
+                            <div class="hidden sm:block">
+                                <h1 class="text-xl font-bold bg-gradient-to-r from-emerald-400 to-blue-500 bg-clip-text text-transparent leading-tight">Ledgerly</h1>
+                                <p class="text-xs text-gray-400 leading-none font-medium">Smart Sales Management</p>
                             </div>
                         </div>
                     </div>
-                `;
-            },
+                    
+                    <div class="hidden md:flex items-center space-x-4">
+                        <span class="text-gray-500">|</span>
+                        <div class="flex items-center space-x-3">
+                            <div class="w-8 h-8 rounded-full bg-gradient-to-r from-purple-500 to-pink-500 flex items-center justify-center">
+                                <span class="text-white font-bold text-sm">${this.state.currentUser.name.charAt(0)}</span>
+                            </div>
+                            <div>
+                                <p class="text-white font-medium text-sm">${this.state.currentUser.name}</p>
+                                <p class="text-xs text-gray-400 capitalize">${this.state.currentUser.role}</p>
+                            </div>
+                        </div>
+                        ${['admin', 'manager'].includes(this.state.currentUser.role) ? `
+                            <div class="flex items-center space-x-2">
+                                <span class="px-3 py-1 bg-gradient-to-r from-yellow-500 to-orange-500 text-white text-xs rounded-full font-medium">
+                                    ${countryInfo.currency} • ${countryInfo.name.split(' ')[0]}
+                                </span>
+                            </div>
+                        ` : ''}
+                    </div>
+                </div>
+                
+                <div class="flex items-center space-x-2">
+                    <button data-action="start-quick-sale" class="quick-sale-button quick-sale-pulse px-3 py-2 rounded-lg text-sm font-medium" title="Quick Sale">
+                        <i class="fas fa-bolt text-lg"></i>
+                        <span class="hidden sm:inline ml-2">Quick Sale</span>
+                    </button>
+
+                    <button data-action="ai-assistant" class="${aiButtonClass} px-3 py-2 rounded-lg text-sm font-medium" title="${aiText}">
+                        <i class="${aiIcon} text-lg"></i>
+                        <span class="hidden sm:inline ml-2">${aiText}</span>
+                    </button>
+                    
+                    <div class="relative">
+                        <button data-action="inbox" class="text-gray-400 hover:text-teal-400 transition-colors p-2 rounded-lg hover:bg-gray-700/50" title="Messages">
+                            <i class="fas fa-envelope text-lg"></i>
+                            ${unreadCount > 0 ? `<span class="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">${unreadCount}</span>` : ''}
+                        </button>
+                    </div>
+                    
+                    <button data-action="export-data" class="text-gray-400 hover:text-teal-400 transition-colors p-2 rounded-lg hover:bg-gray-700/50 hidden sm:block" title="Export Data">
+                        <i class="fas fa-download text-lg"></i>
+                    </button>
+                    
+                    <button data-action="logout" class="bg-red-600 hover:bg-red-700 text-white px-3 py-2 rounded-lg text-sm font-medium transition-all" title="Logout">
+                        <i class="fas fa-sign-out-alt"></i>
+                        <span class="hidden sm:inline ml-2">Logout</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    `;
+},
+
 
             getSidebar() {
                 const menuItems = [
