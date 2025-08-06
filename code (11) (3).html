@@ -5648,7 +5648,7 @@ getExpensesView() {
                 `;
             },
 
-            // Quick Sale View Implementation
+           // Quick Sale View Implementation
             getQuickSaleView() {
                 const selectedProductIds = this.state.quickSale.selectedProducts.map(item => item.productId);
                 
@@ -5670,7 +5670,6 @@ getExpensesView() {
                         </div>
 
                         <div class="quick-sale-main-grid">
-                            <!-- Product Selection Panel -->
                             <div class="quick-sale-product-panel">
                                 <h3 class="text-xl font-bold text-white mb-4">Select Products</h3>
                                 <div class="product-grid">
@@ -5690,7 +5689,6 @@ getExpensesView() {
                                 </div>
                             </div>
 
-                            <!-- Cart and Finalization Panel -->
                             <div class="quick-sale-cart-panel">
                                 <h3 class="text-xl font-bold text-white mb-4">Cart & Checkout</h3>
                                 
@@ -5700,23 +5698,19 @@ getExpensesView() {
                                             const product = this.state.products.find(p => p.id === item.productId);
                                             return `
                                                 <div class="cart-item">
-                                                    <div class="flex-1">
-                                                        <h4 class="text-white font-medium">${product.name}</h4>
-                                                        <p class="text-gray-400 text-sm">${this.formatCurrency(item.unitPrice)} each</p>
+                                                    <div class="flex-1 pr-2">
+                                                        <h4 class="text-white font-medium text-sm">${product.name}</h4>
+                                                        <p class="text-gray-400 text-xs">${this.formatCurrency(item.unitPrice)} each</p>
                                                     </div>
-                                                                                                        <div class="quantity-controls">
-                                                        <button data-action="decrease-quantity" data-id="${item.productId}" class="quantity-btn">
-                                                            <i class="fas fa-minus"></i>
-                                                        </button>
-                                                        <span class="quantity-display">${item.quantity}</span>
-                                                        <button data-action="increase-quantity" data-id="${item.productId}" class="quantity-btn">
-                                                            <i class="fas fa-plus"></i>
-                                                        </button>
+                                                    <div class="quantity-controls">
+                                                        <button data-action="quick-sale-decrement-quantity" data-id="${item.productId}"><i class="fas fa-minus"></i></button>
+                                                        <input type="number" class="w-12 text-center bg-transparent text-white" value="${item.quantity}" onchange="app.quickSaleUpdateQuantity(${item.productId}, this.value)">
+                                                        <button data-action="quick-sale-increment-quantity" data-id="${item.productId}"><i class="fas fa-plus"></i></button>
                                                     </div>
-                                                    <div class="text-right">
-                                                        <p class="text-white font-bold">${this.formatCurrency(item.unitPrice * item.quantity)}</p>
-                                                        <button data-action="remove-from-cart" data-id="${item.productId}" class="text-red-400 hover:text-red-300 text-sm">
-                                                            <i class="fas fa-trash"></i>
+                                                    <div class="text-right w-20 pl-2">
+                                                        <p class="text-white font-bold text-sm">${this.formatCurrency(item.unitPrice * item.quantity)}</p>
+                                                        <button data-action="quick-sale-remove-product" data-id="${item.productId}" class="text-red-400 hover:text-red-300 text-xs">
+                                                            Remove
                                                         </button>
                                                     </div>
                                                 </div>
@@ -5729,54 +5723,36 @@ getExpensesView() {
                                     `}
                                 </div>
 
-                                ${this.state.quickSale.selectedProducts.length > 0 ? `
-                                    <div class="cart-summary">
-                                        <div class="summary-row">
-                                            <span class="text-gray-400">Subtotal:</span>
-                                            <span class="text-white font-bold">${this.formatCurrency(this.state.quickSale.subtotal)}</span>
-                                        </div>
-                                        <div class="summary-row">
-                                            <span class="text-gray-400">Tax (${(GCC_COUNTRIES[this.state.selectedCountry].tax * 100).toFixed(0)}%):</span>
-                                            <span class="text-white font-bold">${this.formatCurrency(this.state.quickSale.tax)}</span>
-                                        </div>
-                                        <div class="summary-row total-row">
-                                            <span class="text-white font-bold text-lg">Total:</span>
-                                            <span class="text-green-400 font-bold text-xl">${this.formatCurrency(this.state.quickSale.total)}</span>
-                                        </div>
-                                    </div>
-
-                                    <div class="customer-selection mb-4">
-                                        <label class="block text-sm font-medium text-gray-300 mb-2">Customer</label>
-                                        <select id="quick-sale-customer" class="form-input w-full">
-                                            <option value="">Walk-in Customer</option>
-                                            ${this.state.customers.map(customer => `
-                                                <option value="${customer.id}">${customer.name} - ${customer.phone}</option>
-                                            `).join('')}
+                                <div class="cart-summary space-y-2 text-sm">
+                                    <div class="flex justify-between items-center">
+                                        <label for="quickSaleCustomerSelect" class="text-gray-300">Customer</label>
+                                        <select id="quickSaleCustomerSelect" class="form-input w-2/3 !py-1 !px-2 !text-sm">
+                                            <option value="">-- Select Customer --</option>
+                                            ${this.state.customers.map(customer => `<option value="${customer.id}">${customer.name}</option>`).join('')}
                                         </select>
                                     </div>
-
-                                    <div class="payment-method mb-4">
-                                        <label class="block text-sm font-medium text-gray-300 mb-2">Payment Method</label>
-                                        <div class="grid grid-cols-3 gap-2">
-                                            <button data-payment="cash" class="payment-btn active">
-                                                <i class="fas fa-money-bill-wave mb-1"></i>
-                                                <span>Cash</span>
-                                            </button>
-                                            <button data-payment="card" class="payment-btn">
-                                                <i class="fas fa-credit-card mb-1"></i>
-                                                <span>Card</span>
-                                            </button>
-                                            <button data-payment="transfer" class="payment-btn">
-                                                <i class="fas fa-exchange-alt mb-1"></i>
-                                                <span>Transfer</span>
-                                            </button>
-                                        </div>
+                                    <div class="flex justify-between items-center">
+                                        <label for="quickSaleDiscount" class="text-gray-300">Discount</label>
+                                        <input type="number" id="quickSaleDiscount" value="${this.state.quickSale.discount}" class="form-input w-2/3 !py-1 !px-2 !text-sm" placeholder="0.00">
                                     </div>
-
-                                    <button data-action="complete-quick-sale" class="quick-sale-complete-btn">
-                                        <i class="fas fa-check mr-2"></i>Complete Sale
-                                    </button>
-                                ` : ''}
+                                    <div class="flex justify-between items-center">
+                                        <label for="quickSalePaymentType" class="text-gray-300">Payment</label>
+                                        <select id="quickSalePaymentType" class="form-input w-2/3 !py-1 !px-2 !text-sm">
+                                            <option value="Cash">Cash</option>
+                                            <option value="Credit">Credit</option>
+                                        </select>
+                                    </div>
+                                    <div class="pt-2 border-t border-gray-700 space-y-2">
+                                        <div class="flex justify-between"><span>Subtotal</span><span id="quickSaleSubtotal">${this.formatCurrency(0)}</span></div>
+                                        <div class="flex justify-between"><span>Discount</span><span id="quickSaleDiscountDisplay">(${this.formatCurrency(0)})</span></div>
+                                        <div class="flex justify-between font-medium"><span>Net Subtotal</span><span id="quickSaleFinalSubtotal">${this.formatCurrency(0)}</span></div>
+                                        <div class="flex justify-between"><span>${this.getTaxInfo().name} (${(this.getTaxInfo().rate * 100).toFixed(0)}%)</span><span id="quickSaleTax">${this.formatCurrency(0)}</span></div>
+                                        <div class="flex justify-between text-xl font-bold text-teal-400"><span>Total</span><span id="quickSaleFinalTotal">${this.formatCurrency(0)}</span></div>
+                                    </div>
+                                </div>
+                                <button id="finalizeQuickSaleButton" data-action="finalize-quick-sale" class="w-full quick-sale-button mt-4 py-3 opacity-50 cursor-not-allowed" disabled>
+                                    Finalize Sale
+                                </button>
                             </div>
                         </div>
                     </div>
