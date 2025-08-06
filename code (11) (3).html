@@ -1831,7 +1831,7 @@
                 const handlers = {
                     'product-form': () => this.handleProductForm(data),
                     'customer-form': () => this.handleCustomerForm(data),
-                    'sale-form': () => this.handleSaleForm(data),
+                    'sale-form': () => this.handleSaleForm(data, form),
                     'expense-form': () => this.handleExpenseForm(data),
                     'employee-form': () => this.handleEmployeeForm(data),
                     'message-form': () => this.handleMessageForm(data),
@@ -1946,28 +1946,29 @@
             },
 
             // REPLACE the existing handleSaleForm function with this:
-            handleSaleForm(data) {
+            handleSaleForm(data, form) { // Note the added "form" parameter
+                const formData = new FormData(form); // Create FormData object
                 const customerId = parseInt(data.customerId);
                 const saleDate = data.date;
                 const saleType = data.saleType;
                 const discount = parseFloat(data.discount) || 0;
+                
+                const productIds = formData.getAll('productIds'); // Use the new 'name' attribute
 
-                const selectedProductCheckboxes = document.querySelectorAll('input[type="checkbox"][id^="product-"]:checked');
-
-                if (selectedProductCheckboxes.length === 0) {
+                if (productIds.length === 0) {
                     NotificationSystem.error('Please select at least one product.');
                     return;
                 }
 
                 const saleItems = [];
-                selectedProductCheckboxes.forEach(checkbox => {
-                    const productId = parseInt(checkbox.getAttribute('data-id'));
+                productIds.forEach(productIdStr => {
+                    const productId = parseInt(productIdStr);
                     const product = this.state.products.find(p => p.id === productId);
                     if (product) {
-                        // NOTE: This version assumes a quantity of 1 for each selected product.
+                        // For simplicity in this form, we assume quantity of 1 for each checked item
                         saleItems.push({
                             productId: productId,
-                            quantity: 1,
+                            quantity: 1, 
                             unitPrice: product.price
                         });
                     }
@@ -2025,7 +2026,7 @@
                 }
 
                 this.state.sales.push(sale);
-                this.createSaleJournalEntry(sale); // Call the new helper function from Task 2
+                this.createSaleJournalEntry(sale);
 
                 this.closeModal();
                 this.saveData();
@@ -2330,7 +2331,7 @@
                                     <div class="max-h-48 overflow-y-auto p-2 bg-gray-900 rounded-lg border border-gray-700 space-y-2">
                                         ${this.state.products.map(p => `
                                             <div class="flex items-center">
-                                                <input type="checkbox" id="product-${p.id}" data-id="${p.id}" class="form-checkbox h-5 w-5 rounded text-teal-500 bg-gray-800 border-gray-600 focus:ring-teal-500">
+                                                <input type="checkbox" id="product-${p.id}" name="productIds" value="${p.id}" data-id="${p.id}" class="form-checkbox h-5 w-5 rounded text-teal-500 bg-gray-800 border-gray-600 focus:ring-teal-500">
                                                 <label for="product-${p.id}" class="ml-3 text-white">${p.name} (${this.formatCurrency(p.price)}) - Stock: ${p.stock}</label>
                                             </div>
                                         `).join('')}
