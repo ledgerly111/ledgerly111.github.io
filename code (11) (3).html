@@ -835,12 +835,33 @@
         }
 
         /* Quick Sale New UI */
-        .quick-sale-main-grid {
+         .quick-sale-main-grid {
             display: grid;
             grid-template-columns: 3fr 2fr; /* 60% for products, 40% for cart */
             gap: 1.5rem;
             height: calc(100vh - 150px); /* Adjust based on header/footer height */
             overflow: hidden;
+        }
+
+        /* Add this CSS for Quick Sale mobile responsiveness */
+        @media (max-width: 1024px) {
+            .quick-sale-main-grid {
+                grid-template-columns: 1fr; /* Stack to a single column */
+                height: auto; /* Allow content to determine height */
+                overflow-y: auto; /* Allow vertical scrolling for the whole view */
+            }
+            .quick-sale-product-panel, .quick-sale-cart-panel {
+                overflow: visible; /* Remove internal overflow */
+                height: auto;
+            }
+            .product-grid, .cart-list {
+                overflow-y: visible; /* Remove internal scrollbars */
+                max-height: none;
+            }
+            .quick-sale-container {
+                 padding: 1rem;
+            }
+        
         }
 
         .quick-sale-product-panel {
@@ -2223,6 +2244,162 @@
                 }
             },
 
+            getModal(type, id = null) {
+                const isEdit = id !== null;
+                let content = '';
+                let title = '';
+
+                const modalShell = (title, content) => `
+                    <div class="modal-overlay" data-action="close-modal">
+                        <div class="modal-content" onclick="event.stopPropagation()">
+                            <div class="flex justify-between items-center mb-6">
+                                <h3 class="text-xl font-bold text-white">${title}</h3>
+                                <button data-action="close-modal" class="text-gray-400 hover:text-white">
+                                    <i class="fas fa-times text-xl"></i>
+                                </button>
+                            </div>
+                            ${content}
+                        </div>
+                    </div>
+                `;
+
+                switch (type) {
+                    case 'add-product':
+                    case 'edit-product':
+                        title = isEdit ? 'Edit Product' : 'Add New Product';
+                        const product = isEdit ? this.state.products.find(p => p.id === parseInt(id)) : {};
+                        content = `
+                            <form id="product-form" class="space-y-4">
+                                <input type="hidden" id="product-id" value="${id || ''}">
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    <div>
+                                        <label for="name" class="block text-sm font-medium text-gray-300 mb-2">Product Name</label>
+                                        <input type="text" id="name" name="name" class="form-input w-full" value="${product?.name || ''}" required>
+                                    </div>
+                                    <div>
+                                        <label for="category" class="block text-sm font-medium text-gray-300 mb-2">Category</label>
+                                        <select id="category" name="category" class="form-input w-full" required>
+                                            ${this.state.categories.map(cat => `<option value="${cat}" ${product?.category === cat ? 'selected' : ''}>${cat}</option>`).join('')}
+                                        </select>
+                                    </div>
+                                </div>
+                                <div>
+                                    <label for="description" class="block text-sm font-medium text-gray-300 mb-2">Description</label>
+                                    <textarea id="description" name="description" rows="3" class="form-input w-full">${product?.description || ''}</textarea>
+                                </div>
+                                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                    <div>
+                                        <label for="price" class="block text-sm font-medium text-gray-300 mb-2">Selling Price</label>
+                                        <input type="number" id="price" name="price" step="0.01" min="0" class="form-input w-full" value="${product?.price || ''}" required>
+                                    </div>
+                                    <div>
+                                        <label for="cost" class="block text-sm font-medium text-gray-300 mb-2">Cost Price</label>
+                                        <input type="number" id="cost" name="cost" step="0.01" min="0" class="form-input w-full" value="${product?.cost || ''}" required>
+                                    </div>
+                                    <div>
+                                        <label for="stock" class="block text-sm font-medium text-gray-300 mb-2">Stock</label>
+                                        <input type="number" id="stock" name="stock" min="0" class="form-input w-full" value="${product?.stock || ''}" required>
+                                    </div>
+                                </div>
+                                <div class="flex justify-end space-x-3 pt-4">
+                                    <button type="button" data-action="close-modal" class="bg-gray-600 hover:bg-gray-700 text-white px-6 py-3 rounded-xl">Cancel</button>
+                                    <button type="submit" class="perplexity-button px-6 py-3 rounded-xl">${isEdit ? 'Save Changes' : 'Add Product'}</button>
+                                </div>
+                            </form>
+                        `;
+                        break;
+                    
+                    case 'add-sale':
+                        title = 'Record a New Sale';
+                        content = `
+                            <form id="sale-form" class="space-y-4">
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    <div>
+                                        <label for="customerId" class="block text-sm font-medium text-gray-300 mb-2">Customer</label>
+                                        <select id="customerId" name="customerId" class="form-input w-full" required>
+                                            ${this.state.customers.map(c => `<option value="${c.id}">${c.name}</option>`).join('')}
+                                        </select>
+                                    </div>
+                                    <div>
+                                        <label for="date" class="block text-sm font-medium text-gray-300 mb-2">Sale Date</label>
+                                        <input type="date" id="date" name="date" value="${new Date().toISOString().split('T')[0]}" class="form-input w-full" required>
+                                    </div>
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-300 mb-2">Products</label>
+                                    <div class="max-h-48 overflow-y-auto p-2 bg-gray-900 rounded-lg border border-gray-700 space-y-2">
+                                        ${this.state.products.map(p => `
+                                            <div class="flex items-center">
+                                                <input type="checkbox" id="product-${p.id}" data-id="${p.id}" class="form-checkbox h-5 w-5 rounded text-teal-500 bg-gray-800 border-gray-600 focus:ring-teal-500">
+                                                <label for="product-${p.id}" class="ml-3 text-white">${p.name} (${this.formatCurrency(p.price)}) - Stock: ${p.stock}</label>
+                                            </div>
+                                        `).join('')}
+                                    </div>
+                                 </div>
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    <div>
+                                        <label for="saleType" class="block text-sm font-medium text-gray-300 mb-2">Sale Type</label>
+                                        <select id="saleType" name="saleType" class="form-input w-full">
+                                            <option value="Cash">Cash</option>
+                                            <option value="Credit">Credit</option>
+                                        </select>
+                                    </div>
+                                     <div>
+                                        <label for="discount" class="block text-sm font-medium text-gray-300 mb-2">Discount</label>
+                                        <input type="number" id="discount" name="discount" value="0" step="0.01" min="0" class="form-input w-full">
+                                    </div>
+                                </div>
+                                <div class="flex justify-end space-x-3 pt-4">
+                                    <button type="button" data-action="close-modal" class="bg-gray-600 hover:bg-gray-700 text-white px-6 py-3 rounded-xl">Cancel</button>
+                                    <button type="submit" class="perplexity-button px-6 py-3 rounded-xl">Record Sale</button>
+                                </div>
+                            </form>
+                        `;
+                        break;
+                    
+                    case 'add-expense':
+                    case 'edit-expense':
+                         title = isEdit ? 'Edit Expense' : 'Add New Expense';
+                         const expense = isEdit ? this.state.expenses.find(e => e.id === parseInt(id)) : {};
+                         content = `
+                            <form id="expense-form" class="space-y-4">
+                                <input type="hidden" id="expense-id" value="${id || ''}">
+                                <div>
+                                    <label for="description" class="block text-sm font-medium text-gray-300 mb-2">Description</label>
+                                    <input type="text" id="description" name="description" class="form-input w-full" value="${expense?.description || ''}" required>
+                                </div>
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    <div>
+                                        <label for="amount" class="block text-sm font-medium text-gray-300 mb-2">Amount</label>
+                                        <input type="number" id="amount" name="amount" step="0.01" min="0" class="form-input w-full" value="${expense?.amount || ''}" required>
+                                    </div>
+                                    <div>
+                                        <label for="date" class="block text-sm font-medium text-gray-300 mb-2">Expense Date</label>
+                                        <input type="date" id="date" name="date" value="${expense?.date || new Date().toISOString().split('T')[0]}" class="form-input w-full" required>
+                                    </div>
+                                </div>
+                                <div>
+                                    <label for="category" class="block text-sm font-medium text-gray-300 mb-2">Category</label>
+                                     <select id="category" name="category" class="form-input w-full" required>
+                                        ${this.state.chartOfAccounts.filter(acc => acc.type === 'Expense').map(cat => `<option value="${cat.code}" ${expense?.category === cat.code ? 'selected' : ''}>${cat.name}</option>`).join('')}
+                                    </select>
+                                </div>
+                                 <div>
+                                    <label for="notes" class="block text-sm font-medium text-gray-300 mb-2">Notes (Optional)</label>
+                                    <textarea id="notes" name="notes" rows="2" class="form-input w-full">${expense?.notes || ''}</textarea>
+                                </div>
+                                <div class="flex justify-end space-x-3 pt-4">
+                                    <button type="button" data-action="close-modal" class="bg-gray-600 hover:bg-gray-700 text-white px-6 py-3 rounded-xl">Cancel</button>
+                                    <button type="submit" class="expenses-button px-6 py-3 rounded-xl">${isEdit ? 'Save Changes' : 'Add Expense'}</button>
+                                </div>
+                            </form>
+                        `;
+                        break;
+                }
+
+                return modalShell(title, content);
+            },
+            
             prefillEditForm(type, id) {
                 let item;
                 if (type === 'edit-product') {
