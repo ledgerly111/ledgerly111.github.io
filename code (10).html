@@ -3334,7 +3334,7 @@
                 const liabilities = Object.values(accountBalances).filter(acc => acc.type === 'Liability' && acc.balance !== 0);
                 const equity = Object.values(accountBalances).filter(acc => acc.type === 'Equity' && acc.balance !== 0);
 
-                const totalAssets = assets.reduce((sum, acc) => sum + acc.balance, 0);
+                const totalAssets = assets.reduce((sum, acc => sum + acc.balance, 0);
                 const totalLiabilities = liabilities.reduce((sum, acc) => sum + acc.balance, 0);
                 const totalEquity = equity.reduce((sum, acc) => sum + acc.balance, 0);
                 const liabilitiesAndEquity = totalLiabilities + totalEquity;
