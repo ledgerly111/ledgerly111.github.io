@@ -4850,6 +4850,1928 @@ getExpensesView() {
                                         <tr class="border-b border-gray-600">
                                             <th class="px-6 py-4 text-left text-xs font-medium uppercase tracking-wider text-gray-300">Date</th>
                                             <th class="px-6 py-4 text-left text-xs font-medium uppercase tracking-wider text
-                                            <th class="px-6 py-4 text-left text-xs font-medium uppercase tracking-wider text-gray-300">Description</th>
-                                            <th class="px-6 py-4 text-left text-xs font-medium uppercase tracking-wider text-gray-300">Amount</th>
-                                            <th class="px-6 py-4 text-left text-xs font-medium uppercase tracking-wider text-gray-3
+                                            <th class="px-6 py-4 text-left                             <th class="px-6 py-4 text-left text-xs font-medium uppercase tracking-wider text-gray-300">Description</th>
+                            <th class="px-6 py-4 text-left text-xs font-medium uppercase tracking-wider text-gray-300">Amount</th>
+                            <th class="px-6 py-4 text-left text-xs font-medium uppercase tracking-wider text-gray-300">Category</th>
+                            <th class="px-6 py-4 text-left text-xs font-medium uppercase tracking-wider text-gray-300">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-gray-600">
+                        ${this.state.expenses.length > 0 ? this.state.expenses.reverse().map((expense, index) => {
+                            const addedBy = this.state.users.find(u => u.id === expense.addedBy);
+                            const account = this.state.chartOfAccounts.find(acc => acc.code === expense.category);
+                            
+                            return `
+                                <tr class="hover:bg-gray-800/50 ${index % 2 === 0 ? 'odd:bg-gray-800/10' : ''} transition-colors">
+                                    <td class="px-6 py-4 text-white">${expense.date}</td>
+                                    <td class="px-6 py-4">
+                                        <div class="text-white font-medium">${expense.description}</div>
+                                        <div class="text-gray-400 text-sm">By: ${addedBy ? addedBy.name : 'Unknown'}</div>
+                                    </td>
+                                    <td class="px-6 py-4 text-red-400 font-bold text-lg">${this.formatCurrency(expense.amount)}</td>
+                                    <td class="px-6 py-4">
+                                        <span class="px-3 py-1 text-xs font-semibold rounded-full bg-yellow-500/20 text-yellow-400 border border-yellow-500/30">
+                                            ${account ? account.name : expense.category}
+                                        </span>
+                                    </td>
+                                    <td class="px-6 py-4">
+                                        <div class="flex items-center space-x-3">
+                                            <button data-action="edit-expense" data-id="${expense.id}" class="text-blue-400 hover:text-blue-300 transition-colors">
+                                                <i class="fas fa-edit"></i>
+                                            </button>
+                                            <button data-action="delete-expense" data-id="${expense.id}" class="text-red-400 hover:text-red-300 transition-colors">
+                                                <i class="fas fa-trash"></i>
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                            `;
+                        }).join('') : `
+                            <tr>
+                                <td colspan="5" class="px-6 py-12 text-center">
+                                    <div class="text-gray-400">
+                                        <i class="fas fa-receipt text-4xl mb-4 opacity-50"></i>
+                                        <p class="text-lg mb-2">No expenses recorded yet</p>
+                                        <p class="text-sm">Start tracking your business expenses!</p>
+                                        <button data-action="add-expense" class="expenses-button px-6 py-3 rounded-xl mt-4">
+                                            <i class="fas fa-plus mr-2"></i>Add First Expense
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                        `}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+`;
+            },
+
+            getEmployeesView() {
+                return `
+                    <div class="space-y-6 fade-in">
+                        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                            <div>
+                                <h2 class="text-2xl font-bold text-white mb-2">Employee Management</h2>
+                                <p class="text-gray-400">Manage your team with commission tracking</p>
+                            </div>
+                            ${this.canManageEmployees() ? `
+                                <button data-action="add-employee" class="perplexity-button px-4 py-2 rounded-xl font-medium">
+                                    <i class="fas fa-plus mr-2"></i>Add Employee
+                                </button>
+                            ` : ''}
+                        </div>
+
+                        <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                            <div class="perplexity-card p-4 slide-up">
+                                <div class="flex items-center justify-between">
+                                    <div>
+                                        <p class="text-gray-400 text-sm mb-1">Total</p>
+                                        <p class="text-2xl font-bold text-white">${this.state.users.length}</p>
+                                    </div>
+                                    <div class="w-10 h-10 bg-blue-500/20 rounded-xl flex items-center justify-center">
+                                        <i class="fas fa-users text-blue-400"></i>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="perplexity-card p-4 slide-up">
+                                <div class="flex items-center justify-between">
+                                    <div>
+                                        <p class="text-gray-400 text-sm mb-1">Admins</p>
+                                        <p class="text-2xl font-bold text-red-400">${this.state.users.filter(u => u.role === 'admin').length}</p>
+                                    </div>
+                                    <div class="w-10 h-10 bg-red-500/20 rounded-xl flex items-center justify-center">
+                                        <i class="fas fa-crown text-red-400"></i>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="perplexity-card p-4 slide-up">
+                                <div class="flex items-center justify-between">
+                                    <div>
+                                        <p class="text-gray-400 text-sm mb-1">Managers</p>
+                                        <p class="text-2xl font-bold text-purple-400">${this.state.users.filter(u => u.role === 'manager').length}</p>
+                                    </div>
+                                    <div class="w-10 h-10 bg-purple-500/20 rounded-xl flex items-center justify-center">
+                                        <i class="fas fa-user-tie text-purple-400"></i>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="perplexity-card p-4 slide-up">
+                                <div class="flex items-center justify-between">
+                                    <div>
+                                        <p class="text-gray-400 text-sm mb-1">Workers</p>
+                                        <p class="text-2xl font-bold text-green-400">${this.state.users.filter(u => u.role === 'worker').length}</p>
+                                    </div>
+                                    <div class="w-10 h-10 bg-green-500/20 rounded-xl flex items-center justify-center">
+                                        <i class="fas fa-user text-green-400"></i>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="perplexity-card overflow-hidden">
+                            <div class="responsive-table">
+                                <table class="w-full">
+                                    <thead>
+                                        <tr class="border-b border-gray-600">
+                                            <th class="px-6 py-4 text-left text-xs font-medium uppercase tracking-wider text-gray-300">Employee</th>
+                                            <th class="px-6 py-4 text-left text-xs font-medium uppercase tracking-wider text-gray-300">Role</th>
+                                            <th class="px-6 py-4 text-left text-xs font-medium uppercase tracking-wider text-gray-300">Contact</th>
+                                            <th class="px-6 py-4 text-left text-xs font-medium uppercase tracking-wider text-gray-300">Salary</th>
+                                            <th class="px-6 py-4 text-left text-xs font-medium uppercase tracking-wider text-gray-300">Commission</th>
+                                            ${this.canManageEmployees() ? '<th class="px-6 py-4 text-left text-xs font-medium uppercase tracking-wider text-gray-300">Actions</th>' : ''}
+                                        </tr>
+                                    </thead>
+                                    <tbody class="divide-y divide-gray-600">
+                                        ${this.state.users.map((user, index) => `
+                                            <tr class="hover:bg-gray-800/50 ${index % 2 === 0 ? 'odd:bg-gray-800/10' : ''} transition-colors">
+                                                <td class="px-6 py-4">
+                                                    <div class="flex items-center space-x-3">
+                                                        <div class="w-10 h-10 bg-gradient-to-r ${user.role === 'admin' ? 'from-red-500 to-pink-500' : user.role === 'manager' ? 'from-purple-500 to-indigo-500' : 'from-green-500 to-emerald-500'} rounded-lg flex items-center justify-center">
+                                                            <i class="fas ${user.role === 'admin' ? 'fa-crown' : user.role === 'manager' ? 'fa-user-tie' : 'fa-user'} text-white"></i>
+                                                        </div>
+                                                        <div>
+                                                            <div class="text-white font-medium">${user.name}</div>
+                                                            <div class="text-gray-400 text-sm">@${user.username}</div>
+                                                        </div>
+                                                    </div>
+                                                </td>
+                                                <td class="px-6 py-4">
+                                                    <span class="px-3 py-1 text-xs font-semibold rounded-full ${user.role === 'admin' ? 'bg-red-500/20 text-red-400 border border-red-500/30' : user.role === 'manager' ? 'bg-purple-500/20 text-purple-400 border border-purple-500/30' : 'bg-green-500/20 text-green-400 border border-green-500/30'}">
+                                                        ${user.role.charAt(0).toUpperCase() + user.role.slice(1)}
+                                                    </span>
+                                                </td>
+                                                <td class="px-6 py-4">
+                                                    <div class="text-white">${user.email}</div>
+                                                    <div class="text-gray-400 text-sm">${user.phone}</div>
+                                                </td>
+                                                <td class="px-6 py-4 text-white font-medium">${this.formatCurrency(user.salary)}</td>
+                                                <td class="px-6 py-4 text-green-400 font-bold">${this.formatCurrency(user.commission || 0)}</td>
+                                                ${this.canManageEmployees() ? `
+                                                    <td class="px-6 py-4">
+                                                        <div class="flex items-center space-x-3">
+                                                            <button data-action="edit-employee" data-id="${user.id}" class="text-blue-400 hover:text-blue-300 transition-colors">
+                                                                <i class="fas fa-edit"></i>
+                                                            </button>
+                                                            ${user.id !== this.state.currentUser.id ? `
+                                                                <button data-action="delete-employee" data-id="${user.id}" class="text-red-400 hover:text-red-300 transition-colors">
+                                                                    <i class="fas fa-trash"></i>
+                                                                </button>
+                                                            ` : ''}
+                                                        </div>
+                                                    </td>
+                                                ` : ''}
+                                            </tr>
+                                        `).join('')}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            },
+
+            getInvoicesView() {
+                return `
+                    <div class="space-y-6 fade-in">
+                        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                            <div>
+                                <h2 class="text-2xl font-bold text-white mb-2">Invoice Management</h2>
+                                <p class="text-gray-400">Professional invoices with GCC compliance</p>
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                            <div class="perplexity-card p-4 slide-up">
+                                <div class="flex items-center justify-between">
+                                    <div>
+                                        <p class="text-gray-400 text-sm mb-1">Total</p>
+                                        <p class="text-2xl font-bold text-white">${this.state.invoices.length}</p>
+                                    </div>
+                                    <div class="w-10 h-10 bg-blue-500/20 rounded-xl flex items-center justify-center">
+                                        <i class="fas fa-file-invoice text-blue-400"></i>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="perplexity-card p-4 slide-up">
+                                <div class="flex items-center justify-between">
+                                    <div>
+                                        <p class="text-gray-400 text-sm mb-1">Value</p>
+                                        <p class="text-lg font-bold text-green-400">${this.formatCurrency(this.state.invoices.reduce((sum, inv) => sum + inv.total, 0), false)}</p>
+                                    </div>
+                                    <div class="w-10 h-10 bg-green-500/20 rounded-xl flex items-center justify-center">
+                                        <i class="fas fa-dollar-sign text-green-400"></i>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="perplexity-card p-4 slide-up">
+                                <div class="flex items-center justify-between">
+                                    <div>
+                                        <p class="text-gray-400 text-sm mb-1">Pending</p>
+                                        <p class="text-2xl font-bold text-yellow-400">${this.state.invoices.filter(inv => inv.status === 'pending').length}</p>
+                                    </div>
+                                    <div class="w-10 h-10 bg-yellow-500/20 rounded-xl flex items-center justify-center">
+                                        <i class="fas fa-clock text-yellow-400"></i>
+                                    </div>
+                                </div>
+                            </div>
+                                                        <div class="perplexity-card p-4 slide-up">
+                                <div class="flex items-center justify-between">
+                                    <div>
+                                        <p class="text-gray-400 text-sm mb-1">Paid</p>
+                                        <p class="text-2xl font-bold text-green-400">${this.state.invoices.filter(inv => inv.status === 'paid').length}</p>
+                                    </div>
+                                    <div class="w-10 h-10 bg-green-500/20 rounded-xl flex items-center justify-center">
+                                        <i class="fas fa-check text-green-400"></i>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="perplexity-card overflow-hidden">
+                            <div class="responsive-table">
+                                <table class="w-full">
+                                    <thead>
+                                        <tr class="border-b border-gray-600">
+                                            <th class="px-6 py-4 text-left text-xs font-medium uppercase tracking-wider text-gray-300">Invoice #</th>
+                                            <th class="px-6 py-4 text-left text-xs font-medium uppercase tracking-wider text-gray-300">Customer</th>
+                                            <th class="px-6 py-4 text-left text-xs font-medium uppercase tracking-wider text-gray-300">Date</th>
+                                            <th class="px-6 py-4 text-left text-xs font-medium uppercase tracking-wider text-gray-300">Total</th>
+                                            <th class="px-6 py-4 text-left text-xs font-medium uppercase tracking-wider text-gray-300">Status</th>
+                                            <th class="px-6 py-4 text-left text-xs font-medium uppercase tracking-wider text-gray-300">Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody class="divide-y divide-gray-600">
+                                        ${this.state.invoices.length > 0 ? this.state.invoices.reverse().map((invoice, index) => `
+                                            <tr class="hover:bg-gray-800/50 ${index % 2 === 0 ? 'odd:bg-gray-800/10' : ''} transition-colors">
+                                                <td class="px-6 py-4 text-white font-medium">${invoice.invoiceNumber}</td>
+                                                <td class="px-6 py-4">
+                                                    <div class="text-white font-medium">${invoice.customer.name}</div>
+                                                    <div class="text-gray-400 text-sm">${invoice.customer.type}</div>
+                                                </td>
+                                                <td class="px-6 py-4 text-white">${invoice.date}</td>
+                                                <td class="px-6 py-4 text-green-400 font-bold text-lg">${this.formatCurrency(invoice.total)}</td>
+                                                <td class="px-6 py-4">
+                                                    <span class="px-3 py-1 text-xs font-semibold rounded-full ${invoice.status === 'paid' ? 'bg-green-500/20 text-green-400 border border-green-500/30' : 'bg-yellow-500/20 text-yellow-400 border border-yellow-500/30'}">
+                                                        ${invoice.status.charAt(0).toUpperCase() + invoice.status.slice(1)}
+                                                    </span>
+                                                </td>
+                                                <td class="px-6 py-4">
+                                                    <button data-action="download-invoice" data-id="${invoice.id}" class="text-blue-400 hover:text-blue-300 transition-colors">
+                                                        <i class="fas fa-download mr-1"></i>Download
+                                                    </button>
+                                                </td>
+                                            </tr>
+                                        `).join('') : `
+                                            <tr>
+                                                <td colspan="6" class="px-6 py-12 text-center">
+                                                    <div class="text-gray-400">
+                                                        <i class="fas fa-file-invoice text-4xl mb-4 opacity-50"></i>
+                                                        <p class="text-lg mb-2">No invoices generated yet</p>
+                                                        <p class="text-sm">Generate invoices from your sales!</p>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        `}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            },
+
+            getReportsView() {
+                return `
+                    <div class="space-y-6 fade-in">
+                        <div>
+                            <h2 class="text-2xl font-bold text-white mb-2">Business Reports</h2>
+                            <p class="text-gray-400">Comprehensive analytics and insights</p>
+                        </div>
+
+                        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                            <div class="perplexity-card p-6 hover:scale-105 transition-all duration-300 slide-up">
+                                <div class="text-center">
+                                    <div class="w-16 h-16 mx-auto mb-4 bg-gradient-to-r from-blue-500/20 to-cyan-500/20 rounded-2xl flex items-center justify-center">
+                                        <i class="fas fa-chart-line text-blue-400 text-2xl"></i>
+                                    </div>
+                                    <h3 class="text-lg font-bold text-white mb-3">Sales Report</h3>
+                                    <p class="text-gray-400 text-sm mb-4">Detailed sales analysis with trends</p>
+                                    <button data-action="sales" class="perplexity-button px-4 py-2 rounded-xl w-full">
+                                        View Report
+                                    </button>
+                                </div>
+                            </div>
+
+                            <div class="perplexity-card p-6 hover:scale-105 transition-all duration-300 slide-up">
+                                <div class="text-center">
+                                    <div class="w-16 h-16 mx-auto mb-4 bg-gradient-to-r from-green-500/20 to-emerald-500/20 rounded-2xl flex items-center justify-center">
+                                        <i class="fas fa-users text-green-400 text-2xl"></i>
+                                    </div>
+                                    <h3 class="text-lg font-bold text-white mb-3">Customer Report</h3>
+                                    <p class="text-gray-400 text-sm mb-4">Customer analytics and insights</p>
+                                    <button data-action="customers" class="perplexity-button px-4 py-2 rounded-xl w-full">
+                                        View Report
+                                    </button>
+                                </div>
+                            </div>
+
+                            <div class="perplexity-card p-6 hover:scale-105 transition-all duration-300 slide-up">
+                                <div class="text-center">
+                                    <div class="w-16 h-16 mx-auto mb-4 bg-gradient-to-r from-yellow-500/20 to-orange-500/20 rounded-2xl flex items-center justify-center">
+                                        <i class="fas fa-receipt text-yellow-400 text-2xl"></i>
+                                    </div>
+                                    <h3 class="text-lg font-bold text-white mb-3">Expense Report</h3>
+                                    <p class="text-gray-400 text-sm mb-4">Expense tracking and analysis</p>
+                                    <button data-action="expenses" class="expenses-button px-4 py-2 rounded-xl w-full">
+                                        View Report
+                                    </button>
+                                </div>
+                            </div>
+
+                            <div class="perplexity-card p-6 hover:scale-105 transition-all duration-300 slide-up">
+                                <div class="text-center">
+                                    <div class="w-16 h-16 mx-auto mb-4 bg-gradient-to-r from-purple-500/20 to-pink-500/20 rounded-2xl flex items-center justify-center">
+                                        <i class="fas fa-chart-pie text-purple-400 text-2xl"></i>
+                                    </div>
+                                    <h3 class="text-lg font-bold text-white mb-3">Profit & Loss</h3>
+                                    <p class="text-gray-400 text-sm mb-4">Financial performance analysis</p>
+                                    <button data-action="pnl" class="ai-button px-4 py-2 rounded-xl w-full">
+                                        View Report
+                                    </button>
+                                </div>
+                            </div>
+
+                            <div class="perplexity-card p-6 hover:scale-105 transition-all duration-300 slide-up">
+                                <div class="text-center">
+                                    <div class="w-16 h-16 mx-auto mb-4 bg-gradient-to-r from-red-500/20 to-pink-500/20 rounded-2xl flex items-center justify-center">
+                                        <i class="fas fa-balance-scale text-red-400 text-2xl"></i>
+                                    </div>
+                                    <h3 class="text-lg font-bold text-white mb-3">Trial Balance</h3>
+                                    <p class="text-gray-400 text-sm mb-4">Account balance verification</p>
+                                    <button data-action="trial-balance" class="perplexity-button px-4 py-2 rounded-xl w-full">
+                                        View Report
+                                    </button>
+                                </div>
+                            </div>
+
+                            <div class="perplexity-card p-6 hover:scale-105 transition-all duration-300 slide-up">
+                                <div class="text-center">
+                                    <div class="w-16 h-16 mx-auto mb-4 bg-gradient-to-r from-indigo-500/20 to-blue-500/20 rounded-2xl flex items-center justify-center">
+                                        <i class="fas fa-file-alt text-indigo-400 text-2xl"></i>
+                                    </div>
+                                    <h3 class="text-lg font-bold text-white mb-3">Balance Sheet</h3>
+                                    <p class="text-gray-400 text-sm mb-4">Assets, liabilities & equity</p>
+                                    <button data-action="balance-sheet" class="bot-button px-4 py-2 rounded-xl w-full">
+                                        View Report
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            },
+
+            getSettingsView() {
+                return `
+                    <div class="space-y-6 fade-in">
+                        <div>
+                            <h2 class="text-2xl font-bold text-white mb-2">Settings</h2>
+                            <p class="text-gray-400">Configure your application preferences</p>
+                        </div>
+
+                        <div class="perplexity-card p-6">
+                            <h3 class="text-xl font-bold text-white mb-4">Theme Selection</h3>
+                            <div id="theme-selector" class="grid grid-cols-3 gap-4">
+                                <div data-theme="default" class="cursor-pointer p-4 rounded-xl border-2 border-gray-600 hover:border-accent-primary transition-colors">
+                                    <div class="w-full h-16 bg-gradient-to-r from-gray-800 to-gray-900 rounded-lg mb-3"></div>
+                                    <p class="text-white font-medium text-center">Default (Dark)</p>
+                                </div>
+                                <div data-theme="theme-sepia" class="cursor-pointer p-4 rounded-xl border-2 border-gray-600 hover:border-accent-primary transition-colors">
+                                    <div class="w-full h-16 bg-gradient-to-r from-yellow-100 to-yellow-200 rounded-lg mb-3"></div>
+                                    <p class="text-white font-medium text-center">Sepia</p>
+                                </div>
+                                <div data-theme="theme-black" class="cursor-pointer p-4 rounded-xl border-2 border-gray-600 hover:border-accent-primary transition-colors">
+                                    <div class="w-full h-16 bg-gradient-to-r from-black to-gray-900 rounded-lg mb-3"></div>
+                                    <p class="text-white font-medium text-center">Pitch Black</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        ${['admin', 'manager'].includes(this.state.currentUser.role) ? `
+                            <div class="perplexity-card p-6">
+                                <h3 class="text-xl font-bold text-white mb-4">Company Settings</h3>
+                                <form id="company-settings-form" class="space-y-4">
+                                    <div>
+                                        <label for="companyName" class="block text-sm font-medium text-gray-300 mb-2">Company Name</label>
+                                        <input type="text" id="companyName" name="companyName" value="${this.state.companyName}" class="form-input w-full">
+                                    </div>
+                                    <div>
+                                        <label for="lowStockThreshold" class="block text-sm font-medium text-gray-300 mb-2">Low Stock Threshold</label>
+                                        <input type="number" id="lowStockThreshold" name="lowStockThreshold" value="${this.state.lowStockThreshold}" class="form-input w-full">
+                                    </div>
+                                    <button type="submit" class="perplexity-button px-6 py-3 rounded-xl">
+                                        <i class="fas fa-save mr-2"></i>Save Settings
+                                    </button>
+                                </form>
+                            </div>
+
+                            <div class="perplexity-card p-6">
+                                <h3 class="text-xl font-bold text-white mb-4">GCC Currency Settings</h3>
+                                <div class="space-y-4">
+                                    <div>
+                                        <label for="country-select" class="block text-sm font-medium text-gray-300 mb-2">Operating Country</label>
+                                        <select id="country-select" onchange="app.changeCountry(this.value)" class="form-input w-full">
+                                            ${Object.entries(GCC_COUNTRIES).map(([code, country]) => `
+                                                <option value="${code}" ${this.state.selectedCountry === code ? 'selected' : ''}>
+                                                    ${country.name} (${country.currency})
+                                                </option>
+                                            `).join('')}
+                                        </select>
+                                    </div>
+                                    <div class="grid grid-cols-2 gap-4 text-sm">
+                                        <div class="bg-gray-800/50 p-3 rounded-xl">
+                                                                                        <p class="text-gray-400">Currency Symbol</p>
+                                            <p class="text-white font-bold text-lg">${GCC_COUNTRIES[this.state.selectedCountry].symbol}</p>
+                                        </div>
+                                        <div class="bg-gray-800/50 p-3 rounded-xl">
+                                            <p class="text-gray-400">Tax Rate</p>
+                                            <p class="text-white font-bold text-lg">${(GCC_COUNTRIES[this.state.selectedCountry].tax * 100).toFixed(0)}%</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        ` : ''}
+
+                        <div class="perplexity-card p-6">
+                            <h3 class="text-xl font-bold text-white mb-4">User Profile</h3>
+                            <div class="flex items-center space-x-4 mb-4">
+                                <div class="w-16 h-16 bg-gradient-to-r from-teal-500 to-blue-500 rounded-full flex items-center justify-center">
+                                    <span class="text-white font-bold text-xl">${this.state.currentUser.name.charAt(0)}</span>
+                                </div>
+                                <div>
+                                    <h4 class="text-white font-bold text-lg">${this.state.currentUser.name}</h4>
+                                    <p class="text-gray-400 capitalize">${this.state.currentUser.role}</p>
+                                    <p class="text-gray-400 text-sm">${this.state.currentUser.email}</p>
+                                </div>
+                            </div>
+                            <div class="grid grid-cols-2 gap-4 text-sm">
+                                <div class="bg-gray-800/50 p-3 rounded-xl">
+                                    <p class="text-gray-400">Monthly Salary</p>
+                                    <p class="text-white font-bold">${this.formatCurrency(this.state.currentUser.salary / 12)}</p>
+                                </div>
+                                <div class="bg-gray-800/50 p-3 rounded-xl">
+                                    <p class="text-gray-400">Commission Earned</p>
+                                    <p class="text-green-400 font-bold">${this.formatCurrency(this.state.currentUser.commission || 0)}</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="perplexity-card p-6">
+                            <h3 class="text-xl font-bold text-white mb-4">Data Management</h3>
+                            <div class="space-y-4">
+                                <button data-action="export-data" class="perplexity-button px-6 py-3 rounded-xl w-full">
+                                    <i class="fas fa-download mr-2"></i>Export All Data
+                                </button>
+                                <p class="text-gray-400 text-sm">Export your complete business data as JSON for backup or migration purposes.</p>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            },
+
+            getInboxView() {
+                const unreadMessages = this.state.messages.filter(m => m.to === this.state.currentUser.id && !m.read);
+                const readMessages = this.state.messages.filter(m => m.to === this.state.currentUser.id && m.read);
+
+                return `
+                    <div class="space-y-6 fade-in">
+                        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                            <div>
+                                <h2 class="text-2xl font-bold text-white mb-2">Inbox</h2>
+                                <p class="text-gray-400">Team communication with AI sentiment analysis</p>
+                            </div>
+                            <button data-action="compose-message" class="perplexity-button px-4 py-2 rounded-xl font-medium">
+                                <i class="fas fa-plus mr-2"></i>Compose Message
+                            </button>
+                        </div>
+
+                        <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                            <div class="perplexity-card p-4 slide-up">
+                                <div class="flex items-center justify-between">
+                                    <div>
+                                        <p class="text-gray-400 text-sm mb-1">Total</p>
+                                        <p class="text-2xl font-bold text-white">${this.state.messages.filter(m => m.to === this.state.currentUser.id).length}</p>
+                                    </div>
+                                    <div class="w-10 h-10 bg-blue-500/20 rounded-xl flex items-center justify-center">
+                                        <i class="fas fa-envelope text-blue-400"></i>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="perplexity-card p-4 slide-up">
+                                <div class="flex items-center justify-between">
+                                    <div>
+                                        <p class="text-gray-400 text-sm mb-1">Unread</p>
+                                        <p class="text-2xl font-bold text-red-400">${unreadMessages.length}</p>
+                                    </div>
+                                    <div class="w-10 h-10 bg-red-500/20 rounded-xl flex items-center justify-center">
+                                        <i class="fas fa-exclamation text-red-400"></i>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="perplexity-card p-4 slide-up">
+                                <div class="flex items-center justify-between">
+                                    <div>
+                                        <p class="text-gray-400 text-sm mb-1">Read</p>
+                                        <p class="text-2xl font-bold text-green-400">${readMessages.length}</p>
+                                    </div>
+                                    <div class="w-10 h-10 bg-green-500/20 rounded-xl flex items-center justify-center">
+                                        <i class="fas fa-check text-green-400"></i>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="perplexity-card p-4 slide-up">
+                                <div class="flex items-center justify-between">
+                                    <div>
+                                        <p class="text-gray-400 text-sm mb-1">Sent</p>
+                                        <p class="text-2xl font-bold text-purple-400">${this.state.messages.filter(m => m.from === this.state.currentUser.id).length}</p>
+                                    </div>
+                                    <div class="w-10 h-10 bg-purple-500/20 rounded-xl flex items-center justify-center">
+                                        <i class="fas fa-paper-plane text-purple-400"></i>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="perplexity-card overflow-hidden">
+                            <div class="responsive-table">
+                                <table class="w-full">
+                                    <thead>
+                                        <tr class="border-b border-gray-600">
+                                            <th class="px-6 py-4 text-left text-xs font-medium uppercase tracking-wider text-gray-300">From</th>
+                                            <th class="px-6 py-4 text-left text-xs font-medium uppercase tracking-wider text-gray-300">Subject</th>
+                                            <th class="px-6 py-4 text-left text-xs font-medium uppercase tracking-wider text-gray-300">Date</th>
+                                            <th class="px-6 py-4 text-left text-xs font-medium uppercase tracking-wider text-gray-300">Sentiment</th>
+                                            <th class="px-6 py-4 text-left text-xs font-medium uppercase tracking-wider text-gray-300">Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody class="divide-y divide-gray-600">
+                                        ${this.state.messages.filter(m => m.to === this.state.currentUser.id).length > 0 ? 
+                                            this.state.messages.filter(m => m.to === this.state.currentUser.id).reverse().map((message, index) => {
+                                                const sender = this.state.users.find(u => u.id === message.from);
+                                                return `
+                                                    <tr class="hover:bg-gray-800/50 ${index % 2 === 0 ? 'odd:bg-gray-800/10' : ''} transition-colors ${!message.read ? 'bg-blue-500/5' : ''}">
+                                                        <td class="px-6 py-4">
+                                                            <div class="text-white font-medium">${sender ? sender.name : 'Unknown'}</div>
+                                                            <div class="text-gray-400 text-sm">${sender ? sender.role : ''}</div>
+                                                        </td>
+                                                        <td class="px-6 py-4">
+                                                            <div class="text-white font-medium ${!message.read ? 'font-bold' : ''}">${message.subject}</div>
+                                                            <div class="text-gray-400 text-sm">${message.content.substring(0, 50)}...</div>
+                                                        </td>
+                                                        <td class="px-6 py-4 text-white">${new Date(message.timestamp).toLocaleDateString()}</td>
+                                                        <td class="px-6 py-4">
+                                                            <span class="px-3 py-1 text-xs font-semibold rounded-full ${
+                                                                message.sentiment === 'positive' ? 'bg-green-500/20 text-green-400 border border-green-500/30' :
+                                                                message.sentiment === 'negative' ? 'bg-red-500/20 text-red-400 border border-red-500/30' :
+                                                                'bg-gray-500/20 text-gray-400 border border-gray-500/30'
+                                                            }">
+                                                                ${message.sentiment}
+                                                            </span>
+                                                        </td>
+                                                        <td class="px-6 py-4">
+                                                            ${!message.read ? `
+                                                                <button data-action="mark-read" data-id="${message.id}" class="text-blue-400 hover:text-blue-300 transition-colors">
+                                                                    <i class="fas fa-eye mr-1"></i>Mark Read
+                                                                </button>
+                                                            ` : `
+                                                                <span class="text-gray-500 text-sm">Read</span>
+                                                            `}
+                                                        </td>
+                                                    </tr>
+                                                `;
+                                            }).join('') : `
+                                            <tr>
+                                                <td colspan="5" class="px-6 py-12 text-center">
+                                                    <div class="text-gray-400">
+                                                        <i class="fas fa-envelope text-4xl mb-4 opacity-50"></i>
+                                                        <p class="text-lg mb-2">No messages yet</p>
+                                                        <p class="text-sm">Start communicating with your team!</p>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        `}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            },
+
+            // Quick Sale View Implementation
+            getQuickSaleView() {
+                const selectedProductIds = this.state.quickSale.selectedProducts.map(item => item.productId);
+                
+                return `
+                    <div class="quick-sale-container">
+                        <div class="flex items-center justify-between mb-6">
+                            <div class="flex items-center space-x-4">
+                                <div class="w-12 h-12 bg-gradient-to-r from-blue-500 to-cyan-500 rounded-xl flex items-center justify-center">
+                                    <i class="fas fa-bolt text-white text-xl"></i>
+                                </div>
+                                <div>
+                                    <h1 class="text-2xl font-bold quick-sale-gradient-text">Quick Sale</h1>
+                                    <p class="text-gray-400">Fast and efficient sales processing</p>
+                                </div>
+                            </div>
+                            <button data-action="cancel-quick-sale" class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-xl transition-colors">
+                                <i class="fas fa-times mr-2"></i>Cancel
+                            </button>
+                        </div>
+
+                        <div class="quick-sale-main-grid">
+                            <!-- Product Selection Panel -->
+                            <div class="quick-sale-product-panel">
+                                <h3 class="text-xl font-bold text-white mb-4">Select Products</h3>
+                                <div class="product-grid">
+                                    ${this.state.products.map(product => `
+                                        <div class="product-card ${selectedProductIds.includes(product.id) ? 'selected' : ''}" data-action="quick-sale-add-product" data-id="${product.id}">
+                                            <img src="${product.imageUrl}" alt="${product.name}" class="w-full h-24 object-cover rounded-lg mb-3">
+                                            <h4 class="text-white font-medium text-sm mb-2">${product.name}</h4>
+                                            <p class="text-gray-400 text-xs mb-2">Stock: ${product.stock}</p>
+                                            <p class="text-green-400 font-bold">${this.formatCurrency(product.price)}</p>
+                                            ${selectedProductIds.includes(product.id) ? `
+                                                <div class="absolute top-2 right-2 w-6 h-6 bg-blue-500 rounded-full flex items-center justify-center">
+                                                    <i class="fas fa-check text-white text-xs"></i>
+                                                </div>
+                                            ` : ''}
+                                        </div>
+                                    `).join('')}
+                                </div>
+                            </div>
+
+                            <!-- Cart and Finalization Panel -->
+                            <div class="quick-sale-cart-panel">
+                                <h3 class="text-xl font-bold text-white mb-4">Cart & Checkout</h3>
+                                
+                                <div class="cart-list">
+                                    ${this.state.quickSale.selectedProducts.length > 0 ? 
+                                        this.state.quickSale.selectedProducts.map(item => {
+                                            const product = this.state.products.find(p => p.id === item.productId);
+                                            return `
+                                                <div class="cart-item">
+                                                    <div class="flex-1">
+                                                        <h4 class="text-white font-medium">${product.name}</h4>
+                                                        <p class="text-gray-400 text-sm">${this.formatCurrency(item.unitPrice)} each</p>
+                                                    </div>
+                                                                                                        <div class="quantity-controls">
+                                                        <button data-action="decrease-quantity" data-id="${item.productId}" class="quantity-btn">
+                                                            <i class="fas fa-minus"></i>
+                                                        </button>
+                                                        <span class="quantity-display">${item.quantity}</span>
+                                                        <button data-action="increase-quantity" data-id="${item.productId}" class="quantity-btn">
+                                                            <i class="fas fa-plus"></i>
+                                                        </button>
+                                                    </div>
+                                                    <div class="text-right">
+                                                        <p class="text-white font-bold">${this.formatCurrency(item.unitPrice * item.quantity)}</p>
+                                                        <button data-action="remove-from-cart" data-id="${item.productId}" class="text-red-400 hover:text-red-300 text-sm">
+                                                            <i class="fas fa-trash"></i>
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            `;
+                                        }).join('') : `
+                                        <div class="text-center py-8 text-gray-400">
+                                            <i class="fas fa-shopping-cart text-3xl mb-3 opacity-50"></i>
+                                            <p>No items in cart</p>
+                                        </div>
+                                    `}
+                                </div>
+
+                                ${this.state.quickSale.selectedProducts.length > 0 ? `
+                                    <div class="cart-summary">
+                                        <div class="summary-row">
+                                            <span class="text-gray-400">Subtotal:</span>
+                                            <span class="text-white font-bold">${this.formatCurrency(this.state.quickSale.subtotal)}</span>
+                                        </div>
+                                        <div class="summary-row">
+                                            <span class="text-gray-400">Tax (${(GCC_COUNTRIES[this.state.selectedCountry].tax * 100).toFixed(0)}%):</span>
+                                            <span class="text-white font-bold">${this.formatCurrency(this.state.quickSale.tax)}</span>
+                                        </div>
+                                        <div class="summary-row total-row">
+                                            <span class="text-white font-bold text-lg">Total:</span>
+                                            <span class="text-green-400 font-bold text-xl">${this.formatCurrency(this.state.quickSale.total)}</span>
+                                        </div>
+                                    </div>
+
+                                    <div class="customer-selection mb-4">
+                                        <label class="block text-sm font-medium text-gray-300 mb-2">Customer</label>
+                                        <select id="quick-sale-customer" class="form-input w-full">
+                                            <option value="">Walk-in Customer</option>
+                                            ${this.state.customers.map(customer => `
+                                                <option value="${customer.id}">${customer.name} - ${customer.phone}</option>
+                                            `).join('')}
+                                        </select>
+                                    </div>
+
+                                    <div class="payment-method mb-4">
+                                        <label class="block text-sm font-medium text-gray-300 mb-2">Payment Method</label>
+                                        <div class="grid grid-cols-3 gap-2">
+                                            <button data-payment="cash" class="payment-btn active">
+                                                <i class="fas fa-money-bill-wave mb-1"></i>
+                                                <span>Cash</span>
+                                            </button>
+                                            <button data-payment="card" class="payment-btn">
+                                                <i class="fas fa-credit-card mb-1"></i>
+                                                <span>Card</span>
+                                            </button>
+                                            <button data-payment="transfer" class="payment-btn">
+                                                <i class="fas fa-exchange-alt mb-1"></i>
+                                                <span>Transfer</span>
+                                            </button>
+                                        </div>
+                                    </div>
+
+                                    <button data-action="complete-quick-sale" class="quick-sale-complete-btn">
+                                        <i class="fas fa-check mr-2"></i>Complete Sale
+                                    </button>
+                                ` : ''}
+                            </div>
+                        </div>
+                    </div>
+                `;
+            },
+
+            // Event Handlers
+            handleNavigation(view) {
+                this.state.currentView = view;
+                this.render();
+                this.updateActiveNavItem();
+            },
+
+            updateActiveNavItem() {
+                document.querySelectorAll('.nav-item').forEach(item => {
+                    item.classList.remove('active');
+                });
+                document.querySelector(`[data-view="${this.state.currentView}"]`)?.classList.add('active');
+            },
+
+            handleAddSale() {
+                this.showModal('add-sale');
+            },
+
+            handleAddProduct() {
+                this.showModal('add-product');
+            },
+
+            handleAddCustomer() {
+                this.showModal('add-customer');
+            },
+
+            handleAddExpense() {
+                this.showModal('add-expense');
+            },
+
+            handleAddEmployee() {
+                if (!this.canManageEmployees()) {
+                    this.showNotification('Access denied. Only admins and managers can add employees.', 'error');
+                    return;
+                }
+                this.showModal('add-employee');
+            },
+
+            handleComposeMessage() {
+                this.showModal('compose-message');
+            },
+
+            handleQuickSale() {
+                this.state.currentView = 'quick-sale';
+                this.initializeQuickSale();
+                this.render();
+            },
+
+            initializeQuickSale() {
+                this.state.quickSale = {
+                    selectedProducts: [],
+                    subtotal: 0,
+                    tax: 0,
+                    total: 0,
+                    paymentMethod: 'cash'
+                };
+            },
+
+            handleQuickSaleAddProduct(productId) {
+                const product = this.state.products.find(p => p.id === productId);
+                if (!product || product.stock <= 0) {
+                    this.showNotification('Product out of stock!', 'error');
+                    return;
+                }
+
+                const existingItem = this.state.quickSale.selectedProducts.find(item => item.productId === productId);
+                
+                if (existingItem) {
+                    if (existingItem.quantity < product.stock) {
+                        existingItem.quantity++;
+                    } else {
+                        this.showNotification('Not enough stock available!', 'error');
+                        return;
+                    }
+                } else {
+                    this.state.quickSale.selectedProducts.push({
+                        productId: productId,
+                        quantity: 1,
+                        unitPrice: product.price
+                    });
+                }
+
+                this.updateQuickSaleCalculations();
+                this.render();
+            },
+
+            handleIncreaseQuantity(productId) {
+                const product = this.state.products.find(p => p.id === productId);
+                const item = this.state.quickSale.selectedProducts.find(item => item.productId === productId);
+                
+                if (item && item.quantity < product.stock) {
+                    item.quantity++;
+                    this.updateQuickSaleCalculations();
+                    this.render();
+                } else {
+                    this.showNotification('Not enough stock available!', 'error');
+                }
+            },
+
+            handleDecreaseQuantity(productId) {
+                const item = this.state.quickSale.selectedProducts.find(item => item.productId === productId);
+                
+                if (item) {
+                    if (item.quantity > 1) {
+                        item.quantity--;
+                    } else {
+                        this.state.quickSale.selectedProducts = this.state.quickSale.selectedProducts.filter(i => i.productId !== productId);
+                    }
+                    this.updateQuickSaleCalculations();
+                    this.render();
+                }
+            },
+
+            handleRemoveFromCart(productId) {
+                this.state.quickSale.selectedProducts = this.state.quickSale.selectedProducts.filter(item => item.productId !== productId);
+                this.updateQuickSaleCalculations();
+                this.render();
+            },
+
+            updateQuickSaleCalculations() {
+                this.state.quickSale.subtotal = this.state.quickSale.selectedProducts.reduce((sum, item) => {
+                    return sum + (item.unitPrice * item.quantity);
+                }, 0);
+
+                this.state.quickSale.tax = this.state.quickSale.subtotal * GCC_COUNTRIES[this.state.selectedCountry].tax;
+                this.state.quickSale.total = this.state.quickSale.subtotal + this.state.quickSale.tax;
+            },
+
+            handleCompleteQuickSale() {
+                if (this.state.quickSale.selectedProducts.length === 0) {
+                    this.showNotification('Please add products to cart first!', 'error');
+                    return;
+                }
+
+                const customerSelect = document.getElementById('quick-sale-customer');
+                const customerId = customerSelect ? customerSelect.value : null;
+                const paymentMethod = document.querySelector('.payment-btn.active')?.dataset.payment || 'cash';
+
+                // Create sale record
+                const sale = {
+                    id: Date.now(),
+                    date: new Date().toISOString().split('T')[0],
+                    customerId: customerId || null,
+                    customerName: customerId ? this.state.customers.find(c => c.id == customerId)?.name : 'Walk-in Customer',
+                    items: this.state.quickSale.selectedProducts.map(item => {
+                        const product = this.state.products.find(p => p.id === item.productId);
+                        return {
+                            productId: item.productId,
+                            productName: product.name,
+                            quantity: item.quantity,
+                            unitPrice: item.unitPrice,
+                            total: item.unitPrice * item.quantity
+                        };
+                    }),
+                    subtotal: this.state.quickSale.subtotal,
+                    tax: this.state.quickSale.tax,
+                    total: this.state.quickSale.total,
+                    paymentMethod: paymentMethod,
+                    addedBy: this.state.currentUser.id,
+                    timestamp: Date.now()
+                };
+
+                // Update product stock
+                this.state.quickSale.selectedProducts.forEach(item => {
+                    const product = this.state.products.find(p => p.id === item.productId);
+                    if (product) {
+                        product.stock -= item.quantity;
+                    }
+                });
+
+                // Add commission to current user
+                const commission = this.state.quickSale.total * 0.02; // 2% commission
+                this.state.currentUser.commission = (this.state.currentUser.commission || 0) + commission;
+
+                // Update user in users array
+                const userIndex = this.state.users.findIndex(u => u.id === this.state.currentUser.id);
+                if (userIndex !== -1) {
+                    this.state.users[userIndex].commission = this.state.currentUser.commission;
+                }
+
+                this.state.sales.push(sale);
+                this.saveData();
+
+                this.showNotification(`Sale completed successfully! Commission earned: ${this.formatCurrency(commission)}`, 'success');
+                
+                // Reset quick sale and return to dashboard
+                this.initializeQuickSale();
+                this.state.currentView = 'dashboard';
+                this.render();
+            },
+
+            handleCancelQuickSale() {
+                this.initializeQuickSale();
+                this.state.currentView = 'dashboard';
+                this.render();
+            },
+
+            // Form Submission Handlers
+            handleSaleForm(formData) {
+                const customerId = parseInt(formData.get('customerId'));
+                const customer = this.state.customers.find(c => c.id === customerId);
+                
+                const items = [];
+                let itemIndex = 0;
+                
+                while (formData.get(`items[${itemIndex}][productId]`)) {
+                    const productId = parseInt(formData.get(`items[${itemIndex}][productId]`));
+                    const quantity = parseInt(formData.get(`items[${itemIndex}][quantity]`));
+                    const product = this.state.products.find(p => p.id === productId);
+                    
+                    if (product && quantity > 0) {
+                        if (quantity > product.stock) {
+                            this.showNotification(`Not enough stock for ${product.name}. Available: ${product.stock}`, 'error');
+                            return;
+                        }
+                        
+                        items.push({
+                            productId: productId,
+                            productName: product.name,
+                            quantity: quantity,
+                            unitPrice: product.price,
+                            total: product.price * quantity
+                        });
+                    }
+                    itemIndex++;
+                }
+
+                if (items.length === 0) {
+                    this.showNotification('Please add at least one item to the sale', 'error');
+                    return;
+                }
+
+                const subtotal = items.reduce((sum, item) => sum + item.total, 0);
+                const tax = subtotal * GCC_COUNTRIES[this.state.selectedCountry].tax;
+                const total = subtotal + tax;
+
+                const sale = {
+                    id: Date.now(),
+                    date: formData.get('date'),
+                    customerId: customerId,
+                    customerName: customer ? customer.name : 'Unknown',
+                    items: items,
+                    subtotal: subtotal,
+                    tax: tax,
+                    total: total,
+                    paymentMethod: formData.get('paymentMethod'),
+                    addedBy: this.state.currentUser.id,
+                    timestamp: Date.now()
+                };
+
+                // Update product stock
+                items.forEach(item => {
+                    const product = this.state.products.find(p => p.id === item.productId);
+                    if (product) {
+                        product.stock -= item.quantity;
+                    }
+                });
+
+                // Add commission
+                const commission = total * 0.02;
+                this.state.currentUser.commission = (this.state.currentUser.commission || 0) + commission;
+                
+                const userIndex = this.state.users.findIndex(u => u.id === this.state.currentUser.id);
+                if (userIndex !== -1) {
+                    this.state.users[userIndex].commission = this.state.currentUser.commission;
+                }
+
+                this.state.sales.push(sale);
+                this.saveData();
+                this.hideModal();
+                this.showNotification(`Sale added successfully! Commission earned: ${this.formatCurrency(commission)}`, 'success');
+                this.render();
+            },
+
+            handleProductForm(formData) {
+                const product = {
+                    id: Date.now(),
+                    name: formData.get('name'),
+                    description: formData.get('description'),
+                    price: parseFloat(formData.get('price')),
+                    cost: parseFloat(formData.get('cost')),
+                    stock: parseInt(formData.get('stock')),
+                    category: formData.get('category'),
+                    imageUrl: formData.get('imageUrl') || 'https://via.placeholder.com/150',
+                    addedBy: this.state.currentUser.id,
+                    timestamp: Date.now()
+                };
+
+                this.state.products.push(product);
+                this.saveData();
+                this.hideModal();
+                this.showNotification('Product added successfully!', 'success');
+                this.render();
+            },
+
+            handleCustomerForm(formData) {
+                                const customer = {
+                    id: Date.now(),
+                    name: formData.get('name'),
+                    email: formData.get('email'),
+                    phone: formData.get('phone'),
+                    address: formData.get('address'),
+                    type: formData.get('type'),
+                    addedBy: this.state.currentUser.id,
+                    timestamp: Date.now()
+                };
+
+                this.state.customers.push(customer);
+                this.saveData();
+                this.hideModal();
+                this.showNotification('Customer added successfully!', 'success');
+                this.render();
+            },
+
+            handleExpenseForm(formData) {
+                const expense = {
+                    id: Date.now(),
+                    date: formData.get('date'),
+                    description: formData.get('description'),
+                    amount: parseFloat(formData.get('amount')),
+                    category: formData.get('category'),
+                    addedBy: this.state.currentUser.id,
+                    timestamp: Date.now()
+                };
+
+                this.state.expenses.push(expense);
+                this.saveData();
+                this.hideModal();
+                this.showNotification('Expense added successfully!', 'success');
+                this.render();
+            },
+
+            handleEmployeeForm(formData) {
+                if (!this.canManageEmployees()) {
+                    this.showNotification('Access denied. Only admins and managers can add employees.', 'error');
+                    return;
+                }
+
+                const employee = {
+                    id: Date.now(),
+                    name: formData.get('name'),
+                    username: formData.get('username'),
+                    email: formData.get('email'),
+                    phone: formData.get('phone'),
+                    role: formData.get('role'),
+                    salary: parseFloat(formData.get('salary')),
+                    password: 'password123', // Default password
+                    commission: 0,
+                    addedBy: this.state.currentUser.id,
+                    timestamp: Date.now()
+                };
+
+                // Check if username already exists
+                if (this.state.users.find(u => u.username === employee.username)) {
+                    this.showNotification('Username already exists!', 'error');
+                    return;
+                }
+
+                this.state.users.push(employee);
+                this.saveData();
+                this.hideModal();
+                this.showNotification('Employee added successfully! Default password: password123', 'success');
+                this.render();
+            },
+
+            handleMessageForm(formData) {
+                const message = {
+                    id: Date.now(),
+                    from: this.state.currentUser.id,
+                    to: parseInt(formData.get('to')),
+                    subject: formData.get('subject'),
+                    content: formData.get('content'),
+                    timestamp: Date.now(),
+                    read: false,
+                    sentiment: this.analyzeSentiment(formData.get('content'))
+                };
+
+                this.state.messages.push(message);
+                this.saveData();
+                this.hideModal();
+                this.showNotification('Message sent successfully!', 'success');
+                this.render();
+            },
+
+            // Utility Functions
+            analyzeSentiment(text) {
+                const positiveWords = ['good', 'great', 'excellent', 'amazing', 'wonderful', 'fantastic', 'awesome', 'perfect', 'love', 'happy'];
+                const negativeWords = ['bad', 'terrible', 'awful', 'horrible', 'hate', 'angry', 'frustrated', 'disappointed', 'sad', 'upset'];
+                
+                const words = text.toLowerCase().split(' ');
+                let positiveCount = 0;
+                let negativeCount = 0;
+                
+                words.forEach(word => {
+                    if (positiveWords.includes(word)) positiveCount++;
+                    if (negativeWords.includes(word)) negativeCount++;
+                });
+                
+                if (positiveCount > negativeCount) return 'positive';
+                if (negativeCount > positiveCount) return 'negative';
+                return 'neutral';
+            },
+
+            formatCurrency(amount, showSymbol = true) {
+                const country = GCC_COUNTRIES[this.state.selectedCountry];
+                const formatted = new Intl.NumberFormat('en-US', {
+                    minimumFractionDigits: 2,
+                    maximumFractionDigits: 2
+                }).format(amount);
+                
+                return showSymbol ? `${country.symbol}${formatted}` : formatted;
+            },
+
+            canManageEmployees() {
+                return ['admin', 'manager'].includes(this.state.currentUser.role);
+            },
+
+            canViewReports() {
+                return ['admin', 'manager'].includes(this.state.currentUser.role);
+            },
+
+            // Modal Functions
+            showModal(type) {
+                const modal = document.getElementById('modal');
+                const modalContent = document.getElementById('modal-content');
+                
+                modalContent.innerHTML = this.getModalContent(type);
+                modal.classList.remove('hidden');
+                modal.classList.add('flex');
+                
+                // Add event listeners for modal forms
+                this.addModalEventListeners(type);
+            },
+
+            hideModal() {
+                const modal = document.getElementById('modal');
+                modal.classList.add('hidden');
+                modal.classList.remove('flex');
+            },
+
+            getModalContent(type) {
+                switch (type) {
+                    case 'add-sale':
+                        return this.getSaleModalContent();
+                    case 'add-product':
+                        return this.getProductModalContent();
+                    case 'add-customer':
+                        return this.getCustomerModalContent();
+                    case 'add-expense':
+                        return this.getExpenseModalContent();
+                    case 'add-employee':
+                        return this.getEmployeeModalContent();
+                    case 'compose-message':
+                        return this.getMessageModalContent();
+                    default:
+                        return '<p class="text-white">Modal content not found</p>';
+                }
+            },
+
+            getSaleModalContent() {
+                return `
+                    <div class="bg-gray-800 rounded-2xl p-6 w-full max-w-4xl max-h-[90vh] overflow-y-auto">
+                        <div class="flex justify-between items-center mb-6">
+                            <h3 class="text-xl font-bold text-white">Add New Sale</h3>
+                            <button onclick="app.hideModal()" class="text-gray-400 hover:text-white">
+                                <i class="fas fa-times text-xl"></i>
+                            </button>
+                        </div>
+                        
+                        <form id="sale-form" class="space-y-6">
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div>
+                                    <label for="sale-date" class="block text-sm font-medium text-gray-300 mb-2">Date</label>
+                                    <input type="date" id="sale-date" name="date" value="${new Date().toISOString().split('T')[0]}" class="form-input w-full" required>
+                                </div>
+                                <div>
+                                    <label for="sale-customer" class="block text-sm font-medium text-gray-300 mb-2">Customer</label>
+                                    <select id="sale-customer" name="customerId" class="form-input w-full" required>
+                                        <option value="">Select Customer</option>
+                                        ${this.state.customers.map(customer => `
+                                            <option value="${customer.id}">${customer.name} - ${customer.phone}</option>
+                                        `).join('')}
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div>
+                                <label class="block text-sm font-medium text-gray-300 mb-2">Items</label>
+                                <div id="sale-items" class="space-y-3">
+                                    <div class="sale-item grid grid-cols-1 md:grid-cols-4 gap-3 p-3 bg-gray-700 rounded-xl">
+                                        <select name="items[0][productId]" class="form-input" required>
+                                            <option value="">Select Product</option>
+                                            ${this.state.products.filter(p => p.stock > 0).map(product => `
+                                                <option value="${product.id}" data-price="${product.price}" data-stock="${product.stock}">
+                                                    ${product.name} (Stock: ${product.stock}) - ${this.formatCurrency(product.price)}
+                                                </option>
+                                            `).join('')}
+                                        </select>
+                                        <input type="number" name="items[0][quantity]" placeholder="Quantity" min="1" class="form-input" required>
+                                        <input type="number" name="items[0][unitPrice]" placeholder="Unit Price" step="0.01" class="form-input" readonly>
+                                        <button type="button" onclick="this.parentElement.remove()" class="bg-red-600 hover:bg-red-700 text-white px-3 py-2 rounded-xl">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                                <button type="button" id="add-sale-item" class="mt-3 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-xl">
+                                    <i class="fas fa-plus mr-2"></i>Add Item
+                                </button>
+                            </div>
+
+                            <div>
+                                <label for="sale-payment" class="block text-sm font-medium text-gray-300 mb-2">Payment Method</label>
+                                <select id="sale-payment" name="paymentMethod" class="form-input w-full" required>
+                                    <option value="cash">Cash</option>
+                                    <option value="card">Card</option>
+                                    <option value="transfer">Bank Transfer</option>
+                                </select>
+                            </div>
+
+                            <div class="flex justify-end space-x-3">
+                                <button type="button" onclick="app.hideModal()" class="bg-gray-600 hover:bg-gray-700 text-white px-6 py-3 rounded-xl">
+                                    Cancel
+                                </button>
+                                <button type="submit" class="perplexity-button px-6 py-3 rounded-xl">
+                                    <i class="fas fa-save mr-2"></i>Add Sale
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                `;
+            },
+
+            getProductModalContent() {
+                return `
+                    <div class="bg-gray-800 rounded-2xl p-6 w-full max-w-2xl">
+                        <div class="flex justify-between items-center mb-6">
+                            <h3 class="text-xl font-bold text-white">Add New Product</h3>
+                            <button onclick="app.hideModal()" class="text-gray-400 hover:text-white">
+                                <i class="fas fa-times text-xl"></i>
+                            </button>
+                        </div>
+                        
+                        <form id="product-form" class="space-y-4">
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div>
+                                    <label for="product-name" class="block text-sm font-medium text-gray-300 mb-2">Product Name</label>
+                                    <input type="text" id="product-name" name="name" class="form-input w-full" required>
+                                </div>
+                                <div>
+                                    <label for="product-category" class="block text-sm font-medium text-gray-300 mb-2">Category</label>
+                                    <input type="text" id="product-category" name="category" class="form-input w-full" required>
+                                </div>
+                            </div>
+
+                            <div>
+                                <label for="product-description" class="block text-sm font-medium text-gray-300 mb-2">Description</label>
+                                <textarea id="product-description" name="description" rows="3" class="form-input w-full"></textarea>
+                            </div>
+
+                            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                <div>
+                                    <label for="product-price" class="block text-sm font-medium text-gray-300 mb-2">Selling Price</label>
+                                    <input type="number" id="product-price" name="price" step="0.01" min="0" class="form-input w-full" required>
+                                </div>
+                                <div>
+                                    <label for="product-cost" class="block text-sm font-medium text-gray-300 mb-2">Cost Price</label>
+                                    <input type="number" id="product-cost" name="cost" step="0.01" min="0" class="form-input w-full" required>
+                                </div>
+                                <div>
+                                    <label for="product-stock" class="block text-sm font-medium text-gray-300 mb-2">Initial Stock</label>
+                                    <input type="number" id="product-stock" name="stock" min="0" class="form-input w-full" required>
+                                </div>
+                            </div>
+
+                            <div>
+                                <label for="product-image" class="block text-sm font-medium text-gray-300 mb-2">Image URL</label>
+                                <input type="url" id="product-image" name="imageUrl" class="form-input w-full" placeholder="https://example.com/image.jpg">
+                            </div>
+
+                            <div class="flex justify-end space-x-3">
+                                <button type="button" onclick="app.hideModal()" class="bg-gray-600 hover:bg-gray-700 text-white px-6 py-3 rounded-xl">
+                                    Cancel
+                                </button>
+                                <button type="submit" class="perplexity-button px-6 py-3 rounded-xl">
+                                    <i class="fas fa-save mr-2"></i>Add Product
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                `;
+            },
+
+            getCustomerModalContent() {
+                return `
+                    <div class="bg-gray-800 rounded-2xl p-6 w-full max-w-2xl">
+                        <div class="flex justify-between items-center mb-6">
+                            <h3 class="text-xl font-bold text-white">Add New Customer</h3>
+                            <button onclick="app.hideModal()" class="text-gray-400 hover:text-white">
+                                <i class="fas fa-times text-xl"></i>
+                            </button>
+                        </div>
+                        
+                        <form id="customer-form" class="space-y-4">
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div>
+                                    <label for="customer-name" class="block text-sm font-medium text-gray-300 mb-2">Full Name</label>
+                                    <input type="text" id="customer-name" name="name" class="form-input w-full" required>
+                                </div>
+                                <div>
+                                    <label for="customer-type" class="block text-sm font-medium text-gray-300 mb-2">Customer Type</label>
+                                    <select id="customer-type" name="type" class="form-input w-full" required>
+                                        <option value="individual">Individual</option>
+                                        <option value="business">Business</option>
+                                                                        <select id="customer-type" name="type" class="form-input w-full" required>
+                                        <option value="individual">Individual</option>
+                                        <option value="business">Business</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div>
+                                    <label for="customer-email" class="block text-sm font-medium text-gray-300 mb-2">Email</label>
+                                    <input type="email" id="customer-email" name="email" class="form-input w-full" required>
+                                </div>
+                                <div>
+                                    <label for="customer-phone" class="block text-sm font-medium text-gray-300 mb-2">Phone</label>
+                                    <input type="tel" id="customer-phone" name="phone" class="form-input w-full" required>
+                                </div>
+                            </div>
+
+                            <div>
+                                <label for="customer-address" class="block text-sm font-medium text-gray-300 mb-2">Address</label>
+                                <textarea id="customer-address" name="address" rows="3" class="form-input w-full"></textarea>
+                            </div>
+
+                            <div class="flex justify-end space-x-3">
+                                <button type="button" onclick="app.hideModal()" class="bg-gray-600 hover:bg-gray-700 text-white px-6 py-3 rounded-xl">
+                                    Cancel
+                                </button>
+                                <button type="submit" class="perplexity-button px-6 py-3 rounded-xl">
+                                    <i class="fas fa-save mr-2"></i>Add Customer
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                `;
+            },
+
+            getExpenseModalContent() {
+                return `
+                    <div class="bg-gray-800 rounded-2xl p-6 w-full max-w-2xl">
+                        <div class="flex justify-between items-center mb-6">
+                            <h3 class="text-xl font-bold text-white">Add New Expense</h3>
+                            <button onclick="app.hideModal()" class="text-gray-400 hover:text-white">
+                                <i class="fas fa-times text-xl"></i>
+                            </button>
+                        </div>
+                        
+                        <form id="expense-form" class="space-y-4">
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div>
+                                    <label for="expense-date" class="block text-sm font-medium text-gray-300 mb-2">Date</label>
+                                    <input type="date" id="expense-date" name="date" value="${new Date().toISOString().split('T')[0]}" class="form-input w-full" required>
+                                </div>
+                                <div>
+                                    <label for="expense-amount" class="block text-sm font-medium text-gray-300 mb-2">Amount</label>
+                                    <input type="number" id="expense-amount" name="amount" step="0.01" min="0" class="form-input w-full" required>
+                                </div>
+                            </div>
+
+                            <div>
+                                <label for="expense-description" class="block text-sm font-medium text-gray-300 mb-2">Description</label>
+                                <input type="text" id="expense-description" name="description" class="form-input w-full" required>
+                            </div>
+
+                            <div>
+                                <label for="expense-category" class="block text-sm font-medium text-gray-300 mb-2">Category</label>
+                                <select id="expense-category" name="category" class="form-input w-full" required>
+                                    ${this.state.chartOfAccounts.filter(acc => acc.type === 'expense').map(account => `
+                                        <option value="${account.code}">${account.name}</option>
+                                    `).join('')}
+                                </select>
+                            </div>
+
+                            <div class="flex justify-end space-x-3">
+                                <button type="button" onclick="app.hideModal()" class="bg-gray-600 hover:bg-gray-700 text-white px-6 py-3 rounded-xl">
+                                    Cancel
+                                </button>
+                                <button type="submit" class="expenses-button px-6 py-3 rounded-xl">
+                                    <i class="fas fa-save mr-2"></i>Add Expense
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                `;
+            },
+
+            getEmployeeModalContent() {
+                return `
+                    <div class="bg-gray-800 rounded-2xl p-6 w-full max-w-2xl">
+                        <div class="flex justify-between items-center mb-6">
+                            <h3 class="text-xl font-bold text-white">Add New Employee</h3>
+                            <button onclick="app.hideModal()" class="text-gray-400 hover:text-white">
+                                <i class="fas fa-times text-xl"></i>
+                            </button>
+                        </div>
+                        
+                        <form id="employee-form" class="space-y-4">
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div>
+                                    <label for="employee-name" class="block text-sm font-medium text-gray-300 mb-2">Full Name</label>
+                                    <input type="text" id="employee-name" name="name" class="form-input w-full" required>
+                                </div>
+                                <div>
+                                    <label for="employee-username" class="block text-sm font-medium text-gray-300 mb-2">Username</label>
+                                    <input type="text" id="employee-username" name="username" class="form-input w-full" required>
+                                </div>
+                            </div>
+
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div>
+                                    <label for="employee-email" class="block text-sm font-medium text-gray-300 mb-2">Email</label>
+                                    <input type="email" id="employee-email" name="email" class="form-input w-full" required>
+                                </div>
+                                <div>
+                                    <label for="employee-phone" class="block text-sm font-medium text-gray-300 mb-2">Phone</label>
+                                    <input type="tel" id="employee-phone" name="phone" class="form-input w-full" required>
+                                </div>
+                            </div>
+
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div>
+                                    <label for="employee-role" class="block text-sm font-medium text-gray-300 mb-2">Role</label>
+                                    <select id="employee-role" name="role" class="form-input w-full" required>
+                                        <option value="worker">Worker</option>
+                                        ${this.state.currentUser.role === 'admin' ? '<option value="manager">Manager</option>' : ''}
+                                        ${this.state.currentUser.role === 'admin' ? '<option value="admin">Admin</option>' : ''}
+                                    </select>
+                                </div>
+                                <div>
+                                    <label for="employee-salary" class="block text-sm font-medium text-gray-300 mb-2">Annual Salary</label>
+                                    <input type="number" id="employee-salary" name="salary" min="0" class="form-input w-full" required>
+                                </div>
+                            </div>
+
+                            <div class="bg-yellow-500/10 border border-yellow-500/30 rounded-xl p-4">
+                                <p class="text-yellow-400 text-sm">
+                                    <i class="fas fa-info-circle mr-2"></i>
+                                    Default password will be set to "password123". Employee should change it after first login.
+                                </p>
+                            </div>
+
+                            <div class="flex justify-end space-x-3">
+                                <button type="button" onclick="app.hideModal()" class="bg-gray-600 hover:bg-gray-700 text-white px-6 py-3 rounded-xl">
+                                    Cancel
+                                </button>
+                                <button type="submit" class="perplexity-button px-6 py-3 rounded-xl">
+                                    <i class="fas fa-save mr-2"></i>Add Employee
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                `;
+            },
+
+            getMessageModalContent() {
+                return `
+                    <div class="bg-gray-800 rounded-2xl p-6 w-full max-w-2xl">
+                        <div class="flex justify-between items-center mb-6">
+                            <h3 class="text-xl font-bold text-white">Compose Message</h3>
+                            <button onclick="app.hideModal()" class="text-gray-400 hover:text-white">
+                                <i class="fas fa-times text-xl"></i>
+                            </button>
+                        </div>
+                        
+                        <form id="message-form" class="space-y-4">
+                            <div>
+                                <label for="message-to" class="block text-sm font-medium text-gray-300 mb-2">To</label>
+                                <select id="message-to" name="to" class="form-input w-full" required>
+                                    <option value="">Select Recipient</option>
+                                    ${this.state.users.filter(u => u.id !== this.state.currentUser.id).map(user => `
+                                        <option value="${user.id}">${user.name} (${user.role})</option>
+                                    `).join('')}
+                                </select>
+                            </div>
+
+                            <div>
+                                <label for="message-subject" class="block text-sm font-medium text-gray-300 mb-2">Subject</label>
+                                <input type="text" id="message-subject" name="subject" class="form-input w-full" required>
+                            </div>
+
+                            <div>
+                                <label for="message-content" class="block text-sm font-medium text-gray-300 mb-2">Message</label>
+                                <textarea id="message-content" name="content" rows="6" class="form-input w-full" required></textarea>
+                            </div>
+
+                            <div class="bg-blue-500/10 border border-blue-500/30 rounded-xl p-4">
+                                <p class="text-blue-400 text-sm">
+                                    <i class="fas fa-robot mr-2"></i>
+                                    AI sentiment analysis will be applied to your message automatically.
+                                </p>
+                            </div>
+
+                            <div class="flex justify-end space-x-3">
+                                <button type="button" onclick="app.hideModal()" class="bg-gray-600 hover:bg-gray-700 text-white px-6 py-3 rounded-xl">
+                                    Cancel
+                                </button>
+                                <button type="submit" class="perplexity-button px-6 py-3 rounded-xl">
+                                    <i class="fas fa-paper-plane mr-2"></i>Send Message
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                `;
+            },
+
+            addModalEventListeners(type) {
+                const form = document.getElementById(`${type.replace('add-', '').replace('compose-', '')}-form`);
+                if (form) {
+                    form.addEventListener('submit', (e) => {
+                        e.preventDefault();
+                        const formData = new FormData(form);
+                        
+                        switch (type) {
+                            case 'add-sale':
+                                this.handleSaleForm(formData);
+                                break;
+                            case 'add-product':
+                                this.handleProductForm(formData);
+                                break;
+                            case 'add-customer':
+                                this.handleCustomerForm(formData);
+                                break;
+                            case 'add-expense':
+                                this.handleExpenseForm(formData);
+                                break;
+                            case 'add-employee':
+                                this.handleEmployeeForm(formData);
+                                break;
+                            case 'compose-message':
+                                this.handleMessageForm(formData);
+                                break;
+                        }
+                    });
+                }
+
+                // Add specific event listeners for sale form
+                if (type === 'add-sale') {
+                    this.addSaleFormEventListeners();
+                }
+            },
+
+            addSaleFormEventListeners() {
+                // Add item button
+                const addItemBtn = document.getElementById('add-sale-item');
+                if (addItemBtn) {
+                    addItemBtn.addEventListener('click', () => {
+                        const itemsContainer = document.getElementById('sale-items');
+                        const itemCount = itemsContainer.children.length;
+                        
+                        const newItem = document.createElement('div');
+                        newItem.className = 'sale-item grid grid-cols-1 md:grid-cols-4 gap-3 p-3 bg-gray-700 rounded-xl';
+                        newItem.innerHTML = `
+                            <select name="items[${itemCount}][productId]" class="form-input" required>
+                                <option value="">Select Product</option>
+                                ${this.state.products.filter(p => p.stock > 0).map(product => `
+                                    <option value="${product.id}" data-price="${product.price}" data-stock="${product.stock}">
+                                        ${product.name} (Stock: ${product.stock}) - ${this.formatCurrency(product.price)}
+                                    </option>
+                                `).join('')}
+                            </select>
+                            <input type="number" name="items[${itemCount}][quantity]" placeholder="Quantity" min="1" class="form-input" required>
+                            <input type="number" name="items[${itemCount}][unitPrice]" placeholder="Unit Price" step="0.01" class="form-input" readonly>
+                            <button type="button" onclick="this.parentElement.remove()" class="bg-red-600 hover:bg-red-700 text-white px-3 py-2 rounded-xl">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        `;
+                        
+                        itemsContainer.appendChild(newItem);
+                        this.addProductSelectListener(newItem.querySelector('select'));
+                    });
+                }
+
+                // Add listeners to existing product selects
+                document.querySelectorAll('select[name*="productId"]').forEach(select => {
+                    this.addProductSelectListener(select);
+                });
+            },
+
+            addProductSelectListener(select) {
+                select.addEventListener('change', (e) => {
+                    const selectedOption = e.target.selectedOptions[0];
+                    const priceInput = e.target.parentElement.querySelector('input[name*="unitPrice"]');
+                    
+                    if (selectedOption && selectedOption.dataset.price) {
+                        priceInput.value = selectedOption.dataset.price;
+                    } else {
+                        priceInput.value = '';
+                    }
+                });
+            },
+
+            // Notification System
+                        showNotification(message, type = 'info') {
+                const notification = document.createElement('div');
+                notification.className = `notification ${type} fixed top-4 right-4 z-50 max-w-sm bg-gray-800 border rounded-xl p-4 shadow-lg transform translate-x-full transition-transform duration-300`;
+                
+                const iconMap = {
+                    success: 'fa-check-circle text-green-400',
+                    error: 'fa-exclamation-circle text-red-400',
+                    warning: 'fa-exclamation-triangle text-yellow-400',
+                    info: 'fa-info-circle text-blue-400'
+                };
+
+                notification.innerHTML = `
+                    <div class="flex items-center space-x-3">
+                        <i class="fas ${iconMap[type]} text-xl"></i>
+                        <p class="text-white flex-1">${message}</p>
+                        <button onclick="this.parentElement.parentElement.remove()" class="text-gray-400 hover:text-white">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                `;
+
+                document.body.appendChild(notification);
+
+                // Animate in
+                setTimeout(() => {
+                    notification.classList.remove('translate-x-full');
+                }, 100);
+
+                // Auto remove after 5 seconds
+                setTimeout(() => {
+                    notification.classList.add('translate-x-full');
+                    setTimeout(() => {
+                        if (notification.parentElement) {
+                            notification.remove();
+                        }
+                    }, 300);
+                }, 5000);
+            },
+
+            // Data Management
+            saveData() {
+                const dataToSave = {
+                    users: this.state.users,
+                    products: this.state.products,
+                    customers: this.state.customers,
+                    sales: this.state.sales,
+                    expenses: this.state.expenses,
+                    messages: this.state.messages,
+                    invoices: this.state.invoices,
+                    companyName: this.state.companyName,
+                    lowStockThreshold: this.state.lowStockThreshold,
+                    selectedCountry: this.state.selectedCountry
+                };
+
+                localStorage.setItem('businessAppData', JSON.stringify(dataToSave));
+            },
+
+            loadData() {
+                const savedData = localStorage.getItem('businessAppData');
+                if (savedData) {
+                    const data = JSON.parse(savedData);
+                    this.state.users = data.users || this.state.users;
+                    this.state.products = data.products || [];
+                    this.state.customers = data.customers || [];
+                    this.state.sales = data.sales || [];
+                    this.state.expenses = data.expenses || [];
+                    this.state.messages = data.messages || [];
+                    this.state.invoices = data.invoices || [];
+                    this.state.companyName = data.companyName || this.state.companyName;
+                    this.state.lowStockThreshold = data.lowStockThreshold || this.state.lowStockThreshold;
+                    this.state.selectedCountry = data.selectedCountry || this.state.selectedCountry;
+                }
+            },
+
+            exportData() {
+                const dataToExport = {
+                    users: this.state.users,
+                    products: this.state.products,
+                    customers: this.state.customers,
+                    sales: this.state.sales,
+                    expenses: this.state.expenses,
+                    messages: this.state.messages,
+                    invoices: this.state.invoices,
+                    companyName: this.state.companyName,
+                    lowStockThreshold: this.state.lowStockThreshold,
+                    selectedCountry: this.state.selectedCountry,
+                    exportDate: new Date().toISOString()
+                };
+
+                const dataStr = JSON.stringify(dataToExport, null, 2);
+                const dataBlob = new Blob([dataStr], { type: 'application/json' });
+                const url = URL.createObjectURL(dataBlob);
+                
+                const link = document.createElement('a');
+                link.href = url;
+                link.download = `business-data-${new Date().toISOString().split('T')[0]}.json`;
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                URL.revokeObjectURL(url);
+
+                this.showNotification('Data exported successfully!', 'success');
+            },
+
+            // Theme Management
+            changeTheme(theme) {
+                document.body.className = theme;
+                localStorage.setItem('selectedTheme', theme);
+                this.showNotification('Theme changed successfully!', 'success');
+            },
+
+            loadTheme() {
+                const savedTheme = localStorage.getItem('selectedTheme');
+                if (savedTheme) {
+                    document.body.className = savedTheme;
+                }
+            },
+
+            // Country/Currency Management
+            changeCountry(countryCode) {
+                this.state.selectedCountry = countryCode;
+                this.saveData();
+                this.showNotification(`Currency changed to ${GCC_COUNTRIES[countryCode].currency}`, 'success');
+                this.render();
+            },
+
+            // Message Management
+            markMessageAsRead(messageId) {
+                const message = this.state.messages.find(m => m.id == messageId);
+                if (message) {
+                    message.read = true;
+                    this.saveData();
+                    this.showNotification('Message marked as read', 'success');
+                    this.render();
+                }
+            },
+
+            // Event Delegation
+            setupEventListeners() {
+                document.addEventListener('click', (e) => {
+                    const action = e.target.closest('[data-action]')?.dataset.action;
+                    const id = e.target.closest('[data-id]')?.dataset.id;
+
+                    switch (action) {
+                        case 'add-sale':
+                            this.handleAddSale();
+                            break;
+                        case 'add-product':
+                            this.handleAddProduct();
+                            break;
+                        case 'add-customer':
+                            this.handleAddCustomer();
+                            break;
+                        case 'add-expense':
+                            this.handleAddExpense();
+                            break;
+                        case 'add-employee':
+                            this.handleAddEmployee();
+                            break;
+                        case 'compose-message':
+                            this.handleComposeMessage();
+                            break;
+                        case 'quick-sale':
+                            this.handleQuickSale();
+                            break;
+                        case 'quick-sale-add-product':
+                            this.handleQuickSaleAddProduct(parseInt(id));
+                            break;
+                        case 'increase-quantity':
+                            this.handleIncreaseQuantity(parseInt(id));
+                            break;
+                        case 'decrease-quantity':
+                            this.handleDecreaseQuantity(parseInt(id));
+                            break;
+                        case 'remove-from-cart':
+                            this.handleRemoveFromCart(parseInt(id));
+                            break;
+                        case 'complete-quick-sale':
+                            this.handleCompleteQuickSale();
+                            break;
+                        case 'cancel-quick-sale':
+                            this.handleCancelQuickSale();
+                            break;
+                        case 'mark-read':
+                            this.markMessageAsRead(parseInt(id));
+                            break;
+                        case 'export-data':
+                            this.exportData();
+                            break;
+                        case 'logout':
+                            this.logout();
+                            break;
+                    }
+
+                    // Navigation handling
+                    if (e.target.closest('.nav-item')) {
+                        const view = e.target.closest('.nav-item').dataset.view;
+                        if (view) {
+                            this.handleNavigation(view);
+                        }
+                    }
+
+                    // Theme selection
+                    if (e.target.closest('[data-theme]')) {
+                        const theme = e.target.closest('[data-theme]').dataset.theme;
+                        this.changeTheme(theme);
+                    }
+
+                    // Payment method selection in quick sale
+                    if (e.target.closest('.payment-btn')) {
+                        document.querySelectorAll('.payment-btn').forEach(btn => btn.classList.remove('active'));
+                        e.target.closest('.payment-btn').classList.add('active');
+                    }
+                });
+
+                // Form submissions
+                document.addEventListener('submit', (e) => {
+                    if (e.target.id === 'company-settings-form') {
+                        e.preventDefault();
+                        const formData = new FormData(e.target);
+                        this.state.companyName = formData.get('companyName');
+                        this.state.lowStockThreshold = parseInt(formData.get('lowStockThreshold'));
+                        this.saveData();
+                        this.showNotification('Settings saved successfully!', 'success');
+                    }
+                });
+
+                // Modal close on backdrop click
+                document.addEventListener('click', (e) => {
+                    if (e.target.id === 'modal') {
+                        this.hideModal();
+                    }
+                });
+
+                // Escape key to close modal
+                document.addEventListener('keydown', (e) => {
+                    if (e.key === 'Escape') {
+                        this.hideModal();
+                    }
+                });
+            },
+
+            // Authentication
+            logout() {
+                localStorage.removeItem('currentUser');
+                window.location.reload();
+            },
+
+            // Initialize Application
+            init() {
+                this.loadTheme();
+                this.loadData();
+                this.setupEventListeners();
+                this.render();
+                this.showNotification(`Welcome back, ${this.state.currentUser.name}!`, 'success');
+            }
+        };
+
+        // Initialize the application
+        app.init();
+    </script>
+</body>
+</html>
+
+                                                        
+                                
