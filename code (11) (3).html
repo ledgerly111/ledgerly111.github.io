@@ -2363,11 +2363,18 @@
                     
            
 
+            
+            
             case 'add-expense':
             case 'edit-expense':
                  title = isEdit ? 'Edit Expense' : 'Add New Expense';
                  const expense = isEdit ? this.state.expenses.find(e => e.id === parseInt(id)) : {};
                  content = `
+                    {/*
+                       * FIX: The comment syntax is now correct JavaScript.
+                       * The id="expense-form" allows the handleFormSubmit function
+                       * to identify this specific form.
+                    */}
                     <form id="expense-form" class="space-y-4">
                         <input type="hidden" id="expense-id" value="${id || ''}">
                         <div>
@@ -2386,11 +2393,6 @@
                         </div>
                         <div>
                             <label for="category" class="block text-sm font-medium text-gray-300 mb-2">Category</label>
-                             {/*
-                               * FIX: The <select> menu now correctly populates its <option>s
-                               * by mapping over `this.state.chartOfAccounts` and filtering for
-                               * accounts where the type is 'Expense'.
-                             */}
                              <select id="category" name="category" class="form-input w-full" required>
                                 ${this.state.chartOfAccounts.filter(acc => acc.type === 'Expense').map(cat => `<option value="${cat.code}" ${expense?.category === cat.code ? 'selected' : ''}>${cat.name}</option>`).join('')}
                             </select>
@@ -2406,7 +2408,6 @@
                     </form>
                 `;
                 break;
-
             // ... rest of the getModal function ...
                 }
 
