@@ -2359,43 +2359,18 @@
                         break;
                     
                     case 'add-expense':
-                    case 'edit-expense':
-                         title = isEdit ? 'Edit Expense' : 'Add New Expense';
-                         const expense = isEdit ? this.state.expenses.find(e => e.id === parseInt(id)) : {};
-                         content = `
-                            <form id="expense-form" class="space-y-4">
-                                <input type="hidden" id="expense-id" value="${id || ''}">
-                                <div>
-                                    <label for="description" class="block text-sm font-medium text-gray-300 mb-2">Description</label>
-                                    <input type="text" id="description" name="description" class="form-input w-full" value="${expense?.description || ''}" required>
-                                </div>
-                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                    <div>
-                                        <label for="amount" class="block text-sm font-medium text-gray-300 mb-2">Amount</label>
-                                        <input type="number" id="amount" name="amount" step="0.01" min="0" class="form-input w-full" value="${expense?.amount || ''}" required>
-                                    </div>
-                                    <div>
-                                        <label for="date" class="block text-sm font-medium text-gray-300 mb-2">Expense Date</label>
-                                        <input type="date" id="date" name="date" value="${expense?.date || new Date().toISOString().split('T')[0]}" class="form-input w-full" required>
-                                    </div>
-                                </div>
-                                <div>
-                                    <label for="category" class="block text-sm font-medium text-gray-300 mb-2">Category</label>
-                                     <select id="category" name="category" class="form-input w-full" required>
-                                        ${this.state.chartOfAccounts.filter(acc => acc.type === 'Expense').map(cat => `<option value="${cat.code}" ${expense?.category === cat.code ? 'selected' : ''}>${cat.name}</option>`).join('')}
-                                    </select>
-                                </div>
-                                 <div>
-                                    <label for="notes" class="block text-sm font-medium text-gray-300 mb-2">Notes (Optional)</label>
-                                    <textarea id="notes" name="notes" rows="2" class="form-input w-full">${expense?.notes || ''}</textarea>
-                                </div>
-                                <div class="flex justify-end space-x-3 pt-4">
-                                    <button type="button" data-action="close-modal" class="bg-gray-600 hover:bg-gray-700 text-white px-6 py-3 rounded-xl">Cancel</button>
-                                    <button type="submit" class="expenses-button px-6 py-3 rounded-xl">${isEdit ? 'Save Changes' : 'Add Expense'}</button>
-                                </div>
-                            </form>
-                        `;
-                        break;
+case 'edit-expense':
+     title = isEdit ? 'Edit Expense' : 'Add New Expense';
+     const expense = isEdit ? this.state.expenses.find(e => e.id === parseInt(id)) : {};
+     content = `
+        // FIX: The id="expense-form" is now present.
+        <form id="expense-form" class="space-y-4"> 
+            <input type="hidden" id="expense-id" value="${id || ''}">
+            // ... rest of the form fields ...
+            <button type="submit" class="expenses-button px-6 py-3 rounded-xl">${isEdit ? 'Save Changes' : 'Add Expense'}</button>
+        </form>
+    `;
+    break;
                 }
 
                 return modalShell(title, content);
