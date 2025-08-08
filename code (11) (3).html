@@ -5630,6 +5630,7 @@ getExpensesView() {
                 `;
             },
 
+          
            // Quick Sale View Implementation
             getQuickSaleView() {
                 const selectedProductIds = this.state.quickSale.selectedProducts.map(item => item.productId);
@@ -5741,7 +5742,28 @@ getExpensesView() {
                 `;
             },
 
-           
+            // Dummy placeholder for addJournalEntryRow - likely existed but was cut off
+            addJournalEntryRow() {
+                 console.log("addJournalEntryRow called");
+                 // In a real scenario, this would manipulate the DOM to add a row.
+            },
+
+            // Dummy placeholder for removeJournalEntryRow
+            removeJournalEntryRow(rowElement) {
+                console.log("removeJournalEntryRow called on", rowElement);
+                // In a real scenario, this would remove the row element from the DOM.
+            },
+            
+            // Dummy placeholder for updateJournalEntryTotals
+            updateJournalEntryTotals() {
+                console.log("updateJournalEntryTotals called");
+                // In a real scenario, this would calculate and update debit/credit totals.
+            }
+
+        }; // <<<<<<<< CORRECTED: This closing brace was missing.
+
+        // Now that the app object is correctly defined, we can call init().
+        app.init();
     </script>
 </body>
 </html>
