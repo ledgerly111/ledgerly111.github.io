@@ -5664,8 +5664,35 @@ getInboxView() {
 };
  
 
-        // Initialize the application
+                // Initialize the application
         app.init();
+        
+        // FIX FOR CLOSE AND CANCEL BUTTONS
+        document.addEventListener('click', function(e) {
+            // Check if user clicked X, Cancel, or Close button
+            var button = e.target.closest('button');
+            if (button) {
+                var action = button.getAttribute('data-action');
+                if (action === 'close-modal' || 
+                    action === 'cancel-modal' || 
+                    action === 'close' ||
+                    action === 'cancel') {
+                    
+                    // Find and remove all popups
+                    var popups = document.querySelectorAll('.fixed.inset-0');
+                    popups.forEach(function(popup) {
+                        popup.remove();
+                    });
+                }
+            }
+            
+            // If user clicks the dark background area
+            if (e.target.className && e.target.className.includes('bg-black')) {
+                if (e.target.className.includes('bg-opacity-50')) {
+                    e.target.remove();
+                }
+            }
+        });
     </script>
 </body>
 </html>
