@@ -1514,24 +1514,56 @@
                     { id: 1, description: 'Office Rent', amount: 5000, category: '6110', date: '2024-01-01', addedBy: 1, notes: 'Monthly office rent payment' }
                 ],
                 invoices: [],
-                messages: [],
-                categories: ['Electronics', 'Accessories', 'Software', 'Services', 'Storage', 'Peripherals', 'Displays', 'Other'],
-                expenseCategories: ['Office Supplies', 'Marketing', 'Utilities', 'Rent', 'Transportation', 'Meals & Entertainment', 'Equipment', 'Professional Services', 'Other'],
-                aiInsights: [],
-                botAnalysis: {},
-                lastAIUpdate: null,
-                quickSale: {
-                    active: false,
-                    selectedCustomer: null,
-                    selectedProducts: [], // { productId, quantity, unitPrice }
-                    discount: 0,
-                    paymentType: 'Cash',
-                    subtotal: 0,
-                    taxAmount: 0,
-                    total: 0
-                },
-                // Add this new empty array inside app.state
-                journal: [],
+                messages: [
+    // Example Task Message
+    {
+        id: 1,
+        from: 1, // System or User ID
+        to: 3,   // User or Branch ID
+        subject: 'URGENT: Stock Request for Premium Laptops',
+        content: 'Requesting 15 units of Premium Laptop (SKU: LAP001). Current stock is critically low.',
+        type: 'task', // 'personal', 'branch', 'task'
+        category: 'emergency', // 'emergency', 'complaint', 'request', 'info'
+        status: 'pending_worker_approval', // 'pending_worker_approval', 'pending_manager_approval', 'approved_pending_acceptance', 'completed', 'declined'
+        timestamp: new Date().toISOString(),
+        read: false,
+        requesterId: 2, // Manager who initiated
+        history: [
+            {
+                user: 'John Manager',
+                action: 'Request Sent',
+                timestamp: new Date().toISOString()
+            }
+        ],
+        taskDetails: {
+            productId: 1,
+            requestedStock: 15
+        }
+    }
+],
+branches: [
+    { id: 1, name: 'Management Team', members: [1, 2] },
+    { id: 2, name: 'Sales Floor', members: [3] }
+],
+inboxFilter: 'all', // 'all', 'personal', 'branch', 'task'
+inboxSearchTerm: '',
+categories: ['Electronics', 'Accessories', 'Software', 'Services', 'Storage', 'Peripherals', 'Displays', 'Other'],
+expenseCategories: ['Office Supplies', 'Marketing', 'Utilities', 'Rent', 'Transportation', 'Meals & Entertainment', 'Equipment', 'Professional Services', 'Other'],
+aiInsights: [],
+botAnalysis: {},
+lastAIUpdate: null,
+quickSale: {
+    active: false,
+    selectedCustomer: null,
+    selectedProducts: [], // { productId, quantity, unitPrice }
+    discount: 0,
+    paymentType: 'Cash',
+    subtotal: 0,
+    taxAmount: 0,
+    total: 0
+},
+// Add this new empty array inside app.state
+journal: [],
                 chartOfAccounts: [
                     { code: '1110', name: 'Cash on Hand', type: 'Asset', normalBalance: 'Debit' },
                     { code: '1120', name: 'Accounts Receivable', type: 'Asset', normalBalance: 'Debit' },
@@ -1671,73 +1703,90 @@
 
             handleAction(action, id, event) {
                 const actions = {
-                    'login-admin': () => this.selectUser('admin'),
-                    'login-manager': () => this.selectUser('manager'),
-                    'login-worker': () => this.selectUser('worker'),
-                    'logout': () => this.logout(),
-                    'toggle-mobile-menu': () => this.toggleMobileSidebar(),
-
-                    // V-- ADD THIS LINE SOMEWHERE IN THIS LIST --V
-                    'set-theme': () => this.setTheme(event.target.closest('[data-theme]').dataset.theme),
-
-                    'dashboard': () => this.navigateToView('dashboard'),
-                    'products': () => this.navigateToView('products'),
-                    'customers': () => this.navigateToView('customers'),
-                    'sales': () => this.navigateToView('sales'),
-                    'expenses': () => this.navigateToView('expenses'),
-                    'employees': () => this.navigateToView('employees'),
-                    'invoices': () => this.navigateToView('invoices'),
-                    'reports': () => this.navigateToView('reports'),
-                    'settings': () => this.navigateToView('settings'),
-                    'inbox': () => this.navigateToView('inbox'),
-                    'ai-assistant': () => this.navigateToView('ai-assistant'),
-                    'journal': () => this.navigateToView('journal'),
-                    'pnl': () => this.navigateToView('pnl'), 
-                    'ledger': () => this.navigateToView('ledger'),
-                    'view-ledger-account': () => {
-                        this.state.currentLedgerAccount = id;
-                        this.state.currentView = 'ledger';
-                        this.render();
-                    },
-                    'trial-balance': () => this.navigateToView('trial-balance'),
-                    'balance-sheet': () => this.navigateToView('balance-sheet'),
-                    'toggle-ai-mode': () => this.toggleAIMode(),
-                    'change-country': () => this.changeCountry(event.target.value),
-                    'add-product': () => this.showModal('add-product'),
-                    'edit-product': () => this.showModal('edit-product', id),
-                    'delete-product': () => this.deleteProduct(id),
-                    'add-customer': () => this.showModal('add-customer'),
-                    'edit-customer': () => this.showModal('edit-customer', id),
-                    'delete-customer': () => this.deleteCustomer(id),
-                    'add-sale': () => this.showModal('add-sale'),
-                    'add-expense': () => this.showModal('add-expense'),
-                    'edit-expense': () => this.showModal('edit-expense', id),
-                    'delete-expense': () => this.deleteExpense(id),
-                    'add-employee': () => this.showModal('add-employee'),
-                    'edit-employee': () => this.showModal('edit-employee', id),
-                    'delete-employee': () => this.deleteUser(id),
-                    'generate-invoice': () => this.generateInvoice(id),
-                    'download-invoice': () => this.downloadInvoice(id),
-                    'close-modal': () => this.closeModal(),
-                    'export-data': () => this.exportData(),
-                    'compose-message': () => this.showModal('compose-message'),
-                    'mark-read': () => this.markMessageRead(id),
-                    'refresh-ai': () => { this.updateAIInsights(); this.render(); },
-                    'refresh-bot': () => { this.updateBotAnalysis(); this.render(); },
-                    'bot-quick-action': () => this.handleBotQuickAction(id),
-                    'add-item-to-sale-cart': () => this.addToSaleCart(),
-                    'start-quick-sale': () => this.startQuickSale(),
-                    'quick-sale-add-product': (e) => this.quickSaleAddProduct(id, e),
-                    'quick-sale-remove-product': () => this.quickSaleRemoveProduct(id),
-                    'quick-sale-update-quantity': (e) => this.quickSaleUpdateQuantity(id, e.target.value),
-                    'quick-sale-decrement-quantity': () => this.quickSaleUpdateQuantity(id, -1, true),
-                    'quick-sale-increment-quantity': () => this.quickSaleUpdateQuantity(id, 1, true),
-                    'finalize-quick-sale': () => this.finalizeQuickSale(),
-                    'cancel-quick-sale': () => this.cancelQuickSale(),
-                    'add-journal-entry': () => this.showModal('add-journal-entry'),
-                    'add-journal-row': () => this.addJournalEntryRow(),
-                    'remove-journal-row': (e) => this.removeJournalEntryRow(e.target.closest('.journal-entry-row')),
-                };
+    'login-admin': () => this.selectUser('admin'),
+    'login-manager': () => this.selectUser('manager'),
+    'login-worker': () => this.selectUser('worker'),
+    'logout': () => this.logout(),
+    'toggle-mobile-menu': () => this.toggleMobileSidebar(),
+    'dashboard': () => this.navigateToView('dashboard'),
+    'products': () => this.navigateToView('products'),
+    'customers': () => this.navigateToView('customers'),
+    'sales': () => this.navigateToView('sales'),
+    'expenses': () => this.navigateToView('expenses'),
+    'employees': () => this.navigateToView('employees'),
+    'invoices': () => this.navigateToView('invoices'),
+    'reports': () => this.navigateToView('reports'),
+    'settings': () => this.navigateToView('settings'),
+    'inbox': () => this.navigateToView('inbox'),
+    'ai-assistant': () => this.navigateToView('ai-assistant'),
+    'journal': () => this.navigateToView('journal'),
+    'pnl': () => this.navigateToView('pnl'),
+    'ledger': () => this.navigateToView('ledger'),
+    'view-ledger-account': () => {
+        this.state.currentLedgerAccount = id;
+        this.state.currentView = 'ledger';
+        this.render();
+    },
+    'trial-balance': () => this.navigateToView('trial-balance'),
+    'balance-sheet': () => this.navigateToView('balance-sheet'),
+    'toggle-ai-mode': () => this.toggleAIMode(),
+    'change-country': () => this.changeCountry(event.target.value),
+    'add-product': () => this.showModal('add-product'),
+    'edit-product': () => this.showModal('edit-product', id),
+    'delete-product': () => this.deleteProduct(id),
+    'add-customer': () => this.showModal('add-customer'),
+    'edit-customer': () => this.showModal('edit-customer', id),
+    'delete-customer': () => this.deleteCustomer(id),
+    'add-sale': () => this.showModal('add-sale'),
+    'add-expense': () => this.showModal('add-expense'),
+    'edit-expense': () => this.showModal('edit-expense', id),
+    'delete-expense': () => this.deleteExpense(id),
+    'add-employee': () => this.showModal('add-employee'),
+    'edit-employee': () => this.showModal('edit-employee', id),
+    'delete-employee': () => this.deleteUser(id),
+    'generate-invoice': () => this.generateInvoice(id),
+    'download-invoice': () => this.downloadInvoice(id),
+    'close-modal': () => this.closeModal(),
+    'export-data': () => this.exportData(),
+    'compose-message': () => this.showModal('compose-message'),
+    'mark-read': () => this.markMessageRead(id),
+    'refresh-ai': () => { this.updateAIInsights(); this.render(); },
+    'refresh-bot': () => { this.updateBotAnalysis(); this.render(); },
+    'bot-quick-action': () => this.handleBotQuickAction(id),
+    'add-item-to-sale-cart': () => this.addToSaleCart(),
+    'start-quick-sale': () => this.startQuickSale(),
+    'quick-sale-add-product': (e) => this.quickSaleAddProduct(id, e),
+    'quick-sale-remove-product': () => this.quickSaleRemoveProduct(id),
+    'quick-sale-update-quantity': (e) => this.quickSaleUpdateQuantity(id, e.target.value),
+    'quick-sale-decrement-quantity': () => this.quickSaleUpdateQuantity(id, -1, true),
+    'quick-sale-increment-quantity': () => this.quickSaleUpdateQuantity(id, 1, true),
+    'finalize-quick-sale': () => this.finalizeQuickSale(),
+    'cancel-quick-sale': () => this.cancelQuickSale(),
+    'add-journal-entry': () => this.showModal('add-journal-entry'),
+    'add-journal-row': () => this.addJournalEntryRow(),
+    'remove-journal-row': (e) => this.removeJournalEntryRow(e.target.closest('.journal-entry-row')),
+    'handle-system-alert': () => this.handleBotStockAlertAction(this.state.products.filter(p => p.stock <= this.state.lowStockThreshold)),
+    'filter-inbox': (e) => {
+        this.state.inboxFilter = e.target.value;
+        this.render();
+    },
+    'search-inbox': (e) => {
+        this.state.inboxSearchTerm = e.target.value.toLowerCase();
+        this.render();
+    },
+    'view-message': (id) => this.showModal('view-message', id),
+    'delete-message': (id) => this.deleteMessage(id),
+    'create-branch': () => this.showModal('create-branch'),
+    'send-stock-request': (id) => this.handleTaskAction(id, 'send-stock-request'),
+    'approve-stock-request': (id) => this.handleTaskAction(id, 'approve-stock-request'),
+    'accept-stock': (id) => this.handleTaskAction(id, 'accept-stock'),
+    'decline-request': (id) => {
+        const reason = prompt("Please provide a reason for declining:");
+        if (reason) {
+            this.handleTaskAction(id, 'decline-request', reason);
+        }
+    },
+};
 
                 if (actions[action]) {
                     actions[action](event);
@@ -1845,15 +1894,17 @@
                 const data = Object.fromEntries(formData.entries());
 
                 const handlers = {
-                    'product-form': () => this.handleProductForm(data),
-                    'customer-form': () => this.handleCustomerForm(data),
-                    'sale-form': () => this.handleSaleForm(data, form),
-                    'expense-form': () => this.handleExpenseForm(data),
-                    'employee-form': () => this.handleEmployeeForm(data),
-                    'message-form': () => this.handleMessageForm(data),
-                    'company-settings-form': () => this.handleCompanySettingsForm(data),
-                    'journal-entry-form': () => this.handleJournalEntryForm(form) // Pass the form element for dynamic rows
-                };
+    'product-form': () => this.handleProductForm(data),
+    'customer-form': () => this.handleCustomerForm(data),
+    'sale-form': () => this.handleSaleForm(data, form),
+    'expense-form': () => this.handleExpenseForm(data),
+    'employee-form': () => this.handleEmployeeForm(data),
+    'message-form': () => this.handleMessageForm(data),
+    'company-settings-form': () => this.handleCompanySettingsForm(data),
+    'journal-entry-form': () => this.handleJournalEntryForm(form),
+    'branch-form': () => this.handleBranchForm(data, form),
+    'reply-form': () => this.handleReplyForm(data),
+};
 
                 if (handlers[formId]) {
                     handlers[formId]();
@@ -2294,9 +2345,72 @@
                 let title = '';
 
                 switch (type) {
-                    case 'add-product':
-                    case 'edit-product':
-                        title = isEdit ? 'Edit Product' : 'Add New Product';
+    case 'create-branch':
+        title = 'Create New Branch';
+        content = `
+            <form id="branch-form" class="space-y-4">
+                <div>
+                    <label for="name" class="block text-sm font-medium text-gray-300 mb-2">Branch Name</label>
+                    <input type="text" id="name" name="name" class="form-input w-full" required>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-300 mb-2">Select Members</label>
+                    <div class="max-h-48 overflow-y-auto p-2 bg-gray-900 rounded-lg border border-gray-700 space-y-2">
+                        ${this.state.users.map(user => `
+                            <div class="flex items-center">
+                                <input type="checkbox" id="member-${user.id}" name="members" value="${user.id}" class="form-checkbox h-5 w-5 rounded text-teal-500 bg-gray-800 border-gray-600 focus:ring-teal-500">
+                                <label for="member-${user.id}" class="ml-3 text-white">${user.name} (${user.role})</label>
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+                <div class="flex justify-end space-x-3 pt-4">
+                    <button type="button" data-action="close-modal" class="bg-gray-600 hover:bg-gray-700 text-white px-6 py-3 rounded-xl">Cancel</button>
+                    <button type="submit" class="perplexity-button px-6 py-3 rounded-xl">Create Branch</button>
+                </div>
+            </form>
+        `;
+        break;
+    case 'view-message':
+        title = 'View Message';
+        const message = this.state.messages.find(m => m.id === parseInt(id));
+        if (message) {
+            const fromUser = this.state.users.find(u => u.id === message.from);
+            content = `
+                <div class="space-y-4">
+                    <p><strong>From:</strong> ${fromUser ? fromUser.name : 'System'}</p>
+                    <p><strong>Subject:</strong> ${message.subject}</p>
+                    <p><strong>Message:</strong> ${message.content}</p>
+                    ${message.type === 'task' ? `
+                        <div class="mt-4 pt-4 border-t border-gray-700">
+                            <h4 class="font-bold mb-2">Task History</h4>
+                            <ul class="list-disc list-inside text-gray-400">
+                                ${message.history.map(h => `<li>${new Date(h.timestamp).toLocaleString()}: ${h.user} - ${h.action} ${h.reason ? `(Reason: ${h.reason})` : ''}</li>`).join('')}
+                            </ul>
+                        </div>
+                        <div class="flex justify-end space-x-2 mt-4">
+                            ${message.status === 'pending_worker_approval' && message.to === this.state.currentUser.id ? `<button data-action="send-stock-request" data-id="${message.id}" class="perplexity-button">Send to Manager</button>` : ''}
+                            ${message.status === 'pending_manager_approval' && message.to === this.state.currentUser.id ? `<button data-action="approve-stock-request" data-id="${message.id}" class="ai-button">Approve</button>` : ''}
+                            ${message.status === 'approved_pending_acceptance' && this.state.users.find(u => u.id === message.from)?.id === this.state.currentUser.id ? `<button data-action="accept-stock" data-id="${message.id}" class="bot-button">Accept Stock</button>` : ''}
+                            ${(message.status === 'pending_worker_approval' || message.status === 'pending_manager_approval') && message.to === this.state.currentUser.id ? `<button data-action="decline-request" data-id="${message.id}" class="expenses-button">Decline</button>` : ''}
+                        </div>
+                    ` : `
+                        <form id="reply-form" class="mt-4 pt-4 border-t border-gray-700">
+                            <input type="hidden" name="recipient" value="${message.from}">
+                            <input type="hidden" name="subject" value="Re: ${message.subject}">
+                            <textarea name="content" class="form-input w-full" placeholder="Type your reply..." required></textarea>
+                            <div class="flex justify-end mt-2">
+                                <button type="submit" class="perplexity-button">Send Reply</button>
+                            </div>
+                        </form>
+                    `}
+                </div>
+            `;
+        }
+        break;
+    case 'add-product':
+    case 'edit-product':
+        title = isEdit ? 'Edit Product' : 'Add New Product';
                         const product = isEdit ? this.state.products.find(p => p.id === parseInt(id)) : {};
                         content = `
                             <form id="product-form" class="space-y-4">
@@ -5517,109 +5631,238 @@ getSettingsView() {
             },
 
 getInboxView() {
-    const messages = [
-        { id: 1, from: 'System', subject: 'Welcome to AccuraSoft!', content: 'Thank you for using our business management system.', date: '2024-01-15', read: true, type: 'info' },
-        { id: 2, from: 'AccuraBot', subject: 'Low Stock Alert', content: 'Some products are running low on stock.', date: '2024-01-14', read: false, type: 'warning' },
-        { id: 3, from: 'AccuraAI', subject: 'Monthly Report Ready', content: 'Your monthly business report is now available.', date: '2024-01-13', read: false, type: 'success' },
-        { id: 4, from: 'System', subject: 'Backup Completed', content: 'Your data has been successfully backed up.', date: '2024-01-12', read: true, type: 'info' }
-    ];
+    // Filter and search messages
+    const filteredMessages = this.state.messages
+        .filter(m => {
+            // Filter by selected type
+            if (this.state.inboxFilter === 'all') return true;
+            return m.type === this.state.inboxFilter;
+        })
+        .filter(m => {
+            // Filter by search term
+            const searchTerm = this.state.inboxSearchTerm.toLowerCase();
+            if (searchTerm === '') return true;
+            return m.subject.toLowerCase().includes(searchTerm) || m.content.toLowerCase().includes(searchTerm);
+        })
+        .sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp)); // Sort by most recent
+
+    const unreadCount = this.state.messages.filter(m => !m.read).length;
 
     return `
         <div class="space-y-6 fade-in">
             <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                 <div>
                     <h2 class="text-2xl font-bold text-white mb-2">Inbox</h2>
-                    <p class="text-gray-400">System notifications and messages</p>
+                    <p class="text-gray-400">${unreadCount} unread messages</p>
                 </div>
                 <div class="flex space-x-3">
-                    <button class="perplexity-button px-4 py-2 rounded-xl font-medium">
-                        <i class="fas fa-sync-alt mr-2"></i>Refresh
+                    <button data-action="create-branch" class="ai-button px-4 py-2 rounded-xl font-medium">
+                        <i class="fas fa-users mr-2"></i>Create Branch
                     </button>
-                    <button class="px-4 py-2 bg-gray-700 hover:bg-gray-600 rounded-xl font-medium text-white transition-colors">
-                        <i class="fas fa-check-double mr-2"></i>Mark All Read
+                    <button data-action="compose-message" class="perplexity-button px-4 py-2 rounded-xl font-medium">
+                        <i class="fas fa-edit mr-2"></i>Compose
                     </button>
                 </div>
             </div>
 
-            <!-- Message Stats -->
-            <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-                <div class="perplexity-card p-4 text-center">
-                    <div class="text-2xl font-bold text-white">${messages.length}</div>
-                    <div class="text-sm text-gray-400 mt-1">Total Messages</div>
-                </div>
-                <div class="perplexity-card p-4 text-center">
-                    <div class="text-2xl font-bold text-blue-400">${messages.filter(m => !m.read).length}</div>
-                    <div class="text-sm text-gray-400 mt-1">Unread</div>
-                </div>
-                <div class="perplexity-card p-4 text-center">
-                    <div class="text-2xl font-bold text-yellow-400">${messages.filter(m => m.type === 'warning').length}</div>
-                    <div class="text-sm text-gray-400 mt-1">Alerts</div>
-                </div>
-                <div class="perplexity-card p-4 text-center">
-                    <div class="text-2xl font-bold text-green-400">${messages.filter(m => m.type === 'success').length}</div>
-                    <div class="text-sm text-gray-400 mt-1">Reports</div>
+            <div class="perplexity-card p-4">
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div class="md:col-span-2">
+                        <input type="text" id="inbox-search" placeholder="Search by subject or content..." class="form-input w-full" onkeyup="app.handleAction('search-inbox', null, event)" value="${this.state.inboxSearchTerm}">
+                    </div>
+                    <div>
+                        <select id="inbox-filter" class="form-input w-full" onchange="app.handleAction('filter-inbox', null, event)">
+                            <option value="all" ${this.state.inboxFilter === 'all' ? 'selected' : ''}>All Messages</option>
+                            <option value="personal" ${this.state.inboxFilter === 'personal' ? 'selected' : ''}>Personal</option>
+                            <option value="branch" ${this.state.inboxFilter === 'branch' ? 'selected' : ''}>Branch</option>
+                            <option value="task" ${this.state.inboxFilter === 'task' ? 'selected' : ''}>Tasks</option>
+                        </select>
+                    </div>
                 </div>
             </div>
 
-            <!-- Messages List -->
             <div class="perplexity-card overflow-hidden">
                 <div class="divide-y divide-gray-700">
-                    ${messages.map(message => `
-                        <div class="p-4 hover:bg-gray-800/50 transition-colors cursor-pointer ${!message.read ? 'bg-blue-500/5' : ''}">
+                    ${filteredMessages.length > 0 ? filteredMessages.map(message => {
+                        const fromUser = this.state.users.find(u => u.id === message.from);
+                        const senderName = fromUser ? fromUser.name : 'System';
+                        const isUnread = !message.read;
+
+                        const icons = {
+                            personal: 'fa-user',
+                            branch: 'fa-users',
+                            task: 'fa-clipboard-list'
+                        };
+
+                        const statusColors = {
+                            pending_worker_approval: 'bg-yellow-500/20 text-yellow-400',
+                            pending_manager_approval: 'bg-blue-500/20 text-blue-400',
+                            approved_pending_acceptance: 'bg-purple-500/20 text-purple-400',
+                            completed: 'bg-green-500/20 text-green-400',
+                            declined: 'bg-red-500/20 text-red-400',
+                        };
+
+                        return `
+                        <div class="p-4 hover:bg-gray-800/50 transition-colors ${isUnread ? 'bg-blue-900/20 border-l-4 border-blue-500' : ''}">
                             <div class="flex items-start space-x-4">
                                 <div class="flex-shrink-0">
-                                    <div class="w-10 h-10 rounded-full flex items-center justify-center ${
-                                        message.type === 'warning' ? 'bg-yellow-500/20' :
-                                        message.type === 'success' ? 'bg-green-500/20' :
-                                        'bg-blue-500/20'
-                                    }">
-                                        <i class="fas ${
-                                            message.from === 'AccuraBot' ? 'fa-robot' :
-                                            message.from === 'AccuraAI' ? 'fa-brain' :
-                                            'fa-envelope'
-                                        } ${
-                                            message.type === 'warning' ? 'text-yellow-400' :
-                                            message.type === 'success' ? 'text-green-400' :
-                                            'text-blue-400'
-                                        }"></i>
+                                    <div class="w-10 h-10 rounded-full flex items-center justify-center bg-gray-700">
+                                        <i class="fas ${icons[message.type] || 'fa-envelope'} text-gray-300"></i>
                                     </div>
                                 </div>
                                 <div class="flex-1 min-w-0">
-                                    <div class="flex items-center justify-between">
-                                        <div class="flex items-center space-x-2">
-                                            <span class="text-white font-medium">${message.from}</span>
-                                            ${!message.read ? '<span class="px-2 py-1 text-xs bg-blue-500/20 text-blue-400 rounded-full">NEW</span>' : ''}
+                                    <div class="flex items-center justify-between flex-wrap gap-2">
+                                        <div class="flex items-center space-x-3">
+                                            <span class="text-white font-medium truncate">${senderName}</span>
+                                            ${isUnread ? '<span class="px-2 py-0.5 text-xs bg-blue-500 text-white rounded-full font-semibold">NEW</span>' : ''}
                                         </div>
-                                        <span class="text-gray-400 text-sm">${message.date}</span>
+                                        <span class="text-gray-400 text-sm flex-shrink-0">${new Date(message.timestamp).toLocaleDateString()}</span>
                                     </div>
-                                    <div class="text-gray-300 font-medium mt-1">${message.subject}</div>
-                                    <div class="text-gray-400 text-sm mt-1">${message.content}</div>
+                                    <div class="text-gray-300 font-medium mt-1 truncate">${message.subject}</div>
                                     <div class="flex items-center space-x-4 mt-3">
-                                        <button class="text-blue-400 hover:text-blue-300 text-sm transition-colors">
-                                            <i class="fas fa-eye mr-1"></i>View
+                                        <button data-action="view-message" data-id="${message.id}" class="text-blue-400 hover:text-blue-300 text-sm font-medium transition-colors">
+                                            <i class="fas fa-eye mr-1"></i>View Details
                                         </button>
-                                        <button class="text-gray-400 hover:text-gray-300 text-sm transition-colors">
-                                            <i class="fas fa-archive mr-1"></i>Archive
-                                        </button>
-                                        <button class="text-red-400 hover:text-red-300 text-sm transition-colors">
+                                        <button data-action="delete-message" data-id="${message.id}" class="text-red-400 hover:text-red-300 text-sm font-medium transition-colors">
                                             <i class="fas fa-trash mr-1"></i>Delete
                                         </button>
+                                        ${message.type === 'task' ? `<span class="px-2 py-1 text-xs font-semibold rounded-full ${statusColors[message.status] || ''}">${message.status.replace(/_/g, ' ')}</span>` : `<span class="px-2 py-1 text-xs font-semibold rounded-full bg-gray-600/50 text-gray-300">${message.category}</span>`}
                                     </div>
                                 </div>
                             </div>
                         </div>
-                    `).join('')}
+                    `}).join('') : `
+                        <div class="text-center py-12 text-gray-500">
+                            <i class="fas fa-inbox text-4xl mb-4"></i>
+                            <p>No messages found.</p>
+                        </div>
+                    `}
                 </div>
             </div>
         </div>
     `;
 }
 
-};
- 
 
-        // Initialize the application
-        app.init();
+    handleBotStockAlertAction(lowStockProducts) {
+        const manager = this.state.users.find(u => u.role === 'manager');
+        if (!manager) {
+            NotificationSystem.error("No manager found to send stock alert.");
+            return;
+        }
+
+        lowStockProducts.forEach(product => {
+            const neededStock = (product.reorderLevel || 10) * 2; // Request double the reorder level
+            const message = {
+                id: Date.now() + product.id,
+                from: 1, // System ID
+                to: this.state.currentUser.id,
+                subject: `Stock Request: ${product.name}`,
+                content: `Automated request for ${neededStock} units of ${product.name} (SKU: ${product.sku}). Manager approval required.`,
+                type: 'task',
+                category: 'emergency',
+                status: 'pending_worker_approval',
+                timestamp: new Date().toISOString(),
+                read: false,
+                requesterId: manager.id,
+                history: [{ user: 'AccuraBot', action: 'Automated Request Created', timestamp: new Date().toISOString() }],
+                taskDetails: {
+                    productId: product.id,
+                    requestedStock: neededStock
+                }
+            };
+            this.state.messages.push(message);
+        });
+
+        this.saveData();
+        this.render();
+        NotificationSystem.info(`New stock request task(s) created for your review.`);
+    },
+
+    handleTaskAction(messageId, action, reason = '') {
+        const messageIndex = this.state.messages.findIndex(m => m.id === parseInt(messageId));
+        if (messageIndex === -1) return;
+
+        const message = this.state.messages[messageIndex];
+        const currentUser = this.state.currentUser;
+        const manager = this.state.users.find(u => u.role === 'manager');
+
+        const historyEntry = {
+            user: currentUser.name,
+            action: '',
+            timestamp: new Date().toISOString(),
+            reason: reason
+        };
+
+        switch (action) {
+            case 'send-stock-request':
+                message.status = 'pending_manager_approval';
+                message.to = manager.id; // Send to manager
+                historyEntry.action = 'Request sent for manager approval';
+                NotificationSystem.success('Request sent to manager.');
+                break;
+            case 'approve-stock-request':
+                message.status = 'approved_pending_acceptance';
+                message.to = message.from; // Send back to worker
+                historyEntry.action = 'Request Approved';
+                NotificationSystem.success('Stock request approved.');
+                break;
+            case 'accept-stock':
+                message.status = 'completed';
+                const product = this.state.products.find(p => p.id === message.taskDetails.productId);
+                if (product) {
+                    product.stock += message.taskDetails.requestedStock;
+                }
+                historyEntry.action = 'Stock Accepted and Inventory Updated';
+                NotificationSystem.success('Stock accepted and added to inventory.');
+                break;
+            case 'decline-request':
+                message.status = 'declined';
+                historyEntry.action = 'Request Declined';
+                NotificationSystem.warning('Request has been declined.');
+                break;
+        }
+
+        message.history.push(historyEntry);
+        this.saveData();
+        this.render();
+    },
+
+    handleBranchForm(data, form) {
+        const memberIds = Array.from(form.querySelectorAll('input[name="members"]:checked')).map(cb => parseInt(cb.value));
+        if (!data.name || memberIds.length === 0) {
+            NotificationSystem.error('Branch name and at least one member are required.');
+            return;
+        }
+        const newBranch = {
+            id: Date.now(),
+            name: data.name,
+            members: memberIds
+        };
+        this.state.branches.push(newBranch);
+        this.closeModal();
+        this.saveData();
+        this.render();
+        NotificationSystem.success(`Branch "${newBranch.name}" created successfully!`);
+    },
+
+    deleteMessage(id) {
+        if (confirm('Are you sure you want to delete this message?')) {
+            this.state.messages = this.state.messages.filter(m => m.id !== parseInt(id));
+            this.saveData();
+            this.render();
+            NotificationSystem.success('Message deleted.');
+        }
+    },
+
+    handleReplyForm(data) {
+        // This can re-use the existing message form logic
+        this.handleMessageForm(data);
+    }
+};
+
+// Initialize the application
+app.init(); 
     </script>
 </body>
 </html>
