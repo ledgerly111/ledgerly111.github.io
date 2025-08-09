@@ -2199,9 +2199,32 @@
 
             // Modal functions
             showModal(type, id = null) {
-                const modalHtml = this.getModal(type, id);
-                document.body.insertAdjacentHTML('beforeend', modalHtml);
-                
+                const modal = document.getElementById('modal');
+                const modalContent = document.getElementById('modal-content');
+
+                if (!modal || !modalContent) {
+                    console.error('Modal container not found in DOM!');
+                    return;
+                }
+
+                // Get the specific HTML content for the modal type
+                const { title, content } = this.getModalContent(type, id);
+
+                // Update the modal's title and content
+                modalContent.innerHTML = `
+                    <div class="flex justify-between items-center mb-6">
+                        <h3 class="text-xl font-bold text-white">${title}</h3>
+                        <button data-action="close-modal" class="text-gray-400 hover:text-white">
+                            <i class="fas fa-times text-xl"></i>
+                        </button>
+                    </div>
+                    ${content}
+                `;
+
+                // Show the modal
+                modal.classList.remove('hidden');
+
+
                 if (id && type.includes('edit')) {
                     this.prefillEditForm(type, parseInt(id));
                 }
@@ -2239,30 +2262,20 @@
             },
 
             closeModal() {
-                const modal = document.querySelector('.modal-overlay');
+                const modal = document.getElementById('modal');
                 if (modal) {
-                    modal.remove();
+                    modal.classList.add('hidden');
+                }
+                const modalContent = document.getElementById('modal-content');
+                if (modalContent) {
+                    modalContent.innerHTML = ''; // Clear content to prevent old data from flashing
                 }
             },
 
-            getModal(type, id = null) {
+            getModalContent(type, id = null) {
                 const isEdit = id !== null;
                 let content = '';
                 let title = '';
-
-                const modalShell = (title, content) => `
-                    <div class="modal-overlay" data-action="close-modal">
-                        <div class="modal-content" onclick="event.stopPropagation()">
-                            <div class="flex justify-between items-center mb-6">
-                                <h3 class="text-xl font-bold text-white">${title}</h3>
-                                <button data-action="close-modal" class="text-gray-400 hover:text-white">
-                                    <i class="fas fa-times text-xl"></i>
-                                </button>
-                            </div>
-                            ${content}
-                        </div>
-                    </div>
-                `;
 
                 switch (type) {
                     case 'add-product':
@@ -2396,11 +2409,12 @@
                             </form>
                         `;
                         break;
+                    // Add other modal cases like 'add-employee' and 'add-customer' here if they exist
                 }
 
-                return modalShell(title, content);
+                return { title, content };
             },
-            
+
             prefillEditForm(type, id) {
                 let item;
                 if (type === 'edit-product') {
