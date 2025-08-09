@@ -2391,7 +2391,7 @@ journal: [],
                         <div class="flex justify-end space-x-2 mt-4">
                             ${message.status === 'pending_worker_approval' && message.to === this.state.currentUser.id ? `<button data-action="send-stock-request" data-id="${message.id}" class="perplexity-button">Send to Manager</button>` : ''}
                             ${message.status === 'pending_manager_approval' && message.to === this.state.currentUser.id ? `<button data-action="approve-stock-request" data-id="${message.id}" class="ai-button">Approve</button>` : ''}
-                            ${message.status === 'approved_pending_acceptance' && this.state.users.find(u => u.id === message.from)?.id === this.state.currentUser.id ? `<button data-action="accept-stock" data-id="${message.id}" class="bot-button">Accept Stock</button>` : ''}
+                            ${message.status === 'approved_pending_acceptance' && message.to === this.state.currentUser.id ? `<button data-action="accept-stock" data-id="${message.id}" class="bot-button">Accept Stock</button>` : ''}
                             ${(message.status === 'pending_worker_approval' || message.status === 'pending_manager_approval') && message.to === this.state.currentUser.id ? `<button data-action="decline-request" data-id="${message.id}" class="expenses-button">Decline</button>` : ''}
                         </div>
                     ` : `
