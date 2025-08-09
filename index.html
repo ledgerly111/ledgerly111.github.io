@@ -2346,6 +2346,7 @@ journal: [],
     let title = '';
 
     switch (type) {
+        // --- NEW MODALS ---
         case 'compose-message':
             title = 'Compose New Message';
             content = `
@@ -2465,12 +2466,12 @@ journal: [],
                     <div class="space-y-4">
                         <p><strong>From:</strong> ${fromUser ? fromUser.name : 'System'}</p>
                         <p><strong>Subject:</strong> ${message.subject}</p>
-                        <p class="p-2 bg-gray-800/50 rounded-lg">${message.content}</p>
+                        <p class="p-3 bg-gray-800/50 rounded-lg text-gray-300 whitespace-pre-wrap">${message.content}</p>
                         ${message.type === 'task' ? `
                             <div class="mt-4 pt-4 border-t border-gray-700">
-                                <h4 class="font-bold mb-2">Task History</h4>
+                                <h4 class="font-bold text-white mb-2">Task History</h4>
                                 <ul class="list-disc list-inside text-gray-400 space-y-1">
-                                    ${message.history.map(h => `<li>${new Date(h.timestamp).toLocaleString()}: ${h.user} - ${h.action} ${h.reason ? `(Reason: ${h.reason})` : ''}</li>`).join('')}
+                                    ${message.history.map(h => `<li><span class="text-gray-500">${new Date(h.timestamp).toLocaleDateString()}</span>: ${h.user} - <strong>${h.action}</strong> ${h.reason ? `(Reason: ${h.reason})` : ''}</li>`).join('')}
                                 </ul>
                             </div>
                             <div class="flex justify-end space-x-2 mt-4">
@@ -2494,6 +2495,7 @@ journal: [],
             }
             break;
 
+        // --- YOUR ORIGINAL WORKING MODALS ---
         case 'add-product':
         case 'edit-product':
             title = isEdit ? 'Edit Product' : 'Add New Product';
@@ -2538,7 +2540,7 @@ journal: [],
                 </form>
             `;
             break;
-
+                    
         case 'add-sale':
             title = 'Record a New Sale';
             content = `
@@ -2586,54 +2588,54 @@ journal: [],
                 </form>
             `;
             break;
-
+                    
         case 'add-expense':
         case 'edit-expense':
-                title = isEdit ? 'Edit Expense' : 'Add New Expense';
-                const expense = isEdit ? this.state.expenses.find(e => e.id === parseInt(id)) : {};
-                content = `
-                <form id="expense-form" class="space-y-4">
-                    <input type="hidden" id="expense-id" value="${id || ''}">
+            title = isEdit ? 'Edit Expense' : 'Add New Expense';
+            const expense = isEdit ? this.state.expenses.find(e => e.id === parseInt(id)) : {};
+            content = `
+            <form id="expense-form" class="space-y-4">
+                <input type="hidden" id="expense-id" value="${id || ''}">
+                <div>
+                    <label for="description" class="block text-sm font-medium text-gray-300 mb-2">Description</label>
+                    <input type="text" id="description" name="description" class="form-input w-full" value="${expense?.description || ''}" required>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
-                        <label for="description" class="block text-sm font-medium text-gray-300 mb-2">Description</label>
-                        <input type="text" id="description" name="description" class="form-input w-full" value="${expense?.description || ''}" required>
-                    </div>
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div>
-                            <label for="amount" class="block text-sm font-medium text-gray-300 mb-2">Amount</label>
-                            <input type="number" id="amount" name="amount" step="0.01" min="0" class="form-input w-full" value="${expense?.amount || ''}" required>
-                        </div>
-                        <div>
-                            <label for="date" class="block text-sm font-medium text-gray-300 mb-2">Expense Date</label>
-                            <input type="date" id="date" name="date" value="${expense?.date || new Date().toISOString().split('T')[0]}" class="form-input w-full" required>
-                        </div>
+                        <label for="amount" class="block text-sm font-medium text-gray-300 mb-2">Amount</label>
+                        <input type="number" id="amount" name="amount" step="0.01" min="0" class="form-input w-full" value="${expense?.amount || ''}" required>
                     </div>
                     <div>
-                        <label for="category" class="block text-sm font-medium text-gray-300 mb-2">Category</label>
-                            <select id="category" name="category" class="form-input w-full" required>
-                            ${this.state.chartOfAccounts.filter(acc => acc.type === 'Expense').map(cat => `<option value="${cat.code}" ${expense?.category === cat.code ? 'selected' : ''}>${cat.name}</option>`).join('')}
-                        </select>
+                        <label for="date" class="block text-sm font-medium text-gray-300 mb-2">Expense Date</label>
+                        <input type="date" id="date" name="date" value="${expense?.date || new Date().toISOString().split('T')[0]}" class="form-input w-full" required>
                     </div>
-                        <div>
-                        <label for="notes" class="block text-sm font-medium text-gray-300 mb-2">Notes (Optional)</label>
-                        <textarea id="notes" name="notes" rows="2" class="form-input w-full">${expense?.notes || ''}</textarea>
-                    </div>
-                    <div class="flex justify-end space-x-3 pt-4">
-                        <button type="button" data-action="close-modal" class="bg-gray-600 hover:bg-gray-700 text-white px-6 py-3 rounded-xl">Cancel</button>
-                        <button type="submit" class="expenses-button px-6 py-3 rounded-xl">${isEdit ? 'Save Changes' : 'Add Expense'}</button>
-                    </div>
-                </form>
+                </div>
+                <div>
+                    <label for="category" class="block text-sm font-medium text-gray-300 mb-2">Category</label>
+                        <select id="category" name="category" class="form-input w-full" required>
+                        ${this.state.chartOfAccounts.filter(acc => acc.type === 'Expense').map(cat => `<option value="${cat.code}" ${expense?.category === cat.code ? 'selected' : ''}>${cat.name}</option>`).join('')}
+                    </select>
+                </div>
+                    <div>
+                    <label for="notes" class="block text-sm font-medium text-gray-300 mb-2">Notes (Optional)</label>
+                    <textarea id="notes" name="notes" rows="2" class="form-input w-full">${expense?.notes || ''}</textarea>
+                </div>
+                <div class="flex justify-end space-x-3 pt-4">
+                    <button type="button" data-action="close-modal" class="bg-gray-600 hover:bg-gray-700 text-white px-6 py-3 rounded-xl">Cancel</button>
+                    <button type="submit" class="expenses-button px-6 py-3 rounded-xl">${isEdit ? 'Save Changes' : 'Add Expense'}</button>
+                </div>
+            </form>
             `;
             break;
+
         default:
             title = 'Action Not Found';
-            content = '<p class="text-red-400">The content for this modal could not be found. Please check the getModalContent function.</p>';
+            content = '<p class="text-red-400">The content for this modal could not be found.</p>';
             break;
     }
 
     return { title, content };
 },
-
             prefillEditForm(type, id) {
                 let item;
                 if (type === 'edit-product') {
@@ -3267,9 +3269,10 @@ renderInbox() {
         <div class="p-4 hover:bg-gray-800/50 transition-colors ${isUnread ? 'bg-blue-900/20 border-l-4 border-blue-500' : ''}">
             <div class="flex items-start space-x-4">
                 <div class="flex-shrink-0">
-                    <div class="w-10 h-10 rounded-full flex items-center justify-center bg-gray-700">
-                        <i class="fas ${icons[message.type] || 'fa-envelope'} text-gray-300"></i>
-                    </div>
+    <div class="w-10 h-10 rounded-full flex items-center justify-center ${message.from === 1 ? 'bg-green-500/20' : 'bg-gray-700'}">
+        <i class="fas ${message.from === 1 ? 'fa-robot text-green-400' : (icons[message.type] || 'fa-envelope') + ' text-gray-300'}"></i>
+    </div>
+</div>
                 </div>
                 <div class="flex-1 min-w-0">
                     <div class="flex items-center justify-between flex-wrap gap-2">
