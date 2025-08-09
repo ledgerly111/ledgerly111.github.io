@@ -2116,7 +2116,7 @@ branches: [
                         if (reason) {
                             this.handleTaskAction(id, 'decline', reason);
                         }
-                    }, () => this.quickSaleUpdateQuantity(id, -1, true),
+                   
                     'quick-sale-increment-quantity': () => this.quickSaleUpdateQuantity(id, 1, true),
                     'finalize-quick-sale': () => this.finalizeQuickSale(),
                     'cancel-quick-sale': () => this.cancelQuickSale(),
