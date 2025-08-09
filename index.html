@@ -1768,11 +1768,11 @@ journal: [],
     'handle-system-alert': () => this.handleBotStockAlertAction(this.state.products.filter(p => p.stock <= this.state.lowStockThreshold)),
     'filter-inbox': (e) => {
         this.state.inboxFilter = e.target.value;
-        this.render();
+        this.renderInbox();
     },
     'search-inbox': (e) => {
         this.state.inboxSearchTerm = e.target.value.toLowerCase();
-        this.render();
+        this.renderInbox();
     },
     'view-message': (id) => this.showModal('view-message', id),
     'delete-message': (id) => this.deleteMessage(id),
@@ -2099,6 +2099,7 @@ journal: [],
                 this.saveData();
                 this.render();
                 NotificationSystem.success(`🎉 Sale recorded! Total: ${this.formatCurrency(sale.total)}`);
+                this.triggerStockAlertCheck();
             },
 
             handleExpenseForm(data) {
@@ -2340,210 +2341,298 @@ journal: [],
             },
 
             getModalContent(type, id = null) {
-                const isEdit = id !== null;
-                let content = '';
-                let title = '';
+    const isEdit = id !== null;
+    let content = '';
+    let title = '';
 
-                switch (type) {
-    case 'create-branch':
-        title = 'Create New Branch';
-        content = `
-            <form id="branch-form" class="space-y-4">
-                <div>
-                    <label for="name" class="block text-sm font-medium text-gray-300 mb-2">Branch Name</label>
-                    <input type="text" id="name" name="name" class="form-input w-full" required>
-                </div>
-                <div>
-                    <label class="block text-sm font-medium text-gray-300 mb-2">Select Members</label>
-                    <div class="max-h-48 overflow-y-auto p-2 bg-gray-900 rounded-lg border border-gray-700 space-y-2">
-                        ${this.state.users.map(user => `
-                            <div class="flex items-center">
-                                <input type="checkbox" id="member-${user.id}" name="members" value="${user.id}" class="form-checkbox h-5 w-5 rounded text-teal-500 bg-gray-800 border-gray-600 focus:ring-teal-500">
-                                <label for="member-${user.id}" class="ml-3 text-white">${user.name} (${user.role})</label>
-                            </div>
-                        `).join('')}
-                    </div>
-                </div>
-                <div class="flex justify-end space-x-3 pt-4">
-                    <button type="button" data-action="close-modal" class="bg-gray-600 hover:bg-gray-700 text-white px-6 py-3 rounded-xl">Cancel</button>
-                    <button type="submit" class="perplexity-button px-6 py-3 rounded-xl">Create Branch</button>
-                </div>
-            </form>
-        `;
-        break;
-    case 'view-message':
-        title = 'View Message';
-        const message = this.state.messages.find(m => m.id === parseInt(id));
-        if (message) {
-            const fromUser = this.state.users.find(u => u.id === message.from);
+    switch (type) {
+        case 'compose-message':
+            title = 'Compose New Message';
             content = `
-                <div class="space-y-4">
-                    <p><strong>From:</strong> ${fromUser ? fromUser.name : 'System'}</p>
-                    <p><strong>Subject:</strong> ${message.subject}</p>
-                    <p><strong>Message:</strong> ${message.content}</p>
-                    ${message.type === 'task' ? `
-                        <div class="mt-4 pt-4 border-t border-gray-700">
-                            <h4 class="font-bold mb-2">Task History</h4>
-                            <ul class="list-disc list-inside text-gray-400">
-                                ${message.history.map(h => `<li>${new Date(h.timestamp).toLocaleString()}: ${h.user} - ${h.action} ${h.reason ? `(Reason: ${h.reason})` : ''}</li>`).join('')}
-                            </ul>
-                        </div>
-                        <div class="flex justify-end space-x-2 mt-4">
-                            ${message.status === 'pending_worker_approval' && message.to === this.state.currentUser.id ? `<button data-action="send-stock-request" data-id="${message.id}" class="perplexity-button">Send to Manager</button>` : ''}
-                            ${message.status === 'pending_manager_approval' && message.to === this.state.currentUser.id ? `<button data-action="approve-stock-request" data-id="${message.id}" class="ai-button">Approve</button>` : ''}
-                            ${message.status === 'approved_pending_acceptance' && message.to === this.state.currentUser.id ? `<button data-action="accept-stock" data-id="${message.id}" class="bot-button">Accept Stock</button>` : ''}
-                            ${(message.status === 'pending_worker_approval' || message.status === 'pending_manager_approval') && message.to === this.state.currentUser.id ? `<button data-action="decline-request" data-id="${message.id}" class="expenses-button">Decline</button>` : ''}
-                        </div>
-                    ` : `
-                        <form id="reply-form" class="mt-4 pt-4 border-t border-gray-700">
-                            <input type="hidden" name="recipient" value="${message.from}">
-                            <input type="hidden" name="subject" value="Re: ${message.subject}">
-                            <textarea name="content" class="form-input w-full" placeholder="Type your reply..." required></textarea>
-                            <div class="flex justify-end mt-2">
-                                <button type="submit" class="perplexity-button">Send Reply</button>
-                            </div>
-                        </form>
-                    `}
-                </div>
+                <form id="message-form" class="space-y-4">
+                    <div>
+                        <label for="recipient" class="block text-sm font-medium text-gray-300 mb-2">Recipient</label>
+                        <select id="recipient" name="recipient" class="form-input w-full" required>
+                            <optgroup label="Users">
+                                ${this.state.users.map(u => `<option value="${u.id}">${u.name}</option>`).join('')}
+                            </optgroup>
+                            <optgroup label="Branches">
+                                ${this.state.branches.map(b => `<option value="${b.id}">Branch: ${b.name}</option>`).join('')}
+                            </optgroup>
+                        </select>
+                    </div>
+                    <div>
+                        <label for="subject" class="block text-sm font-medium text-gray-300 mb-2">Subject</label>
+                        <input type="text" id="subject" name="subject" class="form-input w-full" required>
+                    </div>
+                    <div>
+                        <label for="content" class="block text-sm font-medium text-gray-300 mb-2">Message</label>
+                        <textarea id="content" name="content" rows="4" class="form-input w-full" required></textarea>
+                    </div>
+                    <div class="flex justify-end space-x-3 pt-4">
+                        <button type="button" data-action="close-modal" class="bg-gray-600 hover:bg-gray-700 text-white px-6 py-3 rounded-xl">Cancel</button>
+                        <button type="submit" class="perplexity-button">Send Message</button>
+                    </div>
+                </form>
             `;
-        }
-        break;
-    case 'add-product':
-    case 'edit-product':
-        title = isEdit ? 'Edit Product' : 'Add New Product';
-                        const product = isEdit ? this.state.products.find(p => p.id === parseInt(id)) : {};
-                        content = `
-                            <form id="product-form" class="space-y-4">
-                                <input type="hidden" id="product-id" value="${id || ''}">
-                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                    <div>
-                                        <label for="name" class="block text-sm font-medium text-gray-300 mb-2">Product Name</label>
-                                        <input type="text" id="name" name="name" class="form-input w-full" value="${product?.name || ''}" required>
-                                    </div>
-                                    <div>
-                                        <label for="category" class="block text-sm font-medium text-gray-300 mb-2">Category</label>
-                                        <select id="category" name="category" class="form-input w-full" required>
-                                            ${this.state.categories.map(cat => `<option value="${cat}" ${product?.category === cat ? 'selected' : ''}>${cat}</option>`).join('')}
-                                        </select>
-                                    </div>
-                                </div>
-                                <div>
-                                    <label for="description" class="block text-sm font-medium text-gray-300 mb-2">Description</label>
-                                    <textarea id="description" name="description" rows="3" class="form-input w-full">${product?.description || ''}</textarea>
-                                </div>
-                                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                                    <div>
-                                        <label for="price" class="block text-sm font-medium text-gray-300 mb-2">Selling Price</label>
-                                        <input type="number" id="price" name="price" step="0.01" min="0" class="form-input w-full" value="${product?.price || ''}" required>
-                                    </div>
-                                    <div>
-                                        <label for="cost" class="block text-sm font-medium text-gray-300 mb-2">Cost Price</label>
-                                        <input type="number" id="cost" name="cost" step="0.01" min="0" class="form-input w-full" value="${product?.cost || ''}" required>
-                                    </div>
-                                    <div>
-                                        <label for="stock" class="block text-sm font-medium text-gray-300 mb-2">Stock</label>
-                                        <input type="number" id="stock" name="stock" min="0" class="form-input w-full" value="${product?.stock || ''}" required>
-                                    </div>
-                                </div>
-                                <div class="flex justify-end space-x-3 pt-4">
-                                    <button type="button" data-action="close-modal" class="bg-gray-600 hover:bg-gray-700 text-white px-6 py-3 rounded-xl">Cancel</button>
-                                    <button type="submit" class="perplexity-button px-6 py-3 rounded-xl">${isEdit ? 'Save Changes' : 'Add Product'}</button>
-                                </div>
-                            </form>
-                        `;
-                        break;
-                    
-                    case 'add-sale':
-                        title = 'Record a New Sale';
-                        content = `
-                            <form id="sale-form" class="space-y-4">
-                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                    <div>
-                                        <label for="customerId" class="block text-sm font-medium text-gray-300 mb-2">Customer</label>
-                                        <select id="customerId" name="customerId" class="form-input w-full" required>
-                                            ${this.state.customers.map(c => `<option value="${c.id}">${c.name}</option>`).join('')}
-                                        </select>
-                                    </div>
-                                    <div>
-                                        <label for="date" class="block text-sm font-medium text-gray-300 mb-2">Sale Date</label>
-                                        <input type="date" id="date" name="date" value="${new Date().toISOString().split('T')[0]}" class="form-input w-full" required>
-                                    </div>
-                                </div>
-                                <div>
-                                    <label class="block text-sm font-medium text-gray-300 mb-2">Products</label>
-                                    <div class="max-h-48 overflow-y-auto p-2 bg-gray-900 rounded-lg border border-gray-700 space-y-2">
-                                        ${this.state.products.map(p => `
-                                            <div class="flex items-center">
-                                                <input type="checkbox" id="product-${p.id}" name="productIds" value="${p.id}" data-id="${p.id}" class="form-checkbox h-5 w-5 rounded text-teal-500 bg-gray-800 border-gray-600 focus:ring-teal-500">
-                                                <label for="product-${p.id}" class="ml-3 text-white">${p.name} (${this.formatCurrency(p.price)}) - Stock: ${p.stock}</label>
-                                            </div>
-                                        `).join('')}
-                                    </div>
-                                 </div>
-                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                    <div>
-                                        <label for="saleType" class="block text-sm font-medium text-gray-300 mb-2">Sale Type</label>
-                                        <select id="saleType" name="saleType" class="form-input w-full">
-                                            <option value="Cash">Cash</option>
-                                            <option value="Credit">Credit</option>
-                                        </select>
-                                    </div>
-                                     <div>
-                                        <label for="discount" class="block text-sm font-medium text-gray-300 mb-2">Discount</label>
-                                        <input type="number" id="discount" name="discount" value="0" step="0.01" min="0" class="form-input w-full">
-                                    </div>
-                                </div>
-                                <div class="flex justify-end space-x-3 pt-4">
-                                    <button type="button" data-action="close-modal" class="bg-gray-600 hover:bg-gray-700 text-white px-6 py-3 rounded-xl">Cancel</button>
-                                    <button type="submit" class="perplexity-button px-6 py-3 rounded-xl">Record Sale</button>
-                                </div>
-                            </form>
-                        `;
-                        break;
-                    
-                    case 'add-expense':
-                    case 'edit-expense':
-                         title = isEdit ? 'Edit Expense' : 'Add New Expense';
-                         const expense = isEdit ? this.state.expenses.find(e => e.id === parseInt(id)) : {};
-                         content = `
-                            <form id="expense-form" class="space-y-4">
-                                <input type="hidden" id="expense-id" value="${id || ''}">
-                                <div>
-                                    <label for="description" class="block text-sm font-medium text-gray-300 mb-2">Description</label>
-                                    <input type="text" id="description" name="description" class="form-input w-full" value="${expense?.description || ''}" required>
-                                </div>
-                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                    <div>
-                                        <label for="amount" class="block text-sm font-medium text-gray-300 mb-2">Amount</label>
-                                        <input type="number" id="amount" name="amount" step="0.01" min="0" class="form-input w-full" value="${expense?.amount || ''}" required>
-                                    </div>
-                                    <div>
-                                        <label for="date" class="block text-sm font-medium text-gray-300 mb-2">Expense Date</label>
-                                        <input type="date" id="date" name="date" value="${expense?.date || new Date().toISOString().split('T')[0]}" class="form-input w-full" required>
-                                    </div>
-                                </div>
-                                <div>
-                                    <label for="category" class="block text-sm font-medium text-gray-300 mb-2">Category</label>
-                                     <select id="category" name="category" class="form-input w-full" required>
-                                        ${this.state.chartOfAccounts.filter(acc => acc.type === 'Expense').map(cat => `<option value="${cat.code}" ${expense?.category === cat.code ? 'selected' : ''}>${cat.name}</option>`).join('')}
-                                    </select>
-                                </div>
-                                 <div>
-                                    <label for="notes" class="block text-sm font-medium text-gray-300 mb-2">Notes (Optional)</label>
-                                    <textarea id="notes" name="notes" rows="2" class="form-input w-full">${expense?.notes || ''}</textarea>
-                                </div>
-                                <div class="flex justify-end space-x-3 pt-4">
-                                    <button type="button" data-action="close-modal" class="bg-gray-600 hover:bg-gray-700 text-white px-6 py-3 rounded-xl">Cancel</button>
-                                    <button type="submit" class="expenses-button px-6 py-3 rounded-xl">${isEdit ? 'Save Changes' : 'Add Expense'}</button>
-                                </div>
-                            </form>
-                        `;
-                        break;
-                    // Add other modal cases like 'add-employee' and 'add-customer' here if they exist
-                }
+            break;
 
-                return { title, content };
-            },
+        case 'add-customer':
+        case 'edit-customer':
+            title = isEdit ? 'Edit Customer' : 'Add New Customer';
+            const customer = isEdit ? this.state.customers.find(c => c.id === parseInt(id)) : {};
+            content = `
+                <form id="customer-form" class="space-y-4">
+                    <input type="hidden" id="customer-id" value="${id || ''}">
+                    <input type="text" name="name" placeholder="Name" class="form-input w-full" value="${customer?.name || ''}" required>
+                    <select name="type" class="form-input w-full">
+                        <option value="Individual" ${customer?.type === 'Individual' ? 'selected' : ''}>Individual</option>
+                        <option value="Business" ${customer?.type === 'Business' ? 'selected' : ''}>Business</option>
+                    </select>
+                    <input type="email" name="email" placeholder="Email" class="form-input w-full" value="${customer?.email || ''}">
+                    <input type="tel" name="phone" placeholder="Phone" class="form-input w-full" value="${customer?.phone || ''}">
+                    <input type="text" name="address" placeholder="Address" class="form-input w-full" value="${customer?.address || ''}">
+                    <input type="text" name="taxId" placeholder="Tax ID (Optional)" class="form-input w-full" value="${customer?.taxId || ''}">
+                    <input type="number" name="creditLimit" placeholder="Credit Limit" class="form-input w-full" value="${customer?.creditLimit || ''}">
+                    <div class="flex justify-end space-x-3 pt-4">
+                        <button type="button" data-action="close-modal" class="bg-gray-600 hover:bg-gray-700 text-white px-6 py-3 rounded-xl">Cancel</button>
+                        <button type="submit" class="perplexity-button">${isEdit ? 'Save Changes' : 'Add Customer'}</button>
+                    </div>
+                </form>
+            `;
+            break;
+
+        case 'add-employee':
+        case 'edit-employee':
+            title = isEdit ? 'Edit Employee' : 'Add New Employee';
+            const employee = isEdit ? this.state.users.find(u => u.id === parseInt(id)) : {};
+            content = `
+                <form id="employee-form" class="space-y-4">
+                    <input type="hidden" id="employee-id" value="${id || ''}">
+                    <input type="text" name="name" placeholder="Full Name" class="form-input w-full" value="${employee?.name || ''}" required>
+                    <input type="text" name="username" placeholder="Username" class="form-input w-full" value="${employee?.username || ''}" required>
+                    <select name="role" class="form-input w-full" required>
+                        <option value="worker" ${employee?.role === 'worker' ? 'selected' : ''}>Worker</option>
+                        <option value="manager" ${employee?.role === 'manager' ? 'selected' : ''}>Manager</option>
+                        <option value="admin" ${employee?.role === 'admin' ? 'selected' : ''}>Admin</option>
+                    </select>
+                    <input type="email" name="email" placeholder="Email" class="form-input w-full" value="${employee?.email || ''}" required>
+                    <input type="tel" name="phone" placeholder="Phone" class="form-input w-full" value="${employee?.phone || ''}">
+                    <input type="text" name="address" placeholder="Address" class="form-input w-full" value="${employee?.address || ''}">
+                    <input type="date" name="hireDate" class="form-input w-full" value="${employee?.hireDate || ''}" required>
+                    <input type="number" name="salary" placeholder="Annual Salary" class="form-input w-full" value="${employee?.salary || ''}" required>
+                    <div class="flex justify-end space-x-3 pt-4">
+                        <button type="button" data-action="close-modal" class="bg-gray-600 hover:bg-gray-700 text-white px-6 py-3 rounded-xl">Cancel</button>
+                        <button type="submit" class="perplexity-button">${isEdit ? 'Save Changes' : 'Add Employee'}</button>
+                    </div>
+                </form>
+            `;
+            break;
+
+        case 'create-branch':
+            title = 'Create New Branch';
+            content = `
+                <form id="branch-form" class="space-y-4">
+                    <div>
+                        <label for="name" class="block text-sm font-medium text-gray-300 mb-2">Branch Name</label>
+                        <input type="text" id="name" name="name" class="form-input w-full" required>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-300 mb-2">Select Members</label>
+                        <div class="max-h-48 overflow-y-auto p-2 bg-gray-900 rounded-lg border border-gray-700 space-y-2">
+                            ${this.state.users.map(user => `
+                                <div class="flex items-center">
+                                    <input type="checkbox" id="member-${user.id}" name="members" value="${user.id}" class="form-checkbox h-5 w-5 rounded text-teal-500 bg-gray-800 border-gray-600 focus:ring-teal-500">
+                                    <label for="member-${user.id}" class="ml-3 text-white">${user.name} (${user.role})</label>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                    <div class="flex justify-end space-x-3 pt-4">
+                        <button type="button" data-action="close-modal" class="bg-gray-600 hover:bg-gray-700 text-white px-6 py-3 rounded-xl">Cancel</button>
+                        <button type="submit" class="perplexity-button px-6 py-3 rounded-xl">Create Branch</button>
+                    </div>
+                </form>
+            `;
+            break;
+
+        case 'view-message':
+            title = 'View Message';
+            const message = this.state.messages.find(m => m.id === parseInt(id));
+            if (message) {
+                const fromUser = this.state.users.find(u => u.id === message.from);
+                content = `
+                    <div class="space-y-4">
+                        <p><strong>From:</strong> ${fromUser ? fromUser.name : 'System'}</p>
+                        <p><strong>Subject:</strong> ${message.subject}</p>
+                        <p class="p-2 bg-gray-800/50 rounded-lg">${message.content}</p>
+                        ${message.type === 'task' ? `
+                            <div class="mt-4 pt-4 border-t border-gray-700">
+                                <h4 class="font-bold mb-2">Task History</h4>
+                                <ul class="list-disc list-inside text-gray-400 space-y-1">
+                                    ${message.history.map(h => `<li>${new Date(h.timestamp).toLocaleString()}: ${h.user} - ${h.action} ${h.reason ? `(Reason: ${h.reason})` : ''}</li>`).join('')}
+                                </ul>
+                            </div>
+                            <div class="flex justify-end space-x-2 mt-4">
+                                ${message.status === 'pending_worker_approval' && message.to === this.state.currentUser.id ? `<button data-action="send-stock-request" data-id="${message.id}" class="perplexity-button">Send to Manager</button>` : ''}
+                                ${message.status === 'pending_manager_approval' && message.to === this.state.currentUser.id ? `<button data-action="approve-stock-request" data-id="${message.id}" class="ai-button">Approve</button>` : ''}
+                                ${message.status === 'approved_pending_acceptance' && message.to === this.state.currentUser.id ? `<button data-action="accept-stock" data-id="${message.id}" class="bot-button">Accept Stock</button>` : ''}
+                                ${(message.status === 'pending_worker_approval' || message.status === 'pending_manager_approval') && message.to === this.state.currentUser.id ? `<button data-action="decline-request" data-id="${message.id}" class="expenses-button">Decline</button>` : ''}
+                            </div>
+                        ` : `
+                            <form id="reply-form" class="mt-4 pt-4 border-t border-gray-700">
+                                <input type="hidden" name="recipient" value="${message.from}">
+                                <input type="hidden" name="subject" value="Re: ${message.subject}">
+                                <textarea name="content" class="form-input w-full" placeholder="Type your reply..." required></textarea>
+                                <div class="flex justify-end mt-2">
+                                    <button type="submit" class="perplexity-button">Send Reply</button>
+                                </div>
+                            </form>
+                        `}
+                    </div>
+                `;
+            }
+            break;
+
+        case 'add-product':
+        case 'edit-product':
+            title = isEdit ? 'Edit Product' : 'Add New Product';
+            const product = isEdit ? this.state.products.find(p => p.id === parseInt(id)) : {};
+            content = `
+                <form id="product-form" class="space-y-4">
+                    <input type="hidden" id="product-id" value="${id || ''}">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label for="name" class="block text-sm font-medium text-gray-300 mb-2">Product Name</label>
+                            <input type="text" id="name" name="name" class="form-input w-full" value="${product?.name || ''}" required>
+                        </div>
+                        <div>
+                            <label for="category" class="block text-sm font-medium text-gray-300 mb-2">Category</label>
+                            <select id="category" name="category" class="form-input w-full" required>
+                                ${this.state.categories.map(cat => `<option value="${cat}" ${product?.category === cat ? 'selected' : ''}>${cat}</option>`).join('')}
+                            </select>
+                        </div>
+                    </div>
+                    <div>
+                        <label for="description" class="block text-sm font-medium text-gray-300 mb-2">Description</label>
+                        <textarea id="description" name="description" rows="3" class="form-input w-full">${product?.description || ''}</textarea>
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div>
+                            <label for="price" class="block text-sm font-medium text-gray-300 mb-2">Selling Price</label>
+                            <input type="number" id="price" name="price" step="0.01" min="0" class="form-input w-full" value="${product?.price || ''}" required>
+                        </div>
+                        <div>
+                            <label for="cost" class="block text-sm font-medium text-gray-300 mb-2">Cost Price</label>
+                            <input type="number" id="cost" name="cost" step="0.01" min="0" class="form-input w-full" value="${product?.cost || ''}" required>
+                        </div>
+                        <div>
+                            <label for="stock" class="block text-sm font-medium text-gray-300 mb-2">Stock</label>
+                            <input type="number" id="stock" name="stock" min="0" class="form-input w-full" value="${product?.stock || ''}" required>
+                        </div>
+                    </div>
+                    <div class="flex justify-end space-x-3 pt-4">
+                        <button type="button" data-action="close-modal" class="bg-gray-600 hover:bg-gray-700 text-white px-6 py-3 rounded-xl">Cancel</button>
+                        <button type="submit" class="perplexity-button px-6 py-3 rounded-xl">${isEdit ? 'Save Changes' : 'Add Product'}</button>
+                    </div>
+                </form>
+            `;
+            break;
+
+        case 'add-sale':
+            title = 'Record a New Sale';
+            content = `
+                <form id="sale-form" class="space-y-4">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label for="customerId" class="block text-sm font-medium text-gray-300 mb-2">Customer</label>
+                            <select id="customerId" name="customerId" class="form-input w-full" required>
+                                ${this.state.customers.map(c => `<option value="${c.id}">${c.name}</option>`).join('')}
+                            </select>
+                        </div>
+                        <div>
+                            <label for="date" class="block text-sm font-medium text-gray-300 mb-2">Sale Date</label>
+                            <input type="date" id="date" name="date" value="${new Date().toISOString().split('T')[0]}" class="form-input w-full" required>
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-300 mb-2">Products</label>
+                        <div class="max-h-48 overflow-y-auto p-2 bg-gray-900 rounded-lg border border-gray-700 space-y-2">
+                            ${this.state.products.map(p => `
+                                <div class="flex items-center">
+                                    <input type="checkbox" id="product-${p.id}" name="productIds" value="${p.id}" data-id="${p.id}" class="form-checkbox h-5 w-5 rounded text-teal-500 bg-gray-800 border-gray-600 focus:ring-teal-500">
+                                    <label for="product-${p.id}" class="ml-3 text-white">${p.name} (${this.formatCurrency(p.price)}) - Stock: ${p.stock}</label>
+                                </div>
+                            `).join('')}
+                        </div>
+                        </div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label for="saleType" class="block text-sm font-medium text-gray-300 mb-2">Sale Type</label>
+                            <select id="saleType" name="saleType" class="form-input w-full">
+                                <option value="Cash">Cash</option>
+                                <option value="Credit">Credit</option>
+                            </select>
+                        </div>
+                            <div>
+                            <label for="discount" class="block text-sm font-medium text-gray-300 mb-2">Discount</label>
+                            <input type="number" id="discount" name="discount" value="0" step="0.01" min="0" class="form-input w-full">
+                        </div>
+                    </div>
+                    <div class="flex justify-end space-x-3 pt-4">
+                        <button type="button" data-action="close-modal" class="bg-gray-600 hover:bg-gray-700 text-white px-6 py-3 rounded-xl">Cancel</button>
+                        <button type="submit" class="perplexity-button px-6 py-3 rounded-xl">Record Sale</button>
+                    </div>
+                </form>
+            `;
+            break;
+
+        case 'add-expense':
+        case 'edit-expense':
+                title = isEdit ? 'Edit Expense' : 'Add New Expense';
+                const expense = isEdit ? this.state.expenses.find(e => e.id === parseInt(id)) : {};
+                content = `
+                <form id="expense-form" class="space-y-4">
+                    <input type="hidden" id="expense-id" value="${id || ''}">
+                    <div>
+                        <label for="description" class="block text-sm font-medium text-gray-300 mb-2">Description</label>
+                        <input type="text" id="description" name="description" class="form-input w-full" value="${expense?.description || ''}" required>
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label for="amount" class="block text-sm font-medium text-gray-300 mb-2">Amount</label>
+                            <input type="number" id="amount" name="amount" step="0.01" min="0" class="form-input w-full" value="${expense?.amount || ''}" required>
+                        </div>
+                        <div>
+                            <label for="date" class="block text-sm font-medium text-gray-300 mb-2">Expense Date</label>
+                            <input type="date" id="date" name="date" value="${expense?.date || new Date().toISOString().split('T')[0]}" class="form-input w-full" required>
+                        </div>
+                    </div>
+                    <div>
+                        <label for="category" class="block text-sm font-medium text-gray-300 mb-2">Category</label>
+                            <select id="category" name="category" class="form-input w-full" required>
+                            ${this.state.chartOfAccounts.filter(acc => acc.type === 'Expense').map(cat => `<option value="${cat.code}" ${expense?.category === cat.code ? 'selected' : ''}>${cat.name}</option>`).join('')}
+                        </select>
+                    </div>
+                        <div>
+                        <label for="notes" class="block text-sm font-medium text-gray-300 mb-2">Notes (Optional)</label>
+                        <textarea id="notes" name="notes" rows="2" class="form-input w-full">${expense?.notes || ''}</textarea>
+                    </div>
+                    <div class="flex justify-end space-x-3 pt-4">
+                        <button type="button" data-action="close-modal" class="bg-gray-600 hover:bg-gray-700 text-white px-6 py-3 rounded-xl">Cancel</button>
+                        <button type="submit" class="expenses-button px-6 py-3 rounded-xl">${isEdit ? 'Save Changes' : 'Add Expense'}</button>
+                    </div>
+                </form>
+            `;
+            break;
+        default:
+            title = 'Action Not Found';
+            content = '<p class="text-red-400">The content for this modal could not be found. Please check the getModalContent function.</p>';
+            break;
+    }
+
+    return { title, content };
+},
 
             prefillEditForm(type, id) {
                 let item;
@@ -3104,8 +3193,112 @@ journal: [],
                 this.state.quickSale.active = false; // Exit quick sale mode
                 this.render();
                 NotificationSystem.success(`⚡ Quick Sale recorded! Total: ${this.formatCurrency(sale.total)} | Commission: ${this.formatCurrency(commission)}`);
+                this.triggerStockAlertCheck();
             },
+   // This is a new function to add to the app object
+triggerStockAlertCheck() {
+    const lowStockProducts = this.state.products.filter(p => p.stock <= p.reorderLevel);
+    if (lowStockProducts.length > 0) {
+        const manager = this.state.users.find(u => u.role === 'manager');
+        if (!manager) return; // No manager to send to
 
+        lowStockProducts.forEach(product => {
+            // Check if a task for this product already exists and is not completed/declined
+            const existingTask = this.state.messages.find(m =>
+                m.type === 'task' &&
+                m.taskDetails?.productId === product.id &&
+                m.status !== 'completed' &&
+                m.status !== 'declined'
+            );
+
+            // Only create a new task if one doesn't already exist
+            if (!existingTask) {
+                const message = {
+                    id: Date.now() + product.id,
+                    from: 1, // System ID
+                    to: manager.id, // Directly send alert to the manager
+                    subject: `URGENT: Low Stock Alert for ${product.name}`,
+                    content: `Stock for ${product.name} (SKU: ${product.sku}) has fallen to ${product.stock}, which is at or below the reorder level of ${product.reorderLevel}. Please approve a new stock order.`,
+                    type: 'task',
+                    category: 'emergency',
+                    status: 'pending_manager_approval', // Manager must approve first
+                    timestamp: new Date().toISOString(),
+                    read: false,
+                    requesterId: 1, // System initiated this request
+                    history: [{ user: 'AccuraBot', action: 'Automated Alert Sent', timestamp: new Date().toISOString() }],
+                    taskDetails: {
+                        productId: product.id,
+                        requestedStock: (product.reorderLevel || 10) * 2 // Suggested reorder amount
+                    }
+                };
+                this.state.messages.push(message);
+                NotificationSystem.warning(`Low stock alert sent to manager for ${product.name}.`);
+            }
+        });
+        this.saveData();
+    }
+},
+
+renderInbox() {
+    const inboxContainer = document.getElementById('inbox-list-container');
+    if (!inboxContainer) return;
+
+    const filteredMessages = this.state.messages
+        .filter(m => this.state.inboxFilter === 'all' || m.type === this.state.inboxFilter)
+        .filter(m => {
+            const searchTerm = this.state.inboxSearchTerm.toLowerCase();
+            return searchTerm === '' || m.subject.toLowerCase().includes(searchTerm) || m.content.toLowerCase().includes(searchTerm);
+        })
+        .sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+
+    inboxContainer.innerHTML = filteredMessages.length > 0 ? filteredMessages.map(message => {
+        const fromUser = this.state.users.find(u => u.id === message.from);
+        const senderName = fromUser ? fromUser.name : 'System';
+        const isUnread = !message.read;
+        const icons = { personal: 'fa-user', branch: 'fa-users', task: 'fa-clipboard-list' };
+        const statusColors = {
+            pending_worker_approval: 'bg-yellow-500/20 text-yellow-400',
+            pending_manager_approval: 'bg-blue-500/20 text-blue-400',
+            approved_pending_acceptance: 'bg-purple-500/20 text-purple-400',
+            completed: 'bg-green-500/20 text-green-400',
+            declined: 'bg-red-500/20 text-red-400',
+        };
+        return `
+        <div class="p-4 hover:bg-gray-800/50 transition-colors ${isUnread ? 'bg-blue-900/20 border-l-4 border-blue-500' : ''}">
+            <div class="flex items-start space-x-4">
+                <div class="flex-shrink-0">
+                    <div class="w-10 h-10 rounded-full flex items-center justify-center bg-gray-700">
+                        <i class="fas ${icons[message.type] || 'fa-envelope'} text-gray-300"></i>
+                    </div>
+                </div>
+                <div class="flex-1 min-w-0">
+                    <div class="flex items-center justify-between flex-wrap gap-2">
+                        <div class="flex items-center space-x-3">
+                            <span class="text-white font-medium truncate">${senderName}</span>
+                            ${isUnread ? '<span class="px-2 py-0.5 text-xs bg-blue-500 text-white rounded-full font-semibold">NEW</span>' : ''}
+                        </div>
+                        <span class="text-gray-400 text-sm flex-shrink-0">${new Date(message.timestamp).toLocaleDateString()}</span>
+                    </div>
+                    <div class="text-gray-300 font-medium mt-1 truncate">${message.subject}</div>
+                    <div class="flex items-center space-x-4 mt-3">
+                        <button data-action="view-message" data-id="${message.id}" class="text-blue-400 hover:text-blue-300 text-sm font-medium transition-colors">
+                            <i class="fas fa-eye mr-1"></i>View Details
+                        </button>
+                        <button data-action="delete-message" data-id="${message.id}" class="text-red-400 hover:text-red-300 text-sm font-medium transition-colors">
+                            <i class="fas fa-trash mr-1"></i>Delete
+                        </button>
+                        ${message.type === 'task' ? `<span class="px-2 py-1 text-xs font-semibold rounded-full ${statusColors[message.status] || ''}">${message.status.replace(/_/g, ' ')}</span>` : `<span class="px-2 py-1 text-xs font-semibold rounded-full bg-gray-600/50 text-gray-300">${message.category}</span>`}
+                    </div>
+                </div>
+            </div>
+        </div>`;
+    }).join('') : `
+        <div class="text-center py-12 text-gray-500">
+            <i class="fas fa-inbox text-4xl mb-4"></i>
+            <p>No messages found.</p>
+        </div>`;
+},
+            
             // Add this new function to the `app` object
             addJournalEntry(date, description, entries) {
                 const newEntry = {
@@ -5631,20 +5824,19 @@ getSettingsView() {
             },
 
 getInboxView() {
-    // Filter and search messages
+    // This logic runs only on the initial load of the view.
+    // The efficient renderInbox() function will handle subsequent updates from search/filter.
     const filteredMessages = this.state.messages
         .filter(m => {
-            // Filter by selected type
             if (this.state.inboxFilter === 'all') return true;
             return m.type === this.state.inboxFilter;
         })
         .filter(m => {
-            // Filter by search term
             const searchTerm = this.state.inboxSearchTerm.toLowerCase();
             if (searchTerm === '') return true;
             return m.subject.toLowerCase().includes(searchTerm) || m.content.toLowerCase().includes(searchTerm);
         })
-        .sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp)); // Sort by most recent
+        .sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
 
     const unreadCount = this.state.messages.filter(m => !m.read).length;
 
@@ -5668,7 +5860,7 @@ getInboxView() {
             <div class="perplexity-card p-4">
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                     <div class="md:col-span-2">
-                        <input type="text" id="inbox-search" placeholder="Search by subject or content..." class="form-input w-full" onkeyup="app.handleAction('search-inbox', null, event)" value="${this.state.inboxSearchTerm}">
+                        <input type="text" id="inbox-search" placeholder="Search by subject or content..." class="form-input w-full" oninput="app.handleAction('search-inbox', null, event)" value="${this.state.inboxSearchTerm}">
                     </div>
                     <div>
                         <select id="inbox-filter" class="form-input w-full" onchange="app.handleAction('filter-inbox', null, event)">
@@ -5682,18 +5874,12 @@ getInboxView() {
             </div>
 
             <div class="perplexity-card overflow-hidden">
-                <div class="divide-y divide-gray-700">
+                <div id="inbox-list-container" class="divide-y divide-gray-700">
                     ${filteredMessages.length > 0 ? filteredMessages.map(message => {
                         const fromUser = this.state.users.find(u => u.id === message.from);
                         const senderName = fromUser ? fromUser.name : 'System';
                         const isUnread = !message.read;
-
-                        const icons = {
-                            personal: 'fa-user',
-                            branch: 'fa-users',
-                            task: 'fa-clipboard-list'
-                        };
-
+                        const icons = { personal: 'fa-user', branch: 'fa-users', task: 'fa-clipboard-list' };
                         const statusColors = {
                             pending_worker_approval: 'bg-yellow-500/20 text-yellow-400',
                             pending_manager_approval: 'bg-blue-500/20 text-blue-400',
@@ -5701,7 +5887,6 @@ getInboxView() {
                             completed: 'bg-green-500/20 text-green-400',
                             declined: 'bg-red-500/20 text-red-400',
                         };
-
                         return `
                         <div class="p-4 hover:bg-gray-800/50 transition-colors ${isUnread ? 'bg-blue-900/20 border-l-4 border-blue-500' : ''}">
                             <div class="flex items-start space-x-4">
@@ -5730,8 +5915,8 @@ getInboxView() {
                                     </div>
                                 </div>
                             </div>
-                        </div>
-                    `}).join('') : `
+                        </div>`;
+                    }).join('') : `
                         <div class="text-center py-12 text-gray-500">
                             <i class="fas fa-inbox text-4xl mb-4"></i>
                             <p>No messages found.</p>
