@@ -149,6 +149,170 @@
             transition: all 0.3s ease;
         }
 
+       /* WhatsApp-style message bubbles and inbox improvements */
+.message-bubble-container {
+    display: flex;
+    margin-bottom: 1rem;
+}
+
+.message-bubble-container.sent {
+    justify-content: flex-end;
+}
+
+.message-bubble {
+    max-width: 70%;
+    padding: 0.75rem 1rem;
+    border-radius: 1rem;
+    position: relative;
+    word-wrap: break-word;
+}
+
+.message-bubble.received {
+    background: var(--bg-tertiary);
+    border-bottom-left-radius: 0.25rem;
+    margin-left: 3rem;
+}
+
+.message-bubble.sent {
+    background: linear-gradient(135deg, var(--accent-primary) 0%, var(--accent-secondary) 100%);
+    color: white;
+    border-bottom-right-radius: 0.25rem;
+    margin-right: 1rem;
+}
+
+/* Theme-specific inbox styles */
+.theme-sepia .message-bubble.received {
+    background: #e8e0d1;
+    color: var(--text-primary);
+}
+
+.theme-sepia .message-bubble.sent {
+    background: linear-gradient(135deg, #2f855a 0%, #2b6cb0 100%);
+}
+
+.theme-black .message-bubble.received {
+    background: #1a1a1a;
+    border: 1px solid #333;
+}
+
+/* Branch chat styles */
+.branch-header {
+    background: var(--bg-secondary);
+    border-bottom: 1px solid var(--border-color);
+    padding: 1rem;
+    position: sticky;
+    top: 0;
+    z-index: 10;
+}
+
+.branch-members-list {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+    margin-top: 0.5rem;
+}
+
+.branch-member-chip {
+    background: var(--bg-tertiary);
+    padding: 0.25rem 0.75rem;
+    border-radius: 1rem;
+    font-size: 0.75rem;
+    color: var(--text-secondary);
+}
+
+/* Responsive inbox */
+@media (max-width: 768px) {
+    .message-bubble {
+        max-width: 85%;
+    }
+    
+    #inbox-list-container > div {
+        padding: 0.75rem;
+    }
+}
+
+/* Employee search dropdown */
+#employee-search-results:not(.hidden) {
+    animation: slideDown 0.2s ease-out;
+}
+
+@keyframes slideDown {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Line clamp utility */
+.line-clamp-2 {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+/* AccuraBot icon animation */
+.animate-pulse {
+    animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+@keyframes pulse {
+    0%, 100% {
+        opacity: 1;
+    }
+    50% {
+        opacity: .5;
+    }
+}
+
+/* Fix inbox scrolling */
+#inbox-list-container {
+    scrollbar-width: thin;
+    scrollbar-color: var(--border-color) transparent;
+}
+
+#inbox-list-container::-webkit-scrollbar {
+    width: 8px;
+}
+
+#inbox-list-container::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+#inbox-list-container::-webkit-scrollbar-thumb {
+    background-color: var(--border-color);
+    border-radius: 4px;
+}
+
+#inbox-list-container::-webkit-scrollbar-thumb:hover {
+    background-color: var(--text-muted);
+}
+
+/* Ensure proper height calculation for main content */
+.main-content {
+    height: calc(100vh - 80px); /* Adjust based on navbar height */
+    overflow-y: auto;
+}
+
+/* Fix for mobile */
+@media (max-width: 768px) {
+    .main-content {
+        height: calc(100vh - 60px);
+    }
+}
+
+/* Tab navigation active state */
+.inbox-tab-active {
+    background: linear-gradient(135deg, var(--accent-primary) 0%, var(--accent-secondary) 100%);
+    color: white;
+}
+
+ 
+
         .sidebar-overlay.open {
             opacity: 1;
             visibility: visible;
@@ -2348,35 +2512,43 @@ journal: [],
     switch (type) {
         // --- NEW MODALS ---
         case 'compose-message':
-            title = 'Compose New Message';
-            content = `
-                <form id="message-form" class="space-y-4">
-                    <div>
-                        <label for="recipient" class="block text-sm font-medium text-gray-300 mb-2">Recipient</label>
-                        <select id="recipient" name="recipient" class="form-input w-full" required>
-                            <optgroup label="Users">
-                                ${this.state.users.map(u => `<option value="${u.id}">${u.name}</option>`).join('')}
-                            </optgroup>
-                            <optgroup label="Branches">
-                                ${this.state.branches.map(b => `<option value="${b.id}">Branch: ${b.name}</option>`).join('')}
-                            </optgroup>
-                        </select>
-                    </div>
-                    <div>
-                        <label for="subject" class="block text-sm font-medium text-gray-300 mb-2">Subject</label>
-                        <input type="text" id="subject" name="subject" class="form-input w-full" required>
-                    </div>
-                    <div>
-                        <label for="content" class="block text-sm font-medium text-gray-300 mb-2">Message</label>
-                        <textarea id="content" name="content" rows="4" class="form-input w-full" required></textarea>
-                    </div>
-                    <div class="flex justify-end space-x-3 pt-4">
-                        <button type="button" data-action="close-modal" class="bg-gray-600 hover:bg-gray-700 text-white px-6 py-3 rounded-xl">Cancel</button>
-                        <button type="submit" class="perplexity-button">Send Message</button>
-                    </div>
-                </form>
-            `;
-            break;
+    title = 'New Message';
+    const recipientId = id ? parseInt(id) : null;
+    const preselectedUser = recipientId ? this.state.users.find(u => u.id === recipientId) : null;
+    
+    content = `
+        <form id="message-form" class="space-y-4">
+            <div>
+                <label for="recipient" class="block text-sm font-medium text-gray-300 mb-2">To</label>
+                <select id="recipient" name="recipient" class="form-input w-full" required>
+                    <option value="">Select recipient...</option>
+                    <optgroup label="Direct Messages">
+                        ${this.state.users
+                            .filter(u => u.id !== this.state.currentUser.id)
+                            .map(u => `
+                                <option value="${u.id}" ${preselectedUser && preselectedUser.id === u.id ? 'selected' : ''}>
+                                    ${u.name} (${u.role})
+                                </option>
+                            `).join('')}
+                    </optgroup>
+                </select>
+            </div>
+            <div>
+                <label for="subject" class="block text-sm font-medium text-gray-300 mb-2">Subject</label>
+                <input type="text" id="subject" name="subject" class="form-input w-full" required>
+            </div>
+            <div>
+                <label for="content" class="block text-sm font-medium text-gray-300 mb-2">Message</label>
+                <textarea id="content" name="content" rows="4" class="form-input w-full" required></textarea>
+            </div>
+            <div class="flex justify-end space-x-3 pt-4">
+                <button type="button" data-action="close-modal" class="bg-gray-600 hover:bg-gray-700 text-white px-6 py-3 rounded-xl">Cancel</button>
+                <button type="submit" class="perplexity-button">Send Message</button>
+            </div>
+        </form>
+    `;
+    break;
+ 
 
         case 'add-customer':
         case 'edit-customer':
@@ -2457,42 +2629,124 @@ journal: [],
             `;
             break;
 
-        case 'view-message':
-            title = 'View Message';
-            const message = this.state.messages.find(m => m.id === parseInt(id));
-            if (message) {
-                const fromUser = this.state.users.find(u => u.id === message.from);
-                content = `
-                    <div class="space-y-4">
-                        <p><strong>From:</strong> ${fromUser ? fromUser.name : 'System'}</p>
-                        <p><strong>Subject:</strong> ${message.subject}</p>
-                        <p class="p-3 bg-gray-800/50 rounded-lg text-gray-300 whitespace-pre-wrap">${message.content}</p>
-                        ${message.type === 'task' ? `
-                            <div class="mt-4 pt-4 border-t border-gray-700">
-                                <h4 class="font-bold text-white mb-2">Task History</h4>
-                                <ul class="list-disc list-inside text-gray-400 space-y-1">
-                                    ${message.history.map(h => `<li><span class="text-gray-500">${new Date(h.timestamp).toLocaleDateString()}</span>: ${h.user} - <strong>${h.action}</strong> ${h.reason ? `(Reason: ${h.reason})` : ''}</li>`).join('')}
-                                </ul>
-                            </div>
-                            <div class="flex justify-end space-x-2 mt-4">
-                                ${message.status === 'pending_worker_approval' && message.to === this.state.currentUser.id ? `<button data-action="send-stock-request" data-id="${message.id}" class="perplexity-button">Send to Manager</button>` : ''}
-                                ${message.status === 'pending_manager_approval' && message.to === this.state.currentUser.id ? `<button data-action="approve-stock-request" data-id="${message.id}" class="ai-button">Approve</button>` : ''}
-                                ${message.status === 'approved_pending_acceptance' && message.to === this.state.currentUser.id ? `<button data-action="accept-stock" data-id="${message.id}" class="bot-button">Accept Stock</button>` : ''}
-                                ${(message.status === 'pending_worker_approval' || message.status === 'pending_manager_approval') && message.to === this.state.currentUser.id ? `<button data-action="decline-request" data-id="${message.id}" class="expenses-button">Decline</button>` : ''}
-                            </div>
-                        ` : `
-                            <form id="reply-form" class="mt-4 pt-4 border-t border-gray-700">
-                                <input type="hidden" name="recipient" value="${message.from}">
-                                <input type="hidden" name="subject" value="Re: ${message.subject}">
-                                <textarea name="content" class="form-input w-full" placeholder="Type your reply..." required></textarea>
-                                <div class="flex justify-end mt-2">
-                                    <button type="submit" class="perplexity-button">Send Reply</button>
-                                </div>
-                            </form>
-                        `}
+            case 'view-message':
+    title = 'Message Details';
+    const message = this.state.messages.find(m => m.id === parseInt(id));
+    if (message) {
+        const fromUser = this.state.users.find(u => u.id === message.from);
+        const isSystemAlert = message.from === 1 && message.category === 'emergency';
+        
+        content = `
+            <div class="space-y-4">
+                <!-- Message Header -->
+                <div class="flex items-center space-x-4 pb-4 border-b border-gray-700">
+                    <div class="w-12 h-12 rounded-full flex items-center justify-center ${
+                        isSystemAlert ? 'bg-red-500/20' : 'bg-gradient-to-br from-teal-500 to-blue-500'
+                    }">
+                        ${isSystemAlert ? 
+                            '<i class="fas fa-robot text-red-400"></i>' :
+                            `<span class="text-white font-bold">${fromUser ? fromUser.name.charAt(0) : 'S'}</span>`
+                        }
                     </div>
-                `;
-            }
+                    <div class="flex-1">
+                        <h3 class="text-lg font-bold text-white">${isSystemAlert ? 'AccuraBot Alert' : fromUser ? fromUser.name : 'System'}</h3>
+                        <p class="text-sm text-gray-400">${this.formatMessageTime(message.timestamp)}</p>
+                    </div>
+                </div>
+                
+                <!-- Message Content -->
+                <div class="bg-gray-800/50 rounded-xl p-4">
+                    <h4 class="font-bold text-white mb-2">${message.subject}</h4>
+                    <p class="text-gray-300 whitespace-pre-wrap">${message.content}</p>
+                </div>
+                
+                ${message.type === 'task' ? `
+                    <!-- Task Details -->
+                    <div class="bg-purple-500/10 border border-purple-500/30 rounded-xl p-4">
+                        <h4 class="font-bold text-purple-400 mb-3 flex items-center">
+                            <i class="fas fa-tasks mr-2"></i>Task Information
+                        </h4>
+                        <div class="space-y-2">
+                            <div class="flex justify-between">
+                                <span class="text-gray-400">Status:</span>
+                                <span class="px-3 py-1 text-xs font-semibold rounded-full ${
+                                    message.status === 'completed' ? 'bg-green-500/20 text-green-400' :
+                                    message.status === 'declined' ? 'bg-red-500/20 text-red-400' :
+                                    'bg-yellow-500/20 text-yellow-400'
+                                }">
+                                    ${message.status.replace(/_/g, ' ')}
+                                </span>
+                            </div>
+                            ${message.taskDetails ? `
+                                <div class="flex justify-between">
+                                    <span class="text-gray-400">Requested Stock:</span>
+                                    <span class="text-white font-medium">${message.taskDetails.requestedStock} units</span>
+                                </div>
+                            ` : ''}
+                        </div>
+                        
+                        <!-- Task History -->
+                        <div class="mt-4 pt-4 border-t border-purple-500/30">
+                            <h5 class="font-medium text-white mb-2">History</h5>
+                            <div class="space-y-2">
+                                ${message.history.map(h => `
+                                    <div class="text-sm">
+                                        <span class="text-gray-500">${new Date(h.timestamp).toLocaleString()}</span>
+                                        <div class="text-gray-300">${h.user}: ${h.action}</div>
+                                        ${h.reason ? `<div class="text-gray-400 italic">Reason: ${h.reason}</div>` : ''}
+                                    </div>
+                                `).join('')}
+                            </div>
+                        </div>
+                        
+                        <!-- Task Actions -->
+                        <div class="flex justify-end space-x-2 mt-4 pt-4 border-t border-purple-500/30">
+                            ${message.status === 'pending_worker_approval' && message.to === this.state.currentUser.id ? 
+                                `<button data-action="send-stock-request" data-id="${message.id}" class="perplexity-button px-4 py-2 rounded-xl">
+                                    <i class="fas fa-paper-plane mr-2"></i>Send to Manager
+                                </button>` : ''}
+                            ${message.status === 'pending_manager_approval' && message.to === this.state.currentUser.id ? 
+                                `<button data-action="approve-stock-request" data-id="${message.id}" class="ai-button px-4 py-2 rounded-xl">
+                                    <i class="fas fa-check mr-2"></i>Approve
+                                </button>` : ''}
+                            ${message.status === 'approved_pending_acceptance' && message.to === this.state.currentUser.id ? 
+                                `<button data-action="accept-stock" data-id="${message.id}" class="bot-button px-4 py-2 rounded-xl">
+                                    <i class="fas fa-box-open mr-2"></i>Accept Stock
+                                </button>` : ''}
+                            ${(message.status === 'pending_worker_approval' || message.status === 'pending_manager_approval') && message.to === this.state.currentUser.id ? 
+                                `<button data-action="decline-request" data-id="${message.id}" class="expenses-button px-4 py-2 rounded-xl">
+                                    <i class="fas fa-times mr-2"></i>Decline
+                                </button>` : ''}
+                        </div>
+                    </div>
+                ` : `
+                    <!-- Reply Section -->
+                    <div class="border-t border-gray-700 pt-4">
+                        <form id="reply-form" class="space-y-3">
+                            <input type="hidden" name="recipient" value="${message.from}">
+                            <input type="hidden" name="subject" value="Re: ${message.subject}">
+                            <div class="relative">
+                                <textarea 
+                                    name="content" 
+                                    class="form-input w-full pr-12" 
+                                    placeholder="Type your reply..." 
+                                    rows="3"
+                                    required
+                                ></textarea>
+                                <button type="submit" class="absolute bottom-3 right-3 text-teal-400 hover:text-teal-300 transition-colors">
+                                    <i class="fas fa-paper-plane text-xl"></i>
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                `}
+            </div>
+        `;
+    }
+    break;
+
+
+
             break;
 
         // --- YOUR ORIGINAL WORKING MODALS ---
@@ -2588,7 +2842,86 @@ journal: [],
                 </form>
             `;
             break;
-                    
+           
+            case 'branch-chat':
+    const branch = this.state.branches.find(b => b.id === parseInt(id));
+    if (branch) {
+        title = branch.name;
+        const branchMessages = this.state.messages.filter(m => m.type === 'branch' && m.branchId === branch.id)
+            .sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp));
+        
+        content = `
+            <div class="space-y-4">
+                <!-- Branch Header -->
+                <div class="branch-header -mx-8 -mt-8 px-8 py-4 mb-4">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <h3 class="text-lg font-bold text-white">${branch.name}</h3>
+                            <div class="branch-members-list">
+                                ${branch.members.map(memberId => {
+                                    const user = this.state.users.find(u => u.id === memberId);
+                                    return user ? `<span class="branch-member-chip">${user.name}</span>` : '';
+                                }).join('')}
+                            </div>
+                        </div>
+                        <button data-action="close-modal" class="text-gray-400 hover:text-white">
+                            <i class="fas fa-times text-xl"></i>
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- Messages -->
+                <div class="space-y-3 max-h-96 overflow-y-auto" id="branch-messages-container">
+                    ${branchMessages.length > 0 ? branchMessages.map(msg => {
+                        const sender = this.state.users.find(u => u.id === msg.from);
+                        const isSentByMe = msg.from === this.state.currentUser.id;
+                        
+                        return `
+                            <div class="message-bubble-container ${isSentByMe ? 'sent' : 'received'}">
+                                ${!isSentByMe ? `
+                                    <div class="w-8 h-8 rounded-full bg-gradient-to-br from-teal-500 to-blue-500 flex items-center justify-center flex-shrink-0">
+                                        <span class="text-white text-xs font-bold">${sender ? sender.name.charAt(0) : 'U'}</span>
+                                    </div>
+                                ` : ''}
+                                <div class="message-bubble ${isSentByMe ? 'sent' : 'received'}">
+                                    ${!isSentByMe ? `<div class="text-xs text-gray-400 mb-1">${sender ? sender.name : 'Unknown'}</div>` : ''}
+                                    <div>${msg.content}</div>
+                                    <div class="text-xs ${isSentByMe ? 'text-gray-200' : 'text-gray-400'} mt-1">
+                                        ${this.formatMessageTime(msg.timestamp)}
+                                    </div>
+                                </div>
+                            </div>
+                        `;
+                    }).join('') : `
+                        <div class="text-center text-gray-400 py-8">
+                            <i class="fas fa-comments text-3xl mb-2"></i>
+                            <p>No messages yet. Start the conversation!</p>
+                        </div>
+                    `}
+                </div>
+                
+                <!-- Send Message Form -->
+                <form onsubmit="app.sendBranchMessage(event, ${branch.id})" class="flex gap-2 mt-4">
+                    <input type="text" 
+                           id="branch-message-input" 
+                           placeholder="Type a message..." 
+                           class="form-input flex-1" 
+                           required>
+                    <button type="submit" class="perplexity-button px-4">
+                        <i class="fas fa-paper-plane"></i>
+                    </button>
+                </form>
+            </div>
+        `;
+        
+        // Auto-scroll to bottom after modal opens
+        setTimeout(() => {
+            const container = document.getElementById('branch-messages-container');
+            if (container) container.scrollTop = container.scrollHeight;
+        }, 100);
+    }
+    break;
+ 
         case 'add-expense':
         case 'edit-expense':
             title = isEdit ? 'Edit Expense' : 'Add New Expense';
@@ -3245,62 +3578,391 @@ renderInbox() {
     const inboxContainer = document.getElementById('inbox-list-container');
     if (!inboxContainer) return;
 
-    const filteredMessages = this.state.messages
-        .filter(m => this.state.inboxFilter === 'all' || m.type === this.state.inboxFilter)
-        .filter(m => {
-            const searchTerm = this.state.inboxSearchTerm.toLowerCase();
-            return searchTerm === '' || m.subject.toLowerCase().includes(searchTerm) || m.content.toLowerCase().includes(searchTerm);
-        })
-        .sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+    // Get user's branches
+    const userBranches = this.state.branches.filter(b => b.members.includes(this.state.currentUser.id));
 
-    inboxContainer.innerHTML = filteredMessages.length > 0 ? filteredMessages.map(message => {
-        const fromUser = this.state.users.find(u => u.id === message.from);
-        const senderName = fromUser ? fromUser.name : 'System';
-        const isUnread = !message.read;
-        const icons = { personal: 'fa-user', branch: 'fa-users', task: 'fa-clipboard-list' };
-        const statusColors = {
-            pending_worker_approval: 'bg-yellow-500/20 text-yellow-400',
-            pending_manager_approval: 'bg-blue-500/20 text-blue-400',
-            approved_pending_acceptance: 'bg-purple-500/20 text-purple-400',
-            completed: 'bg-green-500/20 text-green-400',
-            declined: 'bg-red-500/20 text-red-400',
-        };
-        return `
-        <div class="p-4 hover:bg-gray-800/50 transition-colors ${isUnread ? 'bg-blue-900/20 border-l-4 border-blue-500' : ''}">
-            <div class="flex items-start space-x-4">
-                <div class="flex-shrink-0">
-    <div class="w-10 h-10 rounded-full flex items-center justify-center ${message.from === 1 ? 'bg-green-500/20' : 'bg-gray-700'}">
-        <i class="fas ${message.from === 1 ? 'fa-robot text-green-400' : (icons[message.type] || 'fa-envelope') + ' text-gray-300'}"></i>
-    </div>
-</div>
+    // Filter messages based on current filter
+    let displayItems = [];
+    
+    if (this.state.inboxFilter === 'branch') {
+        // Show branches when branch tab is selected
+        displayItems = userBranches.map(branch => ({
+            type: 'branch',
+            data: branch
+        }));
+    } else {
+        // Show messages for other tabs
+        const filteredMessages = this.state.messages.filter(m => {
+            // Must involve current user
+            if (m.to !== this.state.currentUser.id && m.from !== this.state.currentUser.id) return false;
+            
+            // Apply type filter
+            if (this.state.inboxFilter !== 'all' && m.type !== this.state.inboxFilter) return false;
+            
+            // Apply search filter
+            if (this.state.inboxSearchTerm) {
+                const searchTerm = this.state.inboxSearchTerm.toLowerCase();
+                const fromUser = this.state.users.find(u => u.id === m.from);
+                const toUser = this.state.users.find(u => u.id === m.to);
+                return m.subject.toLowerCase().includes(searchTerm) || 
+                       m.content.toLowerCase().includes(searchTerm) ||
+                       (fromUser && fromUser.name.toLowerCase().includes(searchTerm)) ||
+                       (toUser && toUser.name.toLowerCase().includes(searchTerm));
+            }
+            return true;
+        }).sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+        
+        displayItems = filteredMessages.map(msg => ({
+            type: 'message',
+            data: msg
+        }));
+    }
+
+    // Render the appropriate content
+    if (displayItems.length === 0) {
+        inboxContainer.innerHTML = `
+            <div class="text-center py-16">
+                <div class="w-24 h-24 mx-auto mb-4 bg-gray-800 rounded-full flex items-center justify-center">
+                    <i class="fas ${this.state.inboxFilter === 'branch' ? 'fa-users' : 'fa-inbox'} text-4xl text-gray-600"></i>
                 </div>
-                <div class="flex-1 min-w-0">
-                    <div class="flex items-center justify-between flex-wrap gap-2">
-                        <div class="flex items-center space-x-3">
-                            <span class="text-white font-medium truncate">${senderName}</span>
-                            ${isUnread ? '<span class="px-2 py-0.5 text-xs bg-blue-500 text-white rounded-full font-semibold">NEW</span>' : ''}
-                        </div>
-                        <span class="text-gray-400 text-sm flex-shrink-0">${new Date(message.timestamp).toLocaleDateString()}</span>
-                    </div>
-                    <div class="text-gray-300 font-medium mt-1 truncate">${message.subject}</div>
-                    <div class="flex items-center space-x-4 mt-3">
-                        <button data-action="view-message" data-id="${message.id}" class="text-blue-400 hover:text-blue-300 text-sm font-medium transition-colors">
-                            <i class="fas fa-eye mr-1"></i>View Details
-                        </button>
-                        <button data-action="delete-message" data-id="${message.id}" class="text-red-400 hover:text-red-300 text-sm font-medium transition-colors">
-                            <i class="fas fa-trash mr-1"></i>Delete
-                        </button>
-                        ${message.type === 'task' ? `<span class="px-2 py-1 text-xs font-semibold rounded-full ${statusColors[message.status] || ''}">${message.status.replace(/_/g, ' ')}</span>` : `<span class="px-2 py-1 text-xs font-semibold rounded-full bg-gray-600/50 text-gray-300">${message.category}</span>`}
-                    </div>
-                </div>
+                <p class="text-gray-400 text-lg font-medium mb-2">
+                    ${this.state.inboxFilter === 'branch' ? 'No branches yet' : 'No messages yet'}
+                </p>
+                <p class="text-gray-500 text-sm mb-4">
+                    ${this.state.inboxFilter === 'branch' ? 
+                        ((['admin', 'manager'].includes(this.state.currentUser.role)) ? 
+                            'Create a branch to start group conversations' : 
+                            'You are not a member of any branches yet') : 
+                        'Start a conversation or wait for new messages'}
+                </p>
+                ${this.state.inboxFilter === 'branch' && ['admin', 'manager'].includes(this.state.currentUser.role) ? `
+                    <button data-action="create-branch" class="ai-button px-6 py-2 rounded-xl">
+                        <i class="fas fa-plus mr-2"></i>Create Branch
+                    </button>
+                ` : this.state.inboxFilter !== 'branch' ? `
+                    <button data-action="compose-message" class="perplexity-button px-6 py-2 rounded-xl">
+                        <i class="fas fa-plus mr-2"></i>Start New Conversation
+                    </button>
+                ` : ''}
             </div>
-        </div>`;
-    }).join('') : `
-        <div class="text-center py-12 text-gray-500">
-            <i class="fas fa-inbox text-4xl mb-4"></i>
-            <p>No messages found.</p>
-        </div>`;
+        `;
+        return;
+    }
+
+    // Render items
+    inboxContainer.innerHTML = displayItems.map(item => {
+        if (item.type === 'branch') {
+            // Render branch card
+            const branch = item.data;
+            const memberNames = branch.members.map(memberId => {
+                const user = this.state.users.find(u => u.id === memberId);
+                return user ? user.name : 'Unknown';
+            }).slice(0, 3).join(', ');
+            
+            const unreadCount = this.state.messages.filter(m => 
+                m.type === 'branch' && 
+                m.branchId === branch.id && 
+                m.to === this.state.currentUser.id && 
+                !m.read
+            ).length;
+            
+            return `
+                <div class="p-4 hover:bg-gray-800/50 transition-all duration-200 cursor-pointer"
+                     onclick="app.openBranchChat(${branch.id})">
+                    <div class="flex items-start space-x-4">
+                        <div class="flex-shrink-0">
+                            <div class="w-12 h-12 rounded-full bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center">
+                                <i class="fas fa-users text-white"></i>
+                            </div>
+                            ${unreadCount > 0 ? `<div class="w-3 h-3 bg-blue-500 rounded-full absolute -mt-1 -ml-1 animate-pulse"></div>` : ''}
+                        </div>
+                        <div class="flex-1 min-w-0">
+                            <div class="flex items-center justify-between mb-1">
+                                <h3 class="font-bold text-white text-lg">${branch.name}</h3>
+                                <span class="text-xs text-gray-400">${branch.members.length} members</span>
+                            </div>
+                            <p class="text-sm text-gray-400 mb-2">${memberNames}${branch.members.length > 3 ? '...' : ''}</p>
+                            ${unreadCount > 0 ? `
+                                <span class="inline-flex items-center px-2 py-1 bg-blue-500/20 text-blue-400 rounded-full text-xs">
+                                    <i class="fas fa-envelope mr-1"></i>${unreadCount} new messages
+                                </span>
+                            ` : ''}
+                        </div>
+                    </div>
+                </div>
+            `;
+        } else {
+            // Render message
+            const message = item.data;
+            const fromUser = this.state.users.find(u => u.id === message.from);
+            const toUser = this.state.users.find(u => u.id === message.to);
+            const otherUser = message.from === this.state.currentUser.id ? toUser : fromUser;
+            const senderName = fromUser ? fromUser.name : 'System';
+            const isUnread = message.to === this.state.currentUser.id && !message.read;
+            const isSentByMe = message.from === this.state.currentUser.id;
+            const isSystemAlert = message.from === 1 && message.category === 'emergency';
+            
+            return `
+                <div class="p-4 hover:bg-gray-800/50 transition-all duration-200 cursor-pointer ${isUnread ? 'bg-blue-900/10 border-l-4 border-blue-500' : ''}"
+                     onclick="app.openMessage(${message.id})">
+                    <div class="flex items-start space-x-4">
+                        <div class="flex-shrink-0 relative">
+                            <div class="w-12 h-12 rounded-full flex items-center justify-center ${
+                                isSystemAlert ? 'bg-red-500/20 animate-pulse' : 
+                                'bg-gradient-to-br from-teal-500 to-blue-500'
+                            }">
+                                ${isSystemAlert ? 
+                                    '<i class="fas fa-robot text-red-400"></i>' :
+                                    `<span class="text-white font-bold">${otherUser ? otherUser.name.charAt(0) : 'S'}</span>`
+                                }
+                            </div>
+                            ${isUnread ? '<div class="w-3 h-3 bg-blue-500 rounded-full absolute top-0 right-0 animate-pulse"></div>' : ''}
+                        </div>
+                        <div class="flex-1 min-w-0">
+                            <div class="flex items-center justify-between mb-1">
+                                <div class="flex items-center space-x-2">
+                                    <span class="font-semibold ${isSystemAlert ? 'text-red-400' : 'text-white'}">
+                                        ${isSystemAlert ? '🤖 AccuraBot Alert' : senderName}
+                                    </span>
+                                    ${isSentByMe ? '<span class="text-xs text-gray-500"><i class="fas fa-check-double text-blue-400"></i></span>' : ''}
+                                    ${message.type === 'task' ? `
+                                        <span class="px-2 py-0.5 text-xs font-semibold rounded-full ${
+                                            message.status === 'completed' ? 'bg-green-500/20 text-green-400' :
+                                            message.status === 'declined' ? 'bg-red-500/20 text-red-400' :
+                                            message.status.includes('pending') ? 'bg-yellow-500/20 text-yellow-400' :
+                                            'bg-purple-500/20 text-purple-400'
+                                        }">
+                                            ${message.status.replace(/_/g, ' ')}
+                                        </span>
+                                    ` : ''}
+                                </div>
+                                <span class="text-xs text-gray-400">${this.formatMessageTime(message.timestamp)}</span>
+                            </div>
+                            <div class="font-medium text-gray-300 mb-1">${message.subject}</div>
+                            <div class="text-sm text-gray-400 line-clamp-2">${message.content}</div>
+                            
+                            <!-- Quick Actions -->
+                            <div class="flex items-center space-x-4 mt-3">
+                                ${!message.read && message.to === this.state.currentUser.id ? `
+                                    <button onclick="event.stopPropagation(); app.markAsRead(${message.id})" 
+                                            class="text-xs text-blue-400 hover:text-blue-300 transition-colors">
+                                        <i class="fas fa-check mr-1"></i>Mark as read
+                                    </button>
+                                ` : ''}
+                                ${message.type !== 'task' ? `
+                                    <button onclick="event.stopPropagation(); app.quickReply(${message.id})" 
+                                            class="text-xs text-teal-400 hover:text-teal-300 transition-colors">
+                                        <i class="fas fa-reply mr-1"></i>Quick Reply
+                                    </button>
+                                ` : ''}
+                                <button onclick="event.stopPropagation(); app.deleteMessage(${message.id})" 
+                                        class="text-xs text-red-400 hover:text-red-300 transition-colors">
+                                    <i class="fas fa-trash mr-1"></i>Delete
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+    }).join('');
 },
+
+
+// Format message timestamp like WhatsApp
+formatMessageTime(timestamp) {
+    const date = new Date(timestamp);
+    const now = new Date();
+    const diffMs = now - date;
+    const diffMins = Math.floor(diffMs / 60000);
+    const diffHours = Math.floor(diffMs / 3600000);
+    const diffDays = Math.floor(diffMs / 86400000);
+
+    if (diffMins < 1) return 'Just now';
+    if (diffMins < 60) return `${diffMins}m ago`;
+    if (diffHours < 24) return `${diffHours}h ago`;
+    if (diffDays < 7) return `${diffDays}d ago`;
+    return date.toLocaleDateString();
+},
+
+// Handle inbox search with employee suggestions
+handleInboxSearch(event) {
+    this.state.inboxSearchTerm = event.target.value;
+    const searchTerm = event.target.value.toLowerCase();
+    const resultsContainer = document.getElementById('employee-search-results');
+    
+    if (searchTerm.length > 0) {
+        const matchingUsers = this.state.users.filter(user => 
+            user.name.toLowerCase().includes(searchTerm) ||
+            user.role.toLowerCase().includes(searchTerm)
+        );
+        
+        if (matchingUsers.length > 0) {
+            resultsContainer.innerHTML = matchingUsers.map(user => `
+                <div class="p-3 hover:bg-gray-700 cursor-pointer flex items-center space-x-3 transition-colors"
+                     onclick="app.startConversationWith(${user.id})">
+                    <div class="w-10 h-10 rounded-full bg-gradient-to-br from-teal-500 to-blue-500 flex items-center justify-center">
+                        <span class="text-white font-bold">${user.name.charAt(0)}</span>
+                    </div>
+                    <div>
+                        <div class="text-white font-medium">${user.name}</div>
+                        <div class="text-gray-400 text-sm">${user.role}</div>
+                    </div>
+                </div>
+            `).join('');
+            resultsContainer.classList.remove('hidden');
+        } else {
+            resultsContainer.classList.add('hidden');
+        }
+    } else {
+        resultsContainer.classList.add('hidden');
+    }
+    
+    this.renderInbox();
+},
+
+// Start conversation with specific user
+startConversationWith(userId) {
+    const user = this.state.users.find(u => u.id === userId);
+    if (user) {
+        document.getElementById('employee-search-results').classList.add('hidden');
+        this.showModal('compose-message', userId);
+    }
+},
+
+// Set inbox filter
+setInboxFilter(filter) {
+    this.state.inboxFilter = filter;
+    this.saveData();
+    this.render();
+},
+
+// Mark message as read
+markAsRead(messageId) {
+    const message = this.state.messages.find(m => m.id === messageId);
+    if (message) {
+        message.read = true;
+        this.saveData();
+        this.renderInbox();
+        NotificationSystem.success('Message marked as read');
+    }
+},
+
+// Open message in modal
+openMessage(messageId) {
+    const message = this.state.messages.find(m => m.id === messageId);
+    if (message && message.to === this.state.currentUser.id && !message.read) {
+        message.read = true;
+        this.saveData();
+    }
+    this.showModal('view-message', messageId);
+},
+
+// Quick reply function
+quickReply(messageId) {
+    const message = this.state.messages.find(m => m.id === messageId);
+    if (message) {
+        const replyContent = prompt('Type your quick reply:');
+        if (replyContent) {
+            const reply = {
+                id: Date.now(),
+                from: this.state.currentUser.id,
+                to: message.from === this.state.currentUser.id ? message.to : message.from,
+                subject: `Re: ${message.subject}`,
+                content: replyContent,
+                type: 'personal',
+                category: 'reply',
+                timestamp: new Date().toISOString(),
+                read: false
+            };
+            this.state.messages.push(reply);
+            this.saveData();
+            this.renderInbox();
+            NotificationSystem.success('Reply sent!');
+        }
+    }
+},
+
+// Open branch chat
+openBranchChat(branchId) {
+    const branch = this.state.branches.find(b => b.id === branchId);
+    if (branch) {
+        this.showModal('branch-chat', branchId);
+    }
+},
+
+
+// Start conversation with specific user
+startConversationWith(userId) {
+    const user = this.state.users.find(u => u.id === userId);
+    if (user) {
+        document.getElementById('employee-search-results').classList.add('hidden');
+        this.showModal('compose-message', userId);
+    }
+},
+
+// Set inbox filter
+setInboxFilter(filter) {
+    this.state.inboxFilter = filter;
+    this.saveData();
+    this.render();
+},
+
+// Mark message as read
+markAsRead(messageId) {
+    const message = this.state.messages.find(m => m.id === messageId);
+    if (message) {
+        message.read = true;
+        this.saveData();
+        this.renderInbox();
+        NotificationSystem.success('Message marked as read');
+    }
+},
+
+// Open message in modal
+openMessage(messageId) {
+    const message = this.state.messages.find(m => m.id === messageId);
+    if (message && message.to === this.state.currentUser.id && !message.read) {
+        message.read = true;
+        this.saveData();
+    }
+    this.showModal('view-message', messageId);
+},
+
+// Quick reply function
+quickReply(messageId) {
+    const message = this.state.messages.find(m => m.id === messageId);
+    if (message) {
+        const replyContent = prompt('Type your quick reply:');
+        if (replyContent) {
+            const reply = {
+                id: Date.now(),
+                from: this.state.currentUser.id,
+                to: message.from === this.state.currentUser.id ? message.to : message.from,
+                subject: `Re: ${message.subject}`,
+                content: replyContent,
+                type: 'personal',
+                category: 'reply',
+                timestamp: new Date().toISOString(),
+                read: false
+            };
+            this.state.messages.push(reply);
+            this.saveData();
+            this.renderInbox();
+            NotificationSystem.success('Reply sent!');
+        }
+    }
+},
+
+// Open branch chat
+openBranchChat(branchId) {
+    const branch = this.state.branches.find(b => b.id === branchId);
+    if (branch) {
+        // Create a branch message modal or navigate to branch chat
+        this.showModal('branch-chat', branchId);
+    }
+},
+
             
             // Add this new function to the `app` object
             addJournalEntry(date, description, entries) {
@@ -5826,110 +6488,91 @@ getSettingsView() {
                 `;
             },
 
-getInboxView() {
-    // This logic runs only on the initial load of the view.
-    // The efficient renderInbox() function will handle subsequent updates from search/filter.
-    const filteredMessages = this.state.messages
-        .filter(m => {
-            if (this.state.inboxFilter === 'all') return true;
-            return m.type === this.state.inboxFilter;
-        })
-        .filter(m => {
-            const searchTerm = this.state.inboxSearchTerm.toLowerCase();
-            if (searchTerm === '') return true;
-            return m.subject.toLowerCase().includes(searchTerm) || m.content.toLowerCase().includes(searchTerm);
-        })
-        .sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
-
-    const unreadCount = this.state.messages.filter(m => !m.read).length;
-
+            getInboxView() {
+    const unreadCount = this.state.messages.filter(m => m.to === this.state.currentUser.id && !m.read).length;
+    const userBranches = this.state.branches.filter(b => b.members.includes(this.state.currentUser.id));
+    
     return `
         <div class="space-y-6 fade-in">
             <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                 <div>
-                    <h2 class="text-2xl font-bold text-white mb-2">Inbox</h2>
-                    <p class="text-gray-400">${unreadCount} unread messages</p>
+                    <h2 class="text-2xl font-bold text-white mb-2">
+                        <i class="fas fa-comments text-teal-400 mr-2"></i>Messages
+                    </h2>
+                    <p class="text-gray-400">${unreadCount} unread conversations</p>
                 </div>
                 <div class="flex space-x-3">
-                    <button data-action="create-branch" class="ai-button px-4 py-2 rounded-xl font-medium">
-                        <i class="fas fa-users mr-2"></i>Create Branch
-                    </button>
+                    ${['admin', 'manager'].includes(this.state.currentUser.role) ? `
+                        <button data-action="create-branch" class="ai-button px-4 py-2 rounded-xl font-medium">
+                            <i class="fas fa-users mr-2"></i>Create Branch
+                        </button>
+                    ` : ''}
                     <button data-action="compose-message" class="perplexity-button px-4 py-2 rounded-xl font-medium">
-                        <i class="fas fa-edit mr-2"></i>Compose
+                        <i class="fas fa-edit mr-2"></i>New Message
                     </button>
                 </div>
             </div>
 
+            <!-- Enhanced Search Bar with Employee Search -->
             <div class="perplexity-card p-4">
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    <div class="md:col-span-2">
-                        <input type="text" id="inbox-search" placeholder="Search by subject or content..." class="form-input w-full" oninput="app.handleAction('search-inbox', null, event)" value="${this.state.inboxSearchTerm}">
-                    </div>
-                    <div>
-                        <select id="inbox-filter" class="form-input w-full" onchange="app.handleAction('filter-inbox', null, event)">
-                            <option value="all" ${this.state.inboxFilter === 'all' ? 'selected' : ''}>All Messages</option>
-                            <option value="personal" ${this.state.inboxFilter === 'personal' ? 'selected' : ''}>Personal</option>
-                            <option value="branch" ${this.state.inboxFilter === 'branch' ? 'selected' : ''}>Branch</option>
-                            <option value="task" ${this.state.inboxFilter === 'task' ? 'selected' : ''}>Tasks</option>
-                        </select>
+                <div class="relative">
+                    <input 
+                        type="text" 
+                        id="inbox-search" 
+                        placeholder="Search messages, employees, or branches..." 
+                        class="form-input w-full pl-10 pr-4" 
+                        oninput="app.handleInboxSearch(event)"
+                        value="${this.state.inboxSearchTerm || ''}"
+                    >
+                    <i class="fas fa-search absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+                    
+                    <!-- Employee Search Results Dropdown -->
+                    <div id="employee-search-results" class="absolute top-full left-0 right-0 mt-2 bg-gray-800 rounded-lg shadow-xl border border-gray-700 hidden z-50 max-h-60 overflow-y-auto">
+                        <!-- Results will be populated here -->
                     </div>
                 </div>
             </div>
 
+            <!-- Tab Navigation -->
+            <div class="flex space-x-1 bg-gray-800/50 p-1 rounded-xl">
+                <button 
+                    onclick="app.setInboxFilter('all')" 
+                    class="flex-1 px-4 py-2 rounded-lg font-medium transition-all ${this.state.inboxFilter === 'all' ? 'inbox-tab-active' : 'text-gray-400 hover:text-white hover:bg-gray-700/50'}"
+                >
+                    <i class="fas fa-inbox mr-2"></i>All
+                </button>
+                <button 
+                    onclick="app.setInboxFilter('personal')" 
+                    class="flex-1 px-4 py-2 rounded-lg font-medium transition-all ${this.state.inboxFilter === 'personal' ? 'inbox-tab-active' : 'text-gray-400 hover:text-white hover:bg-gray-700/50'}"
+                >
+                    <i class="fas fa-user mr-2"></i>Personal
+                </button>
+                <button 
+                    onclick="app.setInboxFilter('branch')" 
+                    class="flex-1 px-4 py-2 rounded-lg font-medium transition-all ${this.state.inboxFilter === 'branch' ? 'inbox-tab-active' : 'text-gray-400 hover:text-white hover:bg-gray-700/50'}"
+                >
+                    <i class="fas fa-users mr-2"></i>Branches
+                </button>
+                <button 
+                    onclick="app.setInboxFilter('task')" 
+                    class="flex-1 px-4 py-2 rounded-lg font-medium transition-all ${this.state.inboxFilter === 'task' ? 'inbox-tab-active' : 'text-gray-400 hover:text-white hover:bg-gray-700/50'}"
+                >
+                    <i class="fas fa-tasks mr-2"></i>Tasks
+                </button>
+            </div>
+
+            <!-- Messages List Container -->
             <div class="perplexity-card overflow-hidden">
                 <div id="inbox-list-container" class="divide-y divide-gray-700">
-                    ${filteredMessages.length > 0 ? filteredMessages.map(message => {
-                        const fromUser = this.state.users.find(u => u.id === message.from);
-                        const senderName = fromUser ? fromUser.name : 'System';
-                        const isUnread = !message.read;
-                        const icons = { personal: 'fa-user', branch: 'fa-users', task: 'fa-clipboard-list' };
-                        const statusColors = {
-                            pending_worker_approval: 'bg-yellow-500/20 text-yellow-400',
-                            pending_manager_approval: 'bg-blue-500/20 text-blue-400',
-                            approved_pending_acceptance: 'bg-purple-500/20 text-purple-400',
-                            completed: 'bg-green-500/20 text-green-400',
-                            declined: 'bg-red-500/20 text-red-400',
-                        };
-                        return `
-                        <div class="p-4 hover:bg-gray-800/50 transition-colors ${isUnread ? 'bg-blue-900/20 border-l-4 border-blue-500' : ''}">
-                            <div class="flex items-start space-x-4">
-                                <div class="flex-shrink-0">
-                                    <div class="w-10 h-10 rounded-full flex items-center justify-center bg-gray-700">
-                                        <i class="fas ${icons[message.type] || 'fa-envelope'} text-gray-300"></i>
-                                    </div>
-                                </div>
-                                <div class="flex-1 min-w-0">
-                                    <div class="flex items-center justify-between flex-wrap gap-2">
-                                        <div class="flex items-center space-x-3">
-                                            <span class="text-white font-medium truncate">${senderName}</span>
-                                            ${isUnread ? '<span class="px-2 py-0.5 text-xs bg-blue-500 text-white rounded-full font-semibold">NEW</span>' : ''}
-                                        </div>
-                                        <span class="text-gray-400 text-sm flex-shrink-0">${new Date(message.timestamp).toLocaleDateString()}</span>
-                                    </div>
-                                    <div class="text-gray-300 font-medium mt-1 truncate">${message.subject}</div>
-                                    <div class="flex items-center space-x-4 mt-3">
-                                        <button data-action="view-message" data-id="${message.id}" class="text-blue-400 hover:text-blue-300 text-sm font-medium transition-colors">
-                                            <i class="fas fa-eye mr-1"></i>View Details
-                                        </button>
-                                        <button data-action="delete-message" data-id="${message.id}" class="text-red-400 hover:text-red-300 text-sm font-medium transition-colors">
-                                            <i class="fas fa-trash mr-1"></i>Delete
-                                        </button>
-                                        ${message.type === 'task' ? `<span class="px-2 py-1 text-xs font-semibold rounded-full ${statusColors[message.status] || ''}">${message.status.replace(/_/g, ' ')}</span>` : `<span class="px-2 py-1 text-xs font-semibold rounded-full bg-gray-600/50 text-gray-300">${message.category}</span>`}
-                                    </div>
-                                </div>
-                            </div>
-                        </div>`;
-                    }).join('') : `
-                        <div class="text-center py-12 text-gray-500">
-                            <i class="fas fa-inbox text-4xl mb-4"></i>
-                            <p>No messages found.</p>
-                        </div>
-                    `}
+                    <!-- Messages will be rendered here by renderInbox() -->
                 </div>
             </div>
         </div>
     `;
 },
+
+
+
 
     handleBotStockAlertAction(lowStockProducts) {
         const manager = this.state.users.find(u => u.role === 'manager');
@@ -6045,7 +6688,68 @@ getInboxView() {
     handleReplyForm(data) {
         // This can re-use the existing message form logic
         this.handleMessageForm(data);
+    },
+
+   // Send message to branch
+sendBranchMessage(event, branchId) {
+    event.preventDefault();
+    const input = document.getElementById('branch-message-input');
+    const content = input.value.trim();
+    
+    if (!content) return;
+    
+    const branch = this.state.branches.find(b => b.id === branchId);
+    if (!branch) return;
+    
+    // Create message for each branch member (except sender)
+    branch.members.forEach(memberId => {
+        if (memberId !== this.state.currentUser.id) {
+            const message = {
+                id: Date.now() + memberId,
+                from: this.state.currentUser.id,
+                to: memberId,
+                subject: `Branch: ${branch.name}`,
+                content: content,
+                type: 'branch',
+                branchId: branchId,
+                category: 'branch',
+                timestamp: new Date().toISOString(),
+                read: false
+            };
+            this.state.messages.push(message);
+        }
+    });
+    
+    // Also save a copy for the sender
+    const senderCopy = {
+        id: Date.now(),
+        from: this.state.currentUser.id,
+        to: this.state.currentUser.id,
+        subject: `Branch: ${branch.name}`,
+        content: content,
+        type: 'branch',
+        branchId: branchId,
+        category: 'branch',
+        timestamp: new Date().toISOString(),
+        read: true
+    };
+    this.state.messages.push(senderCopy);
+    
+    this.saveData();
+    input.value = '';
+    
+    // Refresh the modal content
+    this.showModal('branch-chat', branchId);
+    NotificationSystem.success('Message sent to branch!');
+
+
+
+
     }
+
+
+      
+
 };
 
 // Initialize the application
