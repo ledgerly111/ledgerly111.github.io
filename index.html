@@ -4654,6 +4654,13 @@ openBranchChat(branchId) {
                     </div>
                 `;
 
+                // *** THIS IS THE KEY FIX ***
+                // If the view is 'inbox', it needs its contents to be rendered separately.
+                if (this.state.currentView === 'inbox') {
+                    // Use a small timeout to ensure the DOM is fully updated before we fill the inbox list.
+                    setTimeout(() => this.renderInbox(), 0);
+                }
+
                 // Initialize charts if needed
                 if (this.state.currentView === 'dashboard') {
                     setTimeout(() => {
