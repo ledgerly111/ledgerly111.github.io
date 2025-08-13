@@ -171,7 +171,134 @@
             visibility: hidden;
             transition: all 0.3s ease;
         }
+ 
+        /* === NEW CSS FOR QUICK SALE === */
 
+/* Main container for the multi-step process */
+.quick-sale-step-container {
+    display: none; /* Hide all steps by default */
+    animation: fadeIn 0.6s ease-out; /* Use existing fade-in */
+}
+.quick-sale-step-container.active {
+    display: flex; /* Show only the active step */
+    flex-direction: column;
+    height: 100%;
+}
+
+/* Gradient Tracing Animation */
+.gradient-tracing-container {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    z-index: -1; /* Place it behind the content */
+    border-radius: 16px; /* Match the card's border */
+}
+
+.gradient-tracing-svg {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    min-width: 100%;
+    min-height: 100%;
+}
+
+/* This keyframe animation mimics the React motion component */
+@keyframes trace-gradient {
+    0% {
+        stroke-dashoffset: 2000;
+    }
+    100% {
+        stroke-dashoffset: 0;
+    }
+}
+
+.animated-trace-path {
+    stroke: url(#quick-sale-gradient);
+    stroke-linecap: round;
+    stroke-dasharray: 2000;
+    animation: trace-gradient 15s linear infinite;
+}
+
+/* Quantity Slider Styling */
+.quantity-slider-container {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    width: 100%;
+}
+/* ADD THIS CSS FOR THE NEW CANCEL BUTTON */
+.quick-sale-cancel-button {
+    position: absolute;
+    top: 1rem;
+    right: 1.5rem;
+    width: 44px;
+    height: 44px;
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 50%;
+    color: white;
+    font-size: 2rem;
+    line-height: 44px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    z-index: 10;
+}
+
+.quick-sale-cancel-button:hover {
+    background: rgba(255, 255, 255, 0.2);
+    transform: rotate(90deg) scale(1.1);
+}
+.quantity-slider {
+    flex-grow: 1;
+    -webkit-appearance: none;
+    appearance: none;
+    height: 8px;
+    background: rgba(4, 25, 248, 0.2); /* Use quick sale accent color */
+    outline: none;
+    border-radius: 4px;
+    transition: opacity .2s;
+}
+
+/* Slider Thumb for Webkit browsers (Chrome, Safari) */
+.quantity-slider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background: #0419f8; /* Quick sale accent color */
+    cursor: pointer;
+    border: 2px solid #fff;
+    box-shadow: 0 0 10px rgba(4, 25, 248, 0.7);
+}
+
+/* Slider Thumb for Firefox */
+.quantity-slider::-moz-range-thumb {
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background: #0419f8; /* Quick sale accent color */
+    cursor: pointer;
+    border: 2px solid #fff;
+    box-shadow: 0 0 10px rgba(4, 25, 248, 0.7);
+}
+
+.quantity-input {
+    width: 70px;
+    padding: 0.5rem;
+    text-align: center;
+    font-size: 1.1rem;
+    font-weight: bold;
+    background-color: rgba(255, 255, 255, 0.1);
+    border: 1px solid #0419f8;
+    color: var(--text-primary);
+    border-radius: 8px;
+}
        /* WhatsApp-style message bubbles and inbox improvements */
 .message-bubble-container {
     display: flex;
@@ -2103,17 +2230,18 @@ journal: [],
                 }
             },
 
-             saveData() {
+             // THIS IS THE CORRECTED saveData FUNCTION
+            saveData() {
                 // Create a copy of the state to avoid modifying the live application state.
                 const stateToSave = { ...this.state };
 
                 // List all the temporary properties that should NOT be saved.
-                // These are mostly related to the UI or temporary animations.
                 const transientKeys = [
                     'pixelAnimation',
                     'mobileMenuOpen',
                     'aiLoading',
-                    'aiAnswer'
+                    'aiAnswer',
+                    'quickSale' // <-- ADDED THIS KEY TO PREVENT SAVING THE QUICK SALE STATE
                 ];
 
                 // Remove each of these temporary properties from the copy before we save it.
@@ -2229,7 +2357,7 @@ journal: [],
     'reports': () => this.navigateToView('reports'),
     'settings': () => this.navigateToView('settings'),
     'inbox': () => this.navigateToView('inbox'),
-    'ai-assistant': () => this.navigateToView('ai-assistant'),
+    'ai-assistant': () => this.navigateToView('accura-ai'),
     'journal': () => this.navigateToView('journal'),
     'pnl': () => this.navigateToView('pnl'),
     'ledger': () => this.navigateToView('ledger'),
@@ -3664,262 +3792,345 @@ journal: [],
                 </div>`;
             },
 
-            // Quick Sale Feature Logic
+   // =================================================================
+// === START OF THE FINAL, COMPLETE REPLACEMENT CODE BLOCK       ===
+// =================================================================
+
+            // === NEW, EXPANDED QUICK SALE LOGIC ===
+
             startQuickSale() {
+                // Reset or initialize the quick sale state
                 this.state.quickSale = {
                     active: true,
-                    selectedCustomer: null,
-                    selectedProducts: [], // { productId, quantity, unitPrice }
-                    discount: 0,
-                    paymentType: 'Cash',
-                    subtotal: 0,
-                    taxAmount: 0,
-                    total: 0
+                    currentStep: 1,
+                    selectedProductIds: [],
+                    productQuantities: {}, // { productId: quantity }
+                    selectedCustomerId: null,
                 };
-                this.render();
+                this.render(); 
             },
 
             cancelQuickSale() {
+                // Set the active flag to false to exit the quick sale view
                 this.state.quickSale.active = false;
+                // Re-render the app to show the previous screen (e.g., Dashboard)
                 this.render();
-                NotificationSystem.info('Quick Sale cancelled.');
+                // Show a confirmation message
+                NotificationSystem.info('Quick Sale Cancelled.');
             },
 
-            quickSaleAddProduct(productId, event) {
-                const pId = parseInt(productId);
-                const product = this.state.products.find(p => p.id === pId);
-                if (!product) return;
-
-                const existingItemIndex = this.state.quickSale.selectedProducts.findIndex(item => item.productId === pId);
-
-                if (existingItemIndex > -1) {
-                    // If already in cart, increment quantity
-                    if (this.state.quickSale.selectedProducts[existingItemIndex].quantity < product.stock) {
-                        this.state.quickSale.selectedProducts[existingItemIndex].quantity++;
-                        NotificationSystem.info(`Added another ${product.name} to cart.`);
-                    } else {
-                        NotificationSystem.warning(`Max stock reached for ${product.name}.`);
-                    }
-                } else {
-                    // Add product with default quantity 1 and its price
-                    this.state.quickSale.selectedProducts.push({
-                        productId: pId,
-                        quantity: 1,
-                        unitPrice: product.price
+            bindQuickSaleEvents() {
+                // This function will set up all the interactivity for the new UI
+                document.querySelectorAll('[data-action="qs-add-product"]').forEach(el => {
+                    el.addEventListener('click', (e) => {
+                        const id = parseInt(el.dataset.id);
+                        el.classList.toggle('selected');
+                        el.querySelector('.fa-check-circle').parentElement.classList.toggle('hidden');
+                        
+                        if (this.state.quickSale.selectedProductIds.includes(id)) {
+                            this.state.quickSale.selectedProductIds = this.state.quickSale.selectedProductIds.filter(pid => pid !== id);
+                        } else {
+                            this.state.quickSale.selectedProductIds.push(id);
+                        }
                     });
-                    NotificationSystem.success(`${product.name} added to cart.`);
-                }
-                this.updateQuickSaleCalculations();
-                this.render(); // Re-render to update cart and product card visuals
-            },
-
-            quickSaleRemoveProduct(productId) {
-                const pId = parseInt(productId);
-                this.state.quickSale.selectedProducts = this.state.quickSale.selectedProducts.filter(item => item.productId !== pId);
-                this.updateQuickSaleCalculations();
-                this.render();
-                NotificationSystem.info('Product removed from cart.');
-            },
-
-            quickSaleUpdateQuantity(productId, change, isDelta = false) {
-                const pId = parseInt(productId);
-                const itemIndex = this.state.quickSale.selectedProducts.findIndex(item => item.productId === pId);
-
-                if (itemIndex > -1) {
-                    const product = this.state.products.find(p => p.id === pId);
-                    let newQuantity = isDelta ? this.state.quickSale.selectedProducts[itemIndex].quantity + change : parseInt(change);
-
-                    newQuantity = Math.max(1, Math.min(newQuantity, product.stock)); // Ensure quantity is at least 1 and not more than stock
-
-                    this.state.quickSale.selectedProducts[itemIndex].quantity = newQuantity;
-                    this.updateQuickSaleCalculations();
-                    this.render(); // Re-render to update quantity display and totals
-                }
-            },
-
-            updateQuickSaleCalculations() {
-                let subtotal = 0;
-                this.state.quickSale.selectedProducts.forEach(item => {
-                    subtotal += (item.quantity * item.unitPrice);
                 });
-                this.state.quickSale.subtotal = subtotal;
 
-                const discountInput = document.getElementById('quickSaleDiscount');
-                const discount = parseFloat(discountInput?.value) || 0;
-                this.state.quickSale.discount = discount;
+                document.querySelectorAll('[data-action="qs-select-customer"]').forEach(el => {
+                     el.addEventListener('click', (e) => {
+                        this.state.quickSale.selectedCustomerId = parseInt(el.dataset.id);
+                        // Visually mark selection
+                        document.querySelectorAll('[data-action="qs-select-customer"]').forEach(btn => btn.classList.remove('selected'));
+                        el.classList.add('selected');
+                     });
+                });
 
-                let finalSubtotal = subtotal - discount;
-                if (finalSubtotal < 0) finalSubtotal = 0;
+                document.querySelectorAll('[data-action="qs-next-step"]').forEach(el => {
+                    el.addEventListener('click', () => this.navigateQuickSale(1));
+                });
+                 document.querySelectorAll('[data-action="qs-prev-step"]').forEach(el => {
+                    el.addEventListener('click', () => this.navigateQuickSale(-1));
+                });
+            },
 
-                const taxRate = this.getTaxInfo().rate;
-                const taxAmount = finalSubtotal * taxRate;
-                const total = finalSubtotal + taxAmount;
+            navigateQuickSale(direction) {
+                const { quickSale } = this.state;
+                const nextStep = quickSale.currentStep + direction;
 
-                this.state.quickSale.taxAmount = taxAmount;
-                this.state.quickSale.total = total;
-
-                // Update UI elements directly without full re-render for performance
-                const totalElement = document.getElementById('quickSaleFinalTotal');
-                if (totalElement) {
-                    totalElement.textContent = this.formatCurrency(total);
-                }
-                const subtotalElement = document.getElementById('quickSaleSubtotal');
-                if (subtotalElement) {
-                    subtotalElement.textContent = this.formatCurrency(subtotal);
-                }
-                const discountDisplayElement = document.getElementById('quickSaleDiscountDisplay');
-                if (discountDisplayElement) {
-                    discountDisplayElement.textContent = `(${this.formatCurrency(discount)})`;
-                }
-                const taxElement = document.getElementById('quickSaleTax');
-                if (taxElement) {
-                    taxElement.textContent = this.formatCurrency(taxAmount);
-                }
-                const finalSubtotalElement = document.getElementById('quickSaleFinalSubtotal');
-                if (finalSubtotalElement) {
-                    finalSubtotalElement.textContent = this.formatCurrency(finalSubtotal);
-                }
-
-                // Enable/disable finalize button
-                const finalizeButton = document.getElementById('finalizeQuickSaleButton');
-                if (finalizeButton) {
-                    finalizeButton.disabled = !(this.state.quickSale.selectedProducts.length > 0 && this.state.quickSale.selectedCustomer);
-                    if (finalizeButton.disabled) {
-                        finalizeButton.classList.add('opacity-50', 'cursor-not-allowed');
-                    } else {
-                        finalizeButton.classList.remove('opacity-50', 'cursor-not-allowed');
+                // --- Validation before proceeding ---
+                if (direction > 0) {
+                    if (quickSale.currentStep === 1 && quickSale.selectedProductIds.length === 0) {
+                        NotificationSystem.error("Please select at least one product.");
+                        return;
+                    }
+                     if (quickSale.currentStep === 3 && !quickSale.selectedCustomerId) {
+                        NotificationSystem.error("Please select a customer.");
+                        return;
                     }
                 }
+                
+                // --- Logic to run when entering a new step ---
+                if (nextStep === 2) {
+                    this.renderQuantitySliders();
+                }
+                if (nextStep === 4) {
+                    this.renderSaleSummary();
+                }
+
+                // --- Update UI ---
+                document.getElementById(`qs-step-${quickSale.currentStep}`).classList.remove('active');
+                document.getElementById(`qs-step-${nextStep}`).classList.add('active');
+                document.getElementById('quick-sale-progress-fill').style.width = `${nextStep * 25}%`;
+                
+                quickSale.currentStep = nextStep;
             },
+
+            renderQuantitySliders() {
+                const { selectedProductIds, productQuantities } = this.state.quickSale;
+                const container = document.getElementById('qs-quantity-list');
+                
+                container.innerHTML = selectedProductIds.map(id => {
+                    const product = this.state.products.find(p => p.id === id);
+                    const currentQuantity = productQuantities[id] || 1; // Default to 1
+                    // Set initial quantity if not already set
+                    if (!productQuantities[id]) {
+                        productQuantities[id] = 1;
+                    }
+
+                    return `
+                    <div class="perplexity-card p-4">
+                        <p class="font-bold text-lg text-white mb-3">${product.name}</p>
+                        <div class="quantity-slider-container">
+                           <input type="range" min="1" max="${product.stock}" value="${currentQuantity}" class="quantity-slider" data-id="${id}">
+                           <input type="number" min="1" max="${product.stock}" value="${currentQuantity}" class="quantity-input" data-id="${id}">
+                        </div>
+                    </div>
+                    `;
+                }).join('');
+
+                // Bind events for the newly created sliders and inputs
+                container.querySelectorAll('.quantity-slider, .quantity-input').forEach(el => {
+                    el.addEventListener('input', (e) => {
+                        const id = parseInt(e.target.dataset.id);
+                        let value = parseInt(e.target.value);
+                        const product = this.state.products.find(p => p.id === id);
+
+                        // Clamp the value to be within stock limits
+                        if (value > product.stock) value = product.stock;
+                        if (value < 1) value = 1;
+                        
+                        this.state.quickSale.productQuantities[id] = value;
+                        // Sync the other input
+                        container.querySelector(`.quantity-slider[data-id="${id}"]`).value = value;
+                        container.querySelector(`.quantity-input[data-id="${id}"]`).value = value;
+                    });
+                });
+            },
+
+            renderSaleSummary() {
+                 const { selectedProductIds, productQuantities, selectedCustomerId } = this.state.quickSale;
+                 const container = document.getElementById('qs-summary');
+                 const customer = this.state.customers.find(c => c.id === selectedCustomerId);
+
+                 let subtotal = 0;
+                 const itemsHtml = selectedProductIds.map(id => {
+                     const product = this.state.products.find(p => p.id === id);
+                     const quantity = productQuantities[id];
+                     const total = product.price * quantity;
+                     subtotal += total;
+                     return `<div class="flex justify-between text-gray-300">
+                                <span>${quantity} x ${product.name}</span>
+                                <span>${this.formatCurrency(total)}</span>
+                             </div>`;
+                 }).join('');
+                 
+                 const taxInfo = this.getTaxInfo();
+                 const taxAmount = subtotal * taxInfo.rate;
+                 const total = subtotal + taxAmount;
+
+                 container.innerHTML = `
+                    <p class="text-lg font-bold text-white mb-4">For: ${customer.name}</p>
+                    <div class="space-y-2 mb-4 pb-4 border-b border-gray-600">
+                        ${itemsHtml}
+                    </div>
+                    <div class="space-y-2">
+                         <div class="flex justify-between text-gray-300">
+                            <span>Subtotal</span>
+                            <span>${this.formatCurrency(subtotal)}</span>
+                        </div>
+                        <div class="flex justify-between text-gray-300">
+                            <span>${taxInfo.name} (${taxInfo.rate * 100}%)</span>
+                            <span>${this.formatCurrency(taxAmount)}</span>
+                        </div>
+                        <div class="flex justify-between text-white font-bold text-xl mt-2 pt-2 border-t border-gray-500">
+                            <span>Total</span>
+                            <span class="quick-sale-gradient-text">${this.formatCurrency(total)}</span>
+                        </div>
+                    </div>
+                 `;
+            },
+
+           // =================================================================
+// === START: Corrected code from finalizeQuickSale to renderInbox ===
+// =================================================================
 
             finalizeQuickSale() {
-                const customerId = parseInt(document.getElementById('quickSaleCustomerSelect').value);
-                const items = this.state.quickSale.selectedProducts;
-                const discount = parseFloat(document.getElementById('quickSaleDiscount').value) || 0;
-                const paymentType = document.getElementById('quickSalePaymentType').value;
+                const { productQuantities, selectedCustomerId } = this.state.quickSale;
+                
+                const saleItems = Object.entries(productQuantities).map(([productId, quantity]) => ({
+                    productId: parseInt(productId),
+                    quantity: quantity,
+                    unitPrice: this.state.products.find(p => p.id === parseInt(productId)).price
+                }));
 
-                if (!customerId) {
-                    NotificationSystem.error('No customer selected.');
-                    return;
-                }
-                if (items.length === 0) {
-                    NotificationSystem.error('No products selected.');
-                    return;
-                }
-
-                let subtotalBeforeDiscount = 0;
-                let totalProfit = 0;
-
-                items.forEach(item => {
-                    const product = this.state.products.find(p => p.id === item.productId);
-                    if (product) {
-                        subtotalBeforeDiscount += (item.unitPrice * item.quantity);
-                        totalProfit += ((item.unitPrice - product.cost) * item.quantity);
-                    }
-                });
-
-                let finalSubtotal = subtotalBeforeDiscount - discount;
-                if (finalSubtotal < 0) finalSubtotal = 0; // Ensure subtotal doesn't go negative due to discount
-
+                let subtotal = saleItems.reduce((sum, item) => sum + (item.unitPrice * item.quantity), 0);
                 const taxRate = this.getTaxInfo().rate;
-                const taxAmount = finalSubtotal * taxRate;
-                const total = finalSubtotal + taxAmount;
+                const taxAmount = subtotal * taxRate;
+                const total = subtotal + taxAmount;
 
                 const sale = {
                     id: Date.now(),
-                    customerId: customerId,
-                    items: items,
-                    subtotal: finalSubtotal, // This is subtotal AFTER discount
+                    customerId: selectedCustomerId,
+                    items: saleItems,
+                    subtotal: subtotal,
                     taxAmount: taxAmount,
                     taxRate: taxRate,
                     total: total,
                     date: new Date().toISOString().split('T')[0],
                     salesPersonId: this.state.currentUser.id,
-                    saleType: paymentType,
-                    country: this.state.selectedCountry,
-                    currency: GCC_COUNTRIES[this.state.selectedCountry].currency,
-                    discount: discount // Ensure discount is part of the sale object
+                    saleType: 'Cash',
+                    discount: 0
                 };
-
-                // Update product stock
-                items.forEach(item => {
+                
+                sale.items.forEach(item => {
                     const productIndex = this.state.products.findIndex(p => p.id === item.productId);
                     if (productIndex !== -1) {
                         this.state.products[productIndex].stock -= item.quantity;
                     }
                 });
 
-                // Update customer balance for credit sales
-                if (sale.saleType === 'Credit') {
-                    const customer = this.state.customers.find(c => c.id === sale.customerId);
-                    if (customer) {
-                        customer.balance += sale.total;
-                    }
-                }
-
-                // Calculate and update salesperson commission
-                const commission = totalProfit * 0.1; // 10% commission on profit
-                const userIndex = this.state.users.findIndex(u => u.id === this.state.currentUser.id);
-                if (userIndex !== -1) {
-                    this.state.users[userIndex].commission = (this.state.users[userIndex].commission || 0) + commission;
-                    if (this.state.currentUser.id === this.state.users[userIndex].id) {
-                        this.state.currentUser.commission = this.state.users[userIndex].commission;
-                    }
-                }
-
                 this.state.sales.push(sale);
-                this.createSaleJournalEntry(sale); // <-- ADD THIS LINE
+                this.createSaleJournalEntry(sale);
                 this.saveData();
                 this.updateAIInsights();
                 this.updateBotAnalysis();
-                this.state.quickSale.active = false; // Exit quick sale mode
+                this.state.quickSale.active = false;
                 this.render();
-                NotificationSystem.success(`⚡ Quick Sale recorded! Total: ${this.formatCurrency(sale.total)} | Commission: ${this.formatCurrency(commission)}`);
+                NotificationSystem.success(`⚡ Quick Sale recorded! Total: ${this.formatCurrency(sale.total)}`);
                 this.triggerStockAlertCheck();
             },
-   // This is a new function to add to the app object
-triggerStockAlertCheck() {
-    const lowStockProducts = this.state.products.filter(p => p.stock <= p.reorderLevel);
-    if (lowStockProducts.length > 0) {
-        const manager = this.state.users.find(u => u.role === 'manager');
-        if (!manager) return; // No manager to send to
 
-        lowStockProducts.forEach(product => {
-            // Check if a task for this product already exists and is not completed/declined
-            const existingTask = this.state.messages.find(m =>
-                m.type === 'task' &&
-                m.taskDetails?.productId === product.id &&
-                m.status !== 'completed' &&
-                m.status !== 'declined'
-            );
+            triggerStockAlertCheck() {
+                const lowStockProducts = this.state.products.filter(p => p.stock <= p.reorderLevel);
+                if (lowStockProducts.length > 0) {
+                    const manager = this.state.users.find(u => u.role === 'manager');
+                    if (!manager) return;
 
-            // Only create a new task if one doesn't already exist
-            if (!existingTask) {
-                const message = {
-                    id: Date.now() + product.id,
-                    from: 1, // System ID
-                    to: manager.id, // Directly send alert to the manager
-                    subject: `URGENT: Low Stock Alert for ${product.name}`,
-                    content: `Stock for ${product.name} (SKU: ${product.sku}) has fallen to ${product.stock}, which is at or below the reorder level of ${product.reorderLevel}. Please approve a new stock order.`,
-                    type: 'task',
-                    category: 'emergency',
-                    status: 'pending_manager_approval', // Manager must approve first
-                    timestamp: new Date().toISOString(),
-                    read: false,
-                    requesterId: 1, // System initiated this request
-                    history: [{ user: 'AccuraBot', action: 'Automated Alert Sent', timestamp: new Date().toISOString() }],
-                    taskDetails: {
-                        productId: product.id,
-                        requestedStock: (product.reorderLevel || 10) * 2 // Suggested reorder amount
-                    }
-                };
-                this.state.messages.push(message);
-                NotificationSystem.warning(`Low stock alert sent to manager for ${product.name}.`);
-            }
-        });
-        this.saveData();
-    }
-},
+                    lowStockProducts.forEach(product => {
+                        const existingTask = this.state.messages.find(m =>
+                            m.type === 'task' &&
+                            m.taskDetails?.productId === product.id &&
+                            m.status !== 'completed' &&
+                            m.status !== 'declined'
+                        );
+
+                        if (!existingTask) {
+                            const message = {
+                                id: Date.now() + product.id,
+                                from: 1, to: manager.id,
+                                subject: `URGENT: Low Stock Alert for ${product.name}`,
+                                content: `Stock for ${product.name} (SKU: ${product.sku}) has fallen to ${product.stock}, which is at or below the reorder level of ${product.reorderLevel}. Please approve a new stock order.`,
+                                type: 'task', category: 'emergency', status: 'pending_manager_approval',
+                                timestamp: new Date().toISOString(), read: false,
+                                requesterId: 1,
+                                history: [{ user: 'AccuraBot', action: 'Automated Alert Sent', timestamp: new Date().toISOString() }],
+                                taskDetails: { productId: product.id, requestedStock: (product.reorderLevel || 10) * 2 }
+                            };
+                            this.state.messages.push(message);
+                            NotificationSystem.warning(`Low stock alert sent to manager for ${product.name}.`);
+                        }
+                    });
+                    this.saveData();
+                }
+            },
+
+            renderCharts() {
+                const salesCtx = document.getElementById('salesChart')?.getContext('2d');
+                // CORRECTED ID: Was 'productPerformanceChart', now correctly 'financeChart'
+                const financeCtx = document.getElementById('financeChart')?.getContext('2d');
+
+                if (window.salesChart instanceof Chart) {
+                    window.salesChart.destroy();
+                }
+                if (window.financeChart instanceof Chart) {
+                    window.financeChart.destroy();
+                }
+
+                if (salesCtx) {
+                    const salesByMonth = this.state.sales.reduce((acc, sale) => {
+                        const month = new Date(sale.date).toLocaleString('default', { month: 'short' });
+                        acc[month] = (acc[month] || 0) + sale.total;
+                        return acc;
+                    }, {});
+
+                    window.salesChart = new Chart(salesCtx, {
+                        type: 'line',
+                        data: {
+                            labels: Object.keys(salesByMonth),
+                            datasets: [{
+                                label: 'Monthly Sales',
+                                data: Object.values(salesByMonth),
+                                borderColor: '#00d4aa',
+                                backgroundColor: 'rgba(0, 212, 170, 0.1)',
+                                tension: 0.4,
+                                fill: true,
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            scales: { y: { beginAtZero: true } }
+                        }
+                    });
+                }
+
+                if (financeCtx) { // CORRECTED CHECK
+                    const totalRevenue = this.state.sales.reduce((sum, sale) => sum + sale.total, 0);
+                    const totalExpenses = this.state.expenses.reduce((sum, expense) => sum + expense.amount, 0);
+                    const netProfit = totalRevenue - totalExpenses;
+
+                    window.financeChart = new Chart(financeCtx, { // CORRECTED CHART VARIABLE
+                        type: 'doughnut',
+                        data: {
+                            labels: ['Revenue', 'Expenses', 'Net Profit'],
+                            datasets: [{
+                                label: 'Financial Overview',
+                                data: [totalRevenue, totalExpenses, netProfit],
+                                backgroundColor: [
+                                    'rgba(0, 212, 170, 0.8)',
+                                    'rgba(239, 68, 68, 0.8)',
+                                    'rgba(59, 130, 246, 0.8)'
+                                ],
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                        }
+                    });
+                }
+            },
+            
+            renderReportCharts() {
+                // This is a placeholder for more detailed report charts
+                console.log("Rendering report charts...");
+            },
+
+// =================================================================
+// === END: Corrected code block (renderInbox starts after this) ===
+// =================================================================
+            
+            
+
 
 renderInbox() {
     const inboxContainer = document.getElementById('inbox-list-container');
@@ -4937,118 +5148,76 @@ openBranchChat(branchId) {
                 `;
             },
 
-            // View rendering methods
+           // =================================================================
+            // === PASTE THIS COMPLETE AND CORRECTED RENDER FUNCTION         ===
+            // =================================================================
             render() {
                 const appContainer = document.getElementById('app');
-                
                 if (!this.state.currentUser) {
                     appContainer.innerHTML = this.getLoginView();
                     return;
                 }
 
-                if (window.innerWidth >= 1024) {
-    appContainer.classList.add('app-container-grid');
-} else {
-    appContainer.classList.remove('app-container-grid');
-}
+                // This correctly handles the Quick Sale view and stops further rendering.
                 if (this.state.quickSale.active) {
                     appContainer.innerHTML = this.getQuickSaleView();
-                    // Initialize total calculation for quick sale
-                    setTimeout(() => {
-                        this.updateQuickSaleCalculations();
-                        // Re-attach event listener for discount input
-                        const discountInput = document.getElementById('quickSaleDiscount');
-                        if (discountInput) {
-                            discountInput.addEventListener('input', this.updateQuickSaleCalculations.bind(this));
-                        }
-                        const customerSelect = document.getElementById('quickSaleCustomerSelect');
-                        if (customerSelect) {
-                            customerSelect.addEventListener('change', (e) => {
-                                this.state.quickSale.selectedCustomer = parseInt(e.target.value);
-                                this.updateQuickSaleCalculations();
-                            });
-                        }
-                        const paymentTypeSelect = document.getElementById('quickSalePaymentType');
-                        if (paymentTypeSelect) {
-                            paymentTypeSelect.addEventListener('change', (e) => {
-                                this.state.quickSale.paymentType = e.target.value;
-                                this.updateQuickSaleCalculations();
-                            });
-                        }
-                    }, 50);
+                    // We call bindQuickSaleEvents here AFTER the view is rendered
+                    setTimeout(() => this.bindQuickSaleEvents(), 50);
                     return;
                 }
 
-                const views = {
-                    'dashboard': this.getDashboardView(),
-                    'products': this.getProductsView(),
-                    'customers': this.getCustomersView(),
-                    'sales': this.getSalesView(),
-                    'expenses': this.getExpensesView(),
-                    'employees': this.getEmployeesView(),
-                    'invoices': this.getInvoicesView(),
-                    'reports': this.getReportsView(),
-                    'settings': this.getSettingsView(),
-                    'inbox': this.getInboxView(),
-                    'ai-assistant': this.getAIAssistantView(),
-                    'journal': this.getJournalView(), // Added for General Journal
-                    'pnl': this.getPnlView(), // Added for P&L
-                    'ledger': this.getLedgerView(), // New for Ledger
-                    'trial-balance': this.getTrialBalanceView(), // New for Trial Balance
-                    'balance-sheet': this.getBalanceSheetView() // New for Balance Sheet
+                const currentView = this.state.currentView;
+                const viewMap = {
+                    'dashboard': () => this.getDashboardView(),
+                    'accura-ai': () => this.getAccuraAIView(),
+                    'products': () => this.getProductsView(),
+                    'customers': () => this.getCustomersView(),
+                    'sales': () => this.getSalesView(),
+                    'expenses': () => this.getExpensesView(),
+                    'employees': () => this.getEmployeesView(),
+                    'invoices': () => this.getInvoicesView(),
+                    'reports': () => this.getReportsView(),
+                    'journal': () => this.getJournalView(),
+                    'pnl': () => this.getPnlView(),
+                    'ledger': () => this.getLedgerView(),
+                    'trial-balance': () => this.getTrialBalanceView(),
+                    'balance-sheet': () => this.getBalanceSheetView(),
+                    'inbox': () => this.getInboxView(),
+                    'settings': () => this.getSettingsView(),
+                    'bot': () => this.getAccuraBotView(),
                 };
 
+                let content = viewMap[currentView] ? viewMap[currentView]() : this.getDashboardView();
+                let themeClass = this.state.theme === 'dark' ? 'theme-dark' : 'theme-light';
+                let sidebarOpenClass = this.state.mobileMenuOpen ? 'sidebar-open' : '';
+
                 appContainer.innerHTML = `
-                    ${this.getNavbar()}
-                    ${this.getSidebar()}
-                    <div class="main-content">
-                        ${views[this.state.currentView] || this.getDashboardView()}
+                    <div class="app-layout ${themeClass} ${sidebarOpenClass}">
+                        ${this.getSidebar()}
+                        <div class="main-content-wrapper">
+                            ${this.getNavbar()}
+                            <main class="main-content">${content}</main>
+                        </div>
                     </div>
                 `;
 
-                // *** THIS IS THE KEY FIX ***
-                // If the view is 'inbox', it needs its contents to be rendered separately.
-                if (this.state.currentView === 'inbox') {
-                    // Use a small timeout to ensure the DOM is fully updated before we fill the inbox list.
-                    setTimeout(() => this.renderInbox(), 0);
+                // --- THIS IS THE CRUCIAL PART THAT WAS MISSING ---
+                // After rendering the HTML, initialize dynamic components like charts.
+                this.animateDashboardNumbers();
+                if (currentView === 'dashboard') {
+                    this.renderCharts(); // This draws the dashboard graphs.
                 }
-
-                // Initialize charts if needed
-                if (this.state.currentView === 'dashboard') {
-                    setTimeout(() => {
-                        this.createDashboardCharts();
-                        this.animateDashboardNumbers(); // Animate numbers on dashboard load
-                    }, 100);
+                if (currentView === 'reports') {
+                    this.renderReportCharts(); // This draws the report graphs.
                 }
-                // Re-bind bot chat events if on AI assistant view and bot mode
-                if (this.state.currentView === 'ai-assistant' && this.state.aiMode === 'bot') {
-                    setTimeout(() => {
-                        const botChatSendButton = document.getElementById('bot-chat-send');
-                        if (botChatSendButton) {
-                            botChatSendButton.removeEventListener('click', this.handleBotChatCommand.bind(this)); // Prevent duplicate listeners
-                            botChatSendButton.addEventListener('click', this.handleBotChatCommand.bind(this));
-                        }
-                        const botChatInput = document.getElementById('bot-chat-input');
-                        if (botChatInput) {
-                            botChatInput.removeEventListener('keypress', (e) => { // Prevent duplicate listeners
-                                if (e.key === 'Enter') {
-                                    e.preventDefault();
-                                    this.handleBotChatCommand();
-                                }
-                            });
-                            botChatInput.addEventListener('keypress', (e) => {
-                                if (e.key === 'Enter') {
-                                    e.preventDefault();
-                                    this.handleBotChatCommand();
-                                }
-                            });
-                        }
-                        const chatBox = document.getElementById('bot-chat-box');
-                        if (chatBox) {
-                            chatBox.scrollTop = chatBox.scrollHeight; // Scroll to bottom on render
-                        }
-                    }, 100);
+                if (currentView === 'accura-ai') {
+                    const canvasElement = document.getElementById('ai-loading-canvas');
+                    if (canvasElement && this.state.aiLoading) {
+                        this.state.pixelAnimation = new PixelAnimationController('ai-loading-canvas');
+                        this.state.pixelAnimation.start();
+                    }
                 }
+                // --- END OF THE MISSING PART ---
             },
 
             setTheme(themeName) {
@@ -6914,6 +7083,105 @@ getSettingsView() {
                     </div>
                 `;
             },
+// === NEW QUICK SALE VIEW FUNCTION ===
+            getQuickSaleView() {
+                // Define the SVG path for the gradient tracing animation
+                const svgPath = "M1-4.5l71,118.5l92-118.5l92,118.5l92-118.5l92,118.5l92-118.5l92,118.5l92-118.5l92,118.5l92-118.5l92,118.5l92-118.5l92,118.5l92-118.5l92,118.5l92-118.5l92,118.5l92-118.5l71,118.5";
+
+                return `
+                <div id="quick-sale-container" class="quick-sale-container">
+                    <button data-action="cancel-quick-sale" class="quick-sale-cancel-button">&times;</button>
+                    <div class="quick-sale-progress-bar">
+                        <div id="quick-sale-progress-fill" class="quick-sale-progress-fill" style="width: 25%;"></div>
+                    </div>
+
+                    <div id="qs-step-1" class="quick-sale-step-container active">
+                        <div class="quick-sale-step-content">
+                            <h2 class="text-3xl font-bold mb-2 quick-sale-gradient-text">Select Products</h2>
+                            <p class="text-lg text-gray-300 mb-8">Choose items to add to the sale.</p>
+                            <div class="w-full max-w-4xl grid grid-cols-2 md:grid-cols-4 gap-4">
+                                ${this.state.products.map(p => `
+                                    <div class="quick-sale-grid-item" data-action="qs-add-product" data-id="${p.id}">
+                                        <div class="gradient-tracing-container">
+                                             <svg class="gradient-tracing-svg" width="800" height="120" viewBox="0 0 800 120" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                                <path d="${svgPath}" stroke="rgba(4, 25, 248, 0.2)" stroke-width="2"/>
+                                                <path class="animated-trace-path" d="${svgPath}" stroke-width="2"/>
+                                                <defs>
+                                                    <linearGradient id="quick-sale-gradient" x1="0" y1="0" x2="800" y2="0" gradientUnits="userSpaceOnUse">
+                                                        <stop stop-color="#0419f8" stop-opacity="0" />
+                                                        <stop stop-color="#0419f8" />
+                                                        <stop offset="1" stop-color="#0419f8" stop-opacity="0" />
+                                                    </linearGradient>
+                                                </defs>
+                                            </svg>
+                                        </div>
+                                        <i class="fas fa-box text-3xl mb-3 text-white"></i>
+                                        <p class="font-semibold text-white">${p.name}</p>
+                                        <p class="text-sm text-gray-400">${this.formatCurrency(p.price)}</p>
+                                        <div class="absolute top-2 right-2 hidden"><i class="fas fa-check-circle text-green-400"></i></div>
+                                    </div>
+                                `).join('')}
+                            </div>
+                        </div>
+                        <div class="mt-8 text-center">
+                            <button data-action="qs-next-step" class="quick-sale-button px-8 py-3">Next: Adjust Quantities</button>
+                        </div>
+                    </div>
+
+                    <div id="qs-step-2" class="quick-sale-step-container">
+                         <div class="quick-sale-step-content">
+                            <h2 class="text-3xl font-bold mb-2 quick-sale-gradient-text">Adjust Quantities</h2>
+                            <p class="text-lg text-gray-300 mb-8">Use the sliders to set the quantity for each item.</p>
+                            <div id="qs-quantity-list" class="w-full max-w-2xl space-y-6">
+                                </div>
+                        </div>
+                        <div class="mt-8 text-center">
+                            <button data-action="qs-prev-step" class="bg-gray-600 text-white px-8 py-3 rounded-xl mr-4">Back</button>
+                            <button data-action="qs-next-step" class="quick-sale-button px-8 py-3">Next: Select Customer</button>
+                        </div>
+                    </div>
+
+                    <div id="qs-step-3" class="quick-sale-step-container">
+                        <div class="quick-sale-step-content">
+                            <h2 class="text-3xl font-bold mb-2 quick-sale-gradient-text">Select Customer</h2>
+                            <p class="text-lg text-gray-300 mb-8">Who is this sale for?</p>
+                            <div class="w-full max-w-4xl grid grid-cols-2 md:grid-cols-4 gap-4">
+                                 ${this.state.customers.map(c => `
+                                    <div class="quick-sale-grid-item" data-action="qs-select-customer" data-id="${c.id}">
+                                        <div class="gradient-tracing-container">
+                                             <svg class="gradient-tracing-svg" width="800" height="120" viewBox="0 0 800 120" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                                <path d="${svgPath}" stroke="rgba(4, 25, 248, 0.2)" stroke-width="2"/>
+                                                <path class="animated-trace-path" d="${svgPath}" stroke-width="2"/>
+                                            </svg>
+                                        </div>
+                                        <i class="fas fa-user-circle text-3xl mb-3 text-white"></i>
+                                        <p class="font-semibold text-white">${c.name}</p>
+                                        <div class="absolute top-2 right-2 hidden"><i class="fas fa-check-circle text-green-400"></i></div>
+                                    </div>
+                                `).join('')}
+                            </div>
+                        </div>
+                        <div class="mt-8 text-center">
+                            <button data-action="qs-prev-step" class="bg-gray-600 text-white px-8 py-3 rounded-xl mr-4">Back</button>
+                            <button data-action="qs-next-step" class="quick-sale-button px-8 py-3">Next: Confirm Sale</button>
+                        </div>
+                    </div>
+
+                    <div id="qs-step-4" class="quick-sale-step-container">
+                         <div class="quick-sale-step-content">
+                            <h2 class="text-3xl font-bold mb-2 quick-sale-gradient-text">Confirm Sale</h2>
+                            <p class="text-lg text-gray-300 mb-8">Review the details and finalize the transaction.</p>
+                            <div id="qs-summary" class="w-full max-w-md bg-black bg-opacity-30 p-6 rounded-2xl border border-blue-500">
+                                </div>
+                        </div>
+                        <div class="mt-8 text-center">
+                            <button data-action="qs-prev-step" class="bg-gray-600 text-white px-8 py-3 rounded-xl mr-4">Back</button>
+                            <button data-action="finalize-quick-sale" class="bot-button px-8 py-3">Finalize & Record Sale</button>
+                        </div>
+                    </div>
+                </div>
+                `;
+            }, 
 
             getInboxView() {
     const unreadCount = this.state.messages.filter(m => m.to === this.state.currentUser.id && !m.read).length;
