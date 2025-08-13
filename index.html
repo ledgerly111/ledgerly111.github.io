@@ -21,13 +21,13 @@
             --accent-secondary: #0ea5e9;
             --border-color: #374151;
             --hover-bg: #1f2937;
-            --ai-color: #8b5cf6;
-            --bot-color: #10b981;
+            --ai-color: #6726ff;
+            --bot-color: #00a46d;
             --positive-color: #3b82f6;
             --negative-color: #ef4444;
             --gold-color: #f59e0b;
             --quick-sale-bg: #0a1a3a; /* Darker blue for quick sale */
-            --quick-sale-accent: #3b82f6; /* Shining blue for quick sale */
+            --quick-sale-accent: #0419f8; /* Shining blue for quick sale */
         }
 
         /* Sepia Theme */
@@ -90,7 +90,7 @@
             text-size-adjust: 100%;
         }
 
-        /* Mobile-First Design */
+        /* Enhanced Mobile-First Design */
         .app-container {
             min-height: 100vh;
             display: flex;
@@ -114,6 +114,29 @@
             width: 100%;
             max-width: 100vw;
             overflow-x: hidden;
+        }
+
+        /* Enhanced responsive breakpoints */
+        @media (min-width: 768px) {
+            .main-content {
+                padding: 1.5rem;
+            }
+        }
+
+        @media (min-width: 1280px) {
+            .main-content {
+                padding: 2rem;
+                max-width: calc(100vw - 280px);
+            }
+        }
+
+        @media (min-width: 1536px) {
+            .main-content {
+                padding: 2.5rem;
+                max-width: 1400px;
+                margin-left: auto;
+                margin-right: auto;
+            }
         }
 
         /* Mobile Sidebar */
@@ -322,34 +345,68 @@
         .desktop-sidebar {
             display: none;
         }
+/* ---- REPLACE your old @media (min-width: 1024px) block with THIS ---- */
+@media (min-width: 1024px) {
+    /* 1. DEFINE THE MAIN APP GRID */
+    .app-container-grid {
+        display: grid;
+        /* Create two columns: a fixed 280px for the sidebar, and 1fr (fractional unit) for the rest */
+        grid-template-columns: 280px 1fr;
+        /* Create two rows: 'auto' for the navbar height, and '1fr' for the rest of the vertical space */
+        grid-template-rows: auto 1fr;
+        grid-template-areas:
+            "sidebar nav"
+            "sidebar main";
+        min-height: 100vh;
+    }
 
-        @media (min-width: 1024px) {
+    /* 2. POSITION THE MAIN CONTENT */
+    .main-content {
+        grid-area: main; /* Assign this to the 'main' area of our grid */
+        overflow-y: auto; /* Allow this area to scroll vertically if content is long */
+        padding: 2rem;
+        /* REMOVE THE OLD MARGIN AND WIDTH RULES */
+        margin-left: 0;
+        max-width: 100%; /* Let the grid handle the width */
+        height: auto;     /* Let the grid handle the height */
+    }
+
+    /* 3. HIDE MOBILE-ONLY ELEMENTS */
+    .mobile-sidebar, .burger-menu {
+        display: none;
+    }
+
+    /* 4. POSITION THE DESKTOP SIDEBAR */
+    .desktop-sidebar {
+        grid-area: sidebar; /* Assign this to the 'sidebar' area of our grid */
+        display: block;
+        position: fixed; /* Keep it fixed on the screen as you scroll */
+        top: 0;
+        left: 0;
+        width: 280px;
+        height: 100vh;
+        background: linear-gradient(180deg, var(--bg-tertiary) 0%, rgba(36, 41, 56, 0.95) 100%);
+        backdrop-filter: blur(10px);
+        -webkit-backdrop-filter: blur(10px);
+        border-right: 1px solid var(--border-color);
+        overflow-y: auto;
+        z-index: 100;
+    }
+
+    /* 5. POSITION THE NAVBAR */
+    .navbar {
+        grid-area: nav; /* Assign this to the 'nav' area of our grid */
+        position: sticky; /* Make the navbar stick to the top when scrolling */
+        top: 0;
+        z-index: 1000;
+        /* REMOVE THE OLD MARGIN RULE */
+        margin-left: 0;
+    }
+}
+        @media (min-width: 1536px) {
             .main-content {
-                margin-left: 280px;
-                padding: 2rem;
-            }
-            
-            .mobile-sidebar {
-                display: none;
-            }
-            
-            .desktop-sidebar {
-                display: block;
-                position: fixed;
-                top: 0;
-                left: 0;
-                width: 280px;
-                height: 100vh;
-                background: linear-gradient(180deg, var(--bg-tertiary) 0%, rgba(36, 41, 56, 0.95) 100%);
-                backdrop-filter: blur(10px);
-                -webkit-backdrop-filter: blur(10px);
-                border-right: 1px solid var(--border-color);
-                overflow-y: auto;
-                z-index: 100;
-            }
-            
-            .navbar {
-                margin-left: 280px;
+                margin-left: 320px;
+                margin-right: auto;
             }
         }
 
@@ -694,7 +751,94 @@
             box-shadow: 0 2px 2px -1px rgba(0, 0, 0, 0.2); /* Optional: subtle shadow */
         }
 
-        /* Modal Improvements */
+        /* Enhanced responsive grids */
+        .responsive-grid-2 {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 1rem;
+        }
+
+        .responsive-grid-3 {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 1rem;
+        }
+
+        .responsive-grid-4 {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1rem;
+        }
+
+        .responsive-grid-6 {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1rem;
+        }
+
+        @media (min-width: 768px) {
+            .responsive-grid-2 {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 1.25rem;
+            }
+            
+            .responsive-grid-3 {
+                grid-template-columns: repeat(3, 1fr);
+                gap: 1.25rem;
+            }
+            
+            .responsive-grid-4 {
+                grid-template-columns: repeat(3, 1fr);
+                gap: 1.25rem;
+            }
+            
+            .responsive-grid-6 {
+                grid-template-columns: repeat(4, 1fr);
+                gap: 1.25rem;
+            }
+        }
+
+        @media (min-width: 1024px) {
+            .responsive-grid-4 {
+                grid-template-columns: repeat(4, 1fr);
+            }
+            
+            .responsive-grid-6 {
+                grid-template-columns: repeat(6, 1fr);
+                gap: 1.25rem;
+            }
+        }
+
+        @media (min-width: 1280px) {
+    /* Make the grid sidebar wider */
+    .app-container-grid {
+        grid-template-columns: 320px 1fr;
+    }
+    
+    /* Make the sidebar element itself wider */
+    .desktop-sidebar {
+        width: 320px;
+    }
+            
+            .responsive-grid-6 {
+                grid-template-columns: repeat(6, 1fr);
+                gap: 1.5rem;
+            }
+        }
+
+        @media (min-width: 1536px) {
+            .responsive-grid-4 {
+                grid-template-columns: repeat(5, 1fr);
+                gap: 2rem;
+            }
+            
+            .responsive-grid-6 {
+                grid-template-columns: repeat(8, 1fr);
+                gap: 2rem;
+            }
+        }
+
+        /* Enhanced Modal System */
         .modal-overlay {
             position: fixed;
             inset: 0;
@@ -725,6 +869,48 @@
                 padding: 24px 16px;
                 max-height: 95vh;
                 border-radius: 16px;
+            }
+        }
+
+        @media (min-width: 768px) {
+            .modal-content {
+                max-width: 600px;
+                padding: 40px;
+            }
+        }
+
+        @media (min-width: 1024px) {
+            .modal-content {
+                max-width: 700px;
+                padding: 48px;
+            }
+        }
+
+        @media (min-width: 1280px) {
+            .modal-content {
+                max-width: 800px;
+                max-height: 85vh;
+            }
+        }
+
+        /* Enhanced form layouts for larger screens */
+        .form-grid-responsive {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 1rem;
+        }
+
+        @media (min-width: 768px) {
+            .form-grid-responsive {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 1.5rem;
+            }
+        }
+
+        @media (min-width: 1024px) {
+            .form-grid-responsive {
+                grid-template-columns: repeat(3, 1fr);
+                gap: 2rem;
             }
         }
 
@@ -1019,25 +1205,69 @@
             overflow: hidden;
         }
 
-        /* Add this CSS for Quick Sale mobile responsiveness */
-        @media (max-width: 1024px) {
+        /* Enhanced Quick Sale responsiveness */
+        @media (max-width: 768px) {
             .quick-sale-main-grid {
-                grid-template-columns: 1fr; /* Stack to a single column */
-                height: auto; /* Allow content to determine height */
-                overflow-y: auto; /* Allow vertical scrolling for the whole view */
+                grid-template-columns: 1fr;
+                height: auto;
+                overflow-y: auto;
+                gap: 1rem;
             }
             .quick-sale-product-panel, .quick-sale-cart-panel {
-                overflow: visible; /* Remove internal overflow */
+                overflow: visible;
                 height: auto;
             }
             .product-grid, .cart-list {
-                overflow-y: visible; /* Remove internal scrollbars */
+                overflow-y: visible;
                 max-height: none;
             }
             .quick-sale-container {
-                 padding: 1rem;
+                padding: 1rem;
             }
-        
+        }
+
+        @media (min-width: 769px) and (max-width: 1024px) {
+            .quick-sale-main-grid {
+                grid-template-columns: 1fr;
+                height: auto;
+                gap: 1.5rem;
+            }
+            .quick-sale-container {
+                padding: 1.5rem;
+            }
+        }
+
+        @media (min-width: 1025px) {
+            .quick-sale-main-grid {
+                grid-template-columns: 2fr 1fr;
+                gap: 2rem;
+                height: calc(100vh - 120px);
+            }
+            .quick-sale-container {
+                padding: 2rem;
+            }
+        }
+
+        @media (min-width: 1280px) {
+            .quick-sale-main-grid {
+                grid-template-columns: 3fr 2fr;
+                gap: 2.5rem;
+            }
+            .product-grid {
+                grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+                gap: 1.5rem;
+            }
+        }
+
+        @media (min-width: 1536px) {
+            .quick-sale-main-grid {
+                max-width: 1400px;
+                margin: 0 auto;
+            }
+            .product-grid {
+                grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+                gap: 2rem;
+            }
         }
 
         .quick-sale-product-panel {
@@ -1248,6 +1478,103 @@
             border: 1px solid rgba(239, 68, 68, 0.3);
             color: #ef4444;
         }
+
+/* AI Answer/Loading Container */
+.ai-answer-container {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 400px;
+    background: rgba(15, 20, 25, 0.8);
+    border: 1px solid var(--border-color);
+    border-radius: 20px;
+    padding: 2rem;
+    overflow: hidden; /* Important for the canvas */
+    transition: all 0.5s ease;
+}
+
+/* ---- REPLACE the old #ai-loading-canvas CSS with this new version ---- */
+
+#ai-loading-canvas {
+    position: absolute;
+    /* --- CHANGES START HERE --- */
+    top: 0;       /* CHANGED: Position at the very top */
+    left: 0;      /* CHANGED: Position at the very left */
+    width: 100%;  /* CHANGED: Make canvas fill the entire width */
+    height: 100%; /* CHANGED: Make canvas fill the entire height */
+    /* REMOVED: transform property is no longer needed for this layout */
+    /* --- CHANGES END HERE --- */
+    z-index: 1;
+    opacity: 0;
+    transition: opacity 0.5s ease; /* Made the fade-in a little smoother */
+    border-radius: 20px; /* Match the container's border-radius */
+    /* REMOVED: The blur filter to make the pixels sharp and bright */
+}
+
+#ai-loading-canvas.active {
+    opacity: 1;
+}
+
+.ai-answer-content {
+    position: relative;
+    z-index: 2;
+    text-align: center;
+    color: var(--text-secondary);
+}
+
+.ai-icon-center {
+    width: 80px;
+    height: 80px;
+    background: linear-gradient(135deg, var(--ai-color) 0%, #a855f7 100%);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 1.5rem auto;
+    box-shadow: 0 0 30px rgba(139, 92, 246, 0.5);
+}
+
+.ai-icon-center i {
+    color: white;
+    font-size: 2.5rem;
+}
+
+/* AI Question Bar */
+.ai-question-bar {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1rem;
+    padding-top: 1.5rem;
+}
+
+.ai-question-button {
+    background: rgba(36, 41, 56, 0.9);
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    padding: 1rem;
+    text-align: left;
+    color: var(--text-secondary);
+    transition: all 0.3s ease;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.ai-question-button:hover {
+    background: var(--hover-bg);
+    border-color: var(--accent-primary);
+    transform: translateY(-2px);
+    color: var(--text-primary);
+}
+
+.ai-question-button i {
+    color: var(--accent-primary);
+    font-size: 1.2rem;
+    width: 24px;
+    text-align: center;
+}
 
     </style>
 </head>
@@ -1649,6 +1976,9 @@
                 currentView: 'login',
                 mobileMenuOpen: false,
                 aiMode: 'ai',
+                aiLoading: false,
+                aiAnswer: null,
+                pixelAnimation: null,
                 selectedCountry: 'AE',
                 companyName: 'Your Company',
                 lowStockThreshold: 10,
@@ -1773,8 +2103,24 @@ journal: [],
                 }
             },
 
-            saveData() {
-                return DataStorage.save('ledgerlyData', this.state);
+             saveData() {
+                // Create a copy of the state to avoid modifying the live application state.
+                const stateToSave = { ...this.state };
+
+                // List all the temporary properties that should NOT be saved.
+                // These are mostly related to the UI or temporary animations.
+                const transientKeys = [
+                    'pixelAnimation',
+                    'mobileMenuOpen',
+                    'aiLoading',
+                    'aiAnswer'
+                ];
+
+                // Remove each of these temporary properties from the copy before we save it.
+                transientKeys.forEach(key => delete stateToSave[key]);
+
+                // Now, save the cleaned object that only contains the important, persistent data.
+                return DataStorage.save('ledgerlyData', stateToSave);
             },
 
             toggleMobileSidebar() {
@@ -1870,6 +2216,7 @@ journal: [],
     'login-admin': () => this.selectUser('admin'),
     'login-manager': () => this.selectUser('manager'),
     'login-worker': () => this.selectUser('worker'),
+    'ask-ai': () => this.handleAiQuestion(id),
     'logout': () => this.logout(),
     'toggle-mobile-menu': () => this.toggleMobileSidebar(),
     'dashboard': () => this.navigateToView('dashboard'),
@@ -2757,7 +3104,7 @@ journal: [],
             content = `
                 <form id="product-form" class="space-y-4">
                     <input type="hidden" id="product-id" value="${id || ''}">
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div class="form-grid-responsive">
                         <div>
                             <label for="name" class="block text-sm font-medium text-gray-300 mb-2">Product Name</label>
                             <input type="text" id="name" name="name" class="form-input w-full" value="${product?.name || ''}" required>
@@ -2773,7 +3120,7 @@ journal: [],
                         <label for="description" class="block text-sm font-medium text-gray-300 mb-2">Description</label>
                         <textarea id="description" name="description" rows="3" class="form-input w-full">${product?.description || ''}</textarea>
                     </div>
-                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div class="form-grid-responsive">
                         <div>
                             <label for="price" class="block text-sm font-medium text-gray-300 mb-2">Selling Price</label>
                             <input type="number" id="price" name="price" step="0.01" min="0" class="form-input w-full" value="${product?.price || ''}" required>
@@ -2799,7 +3146,7 @@ journal: [],
             title = 'Record a New Sale';
             content = `
                 <form id="sale-form" class="space-y-4">
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div class="form-grid-responsive">
                         <div>
                             <label for="customerId" class="block text-sm font-medium text-gray-300 mb-2">Customer</label>
                             <select id="customerId" name="customerId" class="form-input w-full" required>
@@ -4599,6 +4946,11 @@ openBranchChat(branchId) {
                     return;
                 }
 
+                if (window.innerWidth >= 1024) {
+    appContainer.classList.add('app-container-grid');
+} else {
+    appContainer.classList.remove('app-container-grid');
+}
                 if (this.state.quickSale.active) {
                     appContainer.innerHTML = this.getQuickSaleView();
                     // Initialize total calculation for quick sale
@@ -5022,7 +5374,7 @@ openBranchChat(branchId) {
                             </div>
                         ` : ''}
 
-                        <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+                        <div class="responsive-grid-6">
                             <div class="perplexity-card p-4 hover:scale-105 transition-all duration-300 slide-up">
                                 <div class="flex items-center justify-between">
                                     <div>
@@ -5270,129 +5622,197 @@ openBranchChat(branchId) {
                 }
             },
 
-            getAccuraAIView() {
-                const recommendations = AccuraAI.getPerformanceRecommendations(
-                    this.state.currentUser.role, 
-                    this.state.currentUser.commission || 0, 
-                    this.state.currentUser.salary
-                );
+           // ---- DELETE THE OLD getAccuraAIView() AND PASTE THIS NEW ONE ----
+// ---- DELETE THE OLD getAccuraAIView() AND PASTE THIS NEW, CORRECTED ONE ----
+getAccuraAIView() {
+    // This is the new part for role-based questions.
+    const questions = {
+        admin: [
+            { key: 'profit-margin', icon: 'fas fa-dollar-sign', text: 'What is our current profit margin?' },
+            { key: 'monthly-summary', icon: 'fas fa-chart-line', text: 'Summarize financial performance this month.' },
+            { key: 'top-employee', icon: 'fas fa-users', text: 'Which employee is the top performer?' },
+            { key: 'low-stock', icon: 'fas fa-box', text: 'Which products are critically low in stock?' },
+        ],
+        manager: [
+            { key: 'team-sales', icon: 'fas fa-chart-bar', text: 'How are my team\'s sales trending this week?' },
+            { key: 'dept-expenses', icon: 'fas fa-receipt', text: 'What are the biggest expenses in my department?' },
+            { key: 'inactive-customers', icon: 'fas fa-user-check', text: 'Which customers haven\'t purchased recently?' },
+            { key: 'urgent-tasks', icon: 'fas fa-tasks', text: 'What are the most urgent tasks for my team?' },
+        ],
+        worker: [
+            { key: 'my-commission', icon: 'fas fa-coins', text: 'What is my current sales commission?' },
+            { key: 'my-sales-comparison', icon: 'fas fa-trophy', text: 'How do my sales compare to last month?' },
+            { key: 'my-top-products', icon: 'fas fa-bullseye', text: 'What are my top-selling products?' },
+            { key: 'new-customer-lead', icon: 'fas fa-user-plus', text: 'Suggest a new customer I should contact.' },
+        ]
+    };
+    const userRole = this.state.currentUser.role;
+    const availableQuestions = questions[userRole] || questions['worker'];
 
-                return `
-                    <div class="space-y-6 fade-in">
-                        <div class="flex items-center justify-between flex-wrap gap-x-4 gap-y-2">
-                            <div class="flex items-center space-x-4">
-                                <div class="w-14 h-14 bg-gradient-to-r from-purple-500 to-pink-500 rounded-2xl flex items-center justify-center ai-pulse">
-                                    <i class="fas fa-brain fa-fw text-white text-2xl"></i>
-                                </div>
-                                <div>
-                                    <h2 class="text-2xl font-bold ai-gradient-text">AccuraAI Assistant</h2>
-                                    <p class="text-gray-400">Your intelligent business companion</p>
-                                </div>
-                            </div>
-                            <div class="flex items-center space-x-4">
-                                <div class="flex items-center space-x-2">
-                                    <span class="text-sm text-gray-400">AI</span>
-                                    <div class="toggle-switch ${this.state.aiMode === 'bot' ? 'active' : ''}" data-action="toggle-ai-mode">
-                                        <div class="toggle-knob"></div>
-                                    </div>
-                                    <span class="text-sm text-gray-400">Bot</span>
-                                </div>
-                                <button data-action="refresh-ai" class="ai-button px-4 py-2 rounded-xl">
-                                    <i class="fas fa-sync-alt mr-2"></i>Refresh
-                                </button>
-                            </div>
+    // This HTML combines your ORIGINAL view with the NEW elements.
+    return `
+        <div class="space-y-6 fade-in">
+            <div class="flex items-center justify-between flex-wrap gap-x-4 gap-y-2">
+                <div class="flex items-center space-x-4">
+                    <div class="w-14 h-14 bg-gradient-to-r from-purple-500 to-pink-500 rounded-2xl flex items-center justify-center ai-pulse">
+                        <i class="fas fa-brain fa-fw text-white text-2xl"></i>
+                    </div>
+                    <div>
+                        <h2 class="text-2xl font-bold ai-gradient-text">AccuraAI Assistant</h2>
+                        <p class="text-gray-400">Your intelligent business companion</p>
+                    </div>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <div class="flex items-center space-x-2">
+                        <span class="text-sm text-gray-400">AI</span>
+                        <div class="toggle-switch ${this.state.aiMode === 'bot' ? 'active' : ''}" data-action="toggle-ai-mode">
+                            <div class="toggle-knob"></div>
                         </div>
+                        <span class="text-sm text-gray-400">Bot</span>
+                    </div>
+                </div>
+            </div>
 
-                        <div class="ai-card p-6 slide-up">
-                            <div class="flex items-start space-x-6">
-                                <div class="w-14 h-14 rounded-full bg-gradient-to-r from-purple-500 to-pink-500 flex items-center justify-center flex-shrink-0">
-                                    <i class="fas fa-brain fa-fw text-white text-xl"></i>
-                                </div>
-                                <div class="flex-1">
-                                    <h3 class="text-xl font-bold text-white mb-3">Hello ${this.state.currentUser.name}! 👋</h3>
-                                    <p class="text-gray-300 mb-4 leading-relaxed">I'm AccuraAI, your intelligent business assistant. I analyze your sales data, provide multi-currency insights for GCC markets, and help optimize your business performance with advanced AI analytics.</p>
-                                    <div class="grid grid-cols-2 lg:grid-cols-4 gap-3">
-                                        <div class="bg-purple-500/10 border border-purple-500/30 rounded-xl p-3 text-center">
-                                            <div class="text-xl mb-1">🧠</div>
-                                            <div class="text-purple-400 font-semibold text-sm">AI Analytics</div>
-                                        </div>
-                                        <div class="bg-purple-500/10 border border-purple-500/30 rounded-xl p-3 text-center">
-                                            <div class="text-xl mb-1">💱</div>
-                                            <div class="text-purple-400 font-semibold text-sm">GCC Currency</div>
-                                        </div>
-                                        <div class="bg-purple-500/10 border border-purple-500/30 rounded-xl p-3 text-center">
-                                            <div class="text-xl mb-1">📊</div>
-                                            <div class="text-purple-400 font-semibold text-sm">Smart Insights</div>
-                                        </div>
-                                        <div class="bg-purple-500/10 border border-purple-500/30 rounded-xl p-3 text-center">
-                                            <div class="text-xl mb-1">📈</div>
-                                            <div class="text-purple-400 font-semibold text-sm">Growth Tips</div>
-                                        </div>
-                                    </div>
-                                </div>
+            <div class="ai-card p-6 slide-up">
+                <div class="flex items-start space-x-6">
+                    <div class="w-14 h-14 rounded-full bg-gradient-to-r from-purple-500 to-pink-500 flex items-center justify-center flex-shrink-0">
+                        <i class="fas fa-brain fa-fw text-white text-xl"></i>
+                    </div>
+                    <div class="flex-1">
+                        <h3 class="text-xl font-bold text-white mb-3">Hello ${this.state.currentUser.name}! 👋</h3>
+                        <p class="text-gray-300 mb-4 leading-relaxed">I'm AccuraAI, your intelligent business assistant. I analyze your sales data, provide multi-currency insights for GCC markets, and help optimize your business performance with advanced AI analytics.</p>
+                        <div class="grid grid-cols-2 lg:grid-cols-4 gap-3">
+                            <div class="bg-purple-500/10 border border-purple-500/30 rounded-xl p-3 text-center">
+                                <div class="text-xl mb-1">🧠</div>
+                                <div class="text-purple-400 font-semibold text-sm">AI Analytics</div>
                             </div>
-                        </div>
-
-                        ${recommendations.length > 0 ? `
-                            <div class="perplexity-card p-6 slide-up">
-                                <h3 class="text-xl font-bold text-white mb-4 flex items-center">
-                                    <i class="fas fa-trophy text-yellow-400 mr-2"></i>
-                                    AI Performance Insights
-                                </h3>
-                                <div class="space-y-4">
-                                    ${recommendations.map(rec => `
-                                        <div class="bg-gradient-to-r ${rec.type === 'celebration' ? 'from-green-500/15 to-emerald-500/15 border-green-500/30' : 'from-blue-500/15 to-cyan-500/15 border-blue-500/30'} border rounded-xl p-4">
-                                            <div class="flex items-start space-x-4">
-                                                <div class="text-3xl">${rec.icon}</div>
-                                                <div class="flex-1">
-                                                    <h4 class="font-bold text-white mb-2">${rec.title}</h4>
-                                                    <p class="text-gray-300 mb-3 leading-relaxed">${rec.message}</p>
-                                                    <div class="bg-purple-500/10 border-l-4 border-purple-500 p-3 rounded-r-xl">
-                                                        <p class="text-purple-400 font-medium text-sm">🤖 AI Recommendation: ${rec.tip}</p>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    `).join('')}
-                                </div>
+                            <div class="bg-purple-500/10 border border-purple-500/30 rounded-xl p-3 text-center">
+                                <div class="text-xl mb-1">💱</div>
+                                <div class="text-purple-400 font-semibold text-sm">GCC Currency</div>
                             </div>
-                        ` : ''}
-
-                        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                            <div class="perplexity-card p-6 hover:scale-105 transition-all duration-300 slide-up">
-                                <div class="text-center">
-                                    <div class="w-16 h-16 mx-auto mb-4 bg-gradient-to-r from-purple-500/20 to-pink-500/20 rounded-2xl flex items-center justify-center">
-                                        <i class="fas fa-chart-line text-purple-400 text-2xl"></i>
-                                    </div>
-                                    <h3 class="text-lg font-bold text-white mb-3">Multi-Currency Analytics</h3>
-                                    <p class="text-gray-400 text-sm leading-relaxed">Advanced analysis across GCC currencies with real-time conversion and intelligent tax calculations.</p>
-                                </div>
+                            <div class="bg-purple-500/10 border border-purple-500/30 rounded-xl p-3 text-center">
+                                <div class="text-xl mb-1">📊</div>
+                                <div class="text-purple-400 font-semibold text-sm">Smart Insights</div>
                             </div>
-
-                            <div class="perplexity-card p-6 hover:scale-105 transition-all duration-300 slide-up">
-                                <div class="text-center">
-                                    <div class="w-16 h-16 mx-auto mb-4 bg-gradient-to-r from-purple-500/20 to-pink-500/20 rounded-2xl flex items-center justify-center">
-                                        <i class="fas fa-receipt text-purple-400 text-2xl"></i>
-                                    </div>
-                                    <h3 class="text-lg font-bold text-white mb-3">Smart Invoicing</h3>
-                                    <p class="text-gray-400 text-sm leading-relaxed">AI-powered invoices with country-specific tax calculations and professional formatting.</p>
-                                </div>
-                            </div>
-
-                            <div class="perplexity-card p-6 hover:scale-105 transition-all duration-300 slide-up">
-                                <div class="text-center">
-                                    <div class="w-16 h-16 mx-auto mb-4 bg-gradient-to-r from-purple-500/20 to-pink-500/20 rounded-2xl flex items-center justify-center">
-                                        <i class="fas fa-comments text-purple-400 text-2xl"></i>
-                                    </div>
-                                    <h3 class="text-lg font-bold text-white mb-3">Sentiment Analysis</h3>
-                                    <p class="text-gray-400 text-sm leading-relaxed">AI analysis of team communications with emotional intelligence and behavioral insights.</p>
-                                </div>
+                            <div class="bg-purple-500/10 border border-purple-500/30 rounded-xl p-3 text-center">
+                                <div class="text-xl mb-1">📈</div>
+                                <div class="text-purple-400 font-semibold text-sm">Growth Tips</div>
                             </div>
                         </div>
                     </div>
-                `;
-            },
+                </div>
+            </div>
 
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <div class="perplexity-card p-6 hover:scale-105 transition-all duration-300 slide-up">
+                    <div class="text-center">
+                        <div class="w-16 h-16 mx-auto mb-4 bg-gradient-to-r from-purple-500/20 to-pink-500/20 rounded-2xl flex items-center justify-center">
+                            <i class="fas fa-chart-line text-purple-400 text-2xl"></i>
+                        </div>
+                        <h3 class="text-lg font-bold text-white mb-3">Multi-Currency Analytics</h3>
+                        <p class="text-gray-400 text-sm leading-relaxed">Advanced analysis across GCC currencies with real-time conversion and intelligent tax calculations.</p>
+                    </div>
+                </div>
+
+                <div class="perplexity-card p-6 hover:scale-105 transition-all duration-300 slide-up">
+                    <div class="text-center">
+                        <div class="w-16 h-16 mx-auto mb-4 bg-gradient-to-r from-purple-500/20 to-pink-500/20 rounded-2xl flex items-center justify-center">
+                            <i class="fas fa-receipt text-purple-400 text-2xl"></i>
+                        </div>
+                        <h3 class="text-lg font-bold text-white mb-3">Smart Invoicing</h3>
+                        <p class="text-gray-400 text-sm leading-relaxed">AI-powered invoices with country-specific tax calculations and professional formatting.</p>
+                    </div>
+                </div>
+
+                <div class="perplexity-card p-6 hover:scale-105 transition-all duration-300 slide-up">
+                    <div class="text-center">
+                        <div class="w-16 h-16 mx-auto mb-4 bg-gradient-to-r from-purple-500/20 to-pink-500/20 rounded-2xl flex items-center justify-center">
+                            <i class="fas fa-comments text-purple-400 text-2xl"></i>
+                        </div>
+                        <h3 class="text-lg font-bold text-white mb-3">Sentiment Analysis</h3>
+                        <p class="text-gray-400 text-sm leading-relaxed">AI analysis of team communications with emotional intelligence and behavioral insights.</p>
+                    </div>
+                </div>
+            </div>
+            <div id="ai-response-container" class="mt-6">
+                </div>
+
+            <div class="perplexity-card p-6 mt-6">
+                 <h3 class="text-xl font-bold text-white mb-4 flex items-center">
+                    <i class="fas fa-question-circle text-teal-400 mr-2"></i>
+                    Ask AccuraAI
+                </h3>
+                <div class="ai-question-bar">
+                    ${availableQuestions.map(q => `
+                        <div class="ai-question-button" data-action="ask-ai" data-id="${q.key}">
+                            <i class="${q.icon}"></i>
+                            <span>${q.text}</span>
+                        </div>
+                    `).join('')}
+                </div>
+            </div>
+            </div>
+    `;
+},
+
+handleAiQuestion(questionKey) {
+    const responseContainer = document.getElementById('ai-response-container');
+    if (!responseContainer) return;
+
+    // First, clear any old answer or animation that might be there.
+    if (this.state.pixelAnimation) {
+        this.state.pixelAnimation.stop();
+        this.state.pixelAnimation = null;
+    }
+    
+    // 1. Show the "thinking" UI immediately.
+    responseContainer.innerHTML = `
+        <div class="ai-answer-container">
+            <canvas id="ai-loading-canvas"></canvas>
+            <div class="ai-answer-content">
+                <div class="ai-icon-center animate-pulse">
+                   <i class="fas fa-brain"></i>
+                </div>
+                <h3 class="text-xl font-bold text-white">AccuraAI is thinking...</h3>
+                <p>Analyzing your business data to provide insights.</p>
+            </div>
+        </div>
+    `;
+    responseContainer.scrollIntoView({ behavior: 'smooth', block: 'center' });
+
+    // 2. Use a tiny delay to ensure the browser has created the canvas.
+    // This is the key fix for the error.
+    setTimeout(() => {
+        const canvasElement = document.getElementById('ai-loading-canvas');
+        if (canvasElement) {
+            this.state.pixelAnimation = new PixelAnimationController('ai-loading-canvas');
+            this.state.pixelAnimation.start();
+            canvasElement.classList.add('active');
+        }
+    }, 100); // 100ms delay is safer
+
+    // 3. Set a new timeout to show the answer after 10 seconds.
+    setTimeout(() => {
+        if (this.state.pixelAnimation) {
+            this.state.pixelAnimation.stop();
+            this.state.pixelAnimation = null;
+        }
+        const answer = `This is the AI-generated answer for the question: '${questionKey}'. The AI has processed your request and provides this detailed insight based on your current business data.`;
+        
+        // This block now contains the typo fix (class="ai-icon-center")
+        responseContainer.innerHTML = `
+            <div class="ai-answer-container fade-in">
+                <div class="ai-answer-content">
+                    <div class="ai-icon-center">
+                       <i class="fas fa-lightbulb"></i>
+                    </div>
+                    <h3 class="text-xl font-bold text-white mb-4">Here is your insight:</h3>
+                    <p class="text-left text-lg">${answer}</p>
+                </div>
+            </div>
+        `;
+    }, 10000); // 10,000 milliseconds = 10 seconds
+},
             getAccuraBotView() {
                 const analysis = this.state.botAnalysis;
                 const overview = analysis.overview || {};
@@ -5621,7 +6041,7 @@ openBranchChat(branchId) {
                             </div>
                         </div>
 
-                        <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                        <div class="responsive-grid-4">
                             <div class="perplexity-card p-4 slide-up">
                                 <div class="flex items-center justify-between">
                                     <div>
@@ -5740,7 +6160,7 @@ openBranchChat(branchId) {
                             </button>
                         </div>
 
-                        <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                        <div class="responsive-grid-4">
                             <div class="perplexity-card p-4 slide-up">
                                 <div class="flex items-center justify-between">
                                     <div>
@@ -5868,7 +6288,7 @@ openBranchChat(branchId) {
                             </div>
                         </div>
 
-                        <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                        <div class="responsive-grid-4">
                             <div class="perplexity-card p-4 slide-up">
                                 <div class="flex items-center justify-between">
                                     <div>
@@ -5995,7 +6415,7 @@ openBranchChat(branchId) {
                             </button>
                         </div>
 
-                        <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                        <div class="responsive-grid-4">
                             <div class="perplexity-card p-4 slide-up">
                                 <div class="flex items-center justify-between">
                                     <div>
@@ -6273,7 +6693,7 @@ getReportsView() {
             </div>
 
             <!-- Key Metrics -->
-            <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+            <div class="responsive-grid-6">
                 <div class="perplexity-card p-4 text-center">
                     <div class="text-3xl font-bold text-green-400">${this.formatCurrency(totalRevenue, false)}</div>
                     <div class="text-sm text-gray-400 mt-1">Total Revenue</div>
@@ -6757,10 +7177,180 @@ sendBranchMessage(event, branchId) {
 
       
 
-};
+}
 
-// Initialize the application
-app.init(); 
-    </script>
+
+  // Initialize the application
+    app.init(); 
+</script> 
+<script>
+    // This is the powerful, original Pixel class you provided.
+    class Pixel {
+        constructor(canvas, context, x, y, color, speed, delay) {
+            this.width = canvas.width;
+            this.height = canvas.height;
+            this.ctx = context;
+            this.x = x;
+            this.y = y;
+            this.color = color;
+            this.speed = this.getRandomValue(0.1, 0.9) * speed;
+            this.size = 0;
+            this.sizeStep = Math.random() * 0.4;
+            this.minSize = 0.5;
+            this.maxSizeInteger = 2;
+            this.maxSize = this.getRandomValue(this.minSize, this.maxSizeInteger);
+            this.delay = delay;
+            this.counter = 0;
+            this.counterStep = Math.random() * 4 + (this.width + this.height) * 0.01;
+            this.isIdle = false;
+            this.isReverse = false;
+            this.isShimmer = false;
+        }
+
+        getRandomValue(min, max) {
+            return Math.random() * (max - min) + min;
+        }
+
+        draw() {
+            const centerOffset = this.maxSizeInteger * 0.5 - this.size * 0.5;
+            this.ctx.fillStyle = this.color;
+            this.ctx.fillRect(
+                this.x + centerOffset,
+                this.y + centerOffset,
+                this.size,
+                this.size,
+            );
+        }
+
+        appear() {
+            this.isIdle = false;
+            if (this.counter <= this.delay) {
+                this.counter += this.counterStep;
+                return;
+            }
+            if (this.size >= this.maxSize) {
+                this.isShimmer = true;
+            }
+            if (this.isShimmer) {
+                this.shimmer();
+            } else {
+                this.size += this.sizeStep;
+            }
+            this.draw();
+        }
+
+        disappear() {
+            this.isShimmer = false;
+            this.counter = 0;
+            if (this.size <= 0) {
+                this.isIdle = true;
+                return;
+            } else {
+                this.size -= 0.1;
+            }
+            this.draw();
+        }
+
+        shimmer() {
+            if (this.size >= this.maxSize) {
+                this.isReverse = true;
+            } else if (this.size <= this.minSize) {
+                this.isReverse = false;
+            }
+            if (this.isReverse) {
+                this.size -= this.speed;
+            } else {
+                this.size += this.speed;
+            }
+        }
+    }
+
+    // This is a new Controller that uses the original Pixel class.
+    class PixelAnimationController {
+        constructor(canvasId) {
+            this.canvas = document.getElementById(canvasId);
+            if (!this.canvas) return;
+            this.ctx = this.canvas.getContext("2d");
+            this.pixels = [];
+            this.animation = null;
+            this.timeInterval = 1000 / 60;
+            this.timePrevious = performance.now();
+            this.colors = ['#6726ff', '#a855f7', '#c084fc', '#e976ff'];
+            this.gap = 4;
+            this.speed = 0.035;
+
+            this.handleResize();
+            window.addEventListener('resize', () => this.handleResize());
+        }
+
+        handleResize() {
+            if (!this.ctx) return;
+            const rect = this.canvas.getBoundingClientRect();
+            if (rect.width === 0 || rect.height === 0) return;
+            const width = Math.floor(rect.width);
+            const height = Math.floor(rect.height);
+            const dpr = window.devicePixelRatio || 1;
+            this.canvas.width = width * dpr;
+            this.canvas.height = height * dpr;
+            this.canvas.style.width = `${width}px`;
+            this.canvas.style.height = `${height}px`;
+            this.ctx.scale(dpr, dpr);
+            this.createPixels();
+        }
+
+        getDistanceToCenter(x, y) {
+            const dpr = window.devicePixelRatio || 1;
+            const dx = x - (this.canvas.width / dpr) / 2;
+            const dy = y - (this.canvas.height / dpr) / 2;
+            return Math.sqrt(dx * dx + dy * dy);
+        }
+
+        createPixels() {
+            if (!this.ctx) return;
+            this.pixels = [];
+            const dpr = window.devicePixelRatio || 1;
+            const width = this.canvas.width / dpr;
+            const height = this.canvas.height / dpr;
+
+            for (let x = 0; x < width; x += this.gap) {
+                for (let y = 0; y < height; y += this.gap) {
+                    const color = this.colors[Math.floor(Math.random() * this.colors.length)];
+                    const delay = this.getDistanceToCenter(x, y);
+                    this.pixels.push(
+                        new Pixel(this.canvas, this.ctx, x, y, color, this.speed, delay)
+                    );
+                }
+            }
+        }
+        
+        // This is the animation loop that runs continuously
+        _animate() {
+            this.animation = requestAnimationFrame(() => this._animate());
+            const timeNow = performance.now();
+            const timePassed = timeNow - this.timePrevious;
+            if (timePassed < this.timeInterval) return;
+            this.timePrevious = timeNow - (timePassed % this.timeInterval);
+            if (!this.ctx) return;
+            this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+            for (const pixel of this.pixels) {
+                pixel.appear();
+            }
+        }
+
+        start() {
+            if (this.animation) cancelAnimationFrame(this.animation);
+            this._animate();
+        }
+
+        stop() {
+            if (this.animation) cancelAnimationFrame(this.animation);
+            this.animation = null;
+            if (this.ctx) {
+                this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+            }
+        }
+    }
+</script>
+
 </body>
 </html>
