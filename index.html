@@ -472,61 +472,53 @@
         .desktop-sidebar {
             display: none;
         }
-/* ---- REPLACE your old @media (min-width: 1024px) block with THIS ---- */
+/* ---- CORRECTED DESKTOP AND LAPTOP LAYOUT ---- */
 @media (min-width: 1024px) {
-    /* 1. DEFINE THE MAIN APP GRID */
+    /* 1. DEFINE THE MAIN APP GRID (This now targets the main #app container) */
     .app-container-grid {
         display: grid;
-        /* Create two columns: a fixed 280px for the sidebar, and 1fr (fractional unit) for the rest */
-        grid-template-columns: 280px 1fr;
-        /* Create two rows: 'auto' for the navbar height, and '1fr' for the rest of the vertical space */
-        grid-template-rows: auto 1fr;
+        grid-template-columns: 280px 1fr; /* Fixed sidebar, flexible content */
+        grid-template-rows: auto 1fr;    /* Auto navbar height, flexible content height */
         grid-template-areas:
             "sidebar nav"
             "sidebar main";
-        min-height: 100vh;
+        height: 100vh;
+        overflow: hidden; /* Prevent the main container from scrolling */
     }
 
     /* 2. POSITION THE MAIN CONTENT */
     .main-content {
-        grid-area: main; /* Assign this to the 'main' area of our grid */
-        overflow-y: auto; /* Allow this area to scroll vertically if content is long */
+        grid-area: main;
+        overflow-y: auto; /* Allow THIS area to scroll vertically */
         padding: 2rem;
-        /* REMOVE THE OLD MARGIN AND WIDTH RULES */
         margin-left: 0;
-        max-width: 100%; /* Let the grid handle the width */
-        height: auto;     /* Let the grid handle the height */
+        max-width: 100%;
     }
 
     /* 3. HIDE MOBILE-ONLY ELEMENTS */
-    .mobile-sidebar, .burger-menu {
+    .mobile-sidebar, .burger-menu, #sidebar-overlay {
         display: none;
     }
 
-    /* 4. POSITION THE DESKTOP SIDEBAR */
+    /* 4. POSITION THE DESKTOP SIDEBAR (FIXED) */
     .desktop-sidebar {
-        grid-area: sidebar; /* Assign this to the 'sidebar' area of our grid */
-        display: block;
-        position: fixed; /* Keep it fixed on the screen as you scroll */
-        top: 0;
-        left: 0;
-        width: 280px;
-        height: 100vh;
+        grid-area: sidebar;
+        display: flex; /* Use flex for easy vertical layout */
+        flex-direction: column;
+        /* REMOVED 'position: fixed' to keep it within the grid */
         background: linear-gradient(180deg, var(--bg-tertiary) 0%, rgba(36, 41, 56, 0.95) 100%);
         backdrop-filter: blur(10px);
         -webkit-backdrop-filter: blur(10px);
         border-right: 1px solid var(--border-color);
-        overflow-y: auto;
-        z-index: 100;
+        overflow-y: auto; /* Allow sidebar to scroll if content is long */
     }
 
     /* 5. POSITION THE NAVBAR */
     .navbar {
-        grid-area: nav; /* Assign this to the 'nav' area of our grid */
-        position: sticky; /* Make the navbar stick to the top when scrolling */
+        grid-area: nav;
+        position: sticky; /* Stick to the top of its container */
         top: 0;
         z-index: 1000;
-        /* REMOVE THE OLD MARGIN RULE */
         margin-left: 0;
     }
 }
@@ -1702,7 +1694,122 @@
     width: 24px;
     text-align: center;
 }
+/* === START: REPLACEMENT Inbox Notification Bar CSS (Scrolling List Style) === */
 
+/* Keyframes for the continuous vertical scroll animation */
+@keyframes vertical-scroll {
+    0% {
+        transform: translateY(0);
+    }
+    100% {
+        /* This moves the list up by the height of the original items */
+        /* We will set the exact height via a CSS variable in the JS */
+        transform: translateY(var(--scroll-height));
+    }
+}
+
+/* Wrapper for the collapsible animation (this part remains the same) */
+.inbox-notification-wrapper {
+    max-height: 500px;
+    overflow: hidden;
+    transition: max-height 0.5s ease-in-out, margin-bottom 0.5s ease-in-out;
+    margin-bottom: 1.5rem;
+}
+
+.inbox-notification-wrapper.collapsed {
+    max-height: 0;
+    margin-bottom: 0;
+}
+
+/* The main notification bar styling - updated for the list */
+.inbox-notification-bar {
+    background: rgba(20, 20, 22, 0.9); /* Darker, less transparent background like the video */
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid var(--border-color);
+    border-radius: 16px;
+    padding: 0; /* Remove padding to allow list to touch edges */
+    overflow: hidden; /* This is crucial for the scrolling effect */
+    height: 220px; /* Set a fixed height to show about 3 items */
+}
+
+/* This container will hold the scrolling list */
+#inbox-notification-content {
+    /* The animation is applied here! */
+    animation: vertical-scroll 15s linear infinite;
+}
+#inbox-notification-content:hover {
+    /* Pause the animation on hover so the user can read */
+    animation-play-state: paused;
+}
+
+/* A single notification message, styled like the video */
+.notification-message {
+    display: flex;
+    align-items: center;
+    gap: 1rem; /* 16px */
+    padding: 1rem; /* 16px */
+    border-bottom: 1px solid var(--border-color);
+}
+
+.notification-message .avatar {
+    width: 1.25rem; /* 20px - Smaller like video */
+    height: 1.25rem; /* 20px */
+    border-radius: 50%;
+    flex-shrink: 0;
+}
+
+.notification-message .content {
+    display: flex;
+    flex-direction: column; /* Stack username and text vertically */
+    min-width: 0; /* Prevents text overflow issues */
+}
+
+.notification-message .content .top-line {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem; /* 8px */
+}
+
+.notification-message .content .username {
+    font-weight: 600;
+    font-size: 0.875rem; /* 14px */
+}
+
+.notification-message .content .timestamp {
+    color: var(--text-muted);
+    font-size: 0.75rem; /* 12px */
+}
+
+.notification-message .content .text {
+    color: var(--text-secondary);
+    font-size: 0.875rem; /* 14px */
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis; /* Add ... if text is too long */
+}
+
+/* The toggle button remains the same */
+.notification-toggle-btn {
+    display: block;
+    margin: -1rem auto 1.5rem auto;
+    width: 40px;
+    height: 20px;
+    background-color: var(--bg-tertiary);
+    border: 1px solid var(--border-color);
+    color: var(--text-secondary);
+    border-radius: 0 0 12px 12px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    z-index: 10;
+}
+
+.notification-toggle-btn:hover {
+    color: var(--text-primary);
+    background-color: var(--hover-bg);
+}
+
+/* === END: REPLACEMENT Inbox Notification Bar CSS === */
     </style>
 </head>
 <body>
@@ -2093,7 +2200,36 @@
                 return responseHtml;
             }
         };
-
+const inboxNotifications = [
+    {
+        avatarBackground: "bg-gradient-to-r from-green-500 to-emerald-500",
+        username: "System",
+        content: "✅ New sale recorded for Emirates Tech Solutions.",
+        color: "text-green-400",
+        duration: 4000,
+    },
+    {
+        avatarBackground: "bg-gradient-to-r from-yellow-500 to-orange-500",
+        username: "AccuraBot",
+        content: "⚠️ Low stock warning for Wireless Mouse.",
+        color: "text-yellow-400",
+        duration: 4000,
+    },
+    {
+        avatarBackground: "bg-gradient-to-r from-blue-500 to-cyan-500",
+        username: "John Manager",
+        content: "📦 Stock request for Premium Laptops approved.",
+        color: "text-blue-400",
+        duration: 4500,
+    },
+     {
+        avatarBackground: "bg-gradient-to-r from-purple-500 to-pink-500",
+        username: "AccuraAI",
+        content: "💡 New insight: Consider a marketing campaign for External SSDs.",
+        color: "text-purple-400",
+        duration: 5000,
+    },
+];
         // Main Application
         const app = {
             charts: {},
@@ -2185,6 +2321,7 @@ quickSale: {
 },
 // Add this new empty array inside app.state
 journal: [],
+nboxNotificationInterval: null, 
                 chartOfAccounts: [
                     { code: '1110', name: 'Cash on Hand', type: 'Asset', normalBalance: 'Debit' },
                     { code: '1120', name: 'Accounts Receivable', type: 'Asset', normalBalance: 'Debit' },
@@ -2347,6 +2484,7 @@ journal: [],
     'ask-ai': () => this.handleAiQuestion(id),
     'logout': () => this.logout(),
     'toggle-mobile-menu': () => this.toggleMobileSidebar(),
+    'toggle-notification-bar': () => this.toggleNotificationBar(),
     'dashboard': () => this.navigateToView('dashboard'),
     'products': () => this.navigateToView('products'),
     'customers': () => this.navigateToView('customers'),
@@ -2433,6 +2571,7 @@ journal: [],
             },
 
             navigateToView(view) {
+                 this.stopInboxNotifications();
                 this.state.quickSale.active = false; // Close quick sale if navigating away
                 this.state.currentLedgerAccount = null; // Reset selected ledger account
                 this.setView(view);
@@ -5169,7 +5308,8 @@ openBranchChat(branchId) {
                 const currentView = this.state.currentView;
                 const viewMap = {
                     'dashboard': () => this.getDashboardView(),
-                    'accura-ai': () => this.getAccuraAIView(),
+                    // THIS IS THE CORRECTED LINE FOR THE AI/BOT TOGGLE
+                    'accura-ai': () => this.getAIAssistantView(),
                     'products': () => this.getProductsView(),
                     'customers': () => this.getCustomersView(),
                     'sales': () => this.getSalesView(),
@@ -5191,25 +5331,33 @@ openBranchChat(branchId) {
                 let themeClass = this.state.theme === 'dark' ? 'theme-dark' : 'theme-light';
                 let sidebarOpenClass = this.state.mobileMenuOpen ? 'sidebar-open' : '';
 
-                appContainer.innerHTML = `
-                    <div class="app-layout ${themeClass} ${sidebarOpenClass}">
-                        ${this.getSidebar()}
-                        <div class="main-content-wrapper">
-                            ${this.getNavbar()}
-                            <main class="main-content">${content}</main>
-                        </div>
-                    </div>
-                `;
+                // Inside the app.render() function...
 
-                // --- THIS IS THE CRUCIAL PART THAT WAS MISSING ---
-                // After rendering the HTML, initialize dynamic components like charts.
+// This line is new and sets up the container for our grid
+appContainer.className = 'app-container app-container-grid'; 
+
+// This part is simplified to place the sidebar, navbar, and main content directly inside the grid container
+appContainer.innerHTML = `
+        ${this.getSidebar()}
+        ${this.getNavbar()}
+        <main class="main-content">${content}</main>
+`;
+                // --- POST-RENDER INITIALIZATIONS ---
+                // This block runs after the main HTML is on the page.
                 this.animateDashboardNumbers();
                 if (currentView === 'dashboard') {
-                    this.renderCharts(); // This draws the dashboard graphs.
+                    this.renderCharts(); 
                 }
                 if (currentView === 'reports') {
-                    this.renderReportCharts(); // This draws the report graphs.
+                    this.renderReportCharts(); 
                 }
+                
+                // THIS IS THE NEWLY ADDED FIX FOR THE INBOX
+                if (currentView === 'inbox') {
+                    this.renderInbox();
+                    this.startInboxNotifications();
+                }
+
                 if (currentView === 'accura-ai') {
                     const canvasElement = document.getElementById('ai-loading-canvas');
                     if (canvasElement && this.state.aiLoading) {
@@ -5217,7 +5365,6 @@ openBranchChat(branchId) {
                         this.state.pixelAnimation.start();
                     }
                 }
-                // --- END OF THE MISSING PART ---
             },
 
             setTheme(themeName) {
@@ -7183,12 +7330,24 @@ getSettingsView() {
                 `;
             }, 
 
-            getInboxView() {
+           // REPLACE your old getInboxView function with this one
+
+getInboxView() {
     const unreadCount = this.state.messages.filter(m => m.to === this.state.currentUser.id && !m.read).length;
     const userBranches = this.state.branches.filter(b => b.members.includes(this.state.currentUser.id));
     
     return `
         <div class="space-y-6 fade-in">
+        
+            <div id="inbox-notification-wrapper" class="inbox-notification-wrapper">
+                <div class="inbox-notification-bar">
+                    <div id="inbox-notification-content" class="w-full">
+                        </div>
+                </div>
+            </div>
+            <button id="notification-toggle-btn" data-action="toggle-notification-bar" class="notification-toggle-btn">
+                <i class="fas fa-chevron-up"></i>
+            </button>
             <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                 <div>
                     <h2 class="text-2xl font-bold text-white mb-2">
@@ -7208,7 +7367,6 @@ getSettingsView() {
                 </div>
             </div>
 
-            <!-- Enhanced Search Bar with Employee Search -->
             <div class="perplexity-card p-4">
                 <div class="relative">
                     <input 
@@ -7221,14 +7379,11 @@ getSettingsView() {
                     >
                     <i class="fas fa-search absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
                     
-                    <!-- Employee Search Results Dropdown -->
                     <div id="employee-search-results" class="absolute top-full left-0 right-0 mt-2 bg-gray-800 rounded-lg shadow-xl border border-gray-700 hidden z-50 max-h-60 overflow-y-auto">
-                        <!-- Results will be populated here -->
-                    </div>
+                        </div>
                 </div>
             </div>
 
-            <!-- Tab Navigation -->
             <div class="flex space-x-1 bg-gray-800/50 p-1 rounded-xl">
                 <button 
                     onclick="app.setInboxFilter('all')" 
@@ -7256,18 +7411,61 @@ getSettingsView() {
                 </button>
             </div>
 
-            <!-- Messages List Container -->
             <div class="perplexity-card overflow-hidden">
                 <div id="inbox-list-container" class="divide-y divide-gray-700">
-                    <!-- Messages will be rendered here by renderInbox() -->
-                </div>
+                    </div>
             </div>
         </div>
     `;
 },
+ 
+toggleNotificationBar() {
+    const wrapper = document.getElementById('inbox-notification-wrapper');
+    const button = document.getElementById('notification-toggle-btn');
+    const icon = button.querySelector('i');
 
+    wrapper.classList.toggle('collapsed');
+    if (wrapper.classList.contains('collapsed')) {
+        icon.className = 'fas fa-chevron-down';
+    } else {
+        icon.className = 'fas fa-chevron-up';
+    }
+},
 
+// REPLACE your old startInboxNotifications function with this one
 
+startInboxNotifications() {
+    const contentArea = document.getElementById('inbox-notification-content');
+    if (!contentArea) return;
+
+    // 1. Create the HTML for each notification
+    const notificationHTML = inboxNotifications.map(notification => `
+        <div class="notification-message">
+            <div class="avatar ${notification.avatarBackground}"></div>
+            <div class="content">
+                <div class="top-line">
+                    <span class="username ${notification.color}">${notification.username}</span>
+                    <span class="timestamp">just now</span>
+                </div>
+                <div class="text">${notification.content}</div>
+            </div>
+        </div>
+    `).join('');
+
+    // 2. Duplicate the list of notifications to create a seamless loop
+    contentArea.innerHTML = notificationHTML + notificationHTML;
+
+    // 3. Calculate the total height for the CSS animation
+    const listHeight = contentArea.offsetHeight / 2;
+    contentArea.style.setProperty('--scroll-height', `-${listHeight}px`);
+},
+
+stopInboxNotifications() {
+    if (this.state.inboxNotificationInterval) {
+        clearTimeout(this.state.inboxNotificationInterval);
+        this.state.inboxNotificationInterval = null;
+    }
+},
 
     handleBotStockAlertAction(lowStockProducts) {
         const manager = this.state.users.find(u => u.role === 'manager');
