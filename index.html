@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -10,25 +11,75 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
-        :root {
-            --bg-primary: #0f1419;
-            --bg-secondary: #1a1f2e;
-            --bg-tertiary: #242938;
-            --text-primary: #ffffff;
-            --text-secondary: #b4bcd0;
-            --text-muted: #6b7280;
-            --accent-primary: #00d4aa;
-            --accent-secondary: #0ea5e9;
-            --border-color: #374151;
-            --hover-bg: #1f2937;
-            --ai-color: #6726ff;
-            --bot-color: #00a46d;
-            --positive-color: #3b82f6;
-            --negative-color: #ef4444;
-            --gold-color: #f59e0b;
-            --quick-sale-bg: #0a1a3a; /* Darker blue for quick sale */
-            --quick-sale-accent: #0419f8; /* Shining blue for quick sale */
-        }
+   /* === FINAL, WORKING ANIMATION FIX === */
+.animated-header-container {
+    position: relative;
+    display: inline-block;
+}
+
+/* The parent H1 now directly contains the gradient styles */
+.animated-header {
+    background: linear-gradient(135deg, var(--accent-primary) 0%, var(--accent-secondary) 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+}
+
+/* The individual letters start with a transparent fill and are moved down */
+.animated-header span {
+    display: inline-block;
+    -webkit-text-fill-color: transparent; /* KEY CHANGE: Start with a transparent fill */
+    transform: translateY(20px);
+    animation-fill-mode: forwards;
+}
+
+/* When .animate is added, trigger the animation */
+.animate .animated-header span {
+    animation: gradient-letter-appear 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+    animation-delay: calc(var(--i) * 0.07s);
+}
+
+/* The animation reveals the gradient fill and moves the letter up */
+@keyframes gradient-letter-appear {
+    to {
+        -webkit-text-fill-color: unset; /* KEY CHANGE: This reveals the gradient */
+        transform: translateY(0);
+    }
+}
+
+/* The underline animation remains the same */
+.animate .animated-header-container::after {
+    content: '';
+    position: absolute;
+    height: 2px;
+    bottom: -4px;
+    background: linear-gradient(135deg, var(--accent-primary) 0%, var(--accent-secondary) 100%);
+    animation: underline-grow 0.6s ease-out forwards;
+    animation-delay: 0.7s;
+}
+
+@keyframes underline-grow {
+    from { width: 0%; left: 50%; }
+    to { width: 100%; left: 0; }
+}
+:root {
+    --bg-primary: #0f1419;
+    --bg-secondary: #1a1f2e;
+    --bg-tertiary: #242938;
+    --text-primary: #00eeffbe;
+    --text-secondary: #b4bcd0;
+    --text-muted: #6b7280;
+    --accent-primary: #00d4aa;
+    --accent-secondary: #0ea5e9;
+    --border-color: #374151;
+    --hover-bg: #1f2937;
+    --ai-color: #6726ff;
+    --bot-color: #00a46d;
+    --positive-color: #3b82f6;
+    --negative-color: #ef4444;
+    --gold-color: #f59e0b;
+    --quick-sale-bg: #0a1a3a; /* Darker blue for quick sale */
+    --quick-sale-accent: #0419f8; /* Shining blue for quick sale */
+}
 
      /* === FINAL "CLEAR WHITE" (LIGHT) THEME V4 === */
         .theme-light {
@@ -109,7 +160,10 @@
 
         /* Sidebar, Navbar, and Tabs */
         .theme-light .menu-item.active { color: var(--accent-primary); background: rgba(0, 212, 170, 0.1); }
-        .theme-light .navbar, .theme-light .mobile-sidebar, .theme-light .desktop-sidebar { background: var(--bg-primary); border-color: var(--border-color); }
+        .theme-light .navbar, .theme-light .mobile-sidebar, .theme-light .desktop-sidebar { 
+    background: color-mix(in srgb, var(--bg-primary) 80%, transparent); 
+    border-color: color-mix(in srgb, var(--text-primary) 15%, transparent); 
+}
         .theme-light .inbox-tab-active { background: var(--text-primary); color: var(--bg-primary); }
         .theme-light .inbox-tab-active i { color: var(--bg-primary) !important; }
         .theme-light .inbox-notification-bar { background: var(--bg-secondary); border-color: var(--border-color); }
@@ -155,6 +209,24 @@
             text-size-adjust: 100%;
         }
 
+/* === FIX: Navbar text visibility on light theme === */
+.theme-light .navbar .text-white,
+.theme-light .navbar .text-gray-300,
+.theme-light .navbar .text-gray-400,
+.theme-light .navbar p,
+.theme-light .navbar span,
+.theme-light .navbar i {
+    color: var(--text-primary) !important;
+}
+/* === FIX: Sidebar text visibility on light theme === */
+.theme-light .mobile-sidebar .menu-item,
+.theme-light .desktop-sidebar .menu-item {
+    color: var(--text-secondary); /* Make default menu text dark gray */
+}
+
+.theme-light .menu-item:hover {
+    color: var(--text-primary); /* Make menu text darker on hover */
+}
         /* Enhanced Mobile-First Design */
         .app-container {
             min-height: 100vh;
@@ -162,16 +234,16 @@
             flex-direction: column;
         }
 
-        .navbar {
-            background: linear-gradient(90deg, var(--bg-secondary) 0%, rgba(26, 31, 46, 0.95) 100%);
-            backdrop-filter: blur(15px);
-            -webkit-backdrop-filter: blur(15px);
-            border-bottom: 1px solid var(--border-color);
-            padding: 1rem;
-            position: sticky;
-            top: 0;
-            z-index: 1000;
-        }
+       .navbar {
+    background: color-mix(in srgb, var(--bg-secondary) 60%, transparent);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border-bottom: 1px solid color-mix(in srgb, var(--accent-secondary) 20%, transparent);
+    padding: 1rem;
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+}
 
         .main-content {
             flex: 1;
@@ -205,21 +277,20 @@
         }
 
         /* Mobile Sidebar */
-        .mobile-sidebar {
-            position: fixed;
-            top: 0;
-            left: -280px;
-            width: 280px;
-            height: 100vh;
-            background: linear-gradient(180deg, var(--bg-tertiary) 0%, rgba(36, 41, 56, 0.95) 100%);
-            backdrop-filter: blur(10px);
-            -webkit-backdrop-filter: blur(10px);
-            border-right: 1px solid var(--border-color);
-            transition: left 0.3s ease;
-            z-index: 2000;
-            overflow-y: auto;
-        }
-
+       .mobile-sidebar {
+    position: fixed;
+    top: 0;
+    left: -280px;
+    width: 280px;
+    height: 100vh;
+    background: color-mix(in srgb, var(--bg-tertiary) 70%, transparent);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border-right: 1px solid color-mix(in srgb, var(--accent-secondary) 25%, transparent);
+    transition: left 0.3s ease;
+    z-index: 2000;
+    overflow-y: auto;
+}
         .mobile-sidebar.open {
             left: 0;
         }
@@ -567,17 +638,15 @@
 
     /* 4. POSITION THE DESKTOP SIDEBAR (FIXED) */
     .desktop-sidebar {
-        grid-area: sidebar;
-        display: flex; /* Use flex for easy vertical layout */
-        flex-direction: column;
-        /* REMOVED 'position: fixed' to keep it within the grid */
-        background: linear-gradient(180deg, var(--bg-tertiary) 0%, rgba(36, 41, 56, 0.95) 100%);
-        backdrop-filter: blur(10px);
-        -webkit-backdrop-filter: blur(10px);
-        border-right: 1px solid var(--border-color);
-        overflow-y: auto; /* Allow sidebar to scroll if content is long */
-    }
-
+    grid-area: sidebar;
+    display: flex;
+    flex-direction: column;
+    background: color-mix(in srgb, var(--bg-tertiary) 70%, transparent);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border-right: 1px solid color-mix(in srgb, var(--accent-secondary) 25%, transparent);
+    overflow-y: auto;
+}
     /* 5. POSITION THE NAVBAR */
     .navbar {
         grid-area: nav;
@@ -1907,7 +1976,7 @@
 
         // GCC Countries Configuration
         const GCC_COUNTRIES = {
-            'AE': { name: 'United Arab Emirates', currency: 'AED', symbol: 'د.إ', rate: 3.67, tax: 0.05, taxName: 'VAT' },
+            'AE': { name: 'United Arab Emirates', currency: 'AED', symbol: 'DHS', rate: 3.67, tax: 0.05, taxName: 'VAT' },
             'SA': { name: 'Saudi Arabia', currency: 'SAR', symbol: '﷼', rate: 3.75, tax: 0.15, taxName: 'VAT' },
             'KW': { name: 'Kuwait', currency: 'KWD', symbol: 'د.ك', rate: 0.30, tax: 0.00, taxName: 'No Tax' },
             'QA': { name: 'Qatar', currency: 'QAR', symbol: '﷼', rate: 3.64, tax: 0.00, taxName: 'No Tax' },
@@ -2311,6 +2380,7 @@ const inboxNotifications = [
             currentSaleCart: [], // This will hold items for the current sale being added
             state: {
                 currentUser: null,
+                animationInterval: null,
                 currentView: 'login',
                 pendingRole: null,
                 mobileMenuOpen: false,
@@ -2698,6 +2768,7 @@ nboxNotificationInterval: null,
                 this.state.currentUser = this.state.users.find(u => u.id === parseInt(userId));
                 this.state.currentView = 'dashboard';
                 this.render();
+                
             },
 // PASTE THE NEW LOGOUT FUNCTION HERE
 getUserSelectionView() {
@@ -5613,6 +5684,7 @@ openBranchChat(branchId) {
                     'inbox': () => this.getInboxView(),
                     'settings': () => this.getSettingsView(),
                     'bot': () => this.getAccuraBotView(),
+                
                 };
 
                 const contentHTML = viewMap[currentView] ? viewMap[currentView]() : this.getDashboardView();
@@ -5627,7 +5699,34 @@ openBranchChat(branchId) {
                 
                 // Step 5: Run post-render scripts (like charts and animations)
                 this.postRenderSetup();
+                
             },
+
+initializeHeaderAnimation() {
+    // Clear any existing timer to prevent duplicates when re-rendering
+    if (this.animationInterval) {
+        clearInterval(this.animationInterval);
+    }
+
+    const headers = document.querySelectorAll('.animated-header-container');
+    if (headers.length === 0) return;
+
+    // A function to play the animation
+    const playAnimation = () => {
+        headers.forEach(header => {
+            header.classList.remove('animate');
+            // This is a browser trick to force the animation to restart
+            void header.offsetWidth;
+            header.classList.add('animate');
+        });
+    };
+
+    // Play it once immediately
+    playAnimation();
+
+    // Then, set it to play again every 60 seconds
+    this.animationInterval = setInterval(playAnimation, 15000);
+},
 
             setTheme(themeName) {
     document.body.className = themeName === 'default' ? '' : themeName;
@@ -5737,168 +5836,155 @@ openBranchChat(branchId) {
 
             
 
-            getNavbar() {
-                const unreadCount = this.getUnreadMessageCount();
-                const aiButtonClass = this.state.aiMode === 'ai' ? 'ai-button ai-pulse' : 'bot-button bot-pulse';
-                const aiIcon = this.state.aiMode === 'ai' ? 'fas fa-brain' : 'fas fa-robot';
-                const aiText = this.state.aiMode === 'ai' ? 'AccuraAI' : 'AccuraBot';
-                const countryInfo = GCC_COUNTRIES[this.state.selectedCountry];
-                
-                return `
-                    <div class="navbar">
-                        <div class="flex justify-between items-center">
-                            <div class="flex items-center space-x-4">
-                                <div class="burger-menu" data-action="toggle-mobile-menu">
-                                    <i class="fas fa-bars text-white text-lg"></i>
-                                </div>
-                                
-                                <div class="flex items-center space-x-3">
-                                    <div class="flex items-center space-x-3">
-                                      <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-emerald-400 via-teal-500 to-blue-600 flex items-center justify-center shadow-lg transform hover:scale-105 transition-all duration-300">
-                                <svg width="28" height="28" viewBox="0 0 28 28" fill="currentColor" xmlns="http://www.w3.org/2000/svg" class="text-white">
-                                    <rect x="4" y="4" width="6" height="20" rx="3"/>
-                                    <rect x="4" y="18" width="14" height="6" rx="3"/>
-                                    <path d="M15 18L18.5 21.5L24 16" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="stroke-bg-secondary"/>
-                                </svg>
-                            </div>
-                                        <div class="hidden sm:block">
-                                            <h1 class="text-xl font-bold gradient-text leading-tight">Ledgerly</h1>
-                                            <p class="text-xs text-gray-400 leading-none font-medium">Smart Sales Management</p>
-                                        </div>
-                                    </div>
-                                </div>
-                                
-                                <div class="hidden md:flex items-center space-x-4">
-                                    <span class="text-gray-500">|</span>
-                                    <div class="flex items-center space-x-3">
-                                        <div class="w-8 h-8 rounded-full bg-gradient-to-r from-purple-500 to-pink-500 flex items-center justify-center">
-                                            <span class="text-white font-bold text-sm">${this.state.currentUser.name.charAt(0)}</span>
-                                        </div>
-                                        <div>
-                                            <p class="text-white font-medium text-sm">${this.state.currentUser.name}</p>
-                                            <p class="text-xs text-gray-400 capitalize">${this.state.currentUser.role}</p>
-                                        </div>
-                                    </div>
-                                    ${['admin', 'manager'].includes(this.state.currentUser.role) ? `
-                                        <div class="flex items-center space-x-2">
-                                            <span class="px-3 py-1 bg-gradient-to-r from-yellow-500 to-orange-500 text-white text-xs rounded-full font-medium">
-                                                ${countryInfo.currency} • ${countryInfo.name.split(' ')[0]}
-                                            </span>
-                                        </div>
-                                    ` : ''}
-                                </div>
-                            </div>
-                            
-                            <div class="flex items-center space-x-2">
-                                <button data-action="start-quick-sale" class="quick-sale-button quick-sale-pulse px-3 py-2 rounded-lg text-sm font-medium" title="Quick Sale">
-                                    <i class="fas fa-bolt text-lg"></i>
-                                    <span class="hidden sm:inline ml-2">Quick Sale</span>
-                                </button>
-
-                                <button data-action="ai-assistant" class="${aiButtonClass} px-3 py-2 rounded-lg text-sm font-medium" title="${aiText}">
-                                    <i class="${aiIcon} fa-fw text-lg"></i>
-                                    <span class="hidden sm:inline ml-2">${aiText}</span>
-                                </button>
-                                
-                                <div class="relative">
-                                    <button data-action="inbox" class="text-gray-400 hover:text-teal-400 transition-colors p-2 rounded-lg hover:bg-gray-700/50" title="Messages">
-                                        <i class="fas fa-envelope text-lg"></i>
-                                        ${unreadCount > 0 ? `<span class="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">${unreadCount}</span>` : ''}
-                                    </button>
-                                </div>
-                                
-                                <button data-action="export-data" class="text-gray-400 hover:text-teal-400 transition-colors p-2 rounded-lg hover:bg-gray-700/50 hidden sm:block" title="Export Data">
-                                    <i class="fas fa-download text-lg"></i>
-                                </button>
-                                
-                                <button data-action="logout" class="bg-red-600 hover:bg-red-700 text-white px-3 py-2 rounded-lg text-sm font-medium transition-all" title="Logout">
-                                    <i class="fas fa-sign-out-alt"></i>
-                                    <span class="hidden sm:inline ml-2">Logout</span>
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                `;
-            },
-
-
-            getSidebar() {
-                const menuItems = [
-                    { key: 'dashboard', icon: 'fas fa-tachometer-alt', label: 'Dashboard', roles: ['admin', 'manager', 'worker'] },
-                    { key: 'ai-assistant', icon: this.state.aiMode === 'ai' ? 'fas fa-brain' : 'fas fa-robot', label: this.state.aiMode === 'ai' ? 'AccuraAI' : 'AccuraBot', roles: ['admin', 'manager', 'worker'] },
-                    { key: 'products', icon: 'fas fa-box', label: 'Products', roles: ['admin', 'manager', 'worker'] },
-                    { key: 'customers', icon: 'fas fa-users', label: 'Customers', roles: ['admin', 'manager', 'worker'] },
-                    { key: 'sales', icon: 'fas fa-shopping-cart', label: 'Sales', roles: ['admin', 'manager', 'worker'] },
-                    { key: 'expenses', icon: 'fas fa-receipt', label: 'Expenses', roles: ['admin', 'manager', 'worker'] },
-                    { key: 'invoices', icon: 'fas fa-file-invoice', label: 'Invoices', roles: ['admin', 'manager', 'worker'] },
-                    { key: 'journal', icon: 'fas fa-book fa-fw', label: 'General Journal', roles: ['admin', 'worker'] }, // Added for General Journal
-                    { key: 'ledger', icon: 'fas fa-book-open fa-fw', label: 'Ledger', roles: ['admin', 'manager'] }, // New for Ledger
-                    { key: 'trial-balance', icon: 'fas fa-balance-scale fa-fw', label: 'Trial Balance', roles: ['admin', 'manager'] }, // New for Trial Balance
-                    { key: 'pnl', icon: 'fas fa-chart-line fa-fw', label: 'Profit & Loss', roles: ['admin', 'manager'] },
-                    { key: 'balance-sheet', icon: 'fas fa-file-alt fa-fw', label: 'Balance Sheet', roles: ['admin', 'manager'] }, // New for Balance Sheet
-                    { key: 'inbox', icon: 'fas fa-envelope', label: 'Inbox', roles: ['admin', 'manager', 'worker'] },
-                    { key: 'employees', icon: 'fas fa-user-tie', label: 'Employees', roles: ['admin', 'manager'] },
-                    { key: 'reports', icon: 'fas fa-chart-bar', label: 'Reports', roles: ['admin', 'manager'] },
-                    { key: 'settings', icon: 'fas fa-cog', label: 'Settings', roles: ['admin', 'manager', 'worker'] } /* Added worker role */
-                ];
-
-                const userRole = this.state.currentUser.role;
-                const visibleItems = menuItems.filter(item => item.roles.includes(userRole));
-                const unreadCount = this.getUnreadMessageCount();
-
-                const sidebarContent = `
-                    <div class="p-6">
-                        <div class="mb-6">
-                            <div class="flex items-center space-x-3 mb-6">
-                                <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-emerald-400 via-teal-500 to-blue-600 flex items-center justify-center shadow-lg transform hover:scale-105 transition-all duration-300">
-                                <svg width="28" height="28" viewBox="0 0 28 28" fill="currentColor" xmlns="http://www.w3.org/2000/svg" class="text-white">
-                                    <rect x="4" y="4" width="6" height="20" rx="3"/>
-                                    <rect x="4" y="18" width="14" height="6" rx="3"/>
-                                    <path d="M15 18L18.5 21.5L24 16" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="stroke-bg-secondary"/>
-                                </svg>
-                            </div>
-                              <h1 class="text-xl font-bold gradient-text">Ledgerly</h1>
-                                    <p class="text-sm text-gray-400">Sales</p>
-                                </div>
-                            </div>
-                            <h3 class="text-sm font-semibold text-gray-400 uppercase tracking-wider mb-3">Navigation</h3>
-                        </div>
-                        <ul class="space-y-2">
-                            ${visibleItems.map(item => `
-                                <li>
-                                    <button data-action="${item.key}" 
-                                            class="menu-item ${this.state.currentView === item.key ? 'active' : ''} ${item.key === 'ai-assistant' && this.state.aiMode === 'ai' ? 'ai-pulse' : item.key === 'ai-assistant' && this.state.aiMode === 'bot' ? 'bot-pulse' : ''}">
-                                        <i class="${item.icon} fa-fw"></i>
-                                        <span class="font-medium">${item.label}</span>
-                                        ${item.key === 'inbox' && unreadCount > 0 ? `<span class="ml-auto bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">${unreadCount}</span>` : ''}
-                                        ${item.key === 'ai-assistant' ? `<span class="${this.state.aiMode === 'ai' ? 'text-purple-400' : 'text-green-400'} text-xs ml-auto">✨</span>` : ''}
-                                    </button>
-                                </li>
-                            `).join('')}
-                        </ul>
-                        
-                        <div class="mt-8 p-4 bg-gradient-to-r from-gray-800/50 to-gray-700/50 rounded-xl border border-gray-600/50">
-                            <div class="text-center">
-                                <h4 class="text-lg font-bold bg-gradient-to-r from-yellow-500 to-orange-500 bg-clip-text text-transparent mb-1">${this.state.companyName}</h4>
-                                <p class="text-gray-400 text-xs">Powered by AccuraAI</p>
-                                <div class="mt-2 text-xs text-gray-500">
-                                    ${GCC_COUNTRIES[this.state.selectedCountry].currency} • ${GCC_COUNTRIES[this.state.selectedCountry].name.split(' ')[0]}
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                `;
-
-                return `
-                    <div id="mobile-sidebar" class="mobile-sidebar">
-                        ${sidebarContent}
+           getNavbar() {
+    const unreadCount = this.getUnreadMessageCount();
+    const aiButtonClass = this.state.aiMode === 'ai' ? 'ai-button ai-pulse' : 'bot-button bot-pulse';
+    const aiIcon = this.state.aiMode === 'ai' ? 'fas fa-brain' : 'fas fa-robot';
+    const aiText = this.state.aiMode === 'ai' ? 'AccuraAI' : 'AccuraBot';
+    const countryInfo = GCC_COUNTRIES[this.state.selectedCountry];
+    
+    return `
+        <div class="navbar">
+            <div class="flex justify-between items-center">
+                <div class="flex items-center space-x-4">
+                    <div class="burger-menu" data-action="toggle-mobile-menu">
+                        <i class="fas fa-bars text-white text-lg"></i>
                     </div>
                     
-                    <div class="desktop-sidebar">
-                        ${sidebarContent}
+                    <!-- GRADIENT TEXT LOGO -->
+                    <div class="flex items-center">
+                        <div id="navbar-logo-container" class="animated-header-container">
+    <h1 class="animated-header text-2xl font-bold">
+        <span style="--i:1">L</span><span style="--i:2">e</span><span style="--i:3">d</span><span style="--i:4">g</span><span style="--i:5">e</span><span style="--i:6">r</span><span style="--i:7">l</span><span style="--i:8">y</span>
+    </h1>
+</div>
                     </div>
-                `;
-            },
+                    
+                    <div class="hidden md:flex items-center space-x-4">
+                        <span class="text-gray-500">|</span>
+                        <div class="flex items-center space-x-3">
+                            <div class="w-8 h-8 rounded-full bg-gradient-to-r from-purple-500 to-pink-500 flex items-center justify-center">
+                                <span class="text-white font-bold text-sm">${this.state.currentUser.name.charAt(0)}</span>
+                            </div>
+                            <div>
+                                <p class="text-white font-medium text-sm">${this.state.currentUser.name}</p>
+                                <p class="text-xs text-gray-400 capitalize">${this.state.currentUser.role}</p>
+                            </div>
+                        </div>
+                        ${['admin', 'manager'].includes(this.state.currentUser.role) ? `
+                            <div class="flex items-center space-x-2">
+                                <span class="px-3 py-1 bg-gradient-to-r from-yellow-500 to-orange-500 text-white text-xs rounded-full font-medium">
+                                    ${countryInfo.currency} • ${countryInfo.name.split(' ')[0]}
+                                </span>
+                            </div>
+                        ` : ''}
+                    </div>
+                </div>
+                
+                <div class="flex items-center space-x-2">
+                    <button data-action="start-quick-sale" class="quick-sale-button quick-sale-pulse px-3 py-2 rounded-lg text-sm font-medium" title="Quick Sale">
+                        <i class="fas fa-bolt text-lg"></i>
+                        <span class="hidden sm:inline ml-2">Quick Sale</span>
+                    </button>
+
+                    <button data-action="ai-assistant" class="${aiButtonClass} px-3 py-2 rounded-lg text-sm font-medium" title="${aiText}">
+                        <i class="${aiIcon} fa-fw text-lg"></i>
+                        <span class="hidden sm:inline ml-2">${aiText}</span>
+                    </button>
+                    
+                    <div class="relative">
+                        <button data-action="inbox" class="text-gray-400 hover:text-teal-400 transition-colors p-2 rounded-lg hover:bg-gray-700/50" title="Messages">
+                            <i class="fas fa-envelope text-lg"></i>
+                            ${unreadCount > 0 ? `<span class="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">${unreadCount}</span>` : ''}
+                        </button>
+                    </div>
+                    
+                    <button data-action="export-data" class="text-gray-400 hover:text-teal-400 transition-colors p-2 rounded-lg hover:bg-gray-700/50 hidden sm:block" title="Export Data">
+                        <i class="fas fa-download text-lg"></i>
+                    </button>
+                    
+                    <button data-action="logout" class="bg-red-600 hover:bg-red-700 text-white px-3 py-2 rounded-lg text-sm font-medium transition-all" title="Logout">
+                        <i class="fas fa-sign-out-alt"></i>
+                        <span class="hidden sm:inline ml-2">Logout</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    `;
+},
+
+       getSidebar() {
+    const menuItems = [
+        { key: 'dashboard', icon: 'fas fa-tachometer-alt', label: 'Dashboard', roles: ['admin', 'manager', 'worker'] },
+        { key: 'ai-assistant', icon: this.state.aiMode === 'ai' ? 'fas fa-brain' : 'fas fa-robot', label: this.state.aiMode === 'ai' ? 'AccuraAI' : 'AccuraBot', roles: ['admin', 'manager', 'worker'] },
+        { key: 'products', icon: 'fas fa-box', label: 'Products', roles: ['admin', 'manager', 'worker'] },
+        { key: 'customers', icon: 'fas fa-users', label: 'Customers', roles: ['admin', 'manager', 'worker'] },
+        { key: 'sales', icon: 'fas fa-shopping-cart', label: 'Sales', roles: ['admin', 'manager', 'worker'] },
+        { key: 'expenses', icon: 'fas fa-receipt', label: 'Expenses', roles: ['admin', 'manager', 'worker'] },
+        { key: 'invoices', icon: 'fas fa-file-invoice', label: 'Invoices', roles: ['admin', 'manager', 'worker'] },
+        { key: 'journal', icon: 'fas fa-book fa-fw', label: 'General Journal', roles: ['admin', 'worker'] },
+        { key: 'ledger', icon: 'fas fa-book-open fa-fw', label: 'Ledger', roles: ['admin', 'manager'] },
+        { key: 'trial-balance', icon: 'fas fa-balance-scale fa-fw', label: 'Trial Balance', roles: ['admin', 'manager'] },
+        { key: 'pnl', icon: 'fas fa-chart-line fa-fw', label: 'Profit & Loss', roles: ['admin', 'manager'] },
+        { key: 'balance-sheet', icon: 'fas fa-file-alt fa-fw', label: 'Balance Sheet', roles: ['admin', 'manager'] },
+        { key: 'inbox', icon: 'fas fa-envelope', label: 'Inbox', roles: ['admin', 'manager', 'worker'] },
+        { key: 'employees', icon: 'fas fa-user-tie', label: 'Employees', roles: ['admin', 'manager'] },
+        { key: 'reports', icon: 'fas fa-chart-bar', label: 'Reports', roles: ['admin', 'manager'] },
+        { key: 'settings', icon: 'fas fa-cog', label: 'Settings', roles: ['admin', 'manager', 'worker'] }
+    ];
+
+    const userRole = this.state.currentUser.role;
+    const visibleItems = menuItems.filter(item => item.roles.includes(userRole));
+    const unreadCount = this.getUnreadMessageCount();
+
+    const sidebarContent = `
+        <div class="p-6">
+            <!-- GRADIENT TEXT LOGO -->
+            <div class="flex items-center mb-8">
+              <div id="sidebar-logo-container" class="animated-header-container">
+    <h1 class="animated-header text-2xl font-bold">
+        <span style="--i:1">L</span><span style="--i:2">e</span><span style="--i:3">d</span><span style="--i:4">g</span><span style="--i:5">e</span><span style="--i:6">r</span><span style="--i:7">l</span><span style="--i:8">y</span>
+    </h1>
+</div>
+            </div>
+            
+            <h3 class="text-sm font-semibold text-gray-400 uppercase tracking-wider mb-3">Navigation</h3>
+            <ul class="space-y-2">
+                ${visibleItems.map(item => `
+                    <li>
+                        <button data-action="${item.key}" 
+                                class="menu-item ${this.state.currentView === item.key ? 'active' : ''} ${item.key === 'ai-assistant' && this.state.aiMode === 'ai' ? 'ai-pulse' : item.key === 'ai-assistant' && this.state.aiMode === 'bot' ? 'bot-pulse' : ''}">
+                            <i class="${item.icon} fa-fw"></i>
+                            <span class="font-medium">${item.label}</span>
+                            ${item.key === 'inbox' && unreadCount > 0 ? `<span class="ml-auto bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">${unreadCount}</span>` : ''}
+                            ${item.key === 'ai-assistant' ? `<span class="${this.state.aiMode === 'ai' ? 'text-purple-400' : 'text-green-400'} text-xs ml-auto">✨</span>` : ''}
+                        </button>
+                    </li>
+                `).join('')}
+            </ul>
+            
+            <div class="mt-8 p-4 bg-gradient-to-r from-gray-800/50 to-gray-700/50 rounded-xl border border-gray-600/50">
+                <div class="text-center">
+                    <h4 class="text-lg font-bold bg-gradient-to-r from-yellow-500 to-orange-500 bg-clip-text text-transparent mb-1">${this.state.companyName}</h4>
+                    <p class="text-gray-400 text-xs">Powered by AccuraAI</p>
+                    <div class="mt-2 text-xs text-gray-500">
+                        ${GCC_COUNTRIES[this.state.selectedCountry].currency} • ${GCC_COUNTRIES[this.state.selectedCountry].name.split(' ')[0]}
+                    </div>
+                </div>
+            </div>
+        </div>
+    `;
+
+    return `
+        <div id="mobile-sidebar" class="mobile-sidebar">
+            ${sidebarContent}
+        </div>
+        
+        <div class="desktop-sidebar">
+            ${sidebarContent}
+        </div>
+    `;
+},
 
          getDashboardView() {
                 const { currentUser, users, sales, expenses, products, customers } = this.state;
@@ -7549,7 +7635,8 @@ getSettingsView() {
             postRenderSetup() {
                 // This function runs after the main HTML is on the page
                 this.animateDashboardNumbers();
-                
+                this.initializeHeaderAnimation();
+                       
                 if (this.state.currentView === 'dashboard') {
                     this.createDashboardCharts();
                 }
