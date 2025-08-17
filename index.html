@@ -30,136 +30,37 @@
             --quick-sale-accent: #0419f8; /* Shining blue for quick sale */
         }
 
-     /* === FINAL "CLEAR WHITE" (LIGHT) THEME V2 === */
-        .theme-light {
-            --bg-primary: #ffffff;
-            --bg-secondary: #f8f9fa;
-            --bg-tertiary: #e9ecef;
-            --text-primary: #212529;
-            --text-secondary: #495057;
-            --text-muted: #6c757d;
-            --border-color: #dee2e6;
-            --hover-bg: #e9ecef;
+        /* Sepia Theme */
+        .theme-sepia {
+            --bg-primary: #f1e9db;
+            --bg-secondary: #fbf8f2;
+            --bg-tertiary: #e8e0d1;
+            --text-primary: #4a4033;
+            --text-secondary: #5f5243;
+            --text-muted: #8c7f6d;
+            --border-color: #dcd0b9;
+            --hover-bg: #e6dac9;
         }
-        /* General Text & Element Overrides */
-        .theme-light .text-white,
-        .theme-light .text-gray-300,
-        .theme-light .text-gray-400,
-        .theme-light .text-d1d5db {
+        .theme-sepia .text-white,
+        .theme-sepia .text-gray-300,
+        .theme-sepia .text-gray-400,
+        .theme-sepia .text-d1d5db {
             color: var(--text-primary) !important;
         }
-        .theme-light p, .theme-light h1, .theme-light h2, .theme-light h3, .theme-light h4, .theme-light span, .theme-light div, .theme-light th, .theme-light td {
-            border-color: var(--border-color) !important;
-        }
-        .theme-light h1, .theme-light h2, .theme-light h3, .theme-light h4, .theme-light .font-bold, .theme-light .font-semibold {
-             color: var(--text-primary);
-        }
-        .theme-light .text-gray-500 {
-            color: var(--text-muted) !important;
-        }
+        .theme-sepia .text-red-400 { color: #c53030 !important; }
+        .theme-sepia .text-green-400 { color: #2f855a !important; }
+        .theme-sepia .text-blue-400 { color: #2b6cb0 !important; }
+        .theme-sepia .text-yellow-400 { color: #b7791f !important; }
+        .theme-sepia .text-purple-400 { color: #6b46c1 !important; }
+        .theme-sepia .text-teal-400 { color: #2c7a7b !important; }
+        .theme-sepia .perplexity-card { background: #fbf8f2; box-shadow: 0 4px 12px rgba(0,0,0,0.08); }
+        .theme-sepia .form-input { background: #fdfdff !important; border-color: #d1d5db !important; color: #4a4033 !important; }
+        .theme-sepia .form-input:focus { border-color: var(--accent-primary) !important; background: #ffffff !important; }
+        .theme-sepia .menu-item.active { color: var(--accent-primary); background: rgba(0, 212, 170, 0.1); }
+        .theme-sepia .navbar, .theme-sepia .mobile-sidebar, .theme-sepia .desktop-sidebar { background: linear-gradient(90deg, #fbf8f2, #e8e0d1); border-bottom-color: #dcd0b9; }
+        .theme-sepia .quick-sale-container { background: linear-gradient(135deg, #0a1a3a, #000a1a); } /* Keep quick sale dark */
+        .theme-sepia .text-black { color: #111827; } /* Ensure black text is visible */
 
-        /* Specific Color Text Overrides */
-        .theme-light .text-red-400 { color: #dc3545 !important; }
-        .theme-light .text-green-400 { color: #198754 !important; }
-        .theme-light .text-blue-400 { color: #0d6efd !important; }
-        .theme-light .text-yellow-400 { color: #D48806 !important; }
-        .theme-light .text-purple-400 { color: #6f42c1 !important; }
-        .theme-light .text-teal-400 { color: #20c997 !important; }
-        
-        /* Gradient Text Overrides with Brand Colors */
-        .theme-light .gradient-text,
-        .theme-light .quick-sale-gradient-text {
-            color: #0d6efd !important; /* Blue for general */
-            background: none !important; -webkit-background-clip: initial !important; -webkit-text-fill-color: initial !important;
-        }
-        .theme-light .ai-gradient-text {
-            color: #6f42c1 !important; /* Dark Purple for AccuraAI */
-            background: none !important; -webkit-background-clip: initial !important; -webkit-text-fill-color: initial !important;
-        }
-        .theme-light .bot-gradient-text {
-            color: #198754 !important; /* Dark Green for AccuraBot */
-            background: none !important; -webkit-background-clip: initial !important; -webkit-text-fill-color: initial !important;
-        }
-
-        /* Card and Form Overrides */
-        .theme-light .perplexity-card { background: var(--bg-primary); box-shadow: 0 4px 12px rgba(0,0,0,0.08); border-color: var(--border-color); }
-        .theme-light .form-input { background: #ffffff !important; border-color: #ced4da !important; color: var(--text-primary) !important; }
-        .theme-light .form-input:focus { border-color: var(--accent-secondary) !important; background: #ffffff !important; }
-        
-        /* THIS FIXES THE POP-UP MODAL BACKGROUNDS */
-        .theme-light .modal-content {
-            background: var(--bg-primary);
-            border-color: var(--border-color);
-        }
-
-        /* Special Card Overrides with Brand Colors */
-        .theme-light .ai-card {
-            background: rgba(111, 66, 193, 0.07) !important; /* Very light purple */
-            border-color: rgba(111, 66, 193, 0.2) !important;
-        }
-        .theme-light .bot-card {
-            background: rgba(25, 135, 84, 0.07) !important; /* Very light green */
-            border-color: rgba(25, 135, 84, 0.2) !important;
-        }
-        
-        /* AI Animation Background */
-        .theme-light .ai-answer-container {
-            background: var(--bg-secondary);
-        }
-
-        /* Gray Background Overrides */
-        .theme-light .bg-gray-800\/50,
-        .theme-light .bg-gray-800\/60,
-        .theme-light .bg-gray-900,
-        .theme-light .odd\:bg-gray-800\/10:nth-child(odd) {
-            background-color: var(--bg-tertiary) !important;
-        }
-
-        /* Gradient & Colored Background Overrides */
-        .theme-light .bg-gradient-to-r, .theme-light .bg-gradient-to-br {
-            background-image: none !important;
-            background-color: var(--bg-secondary);
-        }
-        .theme-light [class*="bg-"][class*="\/10"],
-        .theme-light [class*="bg-"][class*="\/20"] {
-            background-color: rgba(0, 0, 0, 0.03) !important;
-        }
-        .theme-light [class*="border-"][class*="\/20"],
-        .theme-light [class*="border-"][class*="\/30"] {
-            border-color: var(--border-color) !important;
-        }
-
-        /* Sidebar and Navbar */
-        .theme-light .menu-item.active { color: var(--accent-primary); background: rgba(0, 212, 170, 0.1); }
-        .theme-light .navbar, .theme-light .mobile-sidebar, .theme-light .desktop-sidebar { background: var(--bg-primary); border-color: var(--border-color); }
-        
-        /* Inbox Tabs */
-        .theme-light .inbox-tab-active {
-            background: var(--text-primary);
-            color: var(--bg-primary);
-        }
-        .theme-light .inbox-tab-active i { color: var(--bg-primary) !important; }
-        
-        /* Notification Bar */
-        .theme-light .inbox-notification-bar {
-            background: var(--bg-secondary);
-            border-color: var(--border-color);
-        }
-
-        /* Keep Quick Sale dark for contrast */
-        .theme-light .quick-sale-container { background: linear-gradient(135deg, #0a1a3a, #000a1a); }
-        .theme-light .quick-sale-container .text-gray-300,
-        .theme-light .quick-sale-container .text-white {
-            color: #ffffff !important;
-        }
-        .theme-light .text-black { color: #000000 !important; }
-/* THIS FIXES THE AI AND BOT ICON COLORS */
-        .theme-light .menu-item i.fa-brain {
-            color: #6f42c1 !important; /* Always purple in light theme */
-        }
-        .theme-light .menu-item i.fa-robot {
-            color: #198754 !important; /* Always green in light theme */
-        }
 
         /* Pitch Black Theme */
         .theme-black {
@@ -1132,12 +1033,12 @@
             }
         }
 
-        /* === FINAL REPLACEMENT CODE FOR USER SELECTION CARDS === */
+        /* User Selection Cards */
         .user-selection-card {
             background: rgba(36, 41, 56, 0.8);
-            border: 2px solid var(--border-color);
+            border: 2px solid transparent;
             border-radius: 20px;
-            transition: all 0.3s ease-out;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
             cursor: pointer;
             min-height: 140px;
             display: flex;
@@ -1148,23 +1049,13 @@
             position: relative;
             overflow: hidden;
             padding: 24px;
-            will-change: transform, box-shadow, background;
-            outline: none; /* Prevents the default browser focus ring */
         }
 
-        /* This new rule handles the "focus" state separately. */
-        /* It provides a subtle ring for accessibility (keyboard users) */
-        /* but doesn't trigger the main hover animation. */
-        .user-selection-card:focus-visible {
-            box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.5); /* A subtle blue ring for focus */
-        }
-
-        /* This rule now ONLY applies to an actual mouse hover */
         .user-selection-card:hover {
-            border-color: var(--accent-secondary);
-            background: var(--bg-tertiary);
-            transform: translateY(-6px);
-            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.4);
+            border-color: var(--accent-primary);
+            background: rgba(36, 41, 56, 0.95);
+            transform: translateY(-8px) scale(1.02);
+            box-shadow: 0 20px 40px rgba(0, 212, 170, 0.3);
         }
 
         /* Gradient Text Effects */
@@ -1896,23 +1787,7 @@
 .animate-notification-appear {
   animation: notification-appear 0.5s ease-out forwards;
 }
-/* === FINAL BRAND ICON COLOR FIX (ALL THEMES) === */
-        .menu-item.active i.fa-brain,
-        .menu-item i.fa-brain {
-            color: var(--ai-color) !important;
-        }
-        .menu-item.active i.fa-robot,
-        .menu-item i.fa-robot {
-            color: var(--bot-color) !important;
-        }
-        .theme-light .menu-item.active i.fa-brain,
-        .theme-light .menu-item i.fa-brain {
-            color: #6f42c1 !important; /* Dark purple for light theme */
-        }
-        .theme-light .menu-item.active i.fa-robot,
-        .theme-light .menu-item i.fa-robot {
-            color: #198754 !important; /* Dark green for light theme */
-        }
+
 /* === END: Inbox Notification Bar CSS === */
     </style>
 </head>
@@ -2341,7 +2216,6 @@ const inboxNotifications = [
             state: {
                 currentUser: null,
                 currentView: 'login',
-                pendingRole: null,
                 mobileMenuOpen: false,
                 aiMode: 'ai',
                 aiLoading: false,
@@ -2350,12 +2224,10 @@ const inboxNotifications = [
                 selectedCountry: 'AE',
                 companyName: 'Your Company',
                 lowStockThreshold: 10,
-                users: [ // <-- REPLACE THE ENTIRE USERS ARRAY WITH THIS
+                users: [
                     { id: 1, username: 'admin', role: 'admin', name: 'Administrator', email: 'admin@company.com', phone: '+971501234567', address: 'Business Bay, Dubai', hireDate: '2023-01-01', salary: 75000, commission: 0 },
                     { id: 2, username: 'manager', role: 'manager', name: 'John Manager', email: 'manager@company.com', phone: '+971501234568', address: 'Downtown Dubai', hireDate: '2023-02-01', salary: 60000, commission: 0 },
-                    { id: 3, username: 'worker', role: 'worker', name: 'Jane Worker', email: 'worker@company.com', phone: '+971501234569', address: 'Dubai Marina', hireDate: '2023-03-01', salary: 45000, commission: 250 },
-                    { id: 4, username: 'worker2', role: 'worker', name: 'Bob Worker', email: 'worker2@company.com', phone: '+971501234570', address: 'Dubai Marina', hireDate: '2023-03-02', salary: 45000, commission: 0 },
-                    { id: 5, username: 'manager2', role: 'manager', name: 'Sarah Manager', email: 'manager2@company.com', phone: '+971501234571', address: 'Downtown Dubai', hireDate: '2023-02-02', salary: 60000, commission: 0 }
+                    { id: 3, username: 'worker', role: 'worker', name: 'Jane Worker', email: 'worker@company.com', phone: '+971501234569', address: 'Dubai Marina', hireDate: '2023-03-01', salary: 45000, commission: 250 }
                 ],
                 products: [
                     { id: 1, name: 'Premium Laptop', price: 1299.99, cost: 800, stock: 25, category: 'Electronics', description: 'High-performance business laptop', sku: 'LAP001', supplier: 'TechCorp', reorderLevel: 5, imageUrl: 'https://via.placeholder.com/150/00d4aa/FFFFFF?text=Laptop' },
@@ -2673,23 +2545,15 @@ nboxNotificationInterval: null,
 };
 
                 if (actions[action]) {
-                    actions[action]();
+                    actions[action](event);
                 }
             },
 
-            // REPLACE the entire navigateToView function with this corrected version
             navigateToView(view) {
-                this.stopInboxNotifications();
+                 this.stopInboxNotifications();
                 this.state.quickSale.active = false; // Close quick sale if navigating away
                 this.state.currentLedgerAccount = null; // Reset selected ledger account
-                
-                // --- THIS IS THE FIX ---
-                // Instead of calling a non-existent function, we directly update the state
-                // and then re-render the application.
-                this.state.currentView = view;
-                this.render();
-                // --- END OF FIX ---
-
+                this.setView(view);
                 if (window.innerWidth < 1024) {
                     this.closeMobileSidebar();
                 }
@@ -2711,65 +2575,30 @@ nboxNotificationInterval: null,
                 }
             },
 
-             selectUser(role) {
-                const usersInRole = this.state.users.filter(u => u.role === role);
-                
-                if (role === 'admin' || usersInRole.length === 1) {
-                    this.loginAsUser(usersInRole[0].id);
-                } else {
-                    this.state.pendingRole = role;
-                    this.state.currentView = 'userSelection';
-                    this.render();
+            selectUser(role) {
+                const user = this.state.users.find(u => u.role === role);
+                if (user) {
+                    this.state.currentUser = user;
+                    this.setView('dashboard');
+                    this.updateAIInsights();
+                    this.updateBotAnalysis();
+                    this.saveData();
+                    NotificationSystem.success(`Welcome back, ${user.name}! 🎉`);
                 }
             },
 
-            loginAsUser(userId) {
-                this.state.currentUser = this.state.users.find(u => u.id === parseInt(userId));
-                this.state.currentView = 'dashboard';
-                this.render();
-            },
-// PASTE THE NEW LOGOUT FUNCTION HERE
-getUserSelectionView() {
-                const role = this.state.pendingRole;
-                const users = this.state.users.filter(u => u.role === role);
-                return `
-                    <div class="min-h-screen flex items-center justify-center p-4" style="background: linear-gradient(135deg, #0f1419 0%, #1a1f2e 50%, #242938 100%);">
-                        <div class="w-full max-w-4xl mx-auto">
-                            <div class="text-center mb-8 fade-in">
-                                <h1 class="text-4xl font-bold gradient-text">Select Profile</h1>
-                                <p class="text-gray-300 mt-2 text-lg">Choose your profile to log in as a ${role}</p>
-                            </div>
-                            <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-                                ${users.map(user => `
-                                    <div onclick="app.loginAsUser(${user.id})" class="user-selection-card fade-in" style="animation-delay: ${users.indexOf(user) * 100}ms;">
-                                        <div class="w-24 h-24 rounded-full bg-gray-700 flex items-center justify-center mb-4 border-4 border-gray-600">
-                                            <span class="text-4xl font-bold text-white">${user.name.charAt(0)}</span>
-                                        </div>
-                                        <h3 class="text-lg font-semibold text-white">${user.name}</h3>
-                                    </div>
-                                `).join('')}
-                            </div>
-                             <div class="text-center mt-12 fade-in">
-                                <button onclick="app.logout()" class="perplexity-button px-6 py-3">
-                                    <i class="fas fa-arrow-left mr-2"></i>Back to Roles
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                `;
-            },
             logout() {
+                NotificationSystem.info('Successfully logged out. See you soon!');
                 this.state.currentUser = null;
                 this.state.currentView = 'login';
-                this.state.pendingRole = null; // Reset this from the user selection flow
-                this.saveData(); // Save the logged-out state
                 this.render();
-                NotificationSystem.info('You have been logged out.');
             },
 
-            
+            setView(view) {
+                this.state.currentView = view;
+                this.render();
+            },
 
-            
             // Currency conversion utilities
             convertCurrency(amount, fromCurrency = 'USD', toCurrency = null) {
                 if (!toCurrency) {
@@ -3030,24 +2859,20 @@ getUserSelectionView() {
                 this.triggerStockAlertCheck();
             },
 
-            // REPLACE handleExpenseForm
             handleExpenseForm(data) {
                 const isEdit = document.getElementById('expense-id').value;
                 const expense = {
                     id: isEdit ? parseInt(isEdit) : Date.now(),
                     description: data.description,
                     amount: parseFloat(data.amount),
-                    category: data.category,
+                    category: data.category, // This is now the account code
                     date: data.date,
-                    // THIS LINE IS THE CRUCIAL ADDITION FOR DATA ASSOCIATION
-                    createdByUserId: this.state.currentUser.id,
+                    addedBy: this.state.currentUser.id,
                     notes: data.notes || ''
                 };
 
                 if (isEdit) {
                     const index = this.state.expenses.findIndex(e => e.id === expense.id);
-                    // Preserve original creator when editing
-                    expense.createdByUserId = this.state.expenses[index].createdByUserId;
                     this.state.expenses[index] = expense;
                     NotificationSystem.success('✅ Expense updated successfully!');
                 } else {
@@ -3055,15 +2880,21 @@ getUserSelectionView() {
                     NotificationSystem.success('💸 Expense recorded successfully!');
                 }
 
-                const expenseAccountCode = expense.category;
+                // Add this logic inside handleExpenseForm, after the expense object is pushed.
+                // For now, we find the expense account by a simple mapping.
+                // This can be made more robust later.
+                const expenseAccountCode = expense.category; // The form now submits the account code directly
+
                 const expenseDescription = `Expense recorded: ${expense.description}`;
                 this.createTransaction(expense.date, expenseDescription, [
-                    { accountCode: expenseAccountCode, debit: expense.amount, credit: 0 },
-                    { accountCode: '1110', debit: 0, credit: expense.amount }
+                    { accountCode: expenseAccountCode, debit: expense.amount, credit: 0 }, // Debit the specific expense account
+                    { accountCode: '1110', debit: 0, credit: expense.amount }            // Credit Cash on Hand
                 ]);
 
                 this.closeModal();
                 this.saveData();
+                this.updateAIInsights();
+                this.updateBotAnalysis();
                 this.render();
             },
 
@@ -5593,39 +5424,28 @@ openBranchChat(branchId) {
                 `;
             },
 
-           
+           // =================================================================
+            // === PASTE THIS COMPLETE AND CORRECTED RENDER FUNCTION         ===
+            // =================================================================
             render() {
                 const appContainer = document.getElementById('app');
-                const currentView = this.state.currentView;
-
-                // Step 1: Handle views that do NOT need the main layout (sidebar/navbar)
-                if (currentView === 'login') {
-                    appContainer.className = 'app-container'; // Reset class
-                    appContainer.innerHTML = this.getLoginView();
-                    return; // Stop here
-                }
-                if (currentView === 'userSelection') {
-                    appContainer.className = 'app-container'; // Reset class
-                    appContainer.innerHTML = this.getUserSelectionView();
-                    return; // Stop here
-                }
-                if (this.state.quickSale.active) {
-                    appContainer.className = 'app-container'; // Reset class
-                    appContainer.innerHTML = this.getQuickSaleView();
-                    setTimeout(() => this.bindQuickSaleEvents(), 50);
-                    return; // Stop here
-                }
-
-                // Step 2: If we are past the special views, a user MUST be logged in.
-                // If not, something is wrong, so we safely log them out.
                 if (!this.state.currentUser) {
-                    this.logout();
+                    appContainer.innerHTML = this.getLoginView();
                     return;
                 }
 
-                // Step 3: Determine the main content for logged-in views using the viewMap
+                // This correctly handles the Quick Sale view and stops further rendering.
+                if (this.state.quickSale.active) {
+                    appContainer.innerHTML = this.getQuickSaleView();
+                    // We call bindQuickSaleEvents here AFTER the view is rendered
+                    setTimeout(() => this.bindQuickSaleEvents(), 50);
+                    return;
+                }
+
+                const currentView = this.state.currentView;
                 const viewMap = {
                     'dashboard': () => this.getDashboardView(),
+                    // THIS IS THE CORRECTED LINE FOR THE AI/BOT TOGGLE
                     'accura-ai': () => this.getAIAssistantView(),
                     'products': () => this.getProductsView(),
                     'customers': () => this.getCustomersView(),
@@ -5644,18 +5464,44 @@ openBranchChat(branchId) {
                     'bot': () => this.getAccuraBotView(),
                 };
 
-                const contentHTML = viewMap[currentView] ? viewMap[currentView]() : this.getDashboardView();
+                let content = viewMap[currentView] ? viewMap[currentView]() : this.getDashboardView();
+                let themeClass = this.state.theme === 'dark' ? 'theme-dark' : 'theme-light';
+                let sidebarOpenClass = this.state.mobileMenuOpen ? 'sidebar-open' : '';
 
-                // Step 4: Render the main application grid layout with the content
-                appContainer.className = 'app-container app-container-grid';
-                appContainer.innerHTML = `
-                    ${this.getSidebar()}
-                    ${this.getNavbar()}
-                    <main class="main-content">${contentHTML}</main>
-                `;
+                // Inside the app.render() function...
+
+// This line is new and sets up the container for our grid
+appContainer.className = 'app-container app-container-grid'; 
+
+// This part is simplified to place the sidebar, navbar, and main content directly inside the grid container
+appContainer.innerHTML = `
+        ${this.getSidebar()}
+        ${this.getNavbar()}
+        <main class="main-content">${content}</main>
+`;
+                // --- POST-RENDER INITIALIZATIONS ---
+                // This block runs after the main HTML is on the page.
+                this.animateDashboardNumbers();
+                if (currentView === 'dashboard') {
+                    this.renderCharts(); 
+                }
+                if (currentView === 'reports') {
+                    this.renderReportCharts(); 
+                }
                 
-                // Step 5: Run post-render scripts (like charts and animations)
-                this.postRenderSetup();
+                // THIS IS THE NEWLY ADDED FIX FOR THE INBOX
+                if (currentView === 'inbox') {
+                    this.renderInbox();
+                    this.startInboxNotifications();
+                }
+
+                if (currentView === 'accura-ai') {
+                    const canvasElement = document.getElementById('ai-loading-canvas');
+                    if (canvasElement && this.state.aiLoading) {
+                        this.state.pixelAnimation = new PixelAnimationController('ai-loading-canvas');
+                        this.state.pixelAnimation.start();
+                    }
+                }
             },
 
             setTheme(themeName) {
@@ -5762,10 +5608,6 @@ openBranchChat(branchId) {
                 `;
             },
 
-         
-
-            
-
             getNavbar() {
                 const unreadCount = this.getUnreadMessageCount();
                 const aiButtonClass = this.state.aiMode === 'ai' ? 'ai-button ai-pulse' : 'bot-button bot-pulse';
@@ -5783,13 +5625,9 @@ openBranchChat(branchId) {
                                 
                                 <div class="flex items-center space-x-3">
                                     <div class="flex items-center space-x-3">
-                                       <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-emerald-400 via-teal-500 to-blue-600 flex items-center justify-center shadow-lg transform hover:scale-105 transition-all duration-300">
-                                <svg width="28" height="28" viewBox="0 0 28 28" fill="currentColor" xmlns="http://www.w3.org/2000/svg" class="text-white">
-                                    <path d="M7.5 24C6.11929 24 5 22.8807 5 21.5V15.5C5 14.1193 6.11929 13 7.5 13H8.5C9.88071 13 11 14.1193 11 15.5V21.5C11 22.8807 9.88071 24 8.5 24H7.5Z"/>
-                                    <path d="M14.5 24C13.1193 24 12 22.8807 12 21.5V9.5C12 8.11929 13.1193 7 14.5 7H15.5C16.8807 7 18 8.11929 18 9.5V21.5C18 22.8807 16.8807 24 15.5 24H14.5Z"/>
-                                    <path d="M22.2929 7.29289C22.6834 6.90237 23.3166 6.90237 23.7071 7.29289L25.7071 9.29289C26.0976 9.68342 26.0976 10.3166 25.7071 10.7071L21 15.4142V21.5C21 22.8807 19.8807 24 18.5 24H21.5C22.8807 24 24 22.8807 24 21.5V5.5C24 4.11929 22.8807 3 21.5 3H20.5C19.8601 3 19.2615 3.27043 18.8464 3.73145L16.7071 5.87868C16.3166 6.2692 16.3166 6.90237 16.7071 7.29289C17.0976 7.68342 17.7119 7.68342 18.1024 7.29289L22.2929 3.10241C22.6834 2.71188 23.3166 2.71188 23.7071 3.10241C24.0976 3.49294 24.0976 4.1261 23.7071 4.51663L22.2929 5.93084L20.8787 4.51663C20.4882 4.1261 19.855 4.1261 19.4645 4.51663C19.0739 4.90715 19.0739 5.54032 19.4645 5.93084L22.2929 8.70711Z" clip-rule="evenodd" fill-rule="evenodd"/>
-                                </svg>
-                            </div>
+                                        <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-emerald-400 via-teal-500 to-blue-600 flex items-center justify-center shadow-lg transform hover:scale-105 transition-all duration-300">
+                                            <i class="fas fa-chart-line text-white text-xl"></i>
+                                        </div>
                                         <div class="hidden sm:block">
                                             <h1 class="text-xl font-bold bg-gradient-to-r from-emerald-400 to-blue-500 bg-clip-text text-transparent leading-tight">Ledgerly</h1>
                                             <p class="text-xs text-gray-400 leading-none font-medium">Smart Sales Management</p>
@@ -5879,13 +5717,10 @@ openBranchChat(branchId) {
                     <div class="p-6">
                         <div class="mb-6">
                             <div class="flex items-center space-x-3 mb-6">
-                                <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-emerald-400 via-teal-500 to-blue-600 flex items-center justify-center shadow-lg transform hover:scale-105 transition-all duration-300">
-                                <svg width="28" height="28" viewBox="0 0 28 28" fill="currentColor" xmlns="http://www.w3.org/2000/svg" class="text-white">
-                                    <path d="M7.5 24C6.11929 24 5 22.8807 5 21.5V15.5C5 14.1193 6.11929 13 7.5 13H8.5C9.88071 13 11 14.1193 11 15.5V21.5C11 22.8807 9.88071 24 8.5 24H7.5Z"/>
-                                    <path d="M14.5 24C13.1193 24 12 22.8807 12 21.5V9.5C12 8.11929 13.1193 7 14.5 7H15.5C16.8807 7 18 8.11929 18 9.5V21.5C18 22.8807 16.8807 24 15.5 24H14.5Z"/>
-                                    <path d="M22.2929 7.29289C22.6834 6.90237 23.3166 6.90237 23.7071 7.29289L25.7071 9.29289C26.0976 9.68342 26.0976 10.3166 25.7071 10.7071L21 15.4142V21.5C21 22.8807 19.8807 24 18.5 24H21.5C22.8807 24 24 22.8807 24 21.5V5.5C24 4.11929 22.8807 3 21.5 3H20.5C19.8601 3 19.2615 3.27043 18.8464 3.73145L16.7071 5.87868C16.3166 6.2692 16.3166 6.90237 16.7071 7.29289C17.0976 7.68342 17.7119 7.68342 18.1024 7.29289L22.2929 3.10241C22.6834 2.71188 23.3166 2.71188 23.7071 3.10241C24.0976 3.49294 24.0976 4.1261 23.7071 4.51663L22.2929 5.93084L20.8787 4.51663C20.4882 4.1261 19.855 4.1261 19.4645 4.51663C19.0739 4.90715 19.0739 5.54032 19.4645 5.93084L22.2929 8.70711Z" clip-rule="evenodd" fill-rule="evenodd"/>
-                                </svg>
-                            </div>
+                                <div class="w-12 h-12 rounded-full bg-gradient-to-r from-teal-500 to-blue-500 flex items-center justify-center">
+                                    <i class="fas fa-chart-line text-white text-xl"></i>
+                                </div>
+                                <div>
                                     <h1 class="text-xl font-bold gradient-text">Ledgerly</h1>
                                     <p class="text-sm text-gray-400">Sales</p>
                                 </div>
@@ -5929,41 +5764,21 @@ openBranchChat(branchId) {
                 `;
             },
 
-         getDashboardView() {
-                const { currentUser, users, sales, expenses, products, customers } = this.state;
-                let filteredSales, filteredExpenses;
-
-                // --- DATA SCOPING LOGIC ---
-                if (currentUser.role === 'admin') {
-                    filteredSales = sales;
-                    filteredExpenses = expenses;
-                } else if (currentUser.role === 'manager') {
-                    const workerIds = users.filter(u => u.role === 'worker').map(u => u.id);
-                    const managedUserIds = [currentUser.id, ...workerIds];
-                    filteredSales = sales.filter(s => managedUserIds.includes(s.salesPersonId));
-                    // Check for the new createdByUserId property, fallback to old addedBy
-                    filteredExpenses = expenses.filter(e => managedUserIds.includes(e.createdByUserId || e.addedBy));
-                } else { // worker
-                    filteredSales = sales.filter(s => s.salesPersonId === currentUser.id);
-                    // Check for the new createdByUserId property, fallback to old addedBy
-                    filteredExpenses = expenses.filter(e => (e.createdByUserId || e.addedBy) === currentUser.id);
-                }
-                // --- END DATA SCOPING ---
-
-                const totalRevenue = filteredSales.reduce((sum, s) => sum + s.total, 0);
-                const totalExpensesVal = filteredExpenses.reduce((sum, e) => sum + e.amount, 0);
-                const netProfit = totalRevenue - totalExpensesVal;
-                const lowStockProducts = products.filter(p => p.stock <= this.state.lowStockThreshold);
-                const recentSales = filteredSales.slice(-5).reverse();
-
-                const monthlySalary = (currentUser.salary / 12) || 0;
-                const totalEarnings = monthlySalary + (currentUser.commission || 0);
-                const totalInventoryValue = products.reduce((sum, p) => sum + (p.price * p.stock), 0);
-                
-                // Using the filtered data for calculations
+            getDashboardView() {
                 const totalProducts = this.state.products.length;
                 const totalCustomers = this.state.customers.length;
-                const totalSalesCount = filteredSales.length;
+                const totalSales = this.state.sales.length;
+                const totalRevenue = this.state.sales.reduce((sum, sale) => sum + sale.total, 0);
+                const totalExpenses = this.state.expenses.reduce((sum, expense) => sum + expense.amount, 0);
+                const netProfit = totalRevenue - totalExpenses;
+                const lowStockProducts = this.state.products.filter(p => p.stock <= this.state.lowStockThreshold);
+                const recentSales = this.state.sales.slice(-5).reverse();
+
+                const currentUser = this.state.currentUser;
+                const monthlyEarnings = currentUser.salary / 12;
+                const totalEarnings = monthlyEarnings + (currentUser.commission || 0);
+
+                const totalInventoryValue = this.state.products.reduce((sum, p) => sum + (p.price * p.stock), 0);
 
                 return `
                     <div class="space-y-6 fade-in">
@@ -5996,7 +5811,7 @@ openBranchChat(branchId) {
                                     <div class="text-center p-4 bg-gradient-to-r from-green-500/10 to-emerald-500/10 rounded-xl border border-green-500/20">
                                         <div class="text-green-400 text-2xl mb-2">💰</div>
                                         <p class="text-gray-400 text-sm mb-2">Monthly Salary</p>
-                                        <p class="text-lg font-bold text-green-400 animated-number" data-target="${monthlySalary}" data-format="currency">${this.formatCurrency(0)}</p>
+                                        <p class="text-lg font-bold text-green-400 animated-number" data-target="${monthlyEarnings}" data-format="currency">${this.formatCurrency(0)}</p>
                                     </div>
                                     <div class="text-center p-4 bg-gradient-to-r from-blue-500/10 to-cyan-500/10 rounded-xl border border-blue-500/20">
                                         <div class="text-blue-400 text-2xl mb-2">🎯</div>
@@ -6037,7 +5852,7 @@ openBranchChat(branchId) {
                                 <div class="flex items-center justify-between">
                                     <div>
                                         <p class="text-gray-400 text-sm mb-1">Sales</p>
-                                        <p class="text-2xl font-bold text-white animated-number" data-target="${totalSalesCount}" data-format="integer">${0}</p>
+                                        <p class="text-2xl font-bold text-white animated-number" data-target="${totalSales}" data-format="integer">${0}</p>
                                     </div>
                                     <div class="w-10 h-10 bg-purple-500/20 rounded-xl flex items-center justify-center"><i class="fas fa-shopping-cart text-purple-400"></i></div>
                                 </div>
@@ -6900,24 +6715,14 @@ handleAiQuestion(questionKey) {
                     </div>
                 `;
             },
-getSalesView() {
-                const { currentUser, users, sales } = this.state;
-                let filteredSales;
 
-                // --- DATA SCOPING LOGIC ---
-                if (currentUser.role === 'admin') {
-                    filteredSales = sales;
-                } else if (currentUser.role === 'manager') {
-                    const workerIds = users.filter(u => u.role === 'worker').map(u => u.id);
-                    const managedUserIds = [currentUser.id, ...workerIds];
-                    filteredSales = sales.filter(s => managedUserIds.includes(s.salesPersonId));
-                } else { // worker
-                    filteredSales = sales.filter(sale => sale.salesPersonId === currentUser.id);
-                }
-                // --- END DATA SCOPING ---
-                
+           getSalesView() {
+                const filteredSales = this.state.currentUser.role === 'worker' 
+                    ? this.state.sales.filter(sale => sale.salesPersonId === this.state.currentUser.id)
+                    : this.state.sales;
+
                 const totalRevenue = filteredSales.reduce((sum, sale) => sum + sale.total, 0);
-                const avgSale = totalRevenue / (filteredSales.length || 1);
+                const avgSale = totalRevenue / filteredSales.length || 0;
 
                 return `
                     <div class="space-y-6 fade-in">
@@ -7044,23 +6849,12 @@ getSalesView() {
             },
 
             getExpensesView() {
-                const { currentUser, users, expenses } = this.state;
-                let filteredExpenses;
-
-                // --- DATA SCOPING LOGIC ---
-                if (currentUser.role === 'admin') {
-                   filteredExpenses = expenses;
-                } else if (currentUser.role === 'manager') {
-                   const workerIds = users.filter(u => u.role === 'worker').map(u => u.id);
-                   const managedUserIds = [currentUser.id, ...workerIds];
-                   filteredExpenses = expenses.filter(e => managedUserIds.includes(e.createdByUserId || e.addedBy));
-                } else { // worker
-                   filteredExpenses = expenses.filter(expense => (expense.createdByUserId || expense.addedBy) === currentUser.id);
-                }
-                // --- END DATA SCOPING ---
+                const filteredExpenses = this.state.currentUser.role === 'worker' 
+                    ? this.state.expenses.filter(expense => expense.addedBy === this.state.currentUser.id)
+                    : this.state.expenses;
 
                 const totalExpenses = filteredExpenses.reduce((sum, expense) => sum + expense.amount, 0);
-                const avgExpense = totalExpenses / (filteredExpenses.length || 1);
+                const avgExpense = totalExpenses / filteredExpenses.length || 0;
 
                 return `
                     <div class="space-y-6 fade-in">
@@ -7136,7 +6930,7 @@ getSalesView() {
                                     </thead>
                                     <tbody class="divide-y divide-gray-600">
                                         ${filteredExpenses.slice().reverse().map((expense, index) => {
-                                            const addedBy = this.state.users.find(u => u.id === (expense.createdByUserId || expense.addedBy));
+                                            const addedBy = this.state.users.find(u => u.id === expense.addedBy);
                                             const account = this.state.chartOfAccounts.find(acc => acc.code === expense.category);
                                             return `
                                                 <tr class="hover:bg-gray-800/50 ${index % 2 === 0 ? 'odd:bg-gray-800/10' : ''} transition-colors">
@@ -7148,10 +6942,9 @@ getSalesView() {
                                                         <span class="px-3 py-1 text-xs font-semibold rounded-full bg-yellow-500/20 text-yellow-400 border border-yellow-500/30">
                                                             ${account ? account.name : expense.category}
                                                         </span>
-                                                    </td>
+                                                                                                        </td>
                                                     <td class="px-6 py-4 text-red-400 font-bold">${this.formatCurrency(expense.amount)}</td>
                                                     <td class="px-6 py-4 text-gray-300">${new Date(expense.date).toLocaleDateString()}</td>
-                                                    <td class="px-6 py-4 text-gray-300">${addedBy ? addedBy.name : 'Unknown'}</td>
                                                     <td class="px-6 py-4">
                                                         <div class="flex items-center space-x-3">
                                                             <button data-action="edit-expense" data-id="${expense.id}" class="text-blue-400 hover:text-blue-300 transition-colors">
@@ -7519,10 +7312,10 @@ getSettingsView() {
                                     <div class="w-full h-16 rounded-lg mb-3 flex items-center justify-center" style="background: linear-gradient(135deg, #0f1419, #1a1f2e);"><span class="text-white font-bold">Aa</span></div>
                                     <h4 class="font-semibold text-white">Default Dark</h4>
                                 </div>
-                               <div data-action="set-theme" data-theme="theme-light" class="p-4 rounded-xl cursor-pointer border-2 ${currentTheme === 'theme-light' ? 'border-accent-primary' : 'border-gray-700'} hover:border-accent-primary transition-all text-center" style="background-color: #ffffff;">
-                             <div class="w-full h-16 rounded-lg mb-3 flex items-center justify-center" style="background: #f8f9fa;"><span class="font-bold" style="color: #212529;">Aa</span></div>
-                            <h4 class="font-semibold" style="color: #212529;">Clear White</h4>
-                        </div>
+                                <div data-action="set-theme" data-theme="theme-sepia" class="p-4 rounded-xl cursor-pointer border-2 ${currentTheme === 'theme-sepia' ? 'border-accent-primary' : 'border-gray-700'} hover:border-accent-primary transition-all text-center" style="background-color: #f1e9db;">
+                                     <div class="w-full h-16 rounded-lg mb-3 flex items-center justify-center" style="background: linear-gradient(135deg, #f1e9db, #fbf8f2);"><span class="font-bold" style="color: #4a4033;">Aa</span></div>
+                                    <h4 class="font-semibold" style="color: #4a4033;">Sepia</h4>
+                                </div>
                                 <div data-action="set-theme" data-theme="theme-black" class="p-4 rounded-xl cursor-pointer border-2 ${currentTheme === 'theme-black' ? 'border-accent-primary' : 'border-gray-700'} hover:border-accent-primary transition-all text-center" style="background-color: #000000;">
                                      <div class="w-full h-16 rounded-lg mb-3 flex items-center justify-center" style="background: linear-gradient(135deg, #000000, #0c0c0c);"><span class="text-white font-bold">Aa</span></div>
                                     <h4 class="font-semibold text-white">Pitch Black</h4>
@@ -7573,31 +7366,6 @@ getSettingsView() {
                         ` : ''}
                     </div>
                 `;
-            },
-            // ADD THIS NEW HELPER FUNCTION AFTER getSettingsView()
-            postRenderSetup() {
-                // This function runs after the main HTML is on the page
-                this.animateDashboardNumbers();
-                
-                if (this.state.currentView === 'dashboard') {
-                    this.createDashboardCharts();
-                }
-                if (this.state.currentView === 'reports') {
-                    this.renderReportCharts();
-                }
-                if (this.state.currentView === 'inbox') {
-                    // This function from a previous step might need updating if inbox is changed
-                    // For now, it will render the list view correctly.
-                    this.renderInbox();
-                    this.startInboxNotifications();
-                }
-                if (this.state.currentView === 'accura-ai') {
-                    const canvasElement = document.getElementById('ai-loading-canvas');
-                    if (canvasElement && this.state.aiLoading) {
-                        this.state.pixelAnimation = new PixelAnimationController('ai-loading-canvas');
-                        this.state.pixelAnimation.start();
-                    }
-                }
             },
 // === NEW QUICK SALE VIEW FUNCTION ===
             getQuickSaleView() {
