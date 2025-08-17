@@ -30,7 +30,7 @@
             --quick-sale-accent: #0419f8; /* Shining blue for quick sale */
         }
 
-     /* === FINAL "CLEAR WHITE" (LIGHT) THEME V2 === */
+     /* === FINAL "CLEAR WHITE" (LIGHT) THEME V4 === */
         .theme-light {
             --bg-primary: #ffffff;
             --bg-secondary: #f8f9fa;
@@ -66,100 +66,66 @@
         .theme-light .text-purple-400 { color: #6f42c1 !important; }
         .theme-light .text-teal-400 { color: #20c997 !important; }
         
-        /* Gradient Text Overrides with Brand Colors */
-        .theme-light .gradient-text,
-        .theme-light .quick-sale-gradient-text {
-            color: #0d6efd !important; /* Blue for general */
-            background: none !important; -webkit-background-clip: initial !important; -webkit-text-fill-color: initial !important;
+        /* Gradient Text Override */
+        .theme-light .gradient-text {
+            background: linear-gradient(135deg, #0d6efd 0%, #6f42c1 100%);
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
         }
-        .theme-light .ai-gradient-text {
-            color: #6f42c1 !important; /* Dark Purple for AccuraAI */
-            background: none !important; -webkit-background-clip: initial !important; -webkit-text-fill-color: initial !important;
+        
+        /* Header Buttons */
+        .theme-light .quick-sale-button, .theme-light .ai-button, .theme-light .bot-button, .theme-light .bg-red-600 {
+            background: var(--bg-secondary) !important; border: 1px solid var(--border-color) !important;
+            color: var(--text-secondary) !important; box-shadow: none !important;
         }
-        .theme-light .bot-gradient-text {
-            color: #198754 !important; /* Dark Green for AccuraBot */
-            background: none !important; -webkit-background-clip: initial !important; -webkit-text-fill-color: initial !important;
+        .theme-light .quick-sale-button:hover, .theme-light .ai-button:hover, .theme-light .bot-button:hover, .theme-light .bg-red-600:hover {
+            background: var(--hover-bg) !important; color: var(--text-primary) !important; border-color: #b3b3b3 !important;
+        }
+
+        /* THIS RESTORES THE MAIN AI/BOT ICON BACKGROUNDS */
+        .theme-light .ai-pulse {
+            background: linear-gradient(135deg, var(--ai-color) 0%, #a855f7 100%) !important;
+        }
+        .theme-light .bot-pulse {
+            background: linear-gradient(135deg, var(--bot-color) 0%, #059669 100%) !important;
+        }
+        .theme-light .ai-pulse i, .theme-light .bot-pulse i {
+            color: white !important; /* Ensures icon inside is white */
         }
 
         /* Card and Form Overrides */
         .theme-light .perplexity-card { background: var(--bg-primary); box-shadow: 0 4px 12px rgba(0,0,0,0.08); border-color: var(--border-color); }
         .theme-light .form-input { background: #ffffff !important; border-color: #ced4da !important; color: var(--text-primary) !important; }
-        .theme-light .form-input:focus { border-color: var(--accent-secondary) !important; background: #ffffff !important; }
-        
-        /* THIS FIXES THE POP-UP MODAL BACKGROUNDS */
-        .theme-light .modal-content {
-            background: var(--bg-primary);
-            border-color: var(--border-color);
-        }
+        .theme-light .modal-content { background: var(--bg-primary); border-color: var(--border-color); }
 
         /* Special Card Overrides with Brand Colors */
-        .theme-light .ai-card {
-            background: rgba(111, 66, 193, 0.07) !important; /* Very light purple */
-            border-color: rgba(111, 66, 193, 0.2) !important;
-        }
-        .theme-light .bot-card {
-            background: rgba(25, 135, 84, 0.07) !important; /* Very light green */
-            border-color: rgba(25, 135, 84, 0.2) !important;
-        }
-        
-        /* AI Animation Background */
-        .theme-light .ai-answer-container {
-            background: var(--bg-secondary);
-        }
+        .theme-light .ai-card { background: rgba(111, 66, 193, 0.07) !important; border-color: rgba(111, 66, 193, 0.2) !important; }
+        .theme-light .bot-card { background: rgba(25, 135, 84, 0.07) !important; border-color: rgba(25, 135, 84, 0.2) !important; }
+        .theme-light .ai-answer-container { background: var(--bg-secondary); }
 
         /* Gray Background Overrides */
-        .theme-light .bg-gray-800\/50,
-        .theme-light .bg-gray-800\/60,
-        .theme-light .bg-gray-900,
-        .theme-light .odd\:bg-gray-800\/10:nth-child(odd) {
-            background-color: var(--bg-tertiary) !important;
-        }
+        .theme-light .bg-gray-800\/50, .theme-light .odd\:bg-gray-800\/10:nth-child(odd) { background-color: var(--bg-tertiary) !important; }
+        .theme-light [class*="bg-"][class*="\/10"], .theme-light [class*="bg-"][class*="\/20"] { background-color: rgba(0, 0, 0, 0.03) !important; }
+        .theme-light [class*="border-"][class*="\/30"] { border-color: var(--border-color) !important; }
 
-        /* Gradient & Colored Background Overrides */
-        .theme-light .bg-gradient-to-r, .theme-light .bg-gradient-to-br {
-            background-image: none !important;
-            background-color: var(--bg-secondary);
-        }
-        .theme-light [class*="bg-"][class*="\/10"],
-        .theme-light [class*="bg-"][class*="\/20"] {
-            background-color: rgba(0, 0, 0, 0.03) !important;
-        }
-        .theme-light [class*="border-"][class*="\/20"],
-        .theme-light [class*="border-"][class*="\/30"] {
-            border-color: var(--border-color) !important;
-        }
-
-        /* Sidebar and Navbar */
+        /* Sidebar, Navbar, and Tabs */
         .theme-light .menu-item.active { color: var(--accent-primary); background: rgba(0, 212, 170, 0.1); }
         .theme-light .navbar, .theme-light .mobile-sidebar, .theme-light .desktop-sidebar { background: var(--bg-primary); border-color: var(--border-color); }
-        
-        /* Inbox Tabs */
-        .theme-light .inbox-tab-active {
-            background: var(--text-primary);
-            color: var(--bg-primary);
-        }
+        .theme-light .inbox-tab-active { background: var(--text-primary); color: var(--bg-primary); }
         .theme-light .inbox-tab-active i { color: var(--bg-primary) !important; }
+        .theme-light .inbox-notification-bar { background: var(--bg-secondary); border-color: var(--border-color); }
         
-        /* Notification Bar */
-        .theme-light .inbox-notification-bar {
-            background: var(--bg-secondary);
-            border-color: var(--border-color);
+        /* THIS RESTORES THE SIDEBAR ICON HIGHLIGHTS FOR THE LIGHT THEME */
+        .theme-light .menu-item.active i.fa-brain {
+            color: #6f42c1 !important; /* Dark Purple ONLY when active */
+        }
+        .theme-light .menu-item.active i.fa-robot {
+            color: #198754 !important; /* Dark Green ONLY when active */
         }
 
-        /* Keep Quick Sale dark for contrast */
+        /* Final Consistency Rules */
         .theme-light .quick-sale-container { background: linear-gradient(135deg, #0a1a3a, #000a1a); }
-        .theme-light .quick-sale-container .text-gray-300,
-        .theme-light .quick-sale-container .text-white {
-            color: #ffffff !important;
-        }
+        .theme-light .quick-sale-container .text-gray-300, .theme-light .quick-sale-container .text-white { color: #ffffff !important; }
         .theme-light .text-black { color: #000000 !important; }
-/* THIS FIXES THE AI AND BOT ICON COLORS */
-        .theme-light .menu-item i.fa-brain {
-            color: #6f42c1 !important; /* Always purple in light theme */
-        }
-        .theme-light .menu-item i.fa-robot {
-            color: #198754 !important; /* Always green in light theme */
-        }
 
         /* Pitch Black Theme */
         .theme-black {
@@ -1896,23 +1862,28 @@
 .animate-notification-appear {
   animation: notification-appear 0.5s ease-out forwards;
 }
-/* === FINAL BRAND ICON COLOR FIX (ALL THEMES) === */
-        .menu-item.active i.fa-brain,
-        .menu-item i.fa-brain {
-            color: var(--ai-color) !important;
-        }
-        .menu-item.active i.fa-robot,
-        .menu-item i.fa-robot {
-            color: var(--bot-color) !important;
-        }
-        .theme-light .menu-item.active i.fa-brain,
-        .theme-light .menu-item i.fa-brain {
-            color: #6f42c1 !important; /* Dark purple for light theme */
-        }
-        .theme-light .menu-item.active i.fa-robot,
-        .theme-light .menu-item i.fa-robot {
-            color: #198754 !important; /* Dark green for light theme */
-        }
+/* === FINAL CORRECTED BRAND ICON COLOR FIX (ALL THEMES) === */
+
+    /* --- For Dark/Default Theme --- */
+    /* This rule applies the purple color ONLY when the menu item is active */
+    .menu-item.active i.fa-brain {
+        color: var(--ai-color) !important;
+    }
+    /* This rule applies the green color ONLY when the menu item is active */
+    .menu-item.active i.fa-robot {
+        color: var(--bot-color) !important;
+    }
+
+    /* --- For Light Theme --- */
+    /* This rule applies the dark purple color ONLY when the menu item is active */
+    .theme-light .menu-item.active i.fa-brain {
+        color: #6f42c1 !important;
+    }
+    /* This rule applies the dark green color ONLY when the menu item is active */
+    .theme-light .menu-item.active i.fa-robot {
+        color: #198754 !important;
+    }
+.stroke-bg-secondary { stroke: var(--bg-secondary); }
 /* === END: Inbox Notification Bar CSS === */
     </style>
 </head>
@@ -5783,15 +5754,15 @@ openBranchChat(branchId) {
                                 
                                 <div class="flex items-center space-x-3">
                                     <div class="flex items-center space-x-3">
-                                       <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-emerald-400 via-teal-500 to-blue-600 flex items-center justify-center shadow-lg transform hover:scale-105 transition-all duration-300">
+                                      <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-emerald-400 via-teal-500 to-blue-600 flex items-center justify-center shadow-lg transform hover:scale-105 transition-all duration-300">
                                 <svg width="28" height="28" viewBox="0 0 28 28" fill="currentColor" xmlns="http://www.w3.org/2000/svg" class="text-white">
-                                    <path d="M7.5 24C6.11929 24 5 22.8807 5 21.5V15.5C5 14.1193 6.11929 13 7.5 13H8.5C9.88071 13 11 14.1193 11 15.5V21.5C11 22.8807 9.88071 24 8.5 24H7.5Z"/>
-                                    <path d="M14.5 24C13.1193 24 12 22.8807 12 21.5V9.5C12 8.11929 13.1193 7 14.5 7H15.5C16.8807 7 18 8.11929 18 9.5V21.5C18 22.8807 16.8807 24 15.5 24H14.5Z"/>
-                                    <path d="M22.2929 7.29289C22.6834 6.90237 23.3166 6.90237 23.7071 7.29289L25.7071 9.29289C26.0976 9.68342 26.0976 10.3166 25.7071 10.7071L21 15.4142V21.5C21 22.8807 19.8807 24 18.5 24H21.5C22.8807 24 24 22.8807 24 21.5V5.5C24 4.11929 22.8807 3 21.5 3H20.5C19.8601 3 19.2615 3.27043 18.8464 3.73145L16.7071 5.87868C16.3166 6.2692 16.3166 6.90237 16.7071 7.29289C17.0976 7.68342 17.7119 7.68342 18.1024 7.29289L22.2929 3.10241C22.6834 2.71188 23.3166 2.71188 23.7071 3.10241C24.0976 3.49294 24.0976 4.1261 23.7071 4.51663L22.2929 5.93084L20.8787 4.51663C20.4882 4.1261 19.855 4.1261 19.4645 4.51663C19.0739 4.90715 19.0739 5.54032 19.4645 5.93084L22.2929 8.70711Z" clip-rule="evenodd" fill-rule="evenodd"/>
+                                    <rect x="4" y="4" width="6" height="20" rx="3"/>
+                                    <rect x="4" y="18" width="14" height="6" rx="3"/>
+                                    <path d="M15 18L18.5 21.5L24 16" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="stroke-bg-secondary"/>
                                 </svg>
                             </div>
                                         <div class="hidden sm:block">
-                                            <h1 class="text-xl font-bold bg-gradient-to-r from-emerald-400 to-blue-500 bg-clip-text text-transparent leading-tight">Ledgerly</h1>
+                                            <h1 class="text-xl font-bold gradient-text leading-tight">Ledgerly</h1>
                                             <p class="text-xs text-gray-400 leading-none font-medium">Smart Sales Management</p>
                                         </div>
                                     </div>
@@ -5881,12 +5852,12 @@ openBranchChat(branchId) {
                             <div class="flex items-center space-x-3 mb-6">
                                 <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-emerald-400 via-teal-500 to-blue-600 flex items-center justify-center shadow-lg transform hover:scale-105 transition-all duration-300">
                                 <svg width="28" height="28" viewBox="0 0 28 28" fill="currentColor" xmlns="http://www.w3.org/2000/svg" class="text-white">
-                                    <path d="M7.5 24C6.11929 24 5 22.8807 5 21.5V15.5C5 14.1193 6.11929 13 7.5 13H8.5C9.88071 13 11 14.1193 11 15.5V21.5C11 22.8807 9.88071 24 8.5 24H7.5Z"/>
-                                    <path d="M14.5 24C13.1193 24 12 22.8807 12 21.5V9.5C12 8.11929 13.1193 7 14.5 7H15.5C16.8807 7 18 8.11929 18 9.5V21.5C18 22.8807 16.8807 24 15.5 24H14.5Z"/>
-                                    <path d="M22.2929 7.29289C22.6834 6.90237 23.3166 6.90237 23.7071 7.29289L25.7071 9.29289C26.0976 9.68342 26.0976 10.3166 25.7071 10.7071L21 15.4142V21.5C21 22.8807 19.8807 24 18.5 24H21.5C22.8807 24 24 22.8807 24 21.5V5.5C24 4.11929 22.8807 3 21.5 3H20.5C19.8601 3 19.2615 3.27043 18.8464 3.73145L16.7071 5.87868C16.3166 6.2692 16.3166 6.90237 16.7071 7.29289C17.0976 7.68342 17.7119 7.68342 18.1024 7.29289L22.2929 3.10241C22.6834 2.71188 23.3166 2.71188 23.7071 3.10241C24.0976 3.49294 24.0976 4.1261 23.7071 4.51663L22.2929 5.93084L20.8787 4.51663C20.4882 4.1261 19.855 4.1261 19.4645 4.51663C19.0739 4.90715 19.0739 5.54032 19.4645 5.93084L22.2929 8.70711Z" clip-rule="evenodd" fill-rule="evenodd"/>
+                                    <rect x="4" y="4" width="6" height="20" rx="3"/>
+                                    <rect x="4" y="18" width="14" height="6" rx="3"/>
+                                    <path d="M15 18L18.5 21.5L24 16" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="stroke-bg-secondary"/>
                                 </svg>
                             </div>
-                                    <h1 class="text-xl font-bold gradient-text">Ledgerly</h1>
+                              <h1 class="text-xl font-bold gradient-text">Ledgerly</h1>
                                     <p class="text-sm text-gray-400">Sales</p>
                                 </div>
                             </div>
