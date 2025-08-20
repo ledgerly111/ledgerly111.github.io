@@ -1262,17 +1262,39 @@
             width: 100%;
         }
 
-        /* Toggle Switch */
-        .toggle-switch {
-            position: relative;
-            width: 60px;
-            height: 30px;
-            background: linear-gradient(135deg, #374151 0%, #4b5563 100%);
-            border-radius: 15px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.3);
-        }
+        /* === REPLACEMENT: Enhanced Toggle Switch Animation === */
+.toggle-switch {
+    position: relative;
+    width: 60px;
+    height: 30px;
+    background: linear-gradient(135deg, #374151 0%, #4b5563 100%); /* Dark/Off state */
+    border-radius: 15px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.4);
+}
+
+.toggle-switch.active {
+    background: linear-gradient(135deg, var(--bot-color) 0%, #059669 100%); /* Green/On state */
+    box-shadow: 0 0 15px rgba(16, 185, 129, 0.5);
+}
+
+.toggle-knob {
+    position: absolute;
+    top: 3px;
+    left: 3px;
+    width: 24px;
+    height: 24px;
+    background: linear-gradient(135deg, #e5e7eb 0%, #f9fafb 100%); /* Light colored knob */
+    border-radius: 50%;
+    transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); /* Smooth, bouncy transition */
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.toggle-switch.active .toggle-knob {
+    transform: translateX(30px); /* This is what makes it slide */
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+}
 
         .toggle-switch.active {
             background: linear-gradient(135deg, var(--bot-color) 0%, #059669 100%);
@@ -2095,6 +2117,45 @@
     border-radius: 9999px;
     transition: width 0.5s ease-out;
 }
+/* === NEW: Announcement Color Selector UI Feedback === */
+#announcement-form input[type="radio"] + label {
+    opacity: 0.5; /* Make unselected labels dim */
+    transition: all 0.2s ease-in-out;
+    transform: scale(1);
+}
+
+#announcement-form input[type="radio"]:hover + label {
+    opacity: 0.75; /* Slightly brighten on hover */
+    transform: scale(1.1);
+}
+
+#announcement-form input[type="radio"]:checked + label {
+    opacity: 1; /* Make selected label fully bright */
+    transform: scale(1.2); /* Make it larger */
+    box-shadow: 0 0 10px rgba(255, 255, 255, 0.7); /* Add a white glow */
+}
+
+/* Specific ring colors for focus visibility (accessibility) */
+#announcement-form input[type="radio"]:checked#label-green:focus + label {
+    ring-color: #22c55e;
+}
+#announcement-form input[type="radio"]:checked#label-yellow:focus + label {
+    ring-color: #f59e0b;
+}
+#announcement-form input[type="radio"]:checked#label-red:focus + label {
+    ring-color: #ef4444;
+}
+/* === NEW: AccuraBot Modal Message Animation === */
+.bot-message-fade-in {
+    animation: fadeInBotMessage 0.5s ease-out forwards;
+}
+
+@keyframes fadeInBotMessage {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+
     </style>
 </head>
 <body>
@@ -3609,17 +3670,37 @@ toggleAccuraBotOptions(toggleElement) {
     const optionsDiv = document.getElementById('accurabot-options');
     const iconDiv = document.getElementById('accurabot-icon');
     const checkbox = document.getElementById('accuraBotEnabled');
-    
+    const messageDiv = document.getElementById('accurabot-message'); // Get the new message div
+
     toggleElement.classList.toggle('active');
-    
+
     if (toggleElement.classList.contains('active')) {
         checkbox.checked = true;
         optionsDiv.classList.remove('hidden');
         iconDiv.classList.add('bot-pulse');
+
+        // --- NEW INTERACTIVE MESSAGE LOGIC ---
+        if (messageDiv) {
+            // Set a slight delay to make it feel more interactive
+            setTimeout(() => {
+                messageDiv.innerHTML = `
+                    <div class="bot-message-fade-in flex items-start space-x-3 p-3 bg-green-500/10 border-l-4 border-green-500/50 rounded-r-lg">
+                        <i class="fas fa-robot text-green-400 mt-1"></i>
+                        <p class="text-green-300">Excellent! I will monitor this task. How often do you need the reports?</p>
+                    </div>
+                `;
+            }, 200); // 200ms delay
+        }
+
     } else {
         checkbox.checked = false;
         optionsDiv.classList.add('hidden');
         iconDiv.classList.remove('bot-pulse');
+        
+        // --- CLEAR THE MESSAGE WHEN TOGGLED OFF ---
+        if (messageDiv) {
+            messageDiv.innerHTML = '';
+        }
     }
 },
             handleJournalEntryForm(form) {
@@ -4080,11 +4161,15 @@ case 'create-task':
                              <i class="fas fa-robot text-white"></i>
                          </div>
                          <label for="accuraBotEnabled" class="text-white">Enable AccuraBot Reports</label>
-                         <div class="toggle-switch ${task?.accuraBotEnabled ? 'active' : ''}" onclick="app.toggleAccuraBotOptions(this)"></div>
+                         <div class="toggle-switch ${task?.accuraBotEnabled ? 'active' : ''}" onclick="app.toggleAccuraBotOptions(this)">
+    <div class="toggle-knob"></div>
+</div>
                          <input type="checkbox" id="accuraBotEnabled" name="accuraBotEnabled" class="hidden" ${task?.accuraBotEnabled ? 'checked' : ''}>
                     </div>
                 </div>
                  <div id="accurabot-options" class="mt-4 space-y-2 ${task?.accuraBotEnabled ? '' : 'hidden'}">
+                    <div id="accurabot-message" class="mb-3">
+        </div>
                     <label for="accuraBotReportFrequency" class="block text-sm font-medium text-gray-300">Report Frequency</label>
                     <select id="accuraBotReportFrequency" name="accuraBotReportFrequency" class="form-input w-full">
                         <option value="daily" ${task?.accuraBotReportFrequency === 'daily' ? 'selected' : ''}>Daily</option>
