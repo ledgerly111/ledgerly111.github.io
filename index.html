@@ -11,7 +11,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
-   /* === FINAL, WORKING ANIMATION FIX === */
+  /* === FINAL, WORKING ANIMATION FIX === */
 .animated-header-container {
     position: relative;
     display: inline-block;
@@ -2074,24 +2074,6 @@
 .dot-completed {
     background-color: #3b82f6; /* Blue */
 }
-/* === NEW Task Status Dots === */
-.task-status-dot {
-    width: 10px;
-    height: 10px;
-    border-radius: 50%;
-    display: inline-block;
-    margin-right: 8px;
-}
-
-.dot-live {
-    background-color: #22c55e; /* Green */
-    animation: pulse 2s infinite;
-    box-shadow: 0 0 0 0 rgba(34, 197, 94, 1);
-}
-
-.dot-completed {
-    background-color: #3b82f6; /* Blue */
-}
 
 /* === NEW Bot Task Report Styling in Inbox === */
 .bot-task-report {
@@ -2631,6 +2613,7 @@ quickSale: {
 journal: [],
 currentBranchId: null,
 tasks: [],
+announcements: [],
 nboxNotificationInterval: null, 
                 chartOfAccounts: [
                     { code: '1110', name: 'Cash on Hand', type: 'Asset', normalBalance: 'Debit' },
@@ -3053,6 +3036,7 @@ getUserSelectionView() {
     'product-form': () => this.handleProductForm(data),
     'send-task-form': () => this.handleSendTaskForm(data),
     'task-form': () => this.handleTaskForm(data),
+    'announcement-form': () => this.handleAnnouncementForm(data),
     'customer-form': () => this.handleCustomerForm(data),
     'sale-form': () => this.handleSaleForm(data, form),
     'expense-form': () => this.handleExpenseForm(data),
@@ -3238,8 +3222,9 @@ getUserSelectionView() {
     NotificationSystem.success(`🎉 Sale recorded! Total: ${this.formatCurrency(sale.total)}`);
     this.triggerStockAlertCheck();
 },
-// ADD THIS ENTIRE FUNCTION to your 'app' object.
-// A good place is after the handleSaleForm function.
+
+// REPLACE your old handleTaskForm function with this new one.
+
 handleTaskForm(data) {
     const isEdit = data.taskId !== '';
     const taskId = isEdit ? parseInt(data.taskId) : Date.now();
@@ -3269,14 +3254,16 @@ handleTaskForm(data) {
         // This is the logic for CREATING a new task
         const newTask = {
             ...taskData,
-            branchId: null,
+            branchId: null, // Not assigned to a branch yet
             progress: 0,
-            participants: [this.state.currentUser.id],
+            participants: [this.state.currentUser.id], // Creator is the first participant
             status: 'active',
-            lastNotifiedProgress: 0 // This property is for the bot notifications
+            isSubTask: false, // This is a main task
+            parentTaskId: null, // It has no parent
+            lastNotifiedProgress: 0
         };
         this.state.tasks.push(newTask);
-        NotificationSystem.success('🚀 New task created! You can now send it to a branch.');
+        NotificationSystem.success('🚀 New main task created! You can now assign it to a branch.');
     }
 
     this.saveData();
@@ -3405,56 +3392,74 @@ handleTaskForm(data) {
            
 
 
-// REPLACE this function
-// REPLACE your old updateTaskProgress function with this correct one.
-// REPLACE your current updateTaskProgress function with this new one.
+// REPLACE your old updateTaskProgress function with this new one.
+
 updateTaskProgress(sale, profit) {
     const salespersonId = sale.salesPersonId;
-    const activeTasks = this.state.tasks.filter(task => 
-        task.status === 'active' && task.participants.includes(salespersonId)
+    
+    // Find all ACTIVE SUB-TASKS this salesperson is a part of.
+    // We only process sub-tasks directly to prevent double-counting progress.
+    const activeSubTasks = this.state.tasks.filter(task => 
+        task.isSubTask &&
+        task.status === 'active' && 
+        task.participants.includes(salespersonId)
     );
 
-    activeTasks.forEach(task => {
-        const taskIndex = this.state.tasks.findIndex(t => t.id === task.id);
-        if (taskIndex === -1) return;
+    activeSubTasks.forEach(subTask => {
+        const subTaskIndex = this.state.tasks.findIndex(t => t.id === subTask.id);
+        if (subTaskIndex === -1) return;
 
+        // --- 1. Calculate Progress to Add (with new 'count' type) ---
         let progressToAdd = 0;
-        // --- THIS IS THE FIX FOR ACCURACY ---
-        if (task.goalType === 'sales') {
+        if (subTask.goalType === 'sales') {
             progressToAdd = sale.total;
-        } else if (task.goalType === 'profit') {
+        } else if (subTask.goalType === 'profit') {
             progressToAdd = Math.max(0, profit);
-        } else if (task.goalType === 'count') {
-            // New logic to handle "Number of Sales" type tasks.
-            // Each sale counts as '1' towards the goal.
-            progressToAdd = 1;
+        } else if (subTask.goalType === 'count') {
+            progressToAdd = 1; // Each sale counts as 1
         }
-        // --- END OF FIX ---
+        
+        if (progressToAdd === 0) return;
 
-        if (progressToAdd > 0) {
-            this.state.tasks[taskIndex].progress += progressToAdd;
+        // --- 2. Update the Sub-Task's Progress ---
+        this.state.tasks[subTaskIndex].progress += progressToAdd;
+        
+        // --- 3. Find and Update the Parent Main Task's Progress ---
+        const parentTaskIndex = this.state.tasks.findIndex(t => t.id === subTask.parentTaskId);
+        if (parentTaskIndex !== -1) {
+            this.state.tasks[parentTaskIndex].progress += progressToAdd;
+        }
+
+        // --- 4. Check for Sub-Task Completion ---
+        const updatedSubTask = this.state.tasks[subTaskIndex];
+        const progressPercentage = (updatedSubTask.progress / updatedSubTask.goalTarget) * 100;
+
+        if (progressPercentage >= 100) {
+            this.state.tasks[subTaskIndex].status = 'completed';
+            NotificationSystem.success(`Personal goal achieved for "${updatedSubTask.title}"!`);
+            
+            // --- 5. IMPORTANT: Check if the Main Task is now complete ---
+            this.checkMainTaskCompletion(updatedSubTask.parentTaskId);
         }
         
-        // This is the bot notification logic, which is already correct.
-        const currentTask = this.state.tasks[taskIndex];
-        const progressPercentage = (currentTask.progress / currentTask.goalTarget) * 100;
-        
-        if (progressPercentage >= 100 && currentTask.status !== 'completed') {
-            currentTask.status = 'completed';
-            if (currentTask.lastNotifiedProgress < 100) {
-                this.sendTaskProgressNotification(currentTask, '100');
-                currentTask.lastNotifiedProgress = 100;
+        // --- 6. Handle Bot Notifications for the MAIN task ---
+        // This sends notifications based on the overall team progress.
+        if (parentTaskIndex !== -1) {
+            const mainTask = this.state.tasks[parentTaskIndex];
+            if (mainTask.accuraBotEnabled) {
+                const mainProgressPercentage = (mainTask.progress / mainTask.goalTarget) * 100;
+                
+                if (mainProgressPercentage >= 75 && mainTask.lastNotifiedProgress < 75) {
+                    this.sendTaskProgressNotification(mainTask, '75');
+                    this.state.tasks[parentTaskIndex].lastNotifiedProgress = 75;
+                } else if (mainProgressPercentage >= 50 && mainTask.lastNotifiedProgress < 50) {
+                    this.sendTaskProgressNotification(mainTask, '50');
+                    this.state.tasks[parentTaskIndex].lastNotifiedProgress = 50;
+                } else if (mainProgressPercentage >= 25 && mainTask.lastNotifiedProgress < 25) {
+                    this.sendTaskProgressNotification(mainTask, '25');
+                    this.state.tasks[parentTaskIndex].lastNotifiedProgress = 25;
+                }
             }
-             NotificationSystem.success(`🏆 Task "${currentTask.title}" completed! Great job!`);
-        } else if (progressPercentage >= 75 && currentTask.lastNotifiedProgress < 75) {
-            this.sendTaskProgressNotification(currentTask, '75');
-            currentTask.lastNotifiedProgress = 75;
-        } else if (progressPercentage >= 50 && currentTask.lastNotifiedProgress < 50) {
-            this.sendTaskProgressNotification(currentTask, '50');
-            currentTask.lastNotifiedProgress = 50;
-        } else if (progressPercentage >= 25 && currentTask.lastNotifiedProgress < 25) {
-            this.sendTaskProgressNotification(currentTask, '25');
-            currentTask.lastNotifiedProgress = 25;
         }
     });
 },
@@ -3532,42 +3537,73 @@ sendTaskProgressNotification(task, percentage) {
         this.state.messages.push(message);
     });
 },
-// REPLACE your current handleSendTaskForm function with this new one.
+
+
 handleSendTaskForm(data) {
     const taskId = parseInt(data.taskId);
     const branchId = parseInt(data.branchId);
     
     const taskIndex = this.state.tasks.findIndex(t => t.id === taskId);
+    const mainTask = this.state.tasks[taskIndex];
     const branch = this.state.branches.find(b => b.id === branchId);
 
-    if (taskIndex !== -1 && branch) {
-        const task = this.state.tasks[taskIndex];
-        
-        // --- NEW LOGIC STARTS HERE ---
-        // Merge existing participants with the new branch members.
-        // Using a 'Set' automatically handles any duplicates
-        // (e.g., if the manager was already a participant).
-        const newParticipants = [...new Set([...task.participants, ...branch.members])];
-        
-        // Check if adding all members exceeds the participant limit.
-        if (newParticipants.length > task.participantLimit) {
-            NotificationSystem.error(`Cannot assign: Branch has ${branch.members.length} members, but task limit is ${task.participantLimit}.`);
-            return; // Stop the function here
-        }
-
-        // Update the task with the branch ID and the new, full list of participants.
-        this.state.tasks[taskIndex].branchId = branchId;
-        this.state.tasks[taskIndex].participants = newParticipants;
-        // --- NEW LOGIC ENDS HERE ---
-
-        this.saveData();
-        this.closeModal();
-        this.render();
-        NotificationSystem.success('✅ Task successfully assigned and all branch members have joined!');
-    } else {
+    if (!mainTask || !branch) {
         NotificationSystem.error('Error: Task or Branch not found.');
+        return;
     }
+
+    // --- 1. Validation ---
+    if (branch.members.length === 0) {
+        NotificationSystem.error('Cannot assign: This branch has no members.');
+        return;
+    }
+    if (branch.members.length > mainTask.participantLimit) {
+        NotificationSystem.error(`Cannot assign: Branch has ${branch.members.length} members, but task limit is ${mainTask.participantLimit}.`);
+        return;
+    }
+
+    // --- 2. Calculate Distributed Goal ---
+    const totalGoal = mainTask.goalTarget;
+    const memberCount = branch.members.length;
+    // Use Math.ceil to handle remainders, ensuring the total is met or slightly exceeded
+    const distributedGoal = Math.ceil(totalGoal / memberCount); 
+    
+    // --- 3. Create a Sub-Task for Each Member ---
+    const newSubTasks = branch.members.map(memberId => {
+        const user = this.state.users.find(u => u.id === memberId);
+        return {
+            id: Date.now() + memberId, // Unique ID for sub-task
+            parentTaskId: mainTask.id,
+            isSubTask: true,
+            title: `${mainTask.title} (Personal Goal)`,
+            description: `Your personal contribution towards the main task for ${branch.name}.`,
+            dueDate: mainTask.dueDate,
+            createdBy: mainTask.createdBy,
+            goalType: mainTask.goalType,
+            goalTarget: distributedGoal,
+            participantLimit: 1, // Sub-task is only for one person
+            accuraBotEnabled: false, // Disable bot for sub-tasks to avoid spam
+            branchId: mainTask.branchId,
+            progress: 0,
+            participants: [memberId], // Only the assigned member is a participant
+            status: 'active',
+        };
+    });
+
+    // --- 4. Update the Main Task ---
+    this.state.tasks[taskIndex].branchId = branchId;
+    this.state.tasks[taskIndex].participants = [...new Set([...mainTask.participants, ...branch.members])];
+
+    // --- 5. Add New Sub-Tasks to the State ---
+    this.state.tasks.push(...newSubTasks);
+    
+    this.saveData();
+    this.closeModal();
+    this.render();
+    NotificationSystem.success(`✅ Task assigned! ${newSubTasks.length} personal sub-tasks were created.`);
 },
+
+// PASTE THIS NEW HELPER FUNCTION
 
 toggleAccuraBotOptions(toggleElement) {
     const optionsDiv = document.getElementById('accurabot-options');
@@ -3992,14 +4028,14 @@ case 'send-task-to-branch':
 
             break;
             
-// REPLACE THIS ENTIRE CASE BLOCK
-// REPLACE THIS ENTIRE CASE BLOCK within the getModalContent function
+// PASTE THIS CODE TO REPLACE THE EXISTING 'create-task' CASE
+
 case 'create-task':
     const task = isEdit ? this.state.tasks.find(t => t.id === parseInt(id)) : {};
     title = isEdit ? 'Edit Task' : 'Create New Collaborative Task';
     
     content = `
-        <form id="task-form" class.="space-y-4">
+        <form id="task-form" class="space-y-4">
             <input type="hidden" name="taskId" value="${id || ''}">
             <div>
                 <label for="title" class="block text-sm font-medium text-gray-300 mb-2">Task Title</label>
@@ -4020,9 +4056,9 @@ case 'create-task':
                     <div>
                         <label for="goalType" class="block text-sm font-medium text-gray-300 mb-2">Goal Type</label>
                         <select id="goalType" name="goalType" class="form-input w-full">
-                            <option value="sales" ${task?.goalType === 'sales' ? 'selected' : ''}>Total Sales Value (e.g., $5000)</option>
-                            <option value="profit" ${task?.goalType === 'profit' ? 'selected' : ''}>Total Profit Value (e.g., $1500)</option>
-                            <option value="count" ${task?.goalType === 'count' ? 'selected' : ''}>Number of Sales (e.g., 50 sales)</option>
+                            <option value="sales" ${task?.goalType === 'sales' ? 'selected' : ''}>Total Sales Value (e.g., 5000)</option>
+                            <option value="profit" ${task?.goalType === 'profit' ? 'selected' : ''}>Total Profit Value (e.g., 1500)</option>
+                            <option value="count" ${task?.goalType === 'count' ? 'selected' : ''}>Number of Sales (e.g., 50)</option>
                         </select>
                     </div>
                     <div>
@@ -4033,12 +4069,28 @@ case 'create-task':
             </div>
 
             <div class="perplexity-card p-4">
-                    <h4 class="font-semibold text-white mb-3">Collaboration</h4>
+                <h4 class="font-semibold text-white mb-3">Collaboration & Reporting</h4>
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4 items-center">
                     <div>
                         <label for="participantLimit" class="block text-sm font-medium text-gray-300 mb-2">Max Participants</label>
-                        <input type="number" id="participantLimit" name="participantLimit" class="form-input w-full" value="${task?.participantLimit || ''}" placeholder="e.g., 5" required>
+                        <input type="number" id="participantLimit" name="participantLimit" class="form-input w-full" value="${task?.participantLimit || '5'}" placeholder="e.g., 5" required>
                     </div>
+                    <div class="flex items-center space-x-3 mt-6">
+                         <div id="accurabot-icon" class="w-10 h-10 bg-gradient-to-r from-green-500 to-emerald-500 rounded-lg flex items-center justify-center ${task?.accuraBotEnabled ? 'bot-pulse' : ''}">
+                             <i class="fas fa-robot text-white"></i>
+                         </div>
+                         <label for="accuraBotEnabled" class="text-white">Enable AccuraBot Reports</label>
+                         <div class="toggle-switch ${task?.accuraBotEnabled ? 'active' : ''}" onclick="app.toggleAccuraBotOptions(this)"></div>
+                         <input type="checkbox" id="accuraBotEnabled" name="accuraBotEnabled" class="hidden" ${task?.accuraBotEnabled ? 'checked' : ''}>
+                    </div>
+                </div>
+                 <div id="accurabot-options" class="mt-4 space-y-2 ${task?.accuraBotEnabled ? '' : 'hidden'}">
+                    <label for="accuraBotReportFrequency" class="block text-sm font-medium text-gray-300">Report Frequency</label>
+                    <select id="accuraBotReportFrequency" name="accuraBotReportFrequency" class="form-input w-full">
+                        <option value="daily" ${task?.accuraBotReportFrequency === 'daily' ? 'selected' : ''}>Daily</option>
+                        <option value="weekly" ${task?.accuraBotReportFrequency === 'weekly' ? 'selected' : ''}>Weekly</option>
+                        <option value="end_of_task" ${task?.accuraBotReportFrequency === 'end_of_task' ? 'selected' : ''}>End of Task</option>
+                    </select>
                 </div>
             </div>
 
@@ -4472,6 +4524,32 @@ updateTaskProgress(sale, profit) {
         }
         // --- END OF MISSING LOGIC ---
     });
+},
+// PASTE THIS ENTIRE NEW FUNCTION
+
+checkMainTaskCompletion(parentTaskId) {
+    if (!parentTaskId) return;
+
+    // Find all sub-tasks for the given main task
+    const relatedSubTasks = this.state.tasks.filter(t => t.parentTaskId === parentTaskId);
+    if (relatedSubTasks.length === 0) return; // No sub-tasks found
+
+    // Check if EVERY single sub-task is marked as 'completed'
+    const allSubTasksCompleted = relatedSubTasks.every(subTask => subTask.status === 'completed');
+
+    if (allSubTasksCompleted) {
+        const mainTaskIndex = this.state.tasks.findIndex(t => t.id === parentTaskId);
+        if (mainTaskIndex !== -1) {
+            this.state.tasks[mainTaskIndex].status = 'completed';
+            const mainTask = this.state.tasks[mainTaskIndex];
+            NotificationSystem.success(`🏆 Main Task Completed: "${mainTask.title}"! Great work, team!`);
+            
+            // Optional: Send a final report notification for the main task
+            if (mainTask.accuraBotEnabled) {
+                this.sendTaskProgressNotification(mainTask, '100');
+            }
+        }
+    }
 },
 
 getTaskReportHtml(taskId) {
@@ -6006,87 +6084,110 @@ quickReply(messageId) {
                 return results;
             },
 
-            // Add this new function to the `app` object:
-            getPnlView() {
-                const today = new Date().toISOString().split('T')[0];
-                const firstDayOfMonth = new Date(new Date().getFullYear(), new Date().getMonth(), 1).toISOString().split('T')[0];
+// REPLACE your current getPnlView, renderPnlReport, and updatePnlView functions with these:
 
-                const startDate = document.getElementById('pnlStartDate')?.value || firstDayOfMonth;
-                const endDate = document.getElementById('pnlEndDate')?.value || today;
+getPnlView() {
+    const today = new Date().toISOString().split('T')[0];
+    const firstDayOfMonth = new Date(new Date().getFullYear(), new Date().getMonth(), 1).toISOString().split('T')[0];
 
-                const pnlData = this.calculatePnL(startDate, endDate);
-                const isProfit = pnlData.netIncome >= 0;
+    // Get initial dates, but check if elements exist first (for safety)
+    const startDate = document.getElementById('pnlStartDate')?.value || firstDayOfMonth;
+    const endDate = document.getElementById('pnlEndDate')?.value || today;
 
-                return `
-                    <div class="space-y-6 fade-in">
-                        <div>
-                            <h2 class="text-2xl font-bold text-white mb-2">Profit & Loss Statement</h2>
-                            <p class="text-gray-400">Analyze your revenue and expenses over a specific period.</p>
-                        </div>
+    return `
+        <div class="space-y-6 fade-in">
+            <div>
+                <h2 class="text-2xl font-bold text-white mb-2">Profit & Loss Statement</h2>
+                <p class="text-gray-400">Analyze your revenue and expenses over a specific period.</p>
+            </div>
 
-                        <div class="perplexity-card p-4">
-                            <div class="flex flex-col md:flex-row gap-4 items-center">
-                                <div class="flex-1">
-                                    <label for="pnlStartDate" class="text-sm font-medium text-gray-300">Start Date</label>
-                                    <input type="date" id="pnlStartDate" value="${startDate}" onchange="app.render()" class="form-input w-full mt-1">
-                                </div>
-                                <div class="flex-1">
-                                    <label for="pnlEndDate" class="text-sm font-medium text-gray-300">End Date</label>
-                                    <input type="date" id="pnlEndDate" value="${endDate}" onchange="app.render()" class="form-input w-full mt-1">
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="perplexity-card p-6">
-                            <div class="space-y-4">
-                                <div class="flex justify-between items-center">
-                                    <span class="text-lg font-medium text-white">Revenue</span>
-                                </div>
-                                <div class="flex justify-between items-center pl-4 border-l-2 border-gray-700">
-                                    <span class="text-gray-300">Total Sales Revenue</span>
-                                    <span class="font-mono">${this.formatCurrency(pnlData.totalRevenue)}</span>
-                                </div>
-                                <div class="flex justify-between items-center pl-4 border-l-2 border-gray-700">
-                                    <span class="text-gray-300">Less: Sales Discounts</span>
-                                    <span class="font-mono">(${this.formatCurrency(pnlData.totalDiscounts)})</span>
-                                </div>
-                                <div class="flex justify-between items-center text-lg font-semibold border-t border-gray-600 pt-2">
-                                    <span class="text-white">Net Revenue</span>
-                                    <span class="font-mono text-white">${this.formatCurrency(pnlData.netRevenue)}</span>
-                                </div>
-
-                                <div class="flex justify-between items-center pt-4">
-                                    <span class="text-lg font-medium text-white">Cost of Goods Sold (COGS)</span>
-                                    <span class="font-mono">(${this.formatCurrency(pnlData.totalCOGS)})</span>
-                                </div>
-                                <div class="flex justify-between items-center text-xl font-semibold border-t-2 border-gray-500 pt-3 mt-2">
-                                    <span class="text-teal-400">Gross Profit</span>
-                                    <span class="font-mono text-teal-400">${this.formatCurrency(pnlData.grossProfit)}</span>
-                                </div>
-
-                                <div class="flex justify-between items-center pt-4">
-                                    <span class="text-lg font-medium text-white">Operating Expenses</span>
-                                </div>
-                                ${Object.keys(pnlData.operatingExpenses).map(expenseName => `
-                                    <div class="flex justify-between items-center pl-4 border-l-2 border-gray-700">
-                                        <span class="text-gray-300">${expenseName}</span>
-                                        <span class="font-mono">(${this.formatCurrency(pnlData.operatingExpenses[expenseName])})</span>
-                                    </div>
-                                `).join('')}
-                                <div class="flex justify-between items-center text-lg font-semibold border-t border-gray-600 pt-2">
-                                    <span class="text-white">Total Operating Expenses</span>
-                                    <span class="font-mono text-white">(${this.formatCurrency(pnlData.totalOperatingExpenses)})</span>
-                                </div>
-                                
-                                <div class="flex justify-between items-center text-2xl font-bold border-t-4 pt-4 mt-4 ${isProfit ? 'border-green-500' : 'border-red-500'}">
-                                    <span class="${isProfit ? 'text-green-400' : 'text-red-400'}">Net ${isProfit ? 'Income' : 'Loss'}</span>
-                                    <span class="font-mono ${isProfit ? 'text-green-400' : 'text-red-400'}">${this.formatCurrency(pnlData.netIncome)}</span>
-                                </div>
-                            </div>
-                        </div>
+            <div class="perplexity-card p-4">
+                <div class="flex flex-col md:flex-row gap-4 items-center">
+                    <div class="flex-1">
+                        <label for="pnlStartDate" class="text-sm font-medium text-gray-300">Start Date</label>
+                        <input type="date" id="pnlStartDate" value="${startDate}" onchange="app.updatePnlView()" class="form-input w-full mt-1">
                     </div>
-                `;
-            },
+                    <div class="flex-1">
+                        <label for="pnlEndDate" class="text-sm font-medium text-gray-300">End Date</label>
+                        <input type="date" id="pnlEndDate" value="${endDate}" onchange="app.updatePnlView()" class="form-input w-full mt-1">
+                    </div>
+                </div>
+            </div>
+
+            <div id="pnl-report-container">
+                ${this.renderPnlReport(startDate, endDate)}
+            </div>
+        </div>
+    `;
+},
+
+renderPnlReport(startDate, endDate) {
+    // ** THE FIX IS HERE **
+    // This function now receives dates as arguments instead of trying to find them in the DOM.
+    const pnlData = this.calculatePnL(startDate, endDate);
+    const isProfit = pnlData.netIncome >= 0;
+
+    return `
+        <div class="perplexity-card p-6 slide-up">
+            <div class="space-y-4">
+                <div class="flex justify-between items-center">
+                    <span class="text-lg font-medium text-white">Revenue</span>
+                </div>
+                <div class="flex justify-between items-center pl-4 border-l-2 border-gray-700">
+                    <span class="text-gray-300">Total Sales Revenue</span>
+                    <span class="font-mono">${this.formatCurrency(pnlData.totalRevenue)}</span>
+                </div>
+                <div class="flex justify-between items-center pl-4 border-l-2 border-gray-700">
+                    <span class="text-gray-300">Less: Sales Discounts</span>
+                    <span class="font-mono">(${this.formatCurrency(pnlData.totalDiscounts)})</span>
+                </div>
+                <div class="flex justify-between items-center text-lg font-semibold border-t border-gray-600 pt-2">
+                    <span class="text-white">Net Revenue</span>
+                    <span class="font-mono text-white">${this.formatCurrency(pnlData.netRevenue)}</span>
+                </div>
+
+                <div class="flex justify-between items-center pt-4">
+                    <span class="text-lg font-medium text-white">Cost of Goods Sold (COGS)</span>
+                    <span class="font-mono">(${this.formatCurrency(pnlData.totalCOGS)})</span>
+                </div>
+                <div class="flex justify-between items-center text-xl font-semibold border-t-2 border-gray-500 pt-3 mt-2">
+                    <span class="text-teal-400">Gross Profit</span>
+                    <span class="font-mono text-teal-400">${this.formatCurrency(pnlData.grossProfit)}</span>
+                </div>
+
+                <div class="flex justify-between items-center pt-4">
+                    <span class="text-lg font-medium text-white">Operating Expenses</span>
+                </div>
+                ${Object.keys(pnlData.operatingExpenses).map(expenseName => `
+                    <div class="flex justify-between items-center pl-4 border-l-2 border-gray-700">
+                        <span class="text-gray-300">${expenseName}</span>
+                        <span class="font-mono">(${this.formatCurrency(pnlData.operatingExpenses[expenseName])})</span>
+                    </div>
+                `).join('')}
+                <div class="flex justify-between items-center text-lg font-semibold border-t border-gray-600 pt-2">
+                    <span class="text-white">Total Operating Expenses</span>
+                    <span class="font-mono text-white">(${this.formatCurrency(pnlData.totalOperatingExpenses)})</span>
+                </div>
+                
+                <div class="flex justify-between items-center text-2xl font-bold border-t-4 pt-4 mt-4 ${isProfit ? 'border-green-500' : 'border-red-500'}">
+                    <span class="${isProfit ? 'text-green-400' : 'text-red-400'}">Net ${isProfit ? 'Income' : 'Loss'}</span>
+                    <span class="font-mono ${isProfit ? 'text-green-400' : 'text-red-400'}">${this.formatCurrency(pnlData.netIncome)}</span>
+                </div>
+            </div>
+        </div>
+    `;
+},
+
+updatePnlView() {
+    const container = document.getElementById('pnl-report-container');
+    // ** THE FIX IS HERE **
+    // This function now correctly reads the dates from the DOM and passes them to the render function.
+    const startDate = document.getElementById('pnlStartDate').value;
+    const endDate = document.getElementById('pnlEndDate').value;
+    if (container) {
+        container.innerHTML = this.renderPnlReport(startDate, endDate);
+    }
+},
 
             // Step 3: Create a "Ledger" (T-Accounts) View
             viewLedgerAccount(accountCode) {
@@ -7507,152 +7608,118 @@ handleAiQuestion(questionKey) {
                 `;
             },
 
-            // Add all the missing view methods here
-            getProductsView() {
-                const searchTerm = document.getElementById('product-search')?.value.toLowerCase() || '';
-                const categoryFilter = document.getElementById('product-category-filter')?.value || '';
+            // REPLACE your existing getProductsView function with this:
+getProductsView() {
+    return `
+        <div class="space-y-6 fade-in">
+            <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                <div>
+                    <h2 class="text-2xl font-bold text-white mb-2">Product Management</h2>
+                    <p class="text-gray-400">Manage your inventory with advanced tracking</p>
+                </div>
+                ${this.canManageProducts() ? `
+                    <button data-action="add-product" class="perplexity-button px-4 py-2 rounded-xl font-medium">
+                        <i class="fas fa-plus mr-2"></i>Add Product
+                    </button>
+                ` : ''}
+            </div>
 
-                const filteredProducts = this.state.products.filter(product => {
-                    const matchesSearch = product.name.toLowerCase().includes(searchTerm) ||
-                                          product.sku.toLowerCase().includes(searchTerm) ||
-                                          product.description.toLowerCase().includes(searchTerm);
-                    const matchesCategory = categoryFilter === '' || product.category === categoryFilter;
-                    return matchesSearch && matchesCategory;
-                });
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                    <label for="product-search" class="sr-only">Search Products</label>
+                    <input type="text" id="product-search" placeholder="Search by name or SKU..." class="form-input w-full" onkeyup="app.updateProductListView()">
+                </div>
+                <div>
+                    <label for="product-category-filter" class="sr-only">Filter by Category</label>
+                    <select id="product-category-filter" class="form-input w-full" onchange="app.updateProductListView()">
+                        <option value="">All Categories</option>
+                        ${this.state.categories.map(cat => `<option value="${cat}">${cat}</option>`).join('')}
+                    </select>
+                </div>
+            </div>
 
-                return `
-                    <div class="space-y-6 fade-in">
-                        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-                            <div>
-                                <h2 class="text-2xl font-bold text-white mb-2">Product Management</h2>
-                                <p class="text-gray-400">Manage your inventory with advanced tracking</p>
-                            </div>
+            <div class="perplexity-card overflow-hidden" id="product-table-container">
+                ${this.renderProductTable()}
+            </div>
+        </div>
+    `;
+},
+
+// REPLACE your current renderProductTable function with this corrected version:
+
+renderProductTable() {
+    const searchTerm = document.getElementById('product-search')?.value.toLowerCase() || '';
+    const categoryFilter = document.getElementById('product-category-filter')?.value || '';
+
+    const filteredProducts = this.state.products.filter(product => {
+        const matchesSearch = product.name.toLowerCase().includes(searchTerm) ||
+                              product.sku.toLowerCase().includes(searchTerm) ||
+                              product.description.toLowerCase().includes(searchTerm);
+        const matchesCategory = categoryFilter === '' || product.category === categoryFilter;
+        return matchesSearch && matchesCategory;
+    });
+
+    return `
+        <div class="responsive-table">
+            <table class="w-full">
+                <thead>
+                    <tr class="border-b border-gray-600">
+                        <th class="px-6 py-4 text-left text-xs font-medium uppercase tracking-wider text-gray-300">Product</th>
+                        <th class="px-6 py-4 text-left text-xs font-medium uppercase tracking-wider text-gray-300">Price</th>
+                        <th class="px-6 py-4 text-left text-xs font-medium uppercase tracking-wider text-gray-300">Stock</th>
+                        <th class="px-6 py-4 text-left text-xs font-medium uppercase tracking-wider text-gray-300">Category</th>
+                        ${this.canManageProducts() ? '<th class="px-6 py-4 text-left text-xs font-medium uppercase tracking-wider text-gray-300">Actions</th>' : ''}
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-gray-600">
+                    ${filteredProducts.map((product, index) => {
+                        // ** THE FIX IS HERE **
+                        // This line checks if product.imageUrl exists. If it does, it creates an <img> tag.
+                        // If not, it creates a fallback <div> with a generic box icon.
+                        const imageOrIcon = product.imageUrl
+                            ? `<img src="${product.imageUrl}" alt="${product.name}" class="w-10 h-10 rounded-lg object-cover flex-shrink-0">`
+                            : `<div class="w-10 h-10 bg-gray-700 rounded-lg flex items-center justify-center flex-shrink-0"><i class="fas fa-box text-gray-400"></i></div>`;
+
+                        return `
+                        <tr class="hover:bg-gray-800/50 ${index % 2 === 0 ? 'odd:bg-gray-800/10' : ''} transition-colors">
+                            <td class="px-6 py-4">
+                                <div class="flex items-center space-x-3">
+                                    ${imageOrIcon}
+                                    <div>
+                                        <div class="text-white font-medium">${product.name}</div>
+                                        <div class="text-gray-400 text-sm">SKU: ${product.sku}</div>
+                                    </div>
+                                </div>
+                            </td>
+                            <td class="px-6 py-4 text-white font-medium">${this.formatCurrency(product.price)}</td>
+                            <td class="px-6 py-4">
+                                <span class="px-3 py-1 text-xs font-semibold rounded-full ${product.stock <= product.reorderLevel ? 'bg-red-500/20 text-red-400' : 'bg-green-500/20 text-green-400'}">
+                                    ${product.stock} units
+                                </span>
+                            </td>
+                            <td class="px-6 py-4 text-gray-300">${product.category}</td>
                             ${this.canManageProducts() ? `
-                                <button data-action="add-product" class="perplexity-button px-4 py-2 rounded-xl font-medium">
-                                    <i class="fas fa-plus mr-2"></i>Add Product
-                                </button>
+                                <td class="px-6 py-4">
+                                    <div class="flex items-center space-x-3">
+                                        <button data-action="edit-product" data-id="${product.id}" class="text-blue-400 hover:text-blue-300 transition-colors"><i class="fas fa-edit"></i></button>
+                                        <button data-action="delete-product" data-id="${product.id}" class="text-red-400 hover:text-red-300 transition-colors"><i class="fas fa-trash"></i></button>
+                                    </div>
+                                </td>
                             ` : ''}
-                        </div>
+                        </tr>
+                    `}).join('')}
+                </tbody>
+            </table>
+        </div>
+    `;
+},
 
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <div>
-                                <label for="product-search" class="sr-only">Search Products</label>
-                                <input type="text" id="product-search" placeholder="Search by name or SKU..." class="form-input w-full" onkeyup="app.render()">
-                            </div>
-                            <div>
-                                <label for="product-category-filter" class="sr-only">Filter by Category</label>
-                                <select id="product-category-filter" class="form-input w-full" onchange="app.render()">
-                                    <option value="">All Categories</option>
-                                    ${this.state.categories.map(cat => `<option value="${cat}">${cat}</option>`).join('')}
-                                </select>
-                            </div>
-                        </div>
-
-                        <div class="responsive-grid-4">
-                            <div class="perplexity-card p-4 slide-up">
-                                <div class="flex items-center justify-between">
-                                    <div>
-                                        <p class="text-gray-400 text-sm mb-1">Total</p>
-                                        <p class="text-2xl font-bold text-white">${filteredProducts.length}</p>
-                                    </div>
-                                    <div class="w-10 h-10 bg-blue-500/20 rounded-xl flex items-center justify-center">
-                                        <i class="fas fa-box text-blue-400"></i>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="perplexity-card p-4 slide-up">
-                                <div class="flex items-center justify-between">
-                                    <div>
-                                        <p class="text-gray-400 text-sm mb-1">Value</p>
-                                        <p class="text-lg font-bold text-green-400">${this.formatCurrency(filteredProducts.reduce((sum, p) => sum + (p.price * p.stock), 0), false)}</p>
-                                    </div>
-                                    <div class="w-10 h-10 bg-green-500/20 rounded-xl flex items-center justify-center">
-                                        <i class="fas fa-dollar-sign text-green-400"></i>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="perplexity-card p-4 slide-up">
-                                <div class="flex items-center justify-between">
-                                    <div>
-                                        <p class="text-gray-400 text-sm mb-1">Low Stock</p>
-                                        <p class="text-2xl font-bold text-red-400">${filteredProducts.filter(p => p.stock <= this.state.lowStockThreshold).length}</p>
-                                    </div>
-                                    <div class="w-10 h-10 bg-red-500/20 rounded-xl flex items-center justify-center">
-                                        <i class="fas fa-exclamation-triangle text-red-400"></i>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="perplexity-card p-4 slide-up">
-                                <div class="flex items-center justify-between">
-                                    <div>
-                                        <p class="text-gray-400 text-sm mb-1">Categories</p>
-                                        <p class="text-2xl font-bold text-purple-400">${[...new Set(filteredProducts.map(p => p.category))].length}</p>
-                                    </div>
-                                    <div class="w-10 h-10 bg-purple-500/20 rounded-xl flex items-center justify-center">
-                                        <i class="fas fa-tags text-purple-400"></i>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="perplexity-card overflow-hidden">
-                            <div class="responsive-table">
-                                <table class="w-full">
-                                    <thead>
-                                        <tr class="border-b border-gray-600">
-                                            <th class="px-6 py-4 text-left text-xs font-medium uppercase tracking-wider text-gray-300">Product</th>
-                                            <th class="px-6 py-4 text-left text-xs font-medium uppercase tracking-wider text-gray-300">Price</th>
-                                            <th class="px-6 py-4 text-left text-xs font-medium uppercase tracking-wider text-gray-300">Stock</th>
-                                            <th class="px-6 py-4 text-left text-xs font-medium uppercase tracking-wider text-gray-300">Category</th>
-                                            ${this.canManageProducts() ? '<th class="px-6 py-4 text-left text-xs font-medium uppercase tracking-wider text-gray-300">Actions</th>' : ''}
-                                        </tr>
-                                    </thead>
-                                    <tbody class="divide-y divide-gray-600">
-                                        ${filteredProducts.map((product, index) => `
-                                            <tr class="hover:bg-gray-800/50 ${index % 2 === 0 ? 'odd:bg-gray-800/10' : ''} transition-colors">
-                                                <td class="px-6 py-4">
-                                                    <div class="flex items-center space-x-3">
-                                                        <div class="w-10 h-10 bg-gradient-to-r from-blue-500 to-purple-500 rounded-lg flex items-center justify-center">
-                                                            <i class="fas fa-box text-white"></i>
-                                                        </div>
-                                                        <div>
-                                                            <div class="text-white font-medium">${product.name}</div>
-                                                            <div class="text-gray-400 text-sm">SKU: ${product.sku}</div>
-                                                        </div>
-                                                    </div>
-                                                </td>
-                                                <td class="px-6 py-4 text-white font-medium">${this.formatCurrency(product.price)}</td>
-                                                <td class="px-6 py-4">
-                                                    <span class="px-3 py-1 text-xs font-semibold rounded-full ${product.stock <= this.state.lowStockThreshold ? 'bg-red-500/20 text-red-400 border border-red-500/30' : 'bg-green-500/20 text-green-400 border border-green-500/30'}">
-                                                        ${product.stock} units
-                                                    </span>
-                                                </td>
-                                                <td class="px-6 py-4">
-                                                    <span class="px-3 py-1 text-xs font-semibold rounded-full bg-purple-500/20 text-purple-400 border border-purple-500/30">
-                                                        ${product.category}
-                                                    </span>
-                                                </td>
-                                                ${this.canManageProducts() ? `
-                                                    <td class="px-6 py-4">
-                                                        <div class="flex items-center space-x-3">
-                                                            <button data-action="edit-product" data-id="${product.id}" class="text-blue-400 hover:text-blue-300 transition-colors">
-                                                                <i class="fas fa-edit"></i>
-                                                            </button>
-                                                            <button data-action="delete-product" data-id="${product.id}" class="text-red-400 hover:text-red-300 transition-colors">
-                                                                <i class="fas fa-trash"></i>
-                                                            </button>
-                                                        </div>
-                                                    </td>
-                                                ` : ''}
-                                            </tr>
-                                        `).join('')}
-                                    </tbody>
-                                </table>
-                            </div>
-                        </div>
-                    </div>
-                `;
-            },
+updateProductListView() {
+    const container = document.getElementById('product-table-container');
+    if (container) {
+        container.innerHTML = this.renderProductTable();
+    }
+},
 
             getCustomersView() {
                 return `
@@ -8443,27 +8510,31 @@ getSettingsView() {
                     </div>
                 `;
             },
-           getBranchHubView() {
+          // REPLACE your old getBranchHubView function with this new one.
+
+// REPLACE your old getBranchHubView function with this final version.
+
+getBranchHubView() {
     const branch = this.state.branches.find(b => b.id === this.state.currentBranchId);
     if (!branch) {
         return `<p class="text-red-400">Error: Branch not found.</p>`;
     }
 
-    // Find tasks assigned to this specific branch
-    const assignedTasks = this.state.tasks.filter(task => task.branchId === branch.id);
-    const currentUser = this.state.currentUser;
-
-    const branchMessages = this.state.messages.filter(m => m.type === 'branch' && m.branchId === branch.id)
-        .sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp));
+    const assignedTasks = this.state.tasks.filter(task => !task.isSubTask && task.branchId === branch.id);
+    const branchAnnouncements = this.state.announcements
+        .filter(a => a.branchId === branch.id)
+        .sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp)); // Show newest first
+    
+    // Check if the current user is the creator of this branch
+    const isBranchCreator = this.state.currentUser.id === branch.createdBy;
 
     return `
         <div class="space-y-6 fade-in">
-            <!-- Header -->
             <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                 <div>
                     <h2 class="text-2xl font-bold text-white mb-2 flex items-center">
                         <i class="fas fa-users text-purple-400 mr-3"></i>
-                        ${branch.name}
+                        ${branch.name} Hub
                     </h2>
                     <div class="flex items-center space-x-2">
                         ${branch.members.map(memberId => {
@@ -8477,146 +8548,119 @@ getSettingsView() {
                 </button>
             </div>
 
-            <!-- Main Grid -->
-            <div class="branch-hub-grid">
-                <!-- Tasks Panel -->
-                <div class="tasks-panel perplexity-card p-6">
-                    <div class="flex justify-between items-center mb-4">
-                        <h3 class="text-xl font-bold text-white">Branch Tasks</h3>
-                        ${['admin', 'manager'].includes(currentUser.role) ? `
-                            <button data-action="create-task" class="ai-button px-4 py-2 rounded-xl text-sm">
-                                <i class="fas fa-plus mr-2"></i>Create Task
-                            </button>
-                        ` : ''}
-                    </div>
-                    
-                    <!-- NEW: Dynamic Task List -->
-                    ${assignedTasks.length > 0 ? `
-                        <div class="space-y-4">
-                            ${assignedTasks.map(task => {
-                                const progressPercentage = Math.min((task.progress / task.goalTarget) * 100, 100);
-                                const hasJoined = task.participants.includes(currentUser.id);
-                                const isFull = task.participants.length >= task.participantLimit;
-
-                                return `
-                                <div class="task-card !bg-gray-800/50">
-                                    <div class="flex justify-between items-start mb-3">
-                                      <h3 class="text-lg font-bold text-white">${task.title}</h3>                                  
-                                       <span class="px-3 py-1 text-xs font-semibold rounded-full ${task.status === 'active' ? 'bg-blue-500/20 text-blue-400' : 'bg-green-500/20 text-green-400'}">
-                                            ${task.status}
-                                        </span>
-                                    </div>
-                                    <p class="text-sm text-gray-400 mb-4">${task.description}</p>
-                                    
-                                    <div class="mb-4">
-                                        <div class="flex justify-between text-sm text-gray-300 mb-1">
-                                            <span>Progress</span>
-                                           <span>${this.formatCurrency(task.progress)} / ${this.formatCurrency(task.goalTarget)}</span>
-                                        </div>
-                                        <div class="progress-bar-container">
-                                            <div class="progress-bar-fill" style="width: ${progressPercentage}%;"></div>
-                                        </div>
-                                    </div>
-
-                                    <div class="flex justify-between items-center text-sm text-gray-400 border-t border-gray-700 pt-3">
-                                        <div>
-                                            <i class="fas fa-users mr-1"></i>
-                                            <span>${task.participants.length} / ${task.participantLimit} Joined</span>
-                                        </div>
-                                        <div>
-                                            <i class="fas fa-clock mr-1"></i>
-                                            <span>Due: ${task.dueDate}</span>
-                                        </div>
-                                    </div>
-                                    
-                                    <!-- NEW "Join Task" Button Logic -->
-                                    <div class="mt-3">
-                                        ${hasJoined ? `
-                                            <div class="text-center w-full py-2 px-3 bg-green-500/10 text-green-400 rounded-lg text-sm">
-                                                <i class="fas fa-check-circle mr-2"></i>You have joined this task
-                                            </div>
-                                        ` : isFull ? `
-                                            <div class="text-center w-full py-2 px-3 bg-gray-700 text-gray-400 rounded-lg text-sm">
-                                                <i class="fas fa-lock mr-2"></i>Task is full
-                                            </div>
-                                        ` : `
-                                            <button data-action="join-task" data-id="${task.id}" class="w-full perplexity-button py-2 rounded-lg text-sm">
-                                                <i class="fas fa-user-plus mr-2"></i>Join Task
-                                            </button>
-                                        `}
-                                    </div>
-                                </div>
-                                `
-                            }).join('')}
+            <div class="perplexity-card p-6">
+                <h3 class="text-xl font-bold text-white mb-4">Branch Announcements</h3>
+                
+                ${isBranchCreator ? `
+                <div class="mb-6">
+                    <form id="announcement-form" class="bg-gray-800/50 p-4 rounded-xl">
+                        <input type="hidden" name="branchId" value="${branch.id}">
+                        <textarea name="content" rows="3" class="form-input w-full mb-3" placeholder="Post an announcement for the team..." required></textarea>
+                        <div class="flex justify-between items-center">
+                            <div>
+                                <label class="text-sm text-gray-400 mr-3">Label:</label>
+                                <input type="radio" id="label-green" name="labelColor" value="green" class="hidden" checked>
+                                <label for="label-green" class="w-6 h-6 bg-green-500 inline-block rounded-full cursor-pointer border-2 border-transparent ring-2 ring-green-500"></label>
+                                
+                                <input type="radio" id="label-yellow" name="labelColor" value="yellow" class="hidden">
+                                <label for="label-yellow" class="w-6 h-6 bg-yellow-500 inline-block rounded-full cursor-pointer border-2 border-transparent ml-2"></label>
+                                
+                                <input type="radio" id="label-red" name="labelColor" value="red" class="hidden">
+                                <label for="label-red" class="w-6 h-6 bg-red-500 inline-block rounded-full cursor-pointer border-2 border-transparent ml-2"></label>
+                            </div>
+                            <button type="submit" class="perplexity-button py-2 px-4 rounded-lg">Post</button>
                         </div>
-                    ` : `
-                        <div class="text-center py-16 text-gray-500">
-                            <i class="fas fa-tasks text-4xl mb-3"></i>
-                            <p>No tasks assigned to this branch yet.</p>
+                    </form>
+                </div>
+                ` : ''}
+                
+                <div class="space-y-4">
+                    ${branchAnnouncements.length > 0 ? branchAnnouncements.map(ann => {
+                        const creator = this.state.users.find(u => u.id === ann.createdBy);
+                        const labelClasses = {
+                            green: 'border-green-500 bg-green-500/10',
+                            yellow: 'border-yellow-500 bg-yellow-500/10',
+                            red: 'border-red-500 bg-red-500/10'
+                        };
+                        return `
+                        <div class="p-4 rounded-xl border-l-4 ${labelClasses[ann.labelColor] || 'border-gray-500'}">
+                            <div class="flex justify-between items-center text-xs text-gray-400 mb-2">
+                                <span>By: ${creator ? creator.name : 'Unknown'}</span>
+                                <span>${this.formatMessageTime(ann.timestamp)}</span>
+                            </div>
+                            <p class="text-gray-200">${ann.content}</p>
+                        </div>
+                        `;
+                    }).join('') : `
+                        <div class="text-center py-8 text-gray-500">
+                            <i class="fas fa-bullhorn text-4xl mb-3"></i>
+                            <p>No announcements have been posted here yet.</p>
                         </div>
                     `}
                 </div>
+            </div>
 
-                <!-- Chat Panel (No changes here) -->
-                <div class="chat-panel perplexity-card p-0 flex flex-col">
-                    <div class="p-4 border-b border-gray-700">
-                        <h3 class="text-xl font-bold text-white text-center">Branch Chat</h3>
-                    </div>
-                    <div class="flex-1 p-4 space-y-3 overflow-y-auto" id="branch-messages-container">
-                         ${branchMessages.length > 0 ? branchMessages.map(msg => {
-                            const sender = this.state.users.find(u => u.id === msg.from);
-                            const isSentByMe = msg.from === this.state.currentUser.id;
+            <div class="perplexity-card p-6">
+                <h3 class="text-xl font-bold text-white mb-4">Assigned Team Tasks</h3>
+                 ${assignedTasks.length > 0 ? `
+                    <div class="space-y-4">
+                        ${assignedTasks.map(task => {
+                            const progressPercentage = Math.min((task.progress / task.goalTarget) * 100, 100);
                             return `
-                                <div class="message-bubble-container ${isSentByMe ? 'sent' : 'received'}">
-                                    ${!isSentByMe ? `
-                                        <div class="w-8 h-8 rounded-full bg-gradient-to-br from-teal-500 to-blue-500 flex items-center justify-center flex-shrink-0">
-                                            <span class="text-white text-xs font-bold">${sender ? sender.name.charAt(0) : 'U'}</span>
-                                        </div>
-                                    ` : ''}
-                                    <div class="message-bubble ${isSentByMe ? 'sent' : 'received'}">
-                                        ${!isSentByMe ? `<div class="text-xs text-gray-400 mb-1">${sender ? sender.name : 'Unknown'}</div>` : ''}
-                                        <div>${msg.content}</div>
-                                    </div>
+                            <div class="task-card !bg-gray-800/50">
+                                <div class="flex justify-between items-start mb-3">
+                                    <h3 class="text-lg font-bold text-white">${task.title}</h3>                                  
+                                    <span class="px-3 py-1 text-xs font-semibold rounded-full ${task.status === 'active' ? 'bg-blue-500/20 text-blue-400' : 'bg-green-500/20 text-green-400'}">
+                                        ${task.status}
+                                    </span>
                                 </div>
-                            `;
-                        }).join('') : `
-                            <div class="text-center text-gray-400 py-8">
-                                <i class="fas fa-comments text-3xl mb-2"></i>
-                                <p>Start the conversation!</p>
+                                <p class="text-sm text-gray-400 mb-4">${task.description}</p>
+                                <div class="mb-4">
+                                    <div class="flex justify-between text-sm text-gray-300 mb-1">
+                                        <span>Overall Progress</span>
+                                        <span>${this.formatCurrency(task.progress)} / ${this.formatCurrency(task.goalTarget)}</span>
+                                    </div>
+                                    <div class="progress-bar-container"><div class="progress-bar-fill" style="width: ${progressPercentage}%;"></div></div>
+                                </div>
+                                <div class="flex justify-between items-center text-sm text-gray-400 border-t border-gray-700 pt-3">
+                                    <div><i class="fas fa-users mr-1"></i> ${task.participants.length} / ${task.participantLimit} Participants</div>
+                                    <div><i class="fas fa-clock mr-1"></i> Due: ${task.dueDate}</div>
+                                </div>
                             </div>
-                        `}
+                            `
+                        }).join('')}
                     </div>
-                    <div class="p-4 border-t border-gray-700">
-                         <form onsubmit="app.sendBranchMessage(event, ${branch.id})" class="flex gap-2">
-                            <input type="text" id="branch-message-input" placeholder="Type a message..." class="form-input flex-1" required>
-                            <button type="submit" class="perplexity-button px-4">
-                                <i class="fas fa-paper-plane"></i>
-                            </button>
-                        </form>
+                ` : `
+                    <div class="text-center py-16 text-gray-500">
+                        <i class="fas fa-tasks text-4xl mb-3"></i>
+                        <p>No main tasks have been assigned to this branch yet.</p>
                     </div>
-                </div>
+                `}
             </div>
         </div>
     `;
 },
 
-// REPLACE this entire function
+// REPLACE your old getTasksView function with this new one.
+
 getTasksView() {
     const { tasks, currentUser, taskFilter } = this.state;
     const canCreateTasks = ['admin', 'manager'].includes(currentUser.role);
 
-    const baseVisibleTasks = currentUser.role === 'admin' 
-        ? tasks 
-        : tasks.filter(task => task.createdBy === currentUser.id);
+    // --- NEW LOGIC TO DETERMINE WHICH TASKS TO SHOW ---
+    let visibleTasks = [];
+    if (currentUser.role === 'worker') {
+        // Workers see THEIR SUB-TASKS.
+        visibleTasks = tasks.filter(task => task.isSubTask && task.participants.includes(currentUser.id));
+    } else {
+        // Admins/Managers see the MAIN TASKS they created.
+        visibleTasks = tasks.filter(task => !task.isSubTask && task.createdBy === currentUser.id);
+    }
 
-    // --- NEW FILTERING LOGIC ---
-    const visibleTasks = baseVisibleTasks.filter(task => {
-        if (taskFilter === 'live') {
-            return task.status === 'active';
-        }
-        if (taskFilter === 'completed') {
-            return task.status === 'completed';
-        }
+    // Apply the 'Live' or 'Completed' filter on the already determined list
+    const filteredVisibleTasks = visibleTasks.filter(task => {
+        if (taskFilter === 'live') return task.status === 'active';
+        if (taskFilter === 'completed') return task.status === 'completed';
         return true; // for 'all'
     });
 
@@ -8624,8 +8668,8 @@ getTasksView() {
         <div class="space-y-6 fade-in">
             <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                 <div>
-                    <h2 class="text-2xl font-bold text-white mb-2">Task Dashboard</h2>
-                    <p class="text-gray-400">Collaborate on goals and track progress.</p>
+                    <h2 class="text-2xl font-bold text-white mb-2">${currentUser.role === 'worker' ? 'My Personal Goals' : 'Task Dashboard'}</h2>
+                    <p class="text-gray-400">${currentUser.role === 'worker' ? 'Track your contribution to team tasks.' : 'Create and manage collaborative goals.'}</p>
                 </div>
                 ${canCreateTasks ? `
                     <button data-action="create-task" class="ai-button px-4 py-2 rounded-xl font-medium">
@@ -8635,94 +8679,123 @@ getTasksView() {
             </div>
 
             <div class="flex space-x-1 bg-gray-800/50 p-1 rounded-xl">
-                <button data-action="filter-tasks" data-id="all" class="flex-1 px-4 py-2 rounded-lg font-medium transition-all ${taskFilter === 'all' ? 'inbox-tab-active' : 'text-gray-400 hover:text-white hover:bg-gray-700/50'}">All Tasks</button>
+                <button data-action="filter-tasks" data-id="all" class="flex-1 px-4 py-2 rounded-lg font-medium transition-all ${taskFilter === 'all' ? 'inbox-tab-active' : 'text-gray-400 hover:text-white hover:bg-gray-700/50'}">All</button>
                 <button data-action="filter-tasks" data-id="live" class="flex-1 px-4 py-2 rounded-lg font-medium transition-all ${taskFilter === 'live' ? 'inbox-tab-active' : 'text-gray-400 hover:text-white hover:bg-gray-700/50'}">Live</button>
                 <button data-action="filter-tasks" data-id="completed" class="flex-1 px-4 py-2 rounded-lg font-medium transition-all ${taskFilter === 'completed' ? 'inbox-tab-active' : 'text-gray-400 hover:text-white hover:bg-gray-700/50'}">Completed</button>
             </div>
 
-            ${visibleTasks.length === 0 ? `
+            ${filteredVisibleTasks.length === 0 ? `
                 <div class="perplexity-card p-6">
                     <div class="text-center py-16 text-gray-500">
                         <i class="fas fa-tasks text-5xl mb-4"></i>
-                        <h3 class="text-xl font-bold text-white">No Tasks Found</h3>
-                        <p>No tasks match the current filter.</p>
+                        <h3 class="text-xl font-bold text-white">${currentUser.role === 'worker' ? 'No Personal Goals Assigned' : 'No Tasks Created'}</h3>
+                        <p>${currentUser.role === 'worker' ? 'Your manager will assign tasks to you here.' : 'Create a new task to get started.'}</p>
                     </div>
                 </div>
             ` : `
                 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    ${visibleTasks.map(task => {
-                        const progressPercentage = Math.min((task.progress / task.goalTarget) * 100, 100);
-                        const branch = task.branchId ? this.state.branches.find(b => b.id === task.branchId) : null;
-                        return `
-                        <div class="task-card flex flex-col">
-                            <div class="flex-grow">
-                                <div class="flex justify-between items-start mb-3">
-                                    <h3 class="text-lg font-bold text-white flex items-center">
-                                        ${task.status === 'completed' ? '<span class="task-status-dot dot-completed"></span>' : '<span class="task-status-dot dot-live"></span>'}
-                                        ${task.title}
-                                    </h3>   
-                                    <span class="px-3 py-1 text-xs font-semibold rounded-full ${task.status === 'active' ? 'bg-blue-500/20 text-blue-400' : 'bg-green-500/20 text-green-400'}">
-                                        ${task.status}
-                                    </span>
-                                </div>
+                    ${filteredVisibleTasks.map(task => {
+                        if (task.isSubTask) {
+                            // --- NEW: RENDER PERSONAL SUB-TASK CARD ---
+                            const mainTask = this.state.tasks.find(t => t.id === task.parentTaskId);
+                            const myProgress = Math.min((task.progress / task.goalTarget) * 100, 100);
+                            const teamProgress = mainTask ? Math.min((mainTask.progress / mainTask.goalTarget) * 100, 100) : 0;
+                            return `
+                            <div class="task-card flex flex-col border-l-4 border-yellow-500">
+                                <h3 class="text-lg font-bold text-white mb-1">${task.title}</h3>
                                 <p class="text-sm text-gray-400 mb-4">${task.description}</p>
                                 
-                                <div class="mb-4">
-                                    <div class="flex justify-between text-sm text-gray-300 mb-1">
-                                        <span>Progress</span>
-                                       <span>${this.formatCurrency(task.progress)} / ${this.formatCurrency(task.goalTarget)}</span>
-                                    </div>
-                                    <div class="progress-bar-container">
-                                        <div class="progress-bar-fill" style="width: ${progressPercentage}%;"></div>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div class="space-y-3 border-t border-gray-700 pt-3 text-sm text-gray-400">
-                                <div class="flex justify-between items-center">
+                                <div class="space-y-3 flex-grow">
                                     <div>
-                                        <i class="fas fa-users mr-1"></i>
-                                        <span>${task.participants.length} / ${task.participantLimit} Joined</span>
-                                    </div>
-                                    <div>
-                                        <i class="fas fa-clock mr-1"></i>
-                                        <span>Due: ${task.dueDate}</span>
-                                    </div>
-                                </div>
-                                <div class="pt-2 flex items-center space-x-2">
-                                    ${task.status === 'completed' ? `
-                                        <button data-action="view-task-report" data-id="${task.id}" class="flex-grow bot-button py-2 rounded-lg text-sm">
-                                            <i class="fas fa-chart-bar mr-1"></i>View Report
-                                        </button>
-                                    ` : branch ? `
-                                        <div class="flex-grow text-center py-2 px-3 bg-green-500/10 text-green-400 rounded-lg text-sm">
-                                            <i class="fas fa-check-circle mr-1"></i> Assigned
+                                        <div class="flex justify-between text-sm text-yellow-400 font-semibold mb-1">
+                                            <span>My Progress</span>
+                                            <span>${this.formatCurrency(task.progress)} / ${this.formatCurrency(task.goalTarget)}</span>
                                         </div>
-                                    ` : `
-                                        <button data-action="send-task-to-branch" data-id="${task.id}" class="flex-grow perplexity-button py-2 rounded-lg text-sm">
-                                            <i class="fas fa-paper-plane mr-1"></i>Send
-                                        </button>
-                                    `}
-                                    
-                                    ${canCreateTasks ? `
-                                    <div class="task-actions-container">
-                                        <button data-action="toggle-task-dropdown" data-id="${task.id}" class="flex-shrink-0 w-10 h-10 bg-gray-700 hover:bg-gray-600 rounded-lg transition-colors">
-                                            <i class="fas fa-ellipsis-v text-gray-400"></i>
-                                        </button>
-                                        <div id="task-dropdown-${task.id}" class="task-actions-dropdown">
-                                            <button data-action="edit-task" data-id="${task.id}" class="task-actions-dropdown-item">
-                                                <i class="fas fa-edit text-blue-400"></i>Edit
-                                            </button>
-                                            <button data-action="delete-task" data-id="${task.id}" class="task-actions-dropdown-item">
-                                                <i class="fas fa-trash text-red-400"></i>Delete
-                                            </button>
+                                        <div class="progress-bar-container bg-yellow-500/10">
+                                            <div class="progress-bar-fill bg-gradient-to-r from-yellow-500 to-orange-500" style="width: ${myProgress}%;"></div>
+                                        </div>
+                                    </div>
+                                    ${mainTask ? `
+                                    <div>
+                                        <div class="flex justify-between text-sm text-gray-300 mb-1">
+                                            <span>Overall Team Progress</span>
+                                            <span>${this.formatCurrency(mainTask.progress)} / ${this.formatCurrency(mainTask.goalTarget)}</span>
+                                        </div>
+                                        <div class="progress-bar-container">
+                                            <div class="progress-bar-fill" style="width: ${teamProgress}%;"></div>
                                         </div>
                                     </div>
                                     ` : ''}
                                 </div>
+                                <div class="border-t border-gray-700 pt-3 mt-4 text-sm text-gray-400">
+                                    <i class="fas fa-clock mr-1"></i>
+                                    <span>Due: ${task.dueDate}</span>
+                                </div>
                             </div>
-                        </div>
-                        `
+                            `;
+                        } else {
+                            // --- RENDER MAIN TASK CARD (for Admins/Managers) ---
+                            const progressPercentage = Math.min((task.progress / task.goalTarget) * 100, 100);
+                            const branch = task.branchId ? this.state.branches.find(b => b.id === task.branchId) : null;
+                            return `
+                            <div class="task-card flex flex-col">
+                                <div class="flex-grow">
+                                    <div class="flex justify-between items-start mb-3">
+                                        <h3 class="text-lg font-bold text-white flex items-center">
+                                            ${task.status === 'completed' ? '<span class="task-status-dot dot-completed"></span>' : '<span class="task-status-dot dot-live"></span>'}
+                                            ${task.title}
+                                        </h3>   
+                                        <span class="px-3 py-1 text-xs font-semibold rounded-full ${task.status === 'active' ? 'bg-blue-500/20 text-blue-400' : 'bg-green-500/20 text-green-400'}">
+                                            ${task.status}
+                                        </span>
+                                    </div>
+                                    <p class="text-sm text-gray-400 mb-4">${task.description}</p>
+                                    
+                                    <div class="mb-4">
+                                        <div class="flex justify-between text-sm text-gray-300 mb-1">
+                                            <span>Overall Progress</span>
+                                            <span>${this.formatCurrency(task.progress)} / ${this.formatCurrency(task.goalTarget)}</span>
+                                        </div>
+                                        <div class="progress-bar-container">
+                                            <div class="progress-bar-fill" style="width: ${progressPercentage}%;"></div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="space-y-3 border-t border-gray-700 pt-3 text-sm text-gray-400">
+                                    <div class="flex justify-between items-center">
+                                        <div><i class="fas fa-users mr-1"></i> ${task.participants.length} / ${task.participantLimit} Participants</div>
+                                        <div><i class="fas fa-clock mr-1"></i> Due: ${task.dueDate}</div>
+                                    </div>
+                                    <div class="pt-2 flex items-center space-x-2">
+                                        ${task.status === 'completed' ? `
+                                            <button data-action="view-task-report" data-id="${task.id}" class="flex-grow bot-button py-2 rounded-lg text-sm">
+                                                <i class="fas fa-chart-bar mr-1"></i>View Report
+                                            </button>
+                                        ` : branch ? `
+                                            <div class="flex-grow text-center py-2 px-3 bg-green-500/10 text-green-400 rounded-lg text-sm">
+                                                <i class="fas fa-check-circle mr-1"></i> Assigned to ${branch.name}
+                                            </div>
+                                        ` : `
+                                            <button data-action="send-task-to-branch" data-id="${task.id}" class="flex-grow perplexity-button py-2 rounded-lg text-sm">
+                                                <i class="fas fa-paper-plane mr-1"></i>Assign to Branch
+                                            </button>
+                                        `}
+                                        
+                                        <div class="task-actions-container">
+                                            <button data-action="toggle-task-dropdown" data-id="${task.id}" class="flex-shrink-0 w-10 h-10 bg-gray-700 hover:bg-gray-600 rounded-lg transition-colors">
+                                                <i class="fas fa-ellipsis-v text-gray-400"></i>
+                                            </button>
+                                            <div id="task-dropdown-${task.id}" class="task-actions-dropdown">
+                                                <button data-action="edit-task" data-id="${task.id}" class="task-actions-dropdown-item"><i class="fas fa-edit text-blue-400"></i>Edit</button>
+                                                <button data-action="delete-task" data-id="${task.id}" class="task-actions-dropdown-item"><i class="fas fa-trash text-red-400"></i>Delete</button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            `;
+                        }
                     }).join('')}
                 </div>
             `}
@@ -9074,23 +9147,42 @@ stopInboxNotifications() {
         this.render();
     },
 
-    handleBranchForm(data, form) {
-        const memberIds = Array.from(form.querySelectorAll('input[name="members"]:checked')).map(cb => parseInt(cb.value));
-        if (!data.name || memberIds.length === 0) {
-            NotificationSystem.error('Branch name and at least one member are required.');
-            return;
-        }
-        const newBranch = {
-            id: Date.now(),
-            name: data.name,
-            members: memberIds
-        };
-        this.state.branches.push(newBranch);
-        this.closeModal();
-        this.saveData();
-        this.render();
-        NotificationSystem.success(`Branch "${newBranch.name}" created successfully!`);
-    },
+    // REPLACE your old handleBranchForm function with this new one.
+
+handleBranchForm(data, form) {
+    const memberIds = Array.from(form.querySelectorAll('input[name="members"]:checked')).map(cb => parseInt(cb.value));
+    if (!data.name || memberIds.length === 0) {
+        NotificationSystem.error('Branch name and at least one member are required.');
+        return;
+    }
+    const newBranch = {
+        id: Date.now(),
+        name: data.name,
+        members: memberIds,
+        createdBy: this.state.currentUser.id // <-- THIS IS THE NEW LINE
+    };
+    this.state.branches.push(newBranch);
+    this.closeModal();
+    this.saveData();
+    this.render();
+    NotificationSystem.success(`Branch "${newBranch.name}" created successfully!`);
+},
+// PASTE THIS NEW FUNCTION
+
+handleAnnouncementForm(data) {
+    const newAnnouncement = {
+        id: Date.now(),
+        branchId: parseInt(data.branchId),
+        content: data.content,
+        labelColor: data.labelColor,
+        createdBy: this.state.currentUser.id,
+        timestamp: new Date().toISOString()
+    };
+    this.state.announcements.push(newAnnouncement);
+    this.saveData();
+    this.render(); // Re-render the view to show the new announcement
+    NotificationSystem.success('Announcement posted!');
+},
 
     deleteMessage(id) {
         if (confirm('Are you sure you want to delete this message?')) {
@@ -9106,39 +9198,62 @@ stopInboxNotifications() {
         this.handleMessageForm(data);
     },
 
-   // Send message to branch
+ // REPLACE your existing sendBranchMessage function with this:
 sendBranchMessage(event, branchId) {
     event.preventDefault();
     const input = document.getElementById('branch-message-input');
     const content = input.value.trim();
     if (!content) return;
 
-    // Create only ONE message object for the entire branch
     const newMessage = {
         id: Date.now(),
         from: this.state.currentUser.id,
-        to: null, // 'to' is null because it's for the whole branch
-        branchId: branchId, // This is how we know where it belongs
-        subject: `Message in ${this.state.branches.find(b => b.id === branchId)?.name || 'Branch'}`,
+        branchId: branchId,
         content: content,
         type: 'branch',
         timestamp: new Date().toISOString(),
-        readBy: [this.state.currentUser.id] // The sender has read it
+        readBy: [this.state.currentUser.id]
     };
-    this.state.messages.push(newMessage);
     
+    this.state.messages.push(newMessage);
     this.saveData();
     input.value = '';
     
-    // Simply re-render the current view to show the new message
-    this.render(); 
-    
-    // Auto-scroll to the bottom of the chat after sending
-    setTimeout(() => {
-        const container = document.getElementById('branch-messages-container');
-        if (container) container.scrollTop = container.scrollHeight;
-    }, 50);
-}
+    // Smoothly add the new message without a full re-render
+    const container = document.getElementById('branch-messages-container');
+    if (container) {
+        const messageEl = document.createElement('div');
+        // This is a more complex way to add an element, but it's much smoother for a chat.
+        // It creates a temporary container to parse the HTML string into a real element.
+        const tempContainer = document.createElement('div');
+        tempContainer.innerHTML = this.renderBranchMessageBubbleHTML(newMessage);
+        messageEl.appendChild(tempContainer.firstElementChild);
+        container.appendChild(messageEl);
+        container.scrollTop = container.scrollHeight;
+    }
+},
+
+// ADD this new helper function for the chat:
+renderBranchMessageBubbleHTML(msg) {
+    const sender = this.state.users.find(u => u.id === msg.from);
+    const isSentByMe = msg.from === this.state.currentUser.id;
+    return `
+        <div class="message-bubble-container ${isSentByMe ? 'sent' : 'received'}">
+            ${!isSentByMe ? `
+                <div class="w-8 h-8 rounded-full bg-gradient-to-br from-teal-500 to-blue-500 flex items-center justify-center flex-shrink-0">
+                    <span class="text-white text-xs font-bold">${sender ? sender.name.charAt(0) : 'U'}</span>
+                </div>
+            ` : ''}
+            <div class="message-bubble ${isSentByMe ? 'sent' : 'received'}">
+                ${!isSentByMe ? `<div class="text-xs text-gray-400 mb-1">${sender ? sender.name : 'Unknown'}</div>` : ''}
+                <div>${msg.content}</div>
+                <div class="text-xs ${isSentByMe ? 'text-gray-200' : 'text-gray-400'} mt-1">
+                    ${this.formatMessageTime(msg.timestamp)}
+                </div>
+            </div>
+        </div>
+    `;
+},
 
 
       
