@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ledgerly - Smart Business Management</title>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    
+    <link rel="stylesheet" href="style.css">
+
+</head>
+<body>
+
+    <div id="notification-container" class="notification-container"></div>
+    <div id="sidebar-overlay" class="sidebar-overlay" onclick="app.toggleMobileSidebar()"></div>
+    <div id="modal" class="modal-overlay hidden">
+        <div id="modal-content" class="modal-content"></div>
+    </div>
+    
+    <div id="app" class="app-container"></div>
+
+
+    <script src="script.js"></script> 
+
+</body>
+</html>
