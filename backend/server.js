@@ -24,7 +24,8 @@ app.post('/api/ask-ai', async (req, res) => {
     }
     
     // The URL for the AI API (this is an example for Google's Gemini)
-    const API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=${GEMINI_API_KEY}`;
+   // The URL for the AI API (this is an example for Google's Gemini)
+   const API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-pro-latest:generateContent?key=${GEMINI_API_KEY}`;
 
     // We combine the user's question with the JSON data to create a powerful prompt
     const prompt = `
@@ -54,4 +55,5 @@ app.post('/api/ask-ai', async (req, res) => {
 // Start the server
 app.listen(PORT, () => {
     console.log(`Server is running on port ${PORT}`);
+
 });
