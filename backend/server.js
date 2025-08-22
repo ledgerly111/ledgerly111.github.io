@@ -29,13 +29,23 @@ app.post('/api/ask-ai', async (req, res) => {
 
     // We combine the user's question with the JSON data to create a powerful prompt
     const prompt = `
-        Based on the following JSON data:
-        ${JSON.stringify(contextData, null, 2)}
+**System Instructions:**
+You are AccuraAI, an expert business intelligence assistant integrated into the Ledgerly application. Your tone is professional, insightful, and concise. You have been provided with a real-time JSON object containing the relevant data from the application's database.
 
-        Answer this question: "${userQuestion}"
+**Your Task:**
+1.  Analyze the provided JSON data to answer the user's question.
+2.  Your answer MUST be well-structured and to the point. Use markdown for formatting (like **bolding** for key terms and bullet points for lists).
+3.  **Crucially, NEVER mention that you are basing your answer on JSON data.** Act as if you have direct, internal access to the application's data. Do not use phrases like "Based on the provided JSON..."
 
-        Provide a well-structured, professional answer.
-    `;
+---
+**JSON Data:**
+${JSON.stringify(contextData, null, 2)}
+---
+**User's Question:**
+"${userQuestion}"
+---
+**Your Answer:**
+`;
 
     try {
         // Make the secure call to the AI API from the backend
@@ -57,3 +67,4 @@ app.listen(PORT, () => {
     console.log(`Server is running on port ${PORT}`);
 
 });
+
