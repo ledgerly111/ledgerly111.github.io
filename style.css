@@ -2251,6 +2251,8 @@
     display: inline-block; /* Ensure the background and shadow are applied correctly */
 }
 
+/* In style (2).css, replace the final section with this corrected code */
+
 @keyframes gradientGlow {
     0% {
         background-position: 0% 50%;
@@ -2260,7 +2262,9 @@
         background-position: 100% 50%;
         box-shadow: 0 0 15px 8px rgba(179, 41, 243, 0.7);
     }
-    /* Minimalistic AI Response Highlighting */
+} /* The animation block is now correctly closed here. */
+
+/* === START: Minimalistic AI Response Highlighting === */
 
 /* Style for underlined keywords */
 .ai-answer-body em.highlight {
@@ -2281,9 +2285,15 @@
     color: var(--negative-color); /* Uses the red color from your theme */
     font-weight: 700;
 }
-}
+
+/* === END: Minimalistic AI Response Highlighting === */
+
+
+/* === END: GOOEY TEXT ANIMATION STYLES (Restored & Refined) === */
+/* ... (the rest of your file closing comments) ... */
 /* === END: GOOEY TEXT ANIMATION STYLES (Restored & Refined) === */
 
 /* === END: GOOEY TEXT ANIMATION STYLES === */
 /* === END: NEW, CLEAN "THINKING" ANIMATION STYLES === */
+
 
