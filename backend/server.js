@@ -13,8 +13,8 @@ app.use(express.json());
 
 // This is your single API endpoint
 app.post('/api/ask-ai', async (req, res) => {
-    // Get the question and data from your frontend app
-    const { userQuestion, contextData } = req.body;
+    // Get the target language from the request, default to English
+    const { userQuestion, contextData, targetLanguage = 'English' } = req.body;
     
     // Get the secret API key safely from Render's environment variables
     const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
@@ -23,28 +23,34 @@ app.post('/api/ask-ai', async (req, res) => {
         return res.status(500).json({ error: 'API key not configured on the server.' });
     }
     
-    // The URL for the AI API (this is an example for Google's Gemini)
-    const API_URL =  `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-pro-latest:generateContent?key=${GEMINI_API_KEY}`;
+    // The URL for the AI API using the corrected model name
+    const API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-pro-latest:generateContent?key=${GEMINI_API_KEY}`;
 
-    // --- NEW ENHANCED PROMPT ---
-    // This gives the AI a persona and strict formatting rules.
+    // --- FINAL, COMPLETE PROMPT ---
     const prompt = `
         You are AccuraAI, an expert business analyst integrated into a management app called Ledgerly.
-        Your response MUST be in clean HTML format.
+        Your response MUST be in clean, professional, and user-friendly HTML format.
         Your tone must be professional, insightful, and encouraging.
         
-        Use the following HTML tags to structure your answer:
-        - <h4> for main headers (e.g., Financial Summary, Inventory Analysis).
-        - <p> for paragraphs.
-        - <ul> and <li> for bullet points.
-        - <strong> for important keywords or figures.
-        
-        Do NOT include <html>, <body>, or <head> tags in your response. Just provide the content elements.
+        **Your response structure must follow these rules:**
+        1.  Start with a brief, one-paragraph summary of the key finding.
+        2.  Use multiple detailed sections, each with its own header.
+        3.  Use ordered lists (<ol> and <li>) for step-by-step recommendations or numbered points.
+        4.  Use unordered lists (<ul> and <li>) for general bullet points.
+        5.  Use <strong> tags for important keywords, figures, or takeaways.
+        6.  End with a final "Recommendations" or "Next Steps" section.
+
+        **Formatting Rules:**
+        - Use <h4> tags for all section headers.
+        - **Crucially, always begin every <h4> header with the '>' character followed by a space.** (Example: <h4>> Financial Summary</h4>)
+        - Do NOT include <html>, <body>, or <head> tags in your response.
 
         Here is the JSON data from the Ledgerly app for your analysis:
         ${JSON.stringify(contextData, null, 2)}
 
-        Now, provide a comprehensive and well-structured answer to the user's question: "${userQuestion}"
+        First, generate a comprehensive and well-structured answer in English to the user's question: "${userQuestion}"
+
+        After generating the answer, translate the ENTIRE HTML response accurately into ${targetLanguage}, preserving the HTML structure and the '>' character before headers. Only provide the final translated HTML.
     `;
 
     try {
