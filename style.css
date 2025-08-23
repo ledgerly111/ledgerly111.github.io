@@ -2260,8 +2260,30 @@
         background-position: 100% 50%;
         box-shadow: 0 0 15px 8px rgba(179, 41, 243, 0.7);
     }
+    /* Minimalistic AI Response Highlighting */
+
+/* Style for underlined keywords */
+.ai-answer-body em.highlight {
+    font-style: normal; /* We don't want italics, just the underline */
+    text-decoration: none;
+    border-bottom: 2px solid rgba(0, 212, 170, 0.6); /* A semi-transparent accent color underline */
+    padding-bottom: 1px;
+}
+
+/* Style for positive numbers (revenue, profit, etc.) */
+.ai-answer-body .positive-amount {
+    color: var(--positive-color); /* Uses the blue color from your theme */
+    font-weight: 700;
+}
+
+/* Style for negative numbers (expenses, losses, etc.) */
+.ai-answer-body .negative-amount {
+    color: var(--negative-color); /* Uses the red color from your theme */
+    font-weight: 700;
+}
 }
 /* === END: GOOEY TEXT ANIMATION STYLES (Restored & Refined) === */
 
 /* === END: GOOEY TEXT ANIMATION STYLES === */
 /* === END: NEW, CLEAN "THINKING" ANIMATION STYLES === */
+
