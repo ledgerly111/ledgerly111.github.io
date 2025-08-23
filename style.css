@@ -2049,204 +2049,219 @@
     to { opacity: 1; transform: translateY(0); }
 }
 
-/* === GOOEY TEXT MORPHING ANIMATION === */
-.gooey-text-container {
-    position: relative;
-    width: 100%;
-    min-height: 400px;
+/* === START: CONSOLIDATED AND CORRECTED AI ASSISTANT STYLES === */
+
+/* Styles for the AI category selection buttons */
+.ai-category-button {
     display: flex;
-    align-items: center;
-    justify-content: center;
     flex-direction: column;
-}
-
-.gooey-text-wrapper {
-    position: relative;
-    filter: url(#threshold);
-}
-
-.gooey-text {
-    position: absolute;
-    display: inline-block;
-    font-size: 3rem;
-    font-weight: 700;
-    text-align: center;
-    user-select: none;
-    background: linear-gradient(135deg, #6726ff 0%, #a855f7 50%, #e976ff 100%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-}
-
-@media (min-width: 768px) {
-    .gooey-text {
-        font-size: 4.5rem;
-    }
-}
-
-
-/* === FINAL & FORCEFUL AI RESPONSE LAYOUT OVERRIDE === */
-
-/* This rule forcefully ensures the container itself is NOT a card */
-#ai-response-container {
-    background: none !important;
-    border: none !important;
-    box-shadow: none !important;
-    padding: 0 !important;
-    border-radius: 0 !important;
-}
-
-/* Force the main wrapper to have absolutely NO padding */
-#ai-response-container .ai-answer-wrapper {
-    width: 100% !important;
-    padding: 0 !important;
-    margin-top: 1.5rem !important;
-    margin-bottom: 1.5rem !important;
-}
-
-/* The header containing the icon and title */
-#ai-response-container .ai-answer-header {
-    display: flex !important;
-    align-items: flex-start !important;
-    gap: 1rem !important;
-    margin-bottom: 1.5rem !important;
-    padding: 0 !important; /* Ensures header has no padding */
-}
-
-/* The purple icon box */
-#ai-response-container .ai-answer-icon {
-    width: 32px !important;
-    height: 32px !important;
-    background: linear-gradient(135deg, #6726ff, #a855f7) !important;
-    border-radius: 8px !important;
-    display: flex !important;
-    align-items: center !important;
-    justify-content: center !important;
-    flex-shrink: 0 !important;
-}
-
-#ai-response-container .ai-answer-icon i {
-    color: white !important;
-    font-size: 16px !important;
-}
-
-/* The body of the answer text */
-#ai-response-container .ai-answer-body {
-    padding-left: 48px !important; /* THIS creates the correct indentation */
-    padding-right: 0 !important;
-    padding-top: 0 !important;
-    padding-bottom: 0 !important;
-    color: var(--text-secondary) !important;
-    line-height: 1.8 !important;
-}
-
-/* The container for action buttons */
-#ai-response-container .ai-answer-actions {
-    padding-left: 48px !important; /* Matches the body indentation */
-    padding-right: 0 !important;
-    padding-top: 0 !important;
-    padding-bottom: 0 !important;
-    margin-top: 1.5rem !important;
-}
-/* AI Answer/Loading Container */
-.ai-answer-container {
-    position: relative;
-    display: flex;
     align-items: center;
     justify-content: center;
-    min-height: 400px;
-    background: transparent; /* This removes the "bar" */
-    border-radius: 20px;
-    overflow: hidden; /* Important for the canvas */
-    transition: all 0.5s ease;
-}
-
-.gooey-text-container {
-    position: relative;
-    width: 100%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    flex-direction: column;
-}
-
-.gooey-text-wrapper {
-    position: relative;
-    filter: url(#threshold);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    min-height: 80px;
-    width: 100%;
-}
-
-.gooey-text {
-    position: absolute;
-    display: inline-block;
-    font-size: 2.5rem;
-    font-weight: 700;
-    text-align: center;
-    user-select: none;
-    background: linear-gradient(135deg, #6726ff 0%, #a855f7 50%, #e976ff 100%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-    white-space: nowrap;
-}
-
-/* Mobile responsive */
-@media (max-width: 768px) {
-    .gooey-text {
-        font-size: 1.5rem;
-    }
-    .ai-answer-container {
-        min-height: 300px;
-    }
-}
-
-/* Laptop/Desktop */
-@media (min-width: 769px) {
-    .gooey-text {
-        font-size: 3rem;
-    }
-}
-
-.ai-thinking-label {
-    font-size: 1rem;
-    color: #9ca3af;
-    margin-bottom: 2rem;
-    text-align: center;
-    font-weight: 500;
-}
-
-/* === NEW: AI Question Bar & Button Styles === */
-.ai-question-bar {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-    gap: 1rem;
-}
-
-.ai-question-button {
-    display: flex;
-    align-items: center;
-    gap: 0.75rem;
-    background: rgba(36, 41, 56, 0.8);
-    border: 1px solid var(--border-color);
-    border-radius: 12px;
-    padding: 1rem;
-    color: var(--text-secondary);
+    padding: 1.5rem 1rem;
+    background: linear-gradient(145deg, #2a2e3a, #1a1f2e);
+    border: 1px solid #3b404d;
+    border-radius: 1rem;
     cursor: pointer;
-    transition: all 0.2s ease-out;
+    transition: all 0.3s ease;
+    color: #b4bcd0;
+    font-weight: 600;
+    text-align: center;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 }
 
-.ai-question-button:hover {
-    background: var(--hover-bg);
-    border-color: var(--accent-primary);
-    color: var(--text-primary);
+.ai-category-button:hover {
+    border-color: #8b5cf6; /* Purple-500 */
     transform: translateY(-3px);
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
+    color: #ffffff;
 }
+
+.ai-category-button i {
+    font-size: 2.5rem;
+    margin-bottom: 0.75rem;
+    color: #a78bfa; /* Purple-400 */
+    transition: color 0.3s ease;
+}
+
+.ai-category-button:hover i {
+    color: #c4b5fd; /* Purple-300 */
+}
+
+.ai-category-button span {
+    font-size: 0.95rem;
+}
+
+
+
+/* Wrapper for the final AI answer, handles theme backgrounds */
+.ai-answer-wrapper {
+    margin-top: 1.5rem;
+    border-radius: 1rem;
+    padding: 1.5rem;
+    background: #2a2e3a; /* Default theme background */
+}
+
+.theme-light .ai-answer-wrapper {
+    background: white; /* Light theme background */
+    border: 1px solid #dee2e6;
+}
+
+.theme-black .ai-answer-wrapper {
+    background: #0c0c0c; /* Pitch Black theme background */
+    border: 1px solid #262626;
+}
+
+
+
+/* === END: CONSOLIDATED AI ASSISTANT STYLES === */
 
 .ai-question-button i {
     color: var(--accent-primary);
     font-size: 1rem;
 }
+/* === START: NEW, CLEAN "THINKING" ANIMATION STYLES === */
+
+/* The main container for the animation */
+.clean-thinking-container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 100px; /* Provides space for the text */
+    padding: 1rem;
+    overflow: hidden; /* Prevents any accidental overflow */
+}
+
+/* The text element that will be animated */
+.thinking-text {
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: #a78bfa; /* Purple color */
+    text-shadow: 0 0 15px rgba(167, 139, 250, 0.5); /* Adds a soft glow */
+    transition: opacity 0.5s ease, transform 0.5s ease;
+}
+
+/* Animation classes controlled by JavaScript */
+.thinking-text.fade-in {
+    animation: fadeInSlideUp 0.5s ease-out forwards;
+}
+
+.thinking-text.fade-out {
+    animation: fadeOutSlideUp 0.5s ease-in forwards;
+}
+
+/* Keyframe animations for the text transition */
+@keyframes fadeInSlideUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes fadeOutSlideUp {
+    from {
+        opacity: 1;
+        transform: translateY(0);
+    }
+    to {
+        opacity: 0;
+        transform: translateY(-20px);
+    }
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .thinking-text {
+        font-size: 1.2rem;
+    }
+}
+/* === START: GOOEY TEXT ANIMATION STYLES (Restored & Refined) === */
+
+/* Container for the "thinking" animation */
+.gooey-text-container {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 100px;
+    padding: 1rem;
+    overflow: hidden;
+}
+
+/* Wrapper that applies the SVG filter */
+.gooey-text-wrapper {
+    filter: url(#threshold);
+    width: 100%;
+    text-align: center;
+}
+
+/* The two text elements that morph into each other */
+.gooey-text {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 100%;
+    display: inline-block;
+    font-size: 1.5rem;
+    font-weight: bold;
+    background: linear-gradient(135deg, var(--ai-color) 0%, #a855f7 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    text-shadow: 0 0 10px rgba(103, 38, 255, 0.3); /* REFINED: Softer purple glow */
+    text-align: center;
+    user-select: none;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .gooey-text {
+        font-size: 1.2rem;
+    }
+}
+/* Add this to style.css to style AI-generated headers */
+
+/* This targets any h4 tag inside the AI's response body */
+.ai-answer-body h4 {
+    /* This makes the header text itself a light purple */
+    color: #c4b5fd; /* Tailwind's purple-300 */
+}
+
+/* This uses a pseudo-element to automatically add and style the '>' */
+.ai-answer-body h4::before {
+    content: '>'; /* This adds the '>' character automatically */
+    margin-right: 0.5rem; /* Adds a small space after the '>' */
+    color: #a78bfa;       /* This makes the '>' a darker, more vibrant purple */
+    font-weight: bold;
+}
+/* Style for the AccuraAI Icon Glow */
+.ai-answer-header .ai-answer-icon i.fas.fa-brain { /* Adjust the selector if your icon's structure is different */
+    background: linear-gradient(45deg, #a78bfa, #818cf8, #6366f1, #4f46e5, #a78bfa); /* Vibrant gradient */
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    box-shadow: 0 0 10px 5px rgba(167, 139, 250, 0.6); /* Initial glow */
+    border-radius: 50%; /* Make it circular if it isn't already */
+    padding: 0.4em; /* Add some padding around the icon */
+    animation: gradientGlow 2s infinite alternate; /* Apply the animation */
+    display: inline-block; /* Ensure the background and shadow are applied correctly */
+}
+
+@keyframes gradientGlow {
+    0% {
+        background-position: 0% 50%;
+        box-shadow: 0 0 5px 2px rgba(167, 139, 250, 0.4);
+    }
+    100% {
+        background-position: 100% 50%;
+        box-shadow: 0 0 15px 8px rgba(179, 41, 243, 0.7);
+    }
+}
+/* === END: GOOEY TEXT ANIMATION STYLES (Restored & Refined) === */
+
+/* === END: GOOEY TEXT ANIMATION STYLES === */
+/* === END: NEW, CLEAN "THINKING" ANIMATION STYLES === */
