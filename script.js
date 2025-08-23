@@ -5298,7 +5298,7 @@ async handleAiQuestion(questionText, categoryKey = 'general') {
     newInteractionDiv.innerHTML = `
         <div class="ai-answer-wrapper fade-in">
             <div class="ai-answer-header">
-                <div class="ai-answer-icon"><i class="fas fa-brain"></i></div>
+            <div class="ai-answer-icon"><i class="fas fa-brain ai-response-icon"></i></div>
             </div>
             <div class="ai-answer-body">
                 <div class="gooey-text-container" style="justify-content: flex-start; min-height: 60px; padding: 0;">
@@ -7491,4 +7491,5 @@ renderBranchMessageBubbleHTML(msg) {
 
   // Initialize the application
     app.init(); 
+
 
