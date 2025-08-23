@@ -2285,7 +2285,30 @@
     color: var(--negative-color); /* Uses the red color from your theme */
     font-weight: 700;
 }
+/* Custom Purple Focus Glow for AI Input */
+#custom-ai-question-input:focus {
+    border-color: var(--ai-color) !important; /* Purple border on focus */
+    box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.25) !important; /* Soft purple glow */
+}
+/* Animated Gradient Glow for AI Response Icon */
+.ai-response-icon {
+    font-size: 1.5rem; /* Make the icon a bit bigger */
+    display: inline-block;
+    background: linear-gradient(135deg, var(--ai-color) 0%, #a855f7 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent !important; /* Use !important to override other styles */
+    animation: aiIconGlow 2.5s infinite alternate;
+}
 
+@keyframes aiIconGlow {
+    from {
+        text-shadow: 0 0 5px rgba(168, 85, 247, 0.4);
+    }
+    to {
+        text-shadow: 0 0 20px rgba(168, 85, 247, 0.8);
+    }
+}
 /* === END: Minimalistic AI Response Highlighting === */
 
 
@@ -2295,5 +2318,6 @@
 
 /* === END: GOOEY TEXT ANIMATION STYLES === */
 /* === END: NEW, CLEAN "THINKING" ANIMATION STYLES === */
+
 
 
