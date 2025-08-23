@@ -406,6 +406,7 @@ const inboxNotifications = [
 ];
         // Main Application
         const app = {
+            serverUrl: 'https://ledgerly-backend-e8au.onrender.com',
             charts: {},
             currentSaleCart: [], // This will hold items for the current sale being added
             state: {
@@ -5137,32 +5138,49 @@ initializeHeaderAnimation() {
                     return this.getAccuraBotView();
                 }
             },
+// VERIFY this function in your code
+showAICategories() {
+    const categoryGrid = document.getElementById('ai-category-grid');
+    const inputContainer = document.getElementById('custom-question-input-container');
+    const backButton = document.getElementById('ai-back-button');
+    const titleElement = document.getElementById('ai-action-title');
+    const responseContainer = document.getElementById('ai-response-container');
 
-           // ---- DELETE THE OLD getAccuraAIView() AND PASTE THIS NEW ONE ----
-// REPLACE your current getAccuraAIView function with this:
-getAccuraAIView() {
-    const questions = {
+    if (categoryGrid && inputContainer && backButton && titleElement) {
+        categoryGrid.classList.remove('hidden');
+        inputContainer.classList.add('hidden');
+        backButton.classList.add('hidden');
+        titleElement.textContent = 'Ask AccuraAI'; // Reset title
+    }
+    if (responseContainer) {
+        responseContainer.innerHTML = ''; // This line clears the entire chat history
+    }
+},
+  
+// REPLACE your entire getAIAssistantView function with this corrected version
+getAIAssistantView() {
+    const categories = {
         admin: [
-            { key: 'profit-margin', icon: 'fas fa-dollar-sign', text: 'What is our current profit margin?' },
-            { key: 'monthly-summary', icon: 'fas fa-chart-line', text: 'Summarize financial performance this month.' },
-            { key: 'top-employee', icon: 'fas fa-users', text: 'Which employee is the top performer?' },
-            { key: 'low-stock', icon: 'fas fa-box', text: 'Which products are critically low in stock?' },
+            { key: 'financial', icon: 'fas fa-dollar-sign', text: 'Financial Analysis' },
+            { key: 'inventory', icon: 'fas fa-box', text: 'Inventory Management' },
+            { key: 'employee', icon: 'fas fa-users', text: 'Employee Performance' },
+            { key: 'general', icon: 'fas fa-question-circle', text: 'General Business Inquiry' },
         ],
         manager: [
-            { key: 'team-sales', icon: 'fas fa-chart-bar', text: 'How are my team\'s sales trending this week?' },
-            { key: 'dept-expenses', icon: 'fas fa-receipt', text: 'What are the biggest expenses in my department?' },
-            { key: 'inactive-customers', icon: 'fas fa-user-check', text: 'Which customers haven\'t purchased recently?' },
-            { key: 'urgent-tasks', icon: 'fas fa-tasks', text: 'What are the most urgent tasks for my team?' },
+            { key: 'sales-team', icon: 'fas fa-chart-bar', text: 'Sales Team Performance' },
+            { key: 'expense-control', icon: 'fas fa-receipt', text: 'Expense Control' },
+            { key: 'customer-relations', icon: 'fas fa-handshake', text: 'Customer Relations' },
+            { key: 'task-management', icon: 'fas fa-tasks', text: 'Task Management' },
         ],
         worker: [
-            { key: 'my-commission', icon: 'fas fa-coins', text: 'What is my current sales commission?' },
-            { key: 'my-sales-comparison', icon: 'fas fa-trophy', text: 'How do my sales compare to last month?' },
-            { key: 'my-top-products', icon: 'fas fa-bullseye', text: 'What are my top-selling products?' },
-            { key: 'new-customer-lead', icon: 'fas fa-user-plus', text: 'Suggest a new customer I should contact.' },
+            { key: 'my-performance', icon: 'fas fa-coins', text: 'My Performance & Earnings' },
+            { key: 'product-info', icon: 'fas fa-tag', text: 'Product Information' },
+            { key: 'customer-support', icon: 'fas fa-headset', text: 'Customer Support' },
+            { key: 'daily-tasks', icon: 'fas fa-clipboard-list', text: 'Daily Tasks & Goals' },
         ]
     };
     const userRole = this.state.currentUser.role;
-    const availableQuestions = questions[userRole] || questions['worker'];
+    const availableCategories = categories[userRole] || categories['worker'];
 
     return `
         <div class="space-y-6 fade-in">
@@ -5187,157 +5205,165 @@ getAccuraAIView() {
                 </div>
             </div>
 
-            <div class="ai-card p-6 slide-up">
-                <div class="flex items-start space-x-6">
-                    <div class="w-14 h-14 rounded-full bg-gradient-to-r from-purple-500 to-pink-500 flex items-center justify-center flex-shrink-0">
-                        <i class="fas fa-brain fa-fw text-white text-xl"></i>
-                    </div>
-                    <div class="flex-1">
-                        <h3 class="text-xl font-bold text-white mb-3">Hello ${this.state.currentUser.name}! 👋</h3>
-                        <p class="text-gray-300 mb-4 leading-relaxed">I'm AccuraAI, your intelligent business assistant. I analyze your sales data, provide multi-currency insights for GCC markets, and help optimize your business performance with advanced AI analytics.</p>
-                        <div class="grid grid-cols-2 lg:grid-cols-4 gap-3">
-                            <div class="bg-purple-500/10 border border-purple-500/30 rounded-xl p-3 text-center">
-                                <div class="text-xl mb-1">🧠</div>
-                                <div class="text-purple-400 font-semibold text-sm">AI Analytics</div>
-                            </div>
-                            <div class="bg-purple-500/10 border border-purple-500/30 rounded-xl p-3 text-center">
-                                <div class="text-xl mb-1">💱</div>
-                                <div class="text-purple-400 font-semibold text-sm">GCC Currency</div>
-                            </div>
-                            <div class="bg-purple-500/10 border border-purple-500/30 rounded-xl p-3 text-center">
-                                <div class="text-xl mb-1">📊</div>
-                                <div class="text-purple-400 font-semibold text-sm">Smart Insights</div>
-                            </div>
-                            <div class="bg-purple-500/10 border border-purple-500/30 rounded-xl p-3 text-center">
-                                <div class="text-xl mb-1">📈</div>
-                                <div class="text-purple-400 font-semibold text-sm">Growth Tips</div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                <div class="perplexity-card p-6 hover:scale-105 transition-all duration-300 slide-up">
-                    <div class="text-center">
-                        <div class="w-16 h-16 mx-auto mb-4 bg-gradient-to-r from-purple-500/20 to-pink-500/20 rounded-2xl flex items-center justify-center">
-                            <i class="fas fa-chart-line text-purple-400 text-2xl"></i>
-                        </div>
-                        <h3 class="text-lg font-bold text-white mb-3">Multi-Currency Analytics</h3>
-                        <p class="text-gray-400 text-sm leading-relaxed">Advanced analysis across GCC currencies with real-time conversion and intelligent tax calculations.</p>
-                    </div>
-                </div>
-                <div class="perplexity-card p-6 hover:scale-105 transition-all duration-300 slide-up">
-                    <div class="text-center">
-                        <div class="w-16 h-16 mx-auto mb-4 bg-gradient-to-r from-purple-500/20 to-pink-500/20 rounded-2xl flex items-center justify-center">
-                            <i class="fas fa-receipt text-purple-400 text-2xl"></i>
-                        </div>
-                        <h3 class="text-lg font-bold text-white mb-3">Smart Invoicing</h3>
-                        <p class="text-gray-400 text-sm leading-relaxed">AI-powered invoices with country-specific tax calculations and professional formatting.</p>
-                    </div>
-                </div>
-                <div class="perplexity-card p-6 hover:scale-105 transition-all duration-300 slide-up">
-                    <div class="text-center">
-                        <div class="w-16 h-16 mx-auto mb-4 bg-gradient-to-r from-purple-500/20 to-pink-500/20 rounded-2xl flex items-center justify-center">
-                            <i class="fas fa-comments text-purple-400 text-2xl"></i>
-                        </div>
-                        <h3 class="text-lg font-bold text-white mb-3">Sentiment Analysis</h3>
-                        <p class="text-gray-400 text-sm leading-relaxed">AI analysis of team communications with emotional intelligence and behavioral insights.</p>
-                    </div>
-                </div>
-            </div>
-
-            <div id="ai-response-container" class="mt-6"></div>
+            <div id="ai-response-container" class="mt-6 space-y-4"></div>
 
             <div class="perplexity-card p-6 mt-6">
-                 <h3 class="text-xl font-bold text-white mb-4 flex items-center">
-                    <i class="fas fa-question-circle text-teal-400 mr-2"></i>
-                    Ask AccuraAI
-                </h3>
-                <div class="ai-question-bar">
-                    ${availableQuestions.map(q => `
-                        <div class="ai-question-button" data-action="ask-ai" data-id="${q.key}">
-                            <i class="${q.icon}"></i>
-                            <span>${q.text}</span>
+                 <div class="flex justify-between items-center mb-4 flex-wrap gap-y-2">
+                    <h3 class="text-xl font-bold text-white flex items-center">
+                        <i class="fas fa-question-circle text-teal-400 mr-2"></i>
+                        <span id="ai-action-title">Ask AccuraAI</span>
+                    </h3>
+                    <div class="flex items-center space-x-3">
+                        <select id="ai-language-selector" class="form-input bg-gray-800/50 !border-gray-600 py-1 text-sm w-auto">
+                            <option value="English">English</option>
+                            <option value="Arabic">Arabic</option>
+                            <option value="Spanish">Spanish</option>
+                            <option value="French">French</option>
+                            <option value="Hindi">Hindi</option>
+                        </select>
+                        <button id="ai-back-button" class="hidden text-sm text-blue-400 hover:text-blue-300 transition-colors whitespace-nowrap" onclick="app.showAICategories()">
+                            <i class="fas fa-arrow-left mr-2"></i>Back to Categories
+                        </button>
+                    </div>
+                </div>
+
+                <div id="ai-category-grid" class="ai-question-bar grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                    ${availableCategories.map(cat => `
+                        <div class="ai-category-button" data-category-key="${cat.key}" onclick="app.showCustomQuestionInput('${cat.key}', '${cat.text}')">
+                            <i class="${cat.icon}"></i>
+                            <span>${cat.text}</span>
                         </div>
                     `).join('')}
+                </div>
+                <div id="custom-question-input-container" class="hidden mt-2">
+                    <p class="text-gray-300 mb-3">Ask your question about <span id="selected-category-text" class="font-bold text-white"></span>:</p>
+                    <div class="flex space-x-3">
+                        <input type="text" id="custom-ai-question-input" class="form-input flex-1" placeholder="Type your question here...">
+                        <button class="perplexity-button px-4 py-2 rounded-xl" onclick="app.submitCustomQuestion()">
+                            <i class="fas fa-paper-plane mr-2"></i>Send
+                        </button>
+                    </div>
                 </div>
             </div>
         </div>
     `;
 },
 
-// REPLACE your current handleAiQuestion function with this:
-handleAiQuestion(questionKey) {
+
+async handleAiQuestion(questionText, categoryKey = 'general') {
     const responseContainer = document.getElementById('ai-response-container');
     if (!responseContainer) return;
 
-    // === DIRECT STYLING TO FORCE THE CORRECT LAYOUT ===
-    responseContainer.style.background = 'transparent';
-    responseContainer.style.border = 'none';
-    responseContainer.style.padding = '0';
-    responseContainer.style.boxShadow = 'none';
-    // =======================================================
+    // --- 1. GATHER CONTEXT DATA BASED ON CATEGORY ---
+    let contextData = {};
+    const { sales, expenses, products, users, customers, lowStockThreshold, selectedCountry } = this.state;
 
-    // Clear any old animation
-    if (this.state.morphAnimation) {
-        cancelAnimationFrame(this.state.morphAnimation);
-        this.state.morphAnimation = null;
+    switch (categoryKey) {
+        case 'financial':
+        case 'expense-control':
+            contextData = { sales, expenses, currency: GCC_COUNTRIES[selectedCountry].currency };
+            break;
+        case 'inventory':
+        case 'product-info':
+            contextData = { products, lowStockThreshold };
+            break;
+        case 'employee':
+        case 'sales-team':
+            contextData = { users, sales };
+            break;
+        case 'customer-relations':
+        case 'customer-support':
+            contextData = { customers, sales };
+            break;
+        case 'my-performance':
+            contextData = {
+                myDetails: this.state.currentUser,
+                mySales: sales.filter(s => s.salesPersonId === this.state.currentUser.id)
+            };
+            break;
+        default:
+            contextData = { overview: { salesCount: sales.length, productCount: products.length, customerCount: customers.length } };
     }
-    
+
+    const interactionId = `interaction-${Date.now()}`;
+    const newInteractionDiv = document.createElement('div');
+    newInteractionDiv.id = interactionId;
+    responseContainer.appendChild(newInteractionDiv);
+
+    if (this.state.morphAnimation) cancelAnimationFrame(this.state.morphAnimation);
+
     const userName = this.state.currentUser.name.split(' ')[0];
-    const texts = [
-        `Analyzing data`, `Processing insights`, `Calculating metrics`, `Reviewing performance`,
-        `Gathering intelligence`, `Preparing response`, `Finalizing analysis`, `Almost ready`
-    ];
+    const texts = this.generatePersonalizedMessages(userName, this.state.currentUser.role);
     
-    // Show loading animation
-    responseContainer.innerHTML = `
-    <div class="ai-answer-container">
-        <div class="gooey-text-container">
-            <div class="ai-thinking-label">AccuraAI is thinking...</div>
-            <svg class="absolute h-0 w-0" aria-hidden="true">
-                <defs><filter id="threshold"><feColorMatrix in="SourceGraphic" type="matrix" values="1 0 0 0 0 0 1 0 0 0 0 0 0 0 255 -140"/></filter></defs>
-            </svg>
-            <div class="gooey-text-wrapper">
-                <span id="gooey-text-1" class="gooey-text"></span>
-                <span id="gooey-text-2" class="gooey-text"></span>
+    newInteractionDiv.innerHTML = `
+        <div class="ai-answer-wrapper fade-in">
+            <div class="ai-answer-header">
+                <div class="ai-answer-icon"><i class="fas fa-brain"></i></div>
+            </div>
+            <div class="ai-answer-body">
+                <div class="gooey-text-container" style="justify-content: flex-start; min-height: 60px; padding: 0;">
+                    <svg class="absolute h-0 w-0" aria-hidden="true">
+                        <defs><filter id="threshold"><feColorMatrix in="SourceGraphic" type="matrix" values="1 0 0 0 0 0 1 0 0 0 0 0 0 0 0 255 -160"/></filter></defs>
+                    </svg>
+                    <div class="gooey-text-wrapper" style="text-align: left;">
+                        <span id="gooey-text-1-${interactionId}" class="gooey-text"></span>
+                        <span id="gooey-text-2-${interactionId}" class="gooey-text"></span>
+                    </div>
+                </div>
             </div>
         </div>
-    </div>`;
+    `;
+    newInteractionDiv.scrollIntoView({ behavior: 'smooth', block: 'end' });
     
-    responseContainer.scrollIntoView({ behavior: 'smooth', block: 'center' });
-    
-    // Animation logic
-    let textIndex = texts.length - 1;
+    const text1 = document.getElementById(`gooey-text-1-${interactionId}`);
+    const text2 = document.getElementById(`gooey-text-2-${interactionId}`);
+    if (!text1 || !text2) return;
+
+    let textIndex = 0;
     let time = new Date();
     let morph = 0;
-    let cooldown = 0.25;
     const morphTime = 1;
     const cooldownTime = 0.25;
-    const text1 = document.getElementById('gooey-text-1');
-    const text2 = document.getElementById('gooey-text-2');
-    if (!text1 || !text2) return;
+    let cooldown = cooldownTime;
+
     text1.textContent = texts[textIndex % texts.length];
     text2.textContent = texts[(textIndex + 1) % texts.length];
+
     const setMorph = (fraction) => {
-        text2.style.filter = `blur(${Math.min(8 / fraction - 8, 100)}px)`;
+        text2.style.filter = `blur(${Math.min(4 / fraction - 4, 100)}px)`;
         text2.style.opacity = `${Math.pow(fraction, 0.4) * 100}%`;
         fraction = 1 - fraction;
-        text1.style.filter = `blur(${Math.min(8 / fraction - 8, 100)}px)`;
+        text1.style.filter = `blur(${Math.min(4 / fraction - 4, 100)}px)`;
         text1.style.opacity = `${Math.pow(fraction, 0.4) * 100}%`;
     };
-    const doCooldown = () => { morph = 0; text2.style.filter = ""; text2.style.opacity = "100%"; text1.style.filter = ""; text1.style.opacity = "0%"; };
+
+    const doCooldown = () => {
+        morph = 0;
+        text2.style.filter = "";
+        text2.style.opacity = "100%";
+        text1.style.filter = "";
+        text1.style.opacity = "0%";
+    };
+
     const doMorph = () => {
-        morph -= cooldown; cooldown = 0; let fraction = morph / morphTime;
-        if (fraction > 1) { cooldown = cooldownTime; fraction = 1; }
+        morph -= cooldown;
+        cooldown = 0;
+        let fraction = morph / morphTime;
+        if (fraction > 1) {
+            cooldown = cooldownTime;
+            fraction = 1;
+        }
         setMorph(fraction);
     };
+
     const animate = () => {
         this.state.morphAnimation = requestAnimationFrame(animate);
-        const newTime = new Date(); const shouldIncrementIndex = cooldown > 0;
-        const dt = (newTime.getTime() - time.getTime()) / 1000; time = newTime;
+        const newTime = new Date();
+        const shouldIncrementIndex = cooldown > 0;
+        const dt = (newTime.getTime() - time.getTime()) / 1000;
+        time = newTime;
         cooldown -= dt;
+
         if (cooldown <= 0) {
             if (shouldIncrementIndex) {
                 textIndex = (textIndex + 1) % texts.length;
@@ -5345,36 +5371,75 @@ handleAiQuestion(questionKey) {
                 text2.textContent = texts[(textIndex + 1) % texts.length];
             }
             doMorph();
-        } else { doCooldown(); }
+        } else {
+            doCooldown();
+        }
     };
     animate();
     
-    // Generate and display answer
-    setTimeout(() => {
-        if (this.state.morphAnimation) {
-            cancelAnimationFrame(this.state.morphAnimation);
-            this.state.morphAnimation = null;
+    try {
+        const selectedLanguage = document.getElementById('ai-language-selector').value;
+        const res = await fetch(`${this.serverUrl}/api/ask-ai`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                userQuestion: questionText,
+                contextData: contextData,
+                targetLanguage: selectedLanguage
+            })
+        });
+        if (!res.ok) { throw new Error(`AI server responded with status: ${res.status}`); }
+
+        const data = await res.json();
+        const aiResponseText = data.candidates[0].content.parts[0].text;
+        
+        // --- START: NEW CLEANING LOGIC (THE FIX) ---
+        // This removes the ```html ... ``` block if the AI adds it.
+        let cleanedHtml = aiResponseText.trim();
+        const codeBlockRegex = /^```html\s*\n([\s\S]*?)\n```$/;
+        const match = cleanedHtml.match(codeBlockRegex);
+        if (match) {
+          cleanedHtml = match[1]; // Use only the content INSIDE the code block
         }
+        const finalHtml = cleanedHtml;
+        // --- END: NEW CLEANING LOGIC ---
         
-        let answer = this.generateDetailedAnswer(questionKey, userName);
+        if(this.state.morphAnimation) cancelAnimationFrame(this.state.morphAnimation);
         
-        responseContainer.innerHTML = `
-            <div class="ai-answer-wrapper fade-in">
-                <div class="ai-answer-header">
-                    <div class="ai-answer-icon"><i class="fas fa-brain"></i></div>
-                    <h3 class="ai-answer-title text-white text-xl font-bold">AccuraAI Response</h3>
+        const currentInteractionDiv = document.getElementById(interactionId);
+        if (currentInteractionDiv) {
+            currentInteractionDiv.innerHTML = `
+                <div class="ai-answer-wrapper fade-in">
+                    <div class="ai-answer-header">
+                        <div class="ai-answer-icon"><i class="fas fa-brain"></i></div>
+                        <h3 class="ai-answer-title text-white text-xl font-bold">AccuraAI Response</h3>
+                    </div>
+                    <div class="ai-answer-body">${finalHtml}</div>
+                </div>`;
+            currentInteractionDiv.scrollIntoView({ behavior: 'smooth', block: 'end' });
+        }
+
+    } catch (error) {
+        console.error("Error fetching AI response:", error);
+        if(this.state.morphAnimation) cancelAnimationFrame(this.state.morphAnimation);
+        const currentInteractionDiv = document.getElementById(interactionId);
+        if (currentInteractionDiv) {
+            currentInteractionDiv.innerHTML = `
+                <div class="ai-answer-wrapper border border-red-500/50">
+                    <h4 class="text-red-400 font-bold">Connection Error</h4>
+                    <p class="text-gray-300">Sorry, I couldn't connect to the AI server. Please check your connection and try again.</p>
                 </div>
-                <div class="ai-answer-body">${answer}</div>
-                <div class="ai-answer-actions">
-                    <button onclick="app.handleAiQuestion('${questionKey}')" class="text-gray-400 hover:text-white transition-colors mr-4">
-                        <i class="fas fa-sync-alt mr-2"></i>Regenerate
-                    </button>
-                    <button onclick="app.copyToClipboard()" class="text-gray-400 hover:text-white transition-colors">
-                        <i class="fas fa-copy mr-2"></i>Copy
-                    </button>
-                </div>
-            </div>`;
-    }, 8000);
+            `;
+        }
+    } finally {
+        const inputContainer = document.getElementById('custom-question-input-container');
+        const customQuestionInput = document.getElementById('custom-ai-question-input');
+        if (inputContainer && customQuestionInput) {
+            inputContainer.classList.remove('hidden');
+            customQuestionInput.value = '';
+            customQuestionInput.focus();
+        }
+    }
 },
 
 // Add this helper function for smooth morphing
@@ -5395,124 +5460,117 @@ setMorphStyles(fraction, text1Content, text2Content) {
     text2.textContent = text2Content;
 },
 
-// Add this function to generate detailed answers
-generateDetailedAnswer(questionKey, userName) {
+// Modify your existing generateDetailedAnswer function to accept a categoryKey
+generateDetailedAnswer(questionText, userName, categoryKey = 'general') {
     const currentData = this.state;
     let answer = '';
-    
-    switch(questionKey) {
-        case 'profit-margin':
-            const revenue = currentData.sales.reduce((sum, s) => sum + s.total, 0);
-            const expenses = currentData.expenses.reduce((sum, e) => sum + e.amount, 0);
-            const margin = revenue > 0 ? ((revenue - expenses) / revenue * 100).toFixed(1) : 0;
-            const profit = revenue - expenses;
-            
-            answer = `
-                <p>Based on my analysis of your financial data, here's your profit margin breakdown:</p>
-                <ul>
-                    <li><strong>Current Profit Margin:</strong> ${margin}%</li>
-                    <li><strong>Total Revenue:</strong> ${this.formatCurrency(revenue)}</li>
-                    <li><strong>Total Expenses:</strong> ${this.formatCurrency(expenses)}</li>
-                    <li><strong>Net Profit:</strong> ${this.formatCurrency(profit)}</li>
-                </ul>
-                <p>${margin > 20 ? 
-                    `Excellent performance, ${userName}! Your profit margin is healthy and indicates strong business operations. To maintain this momentum, consider focusing on customer retention and exploring premium product offerings.` : 
-                    `There's room for improvement in your profit margins. Consider reviewing your expense structure, optimizing supplier costs, and exploring ways to increase average transaction values.`
-                }</p>
-                <p><strong>Recommendations:</strong></p>
-                <ul>
-                    <li>Monitor high-expense categories for optimization opportunities</li>
-                    <li>Implement dynamic pricing strategies during peak demand</li>
-                    <li>Focus on high-margin products in your sales efforts</li>
-                </ul>
-            `;
+
+    // Example of how you might use categoryKey and questionText to generate a dynamic answer
+    // This is a placeholder. You would implement your actual AI logic here.
+    switch (categoryKey) {
+        case 'financial':
+            answer = `<p>Hello ${userName}, you asked about financial analysis: "${questionText}".</p>
+                      <p>Based on your current financial data, here's a detailed breakdown:</p>
+                      <ul>
+                          <li><strong>Total Revenue:</strong> ${this.formatCurrency(currentData.sales.reduce((sum, s) => sum + s.total, 0))}</li>
+                          <li><strong>Total Expenses:</strong> ${this.formatCurrency(currentData.expenses.reduce((sum, e) => sum + e.amount, 0))}</li>
+                          <li><strong>Net Profit:</strong> ${this.formatCurrency(currentData.sales.reduce((sum, s) => sum + s.total, 0) - currentData.expenses.reduce((sum, e) => sum + e.amount, 0))}</li>
+                          <li><strong>Recommendation:</strong> Consider reviewing your expense categories for potential savings.</li>
+                      </ul>`;
             break;
-            
-        case 'my-commission':
-            const commission = currentData.currentUser.commission || 0;
-            const totalSales = currentData.sales.filter(s => s.salesPersonId === currentData.currentUser.id).length;
-            const avgSaleValue = totalSales > 0 ? 
-                currentData.sales.filter(s => s.salesPersonId === currentData.currentUser.id)
-                    .reduce((sum, s) => sum + s.total, 0) / totalSales : 0;
-            
-            answer = `
-                <p>Here's your comprehensive commission and performance analysis:</p>
-                <ul>
-                    <li><strong>Current Commission:</strong> ${this.formatCurrency(commission)}</li>
-                    <li><strong>Total Sales Made:</strong> ${totalSales}</li>
-                    <li><strong>Average Sale Value:</strong> ${this.formatCurrency(avgSaleValue)}</li>
-                </ul>
-                <p>${commission > 500 ? 
-                    `Outstanding work, ${userName}! Your commission reflects exceptional sales performance. You're among the top performers.` :
-                    `You have good potential to increase your earnings. Focus on upselling and building stronger customer relationships.`
-                }</p>
-                <p><strong>Tips to Increase Commission:</strong></p>
-                <ul>
-                    <li>Target high-value products with better commission rates</li>
-                    <li>Build long-term relationships for repeat business</li>
-                    <li>Cross-sell complementary products to increase transaction values</li>
-                    <li>Follow up with customers for additional needs</li>
-                </ul>
-            `;
+        case 'inventory':
+            const lowStockProducts = currentData.products.filter(p => p.stock <= currentData.lowStockThreshold);
+            answer = `<p>Hello ${userName}, you asked about inventory: "${questionText}".</p>
+                      <p>Here's an overview of your inventory:</p>
+                      <ul>
+                          <li><strong>Total Products:</strong> ${currentData.products.length}</li>
+                          <li><strong>Low Stock Items (below ${currentData.lowStockThreshold}):</strong> ${lowStockProducts.length > 0 ? lowStockProducts.map(p => p.name).join(', ') : 'None'}</li>
+                          <li><strong>Recommendation:</strong> Ensure timely reorders for critical items to avoid stockouts.</li>
+                      </ul>`;
             break;
-            
-        case 'low-stock':
-            const lowStock = currentData.products.filter(p => p.stock <= currentData.lowStockThreshold);
-            const criticalStock = lowStock.filter(p => p.stock <= 5);
-            
-            answer = lowStock.length > 0 ? `
-                <p>Inventory analysis shows items requiring immediate attention:</p>
-                <p><strong>Critical Stock Alert (${criticalStock.length} items):</strong></p>
-                <ul>
-                    ${criticalStock.slice(0, 5).map(p => 
-                        `<li>${p.name} - Only ${p.stock} units remaining (Reorder Level: ${p.reorderLevel})</li>`
-                    ).join('')}
-                </ul>
-                <p><strong>Low Stock Warning (${lowStock.length - criticalStock.length} items):</strong></p>
-                <ul>
-                    ${lowStock.filter(p => p.stock > 5).slice(0, 5).map(p => 
-                        `<li>${p.name} - ${p.stock} units (Below threshold)</li>`
-                    ).join('')}
-                </ul>
-                <p><strong>Immediate Actions Required:</strong></p>
-                <ul>
-                    <li>Place urgent orders for critical items to prevent stockouts</li>
-                    <li>Contact suppliers for expedited delivery options</li>
-                    <li>Review and adjust reorder levels based on sales velocity</li>
-                    <li>Consider implementing automated reorder systems</li>
-                </ul>
-            ` : `
-                <p>Excellent inventory management! All products are currently well-stocked.</p>
-                <p><strong>Current Status:</strong></p>
-                <ul>
-                    <li>No products below reorder threshold</li>
-                    <li>Inventory levels are optimal</li>
-                    <li>Supply chain is functioning smoothly</li>
-                </ul>
-                <p><strong>Best Practices to Maintain:</strong></p>
-                <ul>
-                    <li>Continue monitoring stock levels regularly</li>
-                    <li>Review seasonal demand patterns</li>
-                    <li>Maintain good supplier relationships</li>
-                </ul>
-            `;
+        case 'employee':
+            const topEmployee = currentData.users.reduce((prev, current) => (prev.commission || 0) > (current.commission || 0) ? prev : current, { commission: 0 });
+            answer = `<p>Hello ${userName}, you asked about employee performance: "${questionText}".</p>
+                      <p>Here's some insight into your team:</p>
+                      <ul>
+                          <li><strong>Total Employees:</strong> ${currentData.users.length}</li>
+                          <li><strong>Top Performer (by commission):</strong> ${topEmployee.name} (${this.formatCurrency(topEmployee.commission)})</li>
+                          <li><strong>Recommendation:</strong> Implement regular performance reviews and training programs.</li>
+                      </ul>`;
             break;
-            
+        case 'sales-team':
+            const managerSales = currentData.sales.filter(s => s.salesPersonId === currentData.currentUser.id);
+            const teamSales = currentData.sales.filter(s => currentData.users.filter(u => u.role === 'worker').map(u => u.id).includes(s.salesPersonId));
+            answer = `<p>Hello ${userName}, you asked about sales team performance: "${questionText}".</p>
+                      <p>Your personal sales: ${this.formatCurrency(managerSales.reduce((sum, s) => sum + s.total, 0))}</p>
+                      <p>Total team sales: ${this.formatCurrency(teamSales.reduce((sum, s) => sum + s.total, 0))}</p>
+                      <p><strong>Recommendation:</strong> Consider setting team sales targets and incentives.</p>`;
+            break;
+        case 'my-performance':
+            const mySales = currentData.sales.filter(s => s.salesPersonId === currentData.currentUser.id);
+            answer = `<p>Hello ${userName}, you asked about your performance: "${questionText}".</p>
+                      <p>Your total sales: ${this.formatCurrency(mySales.reduce((sum, s) => sum + s.total, 0))}</p>
+                      <p>Your current commission: ${this.formatCurrency(currentData.currentUser.commission)}</p>
+                      <p><strong>Recommendation:</strong> Focus on high-value products to maximize commission.</p>`;
+            break;
+        // Add more cases for other categories and roles as needed
+        case 'general':
         default:
-            answer = `
-                <p>I've completed a comprehensive analysis of your business data. Here are the key insights:</p>
-                <p><strong>Business Overview:</strong></p>
-                <ul>
-                    <li>Total Products: ${currentData.products.length}</li>
-                    <li>Active Customers: ${currentData.customers.length}</li>
-                    <li>Recent Sales: ${currentData.sales.length}</li>
-                </ul>
-                <p>Based on current trends, I recommend focusing on your top-performing areas while addressing operational gaps. 
-                Would you like me to dive deeper into any specific aspect of your business?</p>
-            `;
+            answer = `<p>Hello ${userName}, you asked: "${questionText}".</p>
+                      <p>Thank you for your question. AccuraAI is processing your request within the '${categoryKey}' context.</p>
+                      <p>For a more specific answer, please provide more details. This is a placeholder response.</p>
+                      <p><strong>Recommendation:</strong> Ensure your data is up-to-date for the most accurate insights.</p>`;
+            break;
     }
-    
-    return answer;
+
+    return `
+        <div class="ai-response-content">
+            ${answer}
+        </div>
+    `;
+},
+
+ 
+// Add this new function to the app object
+// REPLACE your old showCustomQuestionInput function with this
+showCustomQuestionInput(categoryKey, categoryText) {
+    const categoryGrid = document.getElementById('ai-category-grid');
+    const inputContainer = document.getElementById('custom-question-input-container');
+    const backButton = document.getElementById('ai-back-button');
+    const titleElement = document.getElementById('ai-action-title');
+    const selectedCategoryText = document.getElementById('selected-category-text');
+    const customQuestionInput = document.getElementById('custom-ai-question-input');
+
+    if (categoryGrid && inputContainer && backButton && titleElement && selectedCategoryText && customQuestionInput) {
+        categoryGrid.classList.add('hidden');
+        inputContainer.classList.remove('hidden');
+        backButton.classList.remove('hidden');
+        
+        titleElement.textContent = 'Ask a Question'; // Update title
+        selectedCategoryText.textContent = categoryText;
+        customQuestionInput.value = '';
+        customQuestionInput.focus();
+        this.state.currentAICategory = categoryKey;
+    }
+},
+
+// REPLACE your old submitCustomQuestion function with this
+submitCustomQuestion() {
+    const customQuestionInput = document.getElementById('custom-ai-question-input');
+    const questionText = customQuestionInput.value.trim();
+    const categoryKey = this.state.currentAICategory; // Retrieve the stored category
+
+    if (questionText) {
+        // Hide the input container, but keep the back button and title visible
+        const inputContainer = document.getElementById('custom-question-input-container');
+        if (inputContainer) {
+            inputContainer.classList.add('hidden');
+        }
+
+        this.handleAiQuestion(questionText, categoryKey);
+    } else {
+        NotificationSystem.warning('Please type your question before sending.');
+    }
 },
 
 // Add copy to clipboard function
@@ -5545,125 +5603,6 @@ setMorphStyles(fraction, text1Content, text2Content) {
     text2.textContent = text2Content;
 },
 
-// Add this function to generate detailed answers
-generateDetailedAnswer(questionKey, userName) {
-    const currentData = this.state;
-    let answer = '';
-    
-    switch(questionKey) {
-        case 'profit-margin':
-            const revenue = currentData.sales.reduce((sum, s) => sum + s.total, 0);
-            const expenses = currentData.expenses.reduce((sum, e) => sum + e.amount, 0);
-            const margin = revenue > 0 ? ((revenue - expenses) / revenue * 100).toFixed(1) : 0;
-            const profit = revenue - expenses;
-            
-            answer = `
-                <p>Based on my analysis of your financial data, here's your profit margin breakdown:</p>
-                <ul>
-                    <li><strong>Current Profit Margin:</strong> ${margin}%</li>
-                    <li><strong>Total Revenue:</strong> ${this.formatCurrency(revenue)}</li>
-                    <li><strong>Total Expenses:</strong> ${this.formatCurrency(expenses)}</li>
-                    <li><strong>Net Profit:</strong> ${this.formatCurrency(profit)}</li>
-                </ul>
-                <p>${margin > 20 ? 
-                    `Excellent performance, ${userName}! Your profit margin is healthy and indicates strong business operations. To maintain this momentum, consider focusing on customer retention and exploring premium product offerings.` : 
-                    `There's room for improvement in your profit margins. Consider reviewing your expense structure, optimizing supplier costs, and exploring ways to increase average transaction values.`
-                }</p>
-                <p><strong>Recommendations:</strong></p>
-                <ul>
-                    <li>Monitor high-expense categories for optimization opportunities</li>
-                    <li>Implement dynamic pricing strategies during peak demand</li>
-                    <li>Focus on high-margin products in your sales efforts</li>
-                </ul>
-            `;
-            break;
-            
-        case 'my-commission':
-            const commission = currentData.currentUser.commission || 0;
-            const totalSales = currentData.sales.filter(s => s.salesPersonId === currentData.currentUser.id).length;
-            const avgSaleValue = totalSales > 0 ? 
-                currentData.sales.filter(s => s.salesPersonId === currentData.currentUser.id)
-                    .reduce((sum, s) => sum + s.total, 0) / totalSales : 0;
-            
-            answer = `
-                <p>Here's your comprehensive commission and performance analysis:</p>
-                <ul>
-                    <li><strong>Current Commission:</strong> ${this.formatCurrency(commission)}</li>
-                    <li><strong>Total Sales Made:</strong> ${totalSales}</li>
-                    <li><strong>Average Sale Value:</strong> ${this.formatCurrency(avgSaleValue)}</li>
-                </ul>
-                <p>${commission > 500 ? 
-                    `Outstanding work, ${userName}! Your commission reflects exceptional sales performance. You're among the top performers.` :
-                    `You have good potential to increase your earnings. Focus on upselling and building stronger customer relationships.`
-                }</p>
-                <p><strong>Tips to Increase Commission:</strong></p>
-                <ul>
-                    <li>Target high-value products with better commission rates</li>
-                    <li>Build long-term relationships for repeat business</li>
-                    <li>Cross-sell complementary products to increase transaction values</li>
-                    <li>Follow up with customers for additional needs</li>
-                </ul>
-            `;
-            break;
-            
-        case 'low-stock':
-            const lowStock = currentData.products.filter(p => p.stock <= currentData.lowStockThreshold);
-            const criticalStock = lowStock.filter(p => p.stock <= 5);
-            
-            answer = lowStock.length > 0 ? `
-                <p>Inventory analysis shows items requiring immediate attention:</p>
-                <p><strong>Critical Stock Alert (${criticalStock.length} items):</strong></p>
-                <ul>
-                    ${criticalStock.slice(0, 5).map(p => 
-                        `<li>${p.name} - Only ${p.stock} units remaining (Reorder Level: ${p.reorderLevel})</li>`
-                    ).join('')}
-                </ul>
-                <p><strong>Low Stock Warning (${lowStock.length - criticalStock.length} items):</strong></p>
-                <ul>
-                    ${lowStock.filter(p => p.stock > 5).slice(0, 5).map(p => 
-                        `<li>${p.name} - ${p.stock} units (Below threshold)</li>`
-                    ).join('')}
-                </ul>
-                <p><strong>Immediate Actions Required:</strong></p>
-                <ul>
-                    <li>Place urgent orders for critical items to prevent stockouts</li>
-                    <li>Contact suppliers for expedited delivery options</li>
-                    <li>Review and adjust reorder levels based on sales velocity</li>
-                    <li>Consider implementing automated reorder systems</li>
-                </ul>
-            ` : `
-                <p>Excellent inventory management! All products are currently well-stocked.</p>
-                <p><strong>Current Status:</strong></p>
-                <ul>
-                    <li>No products below reorder threshold</li>
-                    <li>Inventory levels are optimal</li>
-                    <li>Supply chain is functioning smoothly</li>
-                </ul>
-                <p><strong>Best Practices to Maintain:</strong></p>
-                <ul>
-                    <li>Continue monitoring stock levels regularly</li>
-                    <li>Review seasonal demand patterns</li>
-                    <li>Maintain good supplier relationships</li>
-                </ul>
-            `;
-            break;
-            
-        default:
-            answer = `
-                <p>I've completed a comprehensive analysis of your business data. Here are the key insights:</p>
-                <p><strong>Business Overview:</strong></p>
-                <ul>
-                    <li>Total Products: ${currentData.products.length}</li>
-                    <li>Active Customers: ${currentData.customers.length}</li>
-                    <li>Recent Sales: ${currentData.sales.length}</li>
-                </ul>
-                <p>Based on current trends, I recommend focusing on your top-performing areas while addressing operational gaps. 
-                Would you like me to dive deeper into any specific aspect of your business?</p>
-            `;
-    }
-    
-    return answer;
-},
 
 // Add copy to clipboard function
 copyToClipboard() {
@@ -6230,15 +6169,16 @@ getSalesView() {
                                                         <div class="text-gray-400 text-sm">${sale.saleType}</div>
                                                     </td>
                                                     <td class="px-6 py-4">
-                                                        <div class="text-white">${sale.items.length} item${sale.items.length > 1 ? 's' : ''}</div>
-                                                        <div class="text-gray-400 text-sm">
-                                                            ${sale.items.slice(0, 2).map(item => {
-                                                                const product = this.state.products.find(p => p.id === item.productId);
-                                                                return `${item.quantity}x ${product ? product.name : 'Product'}`;
-                                                            }).join(', ')}
-                                                            ${sale.items.length > 2 ? '...' : ''}
-                                                        </div>
-                                                    </td>
+                                                        <td class="px-6 py-4">
+    <div class="text-white">${sale.items.length} item${sale.items.length > 1 ? 's' : ''}</div>
+    <div class="text-gray-400 text-sm">
+        ${sale.items.map(item => { // <-- REMOVED .slice(0, 2)
+            const product = this.state.products.find(p => p.id === item.productId);
+            return `${item.quantity}x ${product ? product.name : 'Product'}`;
+        }).join(', ')}
+        
+    </div>
+</td>
                                                     <td class="px-6 py-4">
                                                         <div class="text-white font-bold">${this.formatCurrency(sale.total)}</div>
                                                         ${sale.discount > 0 ? `<div class="text-gray-400 text-sm">Discount: ${this.formatCurrency(sale.discount)}</div>` : ''}
