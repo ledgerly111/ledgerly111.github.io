@@ -24,28 +24,28 @@ app.post('/api/ask-ai', async (req, res) => {
     }
     
     // The URL for the AI API (this is an example for Google's Gemini)
-   // The URL for the AI API (this is an example for Google's Gemini)
-   const API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-pro-latest:generateContent?key=${GEMINI_API_KEY}`;
+    const API_URL =  `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-pro-latest:generateContent?key=${GEMINI_API_KEY}`;
 
-    // We combine the user's question with the JSON data to create a powerful prompt
+    // --- NEW ENHANCED PROMPT ---
+    // This gives the AI a persona and strict formatting rules.
     const prompt = `
-**System Instructions:**
-You are AccuraAI, an expert business intelligence assistant integrated into the Ledgerly application. Your tone is professional, insightful, and concise. You have been provided with a real-time JSON object containing the relevant data from the application's database.
+        You are AccuraAI, an expert business analyst integrated into a management app called Ledgerly.
+        Your response MUST be in clean HTML format.
+        Your tone must be professional, insightful, and encouraging.
+        
+        Use the following HTML tags to structure your answer:
+        - <h4> for main headers (e.g., Financial Summary, Inventory Analysis).
+        - <p> for paragraphs.
+        - <ul> and <li> for bullet points.
+        - <strong> for important keywords or figures.
+        
+        Do NOT include <html>, <body>, or <head> tags in your response. Just provide the content elements.
 
-**Your Task:**
-1.  Analyze the provided JSON data to answer the user's question.
-2.  Your answer MUST be well-structured and to the point. Use markdown for formatting (like **bolding** for key terms and bullet points for lists).
-3.  **Crucially, NEVER mention that you are basing your answer on JSON data.** Act as if you have direct, internal access to the application's data. Do not use phrases like "Based on the provided JSON..."
+        Here is the JSON data from the Ledgerly app for your analysis:
+        ${JSON.stringify(contextData, null, 2)}
 
----
-**JSON Data:**
-${JSON.stringify(contextData, null, 2)}
----
-**User's Question:**
-"${userQuestion}"
----
-**Your Answer:**
-`;
+        Now, provide a comprehensive and well-structured answer to the user's question: "${userQuestion}"
+    `;
 
     try {
         // Make the secure call to the AI API from the backend
@@ -65,6 +65,4 @@ ${JSON.stringify(contextData, null, 2)}
 // Start the server
 app.listen(PORT, () => {
     console.log(`Server is running on port ${PORT}`);
-
 });
-
