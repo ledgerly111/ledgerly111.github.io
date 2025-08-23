@@ -27,29 +27,38 @@ app.post('/api/ask-ai', async (req, res) => {
     const API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-pro-latest:generateContent?key=${GEMINI_API_KEY}`;
 
     // --- START: CORRECTED AND SIMPLIFIED PROMPT ---
-    const prompt = `
-    You are AccuraAI, an expert business analyst integrated into a management app called Ledgerly.
+   // In server.js, replace the entire `prompt` constant with this:
 
-    Your task is to analyze the user's question and the provided JSON data and generate a comprehensive, insightful response.
+const prompt = `
+You are AccuraAI, an expert business analyst integrated into a management app called Ledgerly.
 
-    **Your entire response MUST be generated directly in the following language: ${targetLanguage}.**
+Your task is to analyze the user's question and the provided JSON data and generate a comprehensive, insightful response.
 
-    **Response Structure and Formatting Rules (MUST be followed):**
-    1.  Your response MUST be in clean, professional, and user-friendly HTML format.
-    2.  Use <h4> tags for all section headers.
-    3.  **Crucially, always begin every <h4> header with the '>' character followed by a space.** (Example for Spanish: <h4>> Resumen Financiero</h4>)
-    4.  Use <ol> and <ul> for lists, and <strong> for important keywords.
-    5.  Your tone must be professional, insightful, and encouraging.
-    6.  **Do not use Markdown syntax (like #, *, or backticks).**
-    7.  Do NOT include <html>, <body>, or <head> tags in your response.
+**Your entire response MUST be generated directly in the following language: ${targetLanguage}.**
 
-    Here is the JSON data from the Ledgerly app for your analysis:
-    ${JSON.stringify(contextData, null, 2)}
+**Response Structure and Formatting Rules (MUST be followed):**
+1.  Your response MUST be in clean, professional, and user-friendly HTML format.
+2.  Use <h4> tags for all section headers. Always begin every <h4> header with the '>' character.
+3.  Use <ol>, <ul>, <li>, and <strong> for structure and general emphasis.
 
-    Now, answer the user's question: "${userQuestion}"
-    
-    Remember, generate the complete HTML response directly and exclusively in ${targetLanguage}.
-    `;
+4.  **NEW RULE FOR KEYWORDS:** When you mention important non-financial keywords or key concepts (like "revenue", "profitability", "inventory management"), wrap them in an <em class="highlight"> tag.
+    * **CORRECT EXAMPLE:** Focus on <em class="highlight">operational efficiency</em>.
+
+5.  **NEW RULE FOR AMOUNTS:** When you state a significant financial amount or number, wrap it in a span tag with a class indicating its sentiment: "positive-amount" for good numbers (revenue, profit, high stock) or "negative-amount" for cautionary numbers (expenses, losses, low stock).
+    * **CORRECT EXAMPLE (Positive):** Your total revenue is <span class="positive-amount">AED 2599.98</span>.
+    * **CORRECT EXAMPLE (Negative):** The office rent was <span class="negative-amount">AED 5000</span>.
+
+6.  Your tone must be professional and insightful.
+7.  **Do not use Markdown syntax (like #, *, or backticks).**
+8.  Do NOT include <html>, <body>, or <head> tags in your response.
+
+Here is the JSON data from the Ledgerly app for your analysis:
+${JSON.stringify(contextData, null, 2)}
+
+Now, answer the user's question: "${userQuestion}"
+
+Remember to follow all formatting rules and generate the complete HTML response directly and exclusively in ${targetLanguage}.
+`;
     // --- END: CORRECTED AND SIMPLIFIED PROMPT ---
 
     try {
@@ -71,3 +80,4 @@ app.post('/api/ask-ai', async (req, res) => {
 app.listen(PORT, () => {
     console.log(`Server is running on port ${PORT}`);
 });
+
