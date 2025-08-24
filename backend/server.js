@@ -5,74 +5,125 @@ const cors = require('cors');
 
 // Create the app
 const app = express();
-const PORT = process.env.PORT || 10000; // Render will provide the PORT
+const PORT = process.env.PORT || 10000; // Render provides the PORT
 
-// Middlewares to handle JSON data and allow cross-origin requests
-app.use(cors()); // Allows your GitHub Pages app to talk to this server
-app.use(express.json());
+// Middlewares to handle larger JSON payloads (for audio) and CORS
+app.use(cors());
+app.use(express.json({ limit: '10mb' })); // Increased limit for audio data
 
-// This is your single API endpoint
-app.post('/api/ask-ai', async (req, res) => {
-    // Get the target language from the request, default to English
-    const { userQuestion, contextData, targetLanguage = 'English' } = req.body;
-    
-    // Get the secret API key safely from Render's environment variables
-    const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
+// =================================================================
+// === ENDPOINT 1: SPEECH-TO-TEXT (The "Ears") ===
+// This endpoint receives audio and returns text.
+// =================================================================
+app.post('/api/speech-to-text', async (req, res) => {
+    // Securely get the STT API key from Render's environment
+    const GOOGLE_STT_API_KEY = process.env.GOOGLE_STT_API_KEY;
+    const STT_API_URL = `https://speech.googleapis.com/v1/speech:recognize?key=${GOOGLE_STT_API_KEY}`;
 
-    if (!GEMINI_API_KEY) {
-        return res.status(500).json({ error: 'API key not configured on the server.' });
+    // The frontend will send the audio as a base64 encoded string
+    const { audio } = req.body;
+
+    if (!GOOGLE_STT_API_KEY) {
+        return res.status(500).json({ error: 'STT API key not configured on the server.' });
     }
-    
-    // The URL for the AI API using the corrected model name
-    const API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-pro-latest:generateContent?key=${GEMINI_API_KEY}`;
+    if (!audio) {
+        return res.status(400).json({ error: 'No audio data provided.' });
+    }
 
-    // --- START: CORRECTED AND SIMPLIFIED PROMPT ---
-   // In server.js, replace the entire `prompt` constant with this:
-
-const prompt = `
-You are AccuraAI, an expert business analyst integrated into a management app called Ledgerly.
-
-Your task is to analyze the user's question and the provided JSON data and generate a comprehensive, insightful response.
-
-**Your entire response MUST be generated directly in the following language: ${targetLanguage}.**
-
-**Response Structure and Formatting Rules (MUST be followed):**
-1.  Your response MUST be in clean, professional, and user-friendly HTML format.
-2.  Use <h4> tags for all section headers. Always begin every <h4> header with the '>' character.
-3.  Use <ol>, <ul>, <li>, and <strong> for structure and general emphasis.
-
-4.  **NEW RULE FOR KEYWORDS:** When you mention important non-financial keywords or key concepts (like "revenue", "profitability", "inventory management"), wrap them in an <em class="highlight"> tag.
-    * **CORRECT EXAMPLE:** Focus on <em class="highlight">operational efficiency</em>.
-
-5.  **NEW RULE FOR AMOUNTS:** When you state a significant financial amount or number, wrap it in a span tag with a class indicating its sentiment: "positive-amount" for good numbers (revenue, profit, high stock) or "negative-amount" for cautionary numbers (expenses, losses, low stock).
-    * **CORRECT EXAMPLE (Positive):** Your total revenue is <span class="positive-amount">AED 2599.98</span>.
-    * **CORRECT EXAMPLE (Negative):** The office rent was <span class="negative-amount">AED 5000</span>.
-
-6.  Your tone must be professional and insightful.
-7.  **Do not use Markdown syntax (like #, *, or backticks).**
-8.  Do NOT include <html>, <body>, or <head> tags in your response.
-
-Here is the JSON data from the Ledgerly app for your analysis:
-${JSON.stringify(contextData, null, 2)}
-
-Now, answer the user's question: "${userQuestion}"
-
-Remember to follow all formatting rules and generate the complete HTML response directly and exclusively in ${targetLanguage}.
-`;
-    // --- END: CORRECTED AND SIMPLIFIED PROMPT ---
+    const requestPayload = {
+        config: {
+            encoding: 'WEBM_OPUS', // Common format from browser MediaRecorder
+            sampleRateHertz: 48000,
+            languageCode: 'en-US',
+            model: 'latest_long', // A model good for general use
+        },
+        audio: {
+            content: audio, // The base64 audio string from the frontend
+        },
+    };
 
     try {
-        // Make the secure call to the AI API from the backend
-        const response = await axios.post(API_URL, {
+        const sttResponse = await axios.post(STT_API_URL, requestPayload);
+        const transcript = sttResponse.data.results?.[0]?.alternatives?.[0]?.transcript || '';
+
+        if (!transcript) {
+            console.log("STT response was empty or failed to transcribe:", sttResponse.data);
+            return res.status(200).json({ transcript: '', error: 'Unable to understand audio.' });
+        }
+
+        // Send the final text transcript back to the frontend
+        res.json({ transcript: transcript });
+
+    } catch (error) {
+        console.error('Error in Speech-to-Text endpoint:', error.response ? error.response.data : error.message);
+        res.status(500).json({ error: 'Failed to process speech.' });
+    }
+});
+
+// =================================================================
+// === ENDPOINT 2: ASK AI & GET SPEECH (The "Brain" and "Mouth") ===
+// This endpoint receives text, gets an AI response, converts it to audio,
+// and sends both the text and audio back.
+// =================================================================
+app.post('/api/ask-ai', async (req, res) => {
+    const { userQuestion, contextData, targetLanguage = 'English' } = req.body;
+    
+    // Securely get BOTH API keys needed for this endpoint
+    const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
+    const GOOGLE_TTS_API_KEY = process.env.GOOGLE_TTS_API_KEY;
+
+    if (!GEMINI_API_KEY || !GOOGLE_TTS_API_KEY) {
+        return res.status(500).json({ error: 'AI or TTS API keys not configured on the server.' });
+    }
+    
+    const GEMINI_API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-pro-latest:generateContent?key=${GEMINI_API_KEY}`;
+    const TTS_API_URL = `https://texttospeech.googleapis.com/v1/text:synthesize?key=${GOOGLE_TTS_API_KEY}`;
+
+    const prompt = `
+        You are AccuraAI, an expert business analyst integrated into a management app called Ledgerly.
+        Your task is to analyze the user's question and the provided JSON data and generate a comprehensive, insightful response.
+        Your entire response MUST be generated directly in the following language: ${targetLanguage}.
+        Response Structure and Formatting Rules (MUST be followed):
+        1. Your response MUST be in clean, professional, and user-friendly HTML format.
+        2. Use <h4> tags for all section headers. Always begin every <h4> header with the '>' character.
+        3. Use <ol>, <ul>, <li>, and <strong> for structure.
+        4. When you mention important keywords (like "revenue", "inventory"), wrap them in an <em class="highlight"> tag.
+        5. When you state a financial amount, wrap it in a span tag with a class of "positive-amount" for good numbers or "negative-amount" for cautionary numbers.
+        6. Do not use Markdown. Do NOT include <html> or <body> tags.
+        Here is the JSON data: ${JSON.stringify(contextData, null, 2)}
+        Now, answer the user's question: "${userQuestion}"
+        Generate the complete HTML response directly and exclusively in ${targetLanguage}.
+    `;
+
+    try {
+        // --- Step 1: Get the text response from Gemini ---
+        const geminiResponse = await axios.post(GEMINI_API_URL, {
             contents: [{ parts: [{ text: prompt }] }],
         });
         
-        // Send the AI's answer back to your frontend app
-        res.json(response.data);
+        const geminiHtmlResponse = geminiResponse.data.candidates[0].content.parts[0].text;
+        
+        // --- Step 2: Clean the HTML to create a plain text version for the voice ---
+        const cleanTextForSpeech = geminiHtmlResponse.replace(/<[^>]*>?/gm, '').replace(/\s+/g, ' ').trim();
+
+        // --- Step 3: Get the audio from the Google Cloud TTS API ---
+        const ttsResponse = await axios.post(TTS_API_URL, {
+            input: { text: cleanTextForSpeech },
+            voice: { languageCode: 'en-US', name: 'en-US-Studio-O' }, // A high-quality studio voice
+            audioConfig: { audioEncoding: 'MP3' }
+        });
+
+        const ttsAudioContent = ttsResponse.data.audioContent; // This is the base64 audio string
+
+        // --- Step 4: Send BOTH the HTML and the Audio back to your app ---
+        res.json({
+            htmlResponse: geminiHtmlResponse,
+            audioResponse: ttsAudioContent
+        });
 
     } catch (error) {
-        console.error('Error calling AI API:', error.response ? error.response.data : error.message);
-        res.status(500).json({ error: 'Failed to get a response from the AI.' });
+        console.error('Error in AI/TTS backend:', error.response ? error.response.data.error : error.message);
+        res.status(500).json({ error: 'Failed to get a response from the AI services.' });
     }
 });
 
@@ -80,4 +131,3 @@ Remember to follow all formatting rules and generate the complete HTML response 
 app.listen(PORT, () => {
     console.log(`Server is running on port ${PORT}`);
 });
-
