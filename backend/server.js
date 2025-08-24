@@ -61,23 +61,21 @@ app.post('/api/speech-to-text', async (req, res) => {
 });
 
 // =================================================================
-// === ENDPOINT 2: ASK AI & GET SPEECH (The "Brain" and "Mouth") ===
-// This endpoint receives text, gets an AI response, converts it to audio,
-// and sends both the text and audio back.
+// === ENDPOINT 2: ASK AI (The "Brain") - MODIFIED ===
+// This endpoint now ONLY returns text response, no automatic TTS
 // =================================================================
 app.post('/api/ask-ai', async (req, res) => {
     const { userQuestion, contextData, targetLanguage = 'English' } = req.body;
     
-    // Securely get BOTH API keys needed for this endpoint
+    // Securely get the GEMINI API key
     const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
-    const GOOGLE_TTS_API_KEY = process.env.GOOGLE_TTS_API_KEY;
 
-    if (!GEMINI_API_KEY || !GOOGLE_TTS_API_KEY) {
-        return res.status(500).json({ error: 'AI or TTS API keys not configured on the server.' });
+    if (!GEMINI_API_KEY) {
+        return res.status(500).json({ error: 'AI API key not configured on the server.' });
     }
     
-   const GEMINI_API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-pro-latest:generateContent?key=${GEMINI_API_KEY}`;
-    const TTS_API_URL = `https://texttospeech.googleapis.com/v1/text:synthesize?key=${GOOGLE_TTS_API_KEY}`;
+    // IMPORTANT: Using gemini-1.5-pro-latest as in your original code
+    const GEMINI_API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-pro-latest:generateContent?key=${GEMINI_API_KEY}`;
 
     const prompt = `
         You are AccuraAI, an expert business analyst integrated into a management app called Ledgerly.
@@ -96,34 +94,74 @@ app.post('/api/ask-ai', async (req, res) => {
     `;
 
     try {
-        // --- Step 1: Get the text response from Gemini ---
+        // Get the text response from Gemini
         const geminiResponse = await axios.post(GEMINI_API_URL, {
             contents: [{ parts: [{ text: prompt }] }],
         });
         
         const geminiHtmlResponse = geminiResponse.data.candidates[0].content.parts[0].text;
         
-        // --- Step 2: Clean the HTML to create a plain text version for the voice ---
-        const cleanTextForSpeech = geminiHtmlResponse.replace(/<[^>]*>?/gm, '').replace(/\s+/g, ' ').trim();
-
-        // --- Step 3: Get the audio from the Google Cloud TTS API ---
-        const ttsResponse = await axios.post(TTS_API_URL, {
-            input: { text: cleanTextForSpeech },
-            voice: { languageCode: 'en-US', name: 'en-US-Studio-O' }, // A high-quality studio voice
-            audioConfig: { audioEncoding: 'MP3' }
-        });
-
-        const ttsAudioContent = ttsResponse.data.audioContent; // This is the base64 audio string
-
-        // --- Step 4: Send BOTH the HTML and the Audio back to your app ---
+        // MODIFIED: Now we ONLY send the HTML response, no automatic TTS
         res.json({
-            htmlResponse: geminiHtmlResponse,
-            audioResponse: ttsAudioContent
+            htmlResponse: geminiHtmlResponse
+            // audioResponse removed - TTS will be on-demand only
         });
 
     } catch (error) {
-        console.error('Error in AI/TTS backend:', error.response ? error.response.data.error : error.message);
-        res.status(500).json({ error: 'Failed to get a response from the AI services.' });
+        console.error('Error in AI backend:', error.response ? error.response.data.error : error.message);
+        res.status(500).json({ error: 'Failed to get a response from the AI service.' });
+    }
+});
+
+// =================================================================
+// === NEW ENDPOINT 3: TEXT-TO-SPEECH ON DEMAND ===
+// This endpoint is called separately when user clicks "Speak" button
+// =================================================================
+app.post('/api/tts-stream', async (req, res) => {
+    const GOOGLE_TTS_API_KEY = process.env.GOOGLE_TTS_API_KEY;
+    const TTS_API_URL = `https://texttospeech.googleapis.com/v1/text:synthesize?key=${GOOGLE_TTS_API_KEY}`;
+
+    const { text, languageCode = 'en-US' } = req.body;
+
+    if (!GOOGLE_TTS_API_KEY) {
+        return res.status(500).json({ error: 'TTS API key not configured on the server.' });
+    }
+    if (!text) {
+        return res.status(400).json({ error: 'No text data provided.' });
+    }
+
+    // Map language codes to appropriate voice names
+    const voiceMap = {
+        'en-US': 'en-US-Studio-O',
+        'ar-XA': 'ar-XA-Standard-A',
+        'es-ES': 'es-ES-Standard-A',
+        'fr-FR': 'fr-FR-Standard-A',
+        'hi-IN': 'hi-IN-Standard-A'
+    };
+
+    const voiceName = voiceMap[languageCode] || 'en-US-Studio-O';
+
+    try {
+        const ttsResponse = await axios.post(TTS_API_URL, {
+            input: { text: text },
+            voice: { 
+                languageCode: languageCode, 
+                name: voiceName 
+            },
+            audioConfig: { 
+                audioEncoding: 'MP3',
+                speakingRate: 1.0,
+                pitch: 0.0
+            }
+        });
+        
+        res.json({ 
+            audioContent: ttsResponse.data.audioContent 
+        });
+        
+    } catch (error) {
+        console.error('Error in TTS stream endpoint:', error.response ? error.response.data : error.message);
+        res.status(500).json({ error: 'Failed to synthesize speech.' });
     }
 });
 
@@ -131,4 +169,5 @@ app.post('/api/ask-ai', async (req, res) => {
 app.listen(PORT, () => {
     console.log(`Server is running on port ${PORT}`);
 });
+
 
