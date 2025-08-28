@@ -5131,52 +5131,25 @@ initializeHeaderAnimation() {
                 `;
             },
 
-            getAIAssistantView() {
-                if (this.state.aiMode === 'ai') {
-                    return this.getAccuraAIView();
-                } else {
-                    return this.getAccuraBotView();
-                }
-            },
-// VERIFY this function in your code
-showAICategories() {
-    const categoryGrid = document.getElementById('ai-category-grid');
-    const inputContainer = document.getElementById('custom-question-input-container');
-    const backButton = document.getElementById('ai-back-button');
-    const titleElement = document.getElementById('ai-action-title');
-    const responseContainer = document.getElementById('ai-response-container');
-
-    if (categoryGrid && inputContainer && backButton && titleElement) {
-        categoryGrid.classList.remove('hidden');
-        inputContainer.classList.add('hidden');
-        backButton.classList.add('hidden');
-        titleElement.textContent = 'Ask AccuraAI'; // Reset title
-    }
-    if (responseContainer) {
-        responseContainer.innerHTML = ''; // This line clears the entire chat history
-    }
-},
-  
-// REPLACE your entire getAIAssistantView function with this corrected version
 getAIAssistantView() {
     const categories = {
         admin: [
-            { key: 'financial', icon: 'fas fa-dollar-sign', text: 'Financial Analysis' },
-            { key: 'inventory', icon: 'fas fa-box', text: 'Inventory Management' },
-            { key: 'employee', icon: 'fas fa-users', text: 'Employee Performance' },
-            { key: 'general', icon: 'fas fa-question-circle', text: 'General Business Inquiry' },
+            { key: 'financial', icon: '<path d="m16 18 6-6-6-6"></path><path d="m8 6-6 6 6 6"></path>', text: 'Financial Analysis', subtext: 'Analyze revenue, expenses, and profit.', image: 'https://images.unsplash.com/photo-1635776062360-af423602aff3?w=800&q=80', stat_icon: '<path d="M16 7h6v6"></path><path d="m22 7-8.5 8.5-5-5L2 17"></path>', stat_text: '95% accuracy rate'},
+            { key: 'inventory', icon: '<path d="M15.707 21.293a1 1 0 0 1-1.414 0l-1.586-1.586a1 1 0 0 1 0-1.414l5.586-5.586a1 1 0 0 1 1.414 0l1.586 1.586a1 1 0 0 1 0 1.414z"></path><path d="m18 13-1.375-6.874a1 1 0 0 0-.746-.776L3.235 2.028a1 1 0 0 0-1.207 1.207L5.35 15.879a1 1 0 0 0 .776.746L13 18"></path><path d="m2.3 2.3 7.286 7.286"></path><circle cx="11" cy="11" r="2"></circle>', text: 'Inventory Management', subtext: 'Get insights on stock levels and reorder points.', image: 'https://images.unsplash.com/photo-1579548122080-c35fd6820ecb?w=800&q=80', stat_icon: '<path d="M9.937 15.5A2 2 0 0 0 8.5 14.063l-6.135-1.582a.5.5 0 0 1 0-.962L8.5 9.936A2 2 0 0 0 9.937 8.5l1.582-6.135a.5.5 0 0 1 .963 0L14.063 8.5A2 2 0 0 0 15.5 9.937l6.135 1.581a.5.5 0 0 1 0 .964L15.5 14.063a2 2 0 0 0-1.437 1.437l-1.582 6.135a.5.5 0 0 1-.963 0z"></path><path d="M20 3v4"></path><path d="M22 5h-4"></path><path d="M4 17v2"></path><path d="M5 18H3"></path>', stat_text: 'Human-like quality' },
+            { key: 'employee', icon: '<line x1="12" x2="12" y1="20" y2="10"></line><line x1="18" x2="18" y1="20" y2="4"></line><line x1="6" x2="6" y1="20" y2="16"></line>', text: 'Employee Performance', subtext: 'Review sales, commissions, and productivity.', image: 'https://images.unsplash.com/photo-1635776062127-d379bfcba9f8?w=800&q=80', stat_icon: '<path d="M2.062 12.348a1 1 0 0 1 0-.696 10.75 10.75 0 0 1 19.876 0 1 1 0 0 1 0 .696 10.75 10.75 0 0 1-19.876 0"></path><circle cx="12" cy="12" r="3"></circle>', stat_text: 'Real-time insights'},
+            { key: 'general', icon: '<rect width="8" height="8" x="3" y="3" rx="2"></rect><path d="M7 11v4a2 2 0 0 0 2 2h4"></path><rect width="8" height="8" x="13" y="13" rx="2"></rect>', text: 'General Inquiry', subtext: 'Ask any other business-related question.', image: 'https://images.unsplash.com/photo-1635776063328-153b13e3c245?w=800&q=80', stat_icon: '<path d="M12 6v6l4 2"></path><circle cx="12" cy="12" r="10"></circle>', stat_text: 'Save 40+ hours/week' },
         ],
         manager: [
-            { key: 'sales-team', icon: 'fas fa-chart-bar', text: 'Sales Team Performance' },
-            { key: 'expense-control', icon: 'fas fa-receipt', text: 'Expense Control' },
-            { key: 'customer-relations', icon: 'fas fa-handshake', text: 'Customer Relations' },
-            { key: 'task-management', icon: 'fas fa-tasks', text: 'Task Management' },
+            { key: 'sales-team', icon: '<path d="m16 18 6-6-6-6"></path><path d="m8 6-6 6 6 6"></path>', text: 'Sales Team Performance', subtext: 'Analyze team sales and individual contributions.', image: 'https://images.unsplash.com/photo-1635776062360-af423602aff3?w=800&q=80', stat_icon: '<path d="M16 7h6v6"></path><path d="m22 7-8.5 8.5-5-5L2 17"></path>', stat_text: '95% accuracy rate'},
+            { key: 'expense-control', icon: '<path d="M15.707 21.293a1 1 0 0 1-1.414 0l-1.586-1.586a1 1 0 0 1 0-1.414l5.586-5.586a1 1 0 0 1 1.414 0l1.586 1.586a1 1 0 0 1 0 1.414z"></path><path d="m18 13-1.375-6.874a1 1 0 0 0-.746-.776L3.235 2.028a1 1 0 0 0-1.207 1.207L5.35 15.879a1 1 0 0 0 .776.746L13 18"></path><path d="m2.3 2.3 7.286 7.286"></path><circle cx="11" cy="11" r="2"></circle>', text: 'Expense Control', subtext: 'Identify spending patterns and savings opportunities.', image: 'https://images.unsplash.com/photo-1579548122080-c35fd6820ecb?w=800&q=80', stat_icon: '<path d="M9.937 15.5A2 2 0 0 0 8.5 14.063l-6.135-1.582a.5.5 0 0 1 0-.962L8.5 9.936A2 2 0 0 0 9.937 8.5l1.582-6.135a.5.5 0 0 1 .963 0L14.063 8.5A2 2 0 0 0 15.5 9.937l6.135 1.581a.5.5 0 0 1 0 .964L15.5 14.063a2 2 0 0 0-1.437 1.437l-1.582 6.135a.5.5 0 0 1-.963 0z"></path><path d="M20 3v4"></path><path d="M22 5h-4"></path><path d="M4 17v2"></path><path d="M5 18H3"></path>', stat_text: 'Human-like quality' },
+            { key: 'customer-relations', icon: '<line x1="12" x2="12" y1="20" y2="10"></line><line x1="18" x2="18" y1="20" y2="4"></line><line x1="6" x2="6" y1="20" y2="16"></line>', text: 'Customer Relations', subtext: 'Discover top customers and buying habits.', image: 'https://images.unsplash.com/photo-1635776062127-d379bfcba9f8?w=800&q=80', stat_icon: '<path d="M2.062 12.348a1 1 0 0 1 0-.696 10.75 10.75 0 0 1 19.876 0 1 1 0 0 1 0 .696 10.75 10.75 0 0 1-19.876 0"></path><circle cx="12" cy="12" r="3"></circle>', stat_text: 'Real-time insights'},
+            { key: 'task-management', icon: '<rect width="8" height="8" x="3" y="3" rx="2"></rect><path d="M7 11v4a2 2 0 0 0 2 2h4"></path><rect width="8" height="8" x="13" y="13" rx="2"></rect>', text: 'Task Management', subtext: 'Get updates on team tasks and progress.', image: 'https://images.unsplash.com/photo-1635776063328-153b13e3c245?w=800&q=80', stat_icon: '<path d="M12 6v6l4 2"></path><circle cx="12" cy="12" r="10"></circle>', stat_text: 'Save 40+ hours/week' },
         ],
         worker: [
-            { key: 'my-performance', icon: 'fas fa-coins', text: 'My Performance & Earnings' },
-            { key: 'product-info', icon: 'fas fa-tag', text: 'Product Information' },
-            { key: 'customer-support', icon: 'fas fa-headset', text: 'Customer Support' },
-            { key: 'daily-tasks', icon: 'fas fa-clipboard-list', text: 'Daily Tasks & Goals' },
+            { key: 'my-performance', icon: '<path d="m16 18 6-6-6-6"></path><path d="m8 6-6 6 6 6"></path>', text: 'My Performance', subtext: 'Check your sales, earnings, and commissions.', image: 'https://images.unsplash.com/photo-1635776062360-af423602aff3?w=800&q=80', stat_icon: '<path d="M16 7h6v6"></path><path d="m22 7-8.5 8.5-5-5L2 17"></path>', stat_text: '95% accuracy rate'},
+            { key: 'product-info', icon: '<path d="M15.707 21.293a1 1 0 0 1-1.414 0l-1.586-1.586a1 1 0 0 1 0-1.414l5.586-5.586a1 1 0 0 1 1.414 0l1.586 1.586a1 1 0 0 1 0 1.414z"></path><path d="m18 13-1.375-6.874a1 1 0 0 0-.746-.776L3.235 2.028a1 1 0 0 0-1.207 1.207L5.35 15.879a1 1 0 0 0 .776.746L13 18"></path><path d="m2.3 2.3 7.286 7.286"></path><circle cx="11" cy="11" r="2"></circle>', text: 'Product Information', subtext: 'Get details about stock, pricing, and features.', image: 'https://images.unsplash.com/photo-1579548122080-c35fd6820ecb?w=800&q=80', stat_icon: '<path d="M9.937 15.5A2 2 0 0 0 8.5 14.063l-6.135-1.582a.5.5 0 0 1 0-.962L8.5 9.936A2 2 0 0 0 9.937 8.5l1.582-6.135a.5.5 0 0 1 .963 0L14.063 8.5A2 2 0 0 0 15.5 9.937l6.135 1.581a.5.5 0 0 1 0 .964L15.5 14.063a2 2 0 0 0-1.437 1.437l-1.582 6.135a.5.5 0 0 1-.963 0z"></path><path d="M20 3v4"></path><path d="M22 5h-4"></path><path d="M4 17v2"></path><path d="M5 18H3"></path>', stat_text: 'Human-like quality' },
+            { key: 'customer-support', icon: '<line x1="12" x2="12" y1="20" y2="10"></line><line x1="18" x2="18" y1="20" y2="4"></line><line x1="6" x2="6" y1="20" y2="16"></line>', text: 'Customer Support', subtext: 'Find customer history and information.', image: 'https://images.unsplash.com/photo-1635776062127-d379bfcba9f8?w=800&q=80', stat_icon: '<path d="M2.062 12.348a1 1 0 0 1 0-.696 10.75 10.75 0 0 1 19.876 0 1 1 0 0 1 0 .696 10.75 10.75 0 0 1-19.876 0"></path><circle cx="12" cy="12" r="3"></circle>', stat_text: 'Real-time insights'},
+            { key: 'daily-tasks', icon: '<rect width="8" height="8" x="3" y="3" rx="2"></rect><path d="M7 11v4a2 2 0 0 0 2 2h4"></path><rect width="8" height="8" x="13" y="13" rx="2"></rect>', text: 'Daily Tasks & Goals', subtext: 'Review your current tasks and objectives.', image: 'https://images.unsplash.com/photo-1635776063328-153b13e3c245?w=800&q=80', stat_icon: '<path d="M12 6v6l4 2"></path><circle cx="12" cy="12" r="10"></circle>', stat_text: 'Save 40+ hours/week' },
         ]
     };
     const userRole = this.state.currentUser.role;
@@ -5206,7 +5179,7 @@ getAIAssistantView() {
             </div>
 
             <div id="ai-response-container" class="mt-6 space-y-4"></div>
-
+            
             <div class="perplexity-card p-6 mt-6">
                  <div class="flex justify-between items-center mb-4 flex-wrap gap-y-2">
                     <h3 class="text-xl font-bold text-white flex items-center">
@@ -5227,14 +5200,37 @@ getAIAssistantView() {
                     </div>
                 </div>
 
-                <div id="ai-category-grid" class="ai-question-bar grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-                    ${availableCategories.map(cat => `
-                        <div class="ai-category-button" data-category-key="${cat.key}" onclick="app.showCustomQuestionInput('${cat.key}', '${cat.text}')">
-                            <i class="${cat.icon}"></i>
-                            <span>${cat.text}</span>
+                <div id="ai-category-grid" class="grid w-full grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                    ${availableCategories.map((cat, index) => `
+                        <div 
+                            class="scale-in group cursor-pointer"
+                            style="animation-delay: ${index * 100}ms;"
+                            onclick="app.showCustomQuestionInput('${cat.key}', '${cat.text}')"
+                        >
+                            <div
+                                class="relative transform overflow-hidden rounded-2xl p-6 shadow-lg transition-all duration-300 group-hover:scale-105 hover:shadow-xl h-full flex flex-col"
+                                style="background-image: url(${cat.image}); background-size: cover;"
+                            >
+                                <div class="relative flex-grow">
+                                    <div class="mb-4 flex h-12 w-12 items-center justify-center rounded-lg bg-white/20 backdrop-blur-sm">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-6 w-6 text-white">
+                                            ${cat.icon}
+                                        </svg>
+                                    </div>
+                                    <h3 class="mb-2 text-lg font-medium text-white">${cat.text}</h3>
+                                    <p class="mb-4 text-sm text-white/80">${cat.subtext}</p>
+                                </div>
+                                <div class="flex items-center text-white/60 mt-auto">
+                                      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-1 h-4 w-4">
+                                        ${cat.stat_icon}
+                                      </svg>
+                                      <span class="text-xs">${cat.stat_text}</span>
+                                </div>
+                            </div>
                         </div>
                     `).join('')}
                 </div>
+                
                 <div id="custom-question-input-container" class="hidden mt-2">
                     <p class="text-gray-300 mb-3">Ask your question about <span id="selected-category-text" class="font-bold text-white"></span>:</p>
                     <div class="flex space-x-3">
@@ -5249,42 +5245,97 @@ getAIAssistantView() {
     `;
 },
 
+showAICategories() {
+    const categoryGrid = document.getElementById('ai-category-grid');
+    const inputContainer = document.getElementById('custom-question-input-container');
+    const backButton = document.getElementById('ai-back-button');
+    const titleElement = document.getElementById('ai-action-title');
+    const responseContainer = document.getElementById('ai-response-container');
 
+    if (categoryGrid && inputContainer && backButton && titleElement) {
+        categoryGrid.classList.remove('hidden');
+        inputContainer.classList.add('hidden');
+        backButton.classList.add('hidden');
+        titleElement.textContent = 'Ask AccuraAI'; // Reset title
+    }
+    if (responseContainer) {
+        responseContainer.innerHTML = ''; // This line clears the chat history
+    }
+},
+  
+// In script.js
+
+// FINAL FIX: Replace your entire animateTextGenerateEffect function with this one.
+animateTextGenerateEffect(container, htmlContent) {
+    const tempDiv = document.createElement('div');
+    tempDiv.innerHTML = htmlContent;
+
+    // Check if the AI returned structured HTML or just plain text
+    const hasStructure = tempDiv.querySelector('h2, p, li, h4, ol, ul');
+    
+    // If there is no structure, the AI has returned a malformed response.
+    // This new logic displays a clear error message instead of trying to fix it.
+    if (!hasStructure) {
+        container.innerHTML = `
+            <div class="ai-response-error">
+                <h4><i class="fas fa-exclamation-triangle"></i> AI Formatting Error</h4>
+                <p>The AI returned an improperly formatted response. This can sometimes happen with complex requests. Please try again.</p>
+            </div>
+        `;
+        return; // Stop the function here
+    }
+
+    // This code only runs if the HTML from the AI is valid.
+    container.innerHTML = htmlContent;
+
+    const lines = Array.from(container.children);
+    container.innerHTML = ''; // Clear container for animation
+
+    const lineDelay = 150;
+
+    lines.forEach((line, lineIndex) => {
+        line.style.opacity = 0;
+        
+        const textNodes = [];
+        const walk = document.createTreeWalker(line, NodeFilter.SHOW_TEXT, null, false);
+        let node;
+        while (node = walk.nextNode()) {
+            if (node.nodeValue.trim()) {
+                textNodes.push(node);
+            }
+        }
+
+        textNodes.forEach(node => {
+            const words = node.nodeValue.split(' ');
+            const fragment = document.createDocumentFragment();
+            words.forEach((word, wordIndex) => {
+                const span = document.createElement('span');
+                span.className = 'generated-word';
+                span.textContent = word + (wordIndex === words.length - 1 ? '' : ' ');
+                fragment.appendChild(span);
+            });
+            node.parentNode.replaceChild(fragment, node);
+        });
+
+        container.appendChild(line);
+
+        setTimeout(() => {
+            line.classList.add('animated-line');
+            line.style.opacity = 1;
+        }, lineIndex * lineDelay);
+
+        const wordSpans = line.querySelectorAll('.generated-word');
+        wordSpans.forEach((span, wordIndex) => {
+            const wordDelay = (lineIndex * lineDelay) + 200 + (wordIndex * 30);
+            span.style.animationDelay = `${wordDelay}ms`;
+        });
+    });
+},
 async handleAiQuestion(questionText, categoryKey = 'general') {
     const responseContainer = document.getElementById('ai-response-container');
     if (!responseContainer) return;
 
-    // --- 1. GATHER CONTEXT DATA BASED ON CATEGORY ---
-    let contextData = {};
-    const { sales, expenses, products, users, customers, lowStockThreshold, selectedCountry } = this.state;
-
-    switch (categoryKey) {
-        case 'financial':
-        case 'expense-control':
-            contextData = { sales, expenses, currency: GCC_COUNTRIES[selectedCountry].currency };
-            break;
-        case 'inventory':
-        case 'product-info':
-            contextData = { products, lowStockThreshold };
-            break;
-        case 'employee':
-        case 'sales-team':
-            contextData = { users, sales };
-            break;
-        case 'customer-relations':
-        case 'customer-support':
-            contextData = { customers, sales };
-            break;
-        case 'my-performance':
-            contextData = {
-                myDetails: this.state.currentUser,
-                mySales: sales.filter(s => s.salesPersonId === this.state.currentUser.id)
-            };
-            break;
-        default:
-            contextData = { overview: { salesCount: sales.length, productCount: products.length, customerCount: customers.length } };
-    }
-
+    // --- 1. SETUP & START THE GOOEY ANIMATION ---
     const interactionId = `interaction-${Date.now()}`;
     const newInteractionDiv = document.createElement('div');
     newInteractionDiv.id = interactionId;
@@ -5298,7 +5349,7 @@ async handleAiQuestion(questionText, categoryKey = 'general') {
     newInteractionDiv.innerHTML = `
         <div class="ai-answer-wrapper fade-in">
             <div class="ai-answer-header">
-            <div class="ai-answer-icon"><i class="fas fa-brain ai-response-icon"></i></div>
+                <div class="ai-answer-icon"><i class="fas fa-brain ai-response-icon"></i></div>
             </div>
             <div class="ai-answer-body">
                 <div class="gooey-text-container" style="justify-content: flex-start; min-height: 60px; padding: 0;">
@@ -5339,20 +5390,14 @@ async handleAiQuestion(questionText, categoryKey = 'general') {
 
     const doCooldown = () => {
         morph = 0;
-        text2.style.filter = "";
-        text2.style.opacity = "100%";
-        text1.style.filter = "";
-        text1.style.opacity = "0%";
+        text2.style.filter = ""; text2.style.opacity = "100%";
+        text1.style.filter = ""; text1.style.opacity = "0%";
     };
 
     const doMorph = () => {
-        morph -= cooldown;
-        cooldown = 0;
+        morph -= cooldown; cooldown = 0;
         let fraction = morph / morphTime;
-        if (fraction > 1) {
-            cooldown = cooldownTime;
-            fraction = 1;
-        }
+        if (fraction > 1) { cooldown = cooldownTime; fraction = 1; }
         setMorph(fraction);
     };
 
@@ -5361,9 +5406,7 @@ async handleAiQuestion(questionText, categoryKey = 'general') {
         const newTime = new Date();
         const shouldIncrementIndex = cooldown > 0;
         const dt = (newTime.getTime() - time.getTime()) / 1000;
-        time = newTime;
-        cooldown -= dt;
-
+        time = newTime; cooldown -= dt;
         if (cooldown <= 0) {
             if (shouldIncrementIndex) {
                 textIndex = (textIndex + 1) % texts.length;
@@ -5376,9 +5419,34 @@ async handleAiQuestion(questionText, categoryKey = 'general') {
         }
     };
     animate();
-    
+
+    // --- 2. CALL THE REAL AI BACKEND ---
     try {
-        const selectedLanguage = document.getElementById('ai-language-selector').value;
+        let contextData = {};
+        const { sales, expenses, products, users, customers, lowStockThreshold, selectedCountry } = this.state;
+        switch (categoryKey) {
+            case 'financial': case 'expense-control':
+                contextData = { sales, expenses, currency: GCC_COUNTRIES[selectedCountry].currency };
+                break;
+            case 'inventory': case 'product-info':
+                contextData = { products, lowStockThreshold };
+                break;
+            case 'employee': case 'sales-team':
+                contextData = { users, sales };
+                break;
+            case 'customer-relations': case 'customer-support':
+                contextData = { customers, sales };
+                break;
+            case 'my-performance':
+                contextData = { myDetails: this.state.currentUser, mySales: sales.filter(s => s.salesPersonId === this.state.currentUser.id) };
+                break;
+            default:
+                contextData = { overview: { salesCount: sales.length, productCount: products.length, customerCount: customers.length } };
+        }
+
+        const languageSelector = document.getElementById('ai-language-selector');
+        const selectedLanguage = languageSelector ? languageSelector.value : 'English';
+
         const res = await fetch(`${this.serverUrl}/api/ask-ai`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -5388,40 +5456,40 @@ async handleAiQuestion(questionText, categoryKey = 'general') {
                 targetLanguage: selectedLanguage
             })
         });
-        if (!res.ok) { throw new Error(`AI server responded with status: ${res.status}`); }
+
+        if (!res.ok) {
+            const errorData = await res.json();
+            throw new Error(`AI server responded with status: ${res.status}. Message: ${errorData.error}`);
+        }
 
         const data = await res.json();
-        const aiResponseText = data.candidates[0].content.parts[0].text;
-        
-        // --- START: NEW CLEANING LOGIC (THE FIX) ---
-        // This removes the ```html ... ``` block if the AI adds it.
-        let cleanedHtml = aiResponseText.trim();
-        const codeBlockRegex = /^```html\s*\n([\s\S]*?)\n```$/;
-        const match = cleanedHtml.match(codeBlockRegex);
-        if (match) {
-          cleanedHtml = match[1]; // Use only the content INSIDE the code block
-        }
-        const finalHtml = cleanedHtml;
-        // --- END: NEW CLEANING LOGIC ---
+        let aiResponseHtml = data.htmlResponse;
         
         if(this.state.morphAnimation) cancelAnimationFrame(this.state.morphAnimation);
         
         const currentInteractionDiv = document.getElementById(interactionId);
         if (currentInteractionDiv) {
+            const cleanedHtml = aiResponseHtml.replace(/^```html\s*|```$/g, '').trim();
+
             currentInteractionDiv.innerHTML = `
                 <div class="ai-answer-wrapper fade-in">
                     <div class="ai-answer-header">
-                        <div class="ai-answer-icon"><i class="fas fa-brain"></i></div>
+                        <div class="ai-answer-icon"><i class="fas fa-brain ai-response-icon"></i></div>
                         <h3 class="ai-answer-title text-white text-xl font-bold">AccuraAI Response</h3>
                     </div>
-                    <div class="ai-answer-body">${finalHtml}</div>
+                    <div class="ai-answer-body"></div>
                 </div>`;
+            
+            const answerBody = currentInteractionDiv.querySelector('.ai-answer-body');
+            this.animateTextGenerateEffect(answerBody, cleanedHtml);
+
             currentInteractionDiv.scrollIntoView({ behavior: 'smooth', block: 'end' });
         }
 
     } catch (error) {
         console.error("Error fetching AI response:", error);
         if(this.state.morphAnimation) cancelAnimationFrame(this.state.morphAnimation);
+        
         const currentInteractionDiv = document.getElementById(interactionId);
         if (currentInteractionDiv) {
             currentInteractionDiv.innerHTML = `
@@ -5431,16 +5499,11 @@ async handleAiQuestion(questionText, categoryKey = 'general') {
                 </div>
             `;
         }
-    } finally {
-        const inputContainer = document.getElementById('custom-question-input-container');
-        const customQuestionInput = document.getElementById('custom-ai-question-input');
-        if (inputContainer && customQuestionInput) {
-            inputContainer.classList.remove('hidden');
-            customQuestionInput.value = '';
-            customQuestionInput.focus();
-        }
     }
 },
+
+
+
 
 // Add this helper function for smooth morphing
 setMorphStyles(fraction, text1Content, text2Content) {
