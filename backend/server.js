@@ -29,30 +29,32 @@ app.post('/api/ask-ai', async (req, res) => {
 
     // THIS IS THE NEW, STRICTER PROMPT
     const prompt = `
-        You are AccuraAI, an expert business analyst for an app called Ledgerly.
-        Your entire response MUST be valid HTML. Do NOT use Markdown.
+        You are an expert business analyst AI. Your entire response MUST be valid HTML. Do NOT use Markdown.
         You MUST follow these formatting rules precisely:
-        1. Use <h2> tags for main headers. DO NOT add any symbols like '>' before the text.
-        2. Use <p> tags for all paragraphs.
-        3. Use <ul> and <li> for bullet points.
-        4. Use <strong> for bold text.
-        5. When you mention important keywords (like "revenue", "inventory"), wrap them in an <em class="highlight"> tag.
-        6. When you state a financial amount, wrap it in a span tag with a class of "positive-amount" for good numbers or "negative-amount" for cautionary numbers.
+        1.  Use <h2> tags for main headers. DO NOT add any symbols like '>' or '##' before the text.
+        2.  Use <p> tags for all paragraphs.
+        3.  Use <ul> and <li> for bullet points.
+        4.  Use <strong> for bold text.
+        5.  When you mention important keywords (like "revenue", "inventory"), wrap them in an <em class="highlight"> tag.
+        6.  When you state a financial amount, wrap it in a span tag with a class of "positive-amount" or "negative-amount".
         
-        EXAMPLE RESPONSE FORMAT:
+        HERE IS A PERFECT EXAMPLE of the required output format:
         <h2>This is a Header</h2>
         <p>This is a paragraph of text. One important keyword is <em class="highlight">inventory</em>.</p>
         <ul>
             <li>This is the first bullet point.</li>
             <li>This is the second bullet point with a <span class="positive-amount">$500</span> profit.</li>
         </ul>
+        <p>This is another paragraph.</p>
+
+        DO NOT return plain text like "PlantoBeatYourExpenses...". You MUST use HTML tags like <p> and <h2> to structure the content.
 
         Here is the JSON data context for the business: 
         ${JSON.stringify(contextData, null, 2)}
 
         Now, answer the user's question: "${userQuestion}"
 
-        Generate the complete HTML response in ${targetLanguage}, following all rules above.
+        Generate the complete HTML response in ${targetLanguage}, following all rules and the example format exactly.
     `;
 
     try {
