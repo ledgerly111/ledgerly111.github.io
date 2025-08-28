@@ -14,12 +14,10 @@ app.use(express.json());
 
 // =================================================================
 // === AI TEXT MODEL ENDPOINT (The "Brain") ===
-// This endpoint receives a question and data, and returns an AI-generated HTML response.
 // =================================================================
 app.post('/api/ask-ai', async (req, res) => {
     const { userQuestion, contextData, targetLanguage = 'English' } = req.body;
     
-    // Securely get the GEMINI API key from your server's environment variables
     const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
 
     if (!GEMINI_API_KEY) {
@@ -27,41 +25,43 @@ app.post('/api/ask-ai', async (req, res) => {
         return res.status(500).json({ error: 'AI API key not configured on the server.' });
     }
     
-    // The official Google Generative AI endpoint
     const GEMINI_API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-pro-latest:generateContent?key=${GEMINI_API_KEY}`;
 
-    // This is the detailed instruction we send to the AI model
+    // THIS IS THE NEW, STRICTER PROMPT
     const prompt = `
-        You are AccuraAI, an expert business analyst integrated into a management app called Ledgerly.
-        Your task is to analyze the user's question and the provided JSON data and generate a comprehensive, insightful response.
-        Your entire response MUST be generated directly in the following language: ${targetLanguage}.
+        You are AccuraAI, an expert business analyst for an app called Ledgerly.
+        Your entire response MUST be valid HTML. Do NOT use Markdown.
+        You MUST follow these formatting rules precisely:
+        1. Use <h2> tags for main headers. DO NOT add any symbols like '>' before the text.
+        2. Use <p> tags for all paragraphs.
+        3. Use <ul> and <li> for bullet points.
+        4. Use <strong> for bold text.
+        5. When you mention important keywords (like "revenue", "inventory"), wrap them in an <em class="highlight"> tag.
+        6. When you state a financial amount, wrap it in a span tag with a class of "positive-amount" for good numbers or "negative-amount" for cautionary numbers.
         
-        Response Structure and Formatting Rules (MUST be followed):
-        1. Your response MUST be in clean, professional, and user-friendly HTML format.
-        2. Use <h2> tags for all section headers.
-        3. Use <ol>, <ul>, <li>, and <strong> for structure.
-        4. When you mention important keywords (like "revenue", "inventory"), wrap them in an <em class="highlight"> tag.
-        5. When you state a financial amount, wrap it in a span tag with a class of "positive-amount" for good numbers or "negative-amount" for cautionary numbers.
-        6. Do not use Markdown. Do NOT include <html> or <body> tags.
+        EXAMPLE RESPONSE FORMAT:
+        <h2>This is a Header</h2>
+        <p>This is a paragraph of text. One important keyword is <em class="highlight">inventory</em>.</p>
+        <ul>
+            <li>This is the first bullet point.</li>
+            <li>This is the second bullet point with a <span class="positive-amount">$500</span> profit.</li>
+        </ul>
 
         Here is the JSON data context for the business: 
         ${JSON.stringify(contextData, null, 2)}
 
         Now, answer the user's question: "${userQuestion}"
 
-        Generate the complete HTML response directly and exclusively in ${targetLanguage}.
+        Generate the complete HTML response in ${targetLanguage}, following all rules above.
     `;
 
     try {
-        // Send the request to the Gemini API
         const geminiResponse = await axios.post(GEMINI_API_URL, {
             contents: [{ parts: [{ text: prompt }] }],
         });
         
-        // Extract the HTML text from the AI's response
         const geminiHtmlResponse = geminiResponse.data.candidates[0].content.parts[0].text;
         
-        // Send the clean HTML back to the frontend app
         res.json({
             htmlResponse: geminiHtmlResponse
         });
