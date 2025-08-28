@@ -2051,6 +2051,7 @@
 
 /* === START: CONSOLIDATED AND CORRECTED AI ASSISTANT STYLES === */
 
+/* You can DELETE this entire block from style.css */
 /* Styles for the AI category selection buttons */
 .ai-category-button {
     display: flex;
@@ -2091,6 +2092,21 @@
     font-size: 0.95rem;
 }
 
+/* === NEW: Meshy Card Animation === */
+@keyframes scaleIn {
+    from {
+        transform: scale(0.95);
+        opacity: 0;
+    }
+    to {
+        transform: scale(1);
+        opacity: 1;
+    }
+}
+
+.scale-in {
+    animation: scaleIn 0.5s ease-out forwards;
+}
 
 
 /* Wrapper for the final AI answer, handles theme backgrounds */
@@ -2231,13 +2247,7 @@
     color: #c4b5fd; /* Tailwind's purple-300 */
 }
 
-/* This uses a pseudo-element to automatically add and style the '>' */
-.ai-answer-body h4::before {
-    content: '>'; /* This adds the '>' character automatically */
-    margin-right: 0.5rem; /* Adds a small space after the '>' */
-    color: #a78bfa;       /* This makes the '>' a darker, more vibrant purple */
-    font-weight: bold;
-}
+
 /* Style for the AccuraAI Icon Glow */
 .ai-answer-header .ai-answer-icon i.fas.fa-brain { /* Adjust the selector if your icon's structure is different */
     background: linear-gradient(45deg, #a78bfa, #818cf8, #6366f1, #4f46e5, #a78bfa); /* Vibrant gradient */
@@ -2309,6 +2319,87 @@
         text-shadow: 0 0 20px rgba(168, 85, 247, 0.8);
     }
 }
+/* === START: AI Response Styling (FINAL & WORKING) === */
+
+/* This targets any h2 tag inside the AI's response body */
+.ai-answer-body h2 {
+    font-size: 1.5rem; /* 24px */
+    font-weight: 700;
+    line-height: 2rem; /* 32px */
+    color: #c4b5fd; /* Tailwind's purple-300 */
+    margin-bottom: 1rem; /* Add some space below the header */
+    border-bottom: 1px solid var(--border-color); /* Add a subtle underline */
+    padding-bottom: 0.5rem; /* Space between text and underline */
+}
+
+/* This targets any h4 tag inside the AI's response body (legacy support) */
+.ai-answer-body h4 {
+    color: #c4b5fd; /* Tailwind's purple-300 */
+}
+
+/* --- NEW TWO-STAGE ANIMATION --- */
+
+/* Stage 1: Animates entire lines (headers, paragraphs, list items) */
+@keyframes fadeInLine {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animated-line {
+    opacity: 0; /* Start lines invisible */
+    animation: fadeInLine 0.5s ease forwards;
+}
+
+/* Stage 2: Animates words inside each line */
+@keyframes fadeInWord {
+  from {
+    opacity: 0;
+    filter: blur(4px);
+  }
+  to {
+    opacity: 1;
+    filter: blur(0px);
+  }
+}
+
+.generated-word {
+  opacity: 0; /* Start words invisible */
+  animation: fadeInWord 0.4s ease forwards;
+  display: inline-block;
+}
+
+/* In style.css */
+
+.ai-response-error {
+    background-color: rgba(239, 68, 68, 0.1);
+    border: 1px solid rgba(239, 68, 68, 0.3);
+    border-radius: 0.75rem;
+    padding: 1rem;
+    color: #fca5a5;
+}
+
+.ai-response-error h4 {
+    color: #f87171;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+/* === END: AI Response Styling (FINAL & WORKING) === */
+
+/* === END: AI Response Styling (FINAL & WORKING) === */
+
+
+
+/* === END: AI Response Header Styling === */
+
 /* === END: Minimalistic AI Response Highlighting === */
 
 
