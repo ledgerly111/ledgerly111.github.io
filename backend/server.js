@@ -28,7 +28,10 @@ app.post('/api/ask-ai', async (req, res) => {
     const GEMINI_API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-pro-latest:generateContent?key=${GEMINI_API_KEY}`;
 
     // THIS IS THE NEW, STRICTER PROMPT
-  const prompt = `
+  // In server (3).js
+
+// THIS IS THE NEW, STRICTER PROMPT FOCUSED ON FORCING HTML OUTPUT
+const prompt = `
     You are an expert business analyst AI. Your entire response MUST be valid HTML. Do NOT use Markdown or plain text.
 
     CRITICAL FORMATTING RULES:
@@ -58,7 +61,6 @@ app.post('/api/ask-ai', async (req, res) => {
 
     Generate the complete HTML response in ${targetLanguage}, following all rules and the example format exactly.
 `;
-
     try {
         const geminiResponse = await axios.post(GEMINI_API_URL, {
             contents: [{ parts: [{ text: prompt }] }],
@@ -80,4 +82,5 @@ app.post('/api/ask-ai', async (req, res) => {
 app.listen(PORT, () => {
     console.log(`Ledgerly AI server is running on port ${PORT}`);
 });
+
 
