@@ -28,39 +28,39 @@ app.post('/api/ask-ai', async (req, res) => {
     const GEMINI_API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-pro-latest:generateContent?key=${GEMINI_API_KEY}`;
 
     // THIS IS THE NEW, STRICTER PROMPT
-  // In server (3).js
+    const prompt = `
+        You are an expert business analyst AI. Your response MUST be properly formatted HTML with correct spacing.
+        
+        CRITICAL RULES:
+        1. ALWAYS include proper spaces between ALL words in your response
+        2. Use <h2> tags for main headers
+        3. Use <p> tags for ALL paragraphs
+        4. Use <ul> and <li> for bullet points
+        5. Use <strong> for bold text
+        6. Wrap important keywords in <em class="highlight"> tags
+        7. Wrap financial amounts in <span class="positive-amount"> or <span class="negative-amount">
+        
+        IMPORTANT: Your text MUST have normal spacing between words. Never concatenate words together.
+        
+        Example of CORRECT format:
+        <h2>Financial Analysis</h2>
+        <p>Your current <em class="highlight">revenue</em> shows positive growth trends.</p>
+        <ul>
+            <li>Total sales: <span class="positive-amount">$5,000</span></li>
+            <li>Net profit margin: 25%</li>
+        </ul>
+        
+        NEVER return text without spaces like "Thisistextwithoutspaces". 
+        ALWAYS ensure proper word spacing like "This is text with spaces".
 
-// THIS IS THE NEW, STRICTER PROMPT FOCUSED ON FORCING HTML OUTPUT
-const prompt = `
-    You are an expert business analyst AI. Your entire response MUST be valid HTML. Do NOT use Markdown or plain text.
+        Here is the JSON data context for the business: 
+        ${JSON.stringify(contextData, null, 2)}
 
-    CRITICAL FORMATTING RULES:
-    1.  The entire response MUST be structured with valid HTML tags.
-    2.  Use <h2> for main headers.
-    3.  Use <p> for all paragraphs and sentences. Every piece of text must be inside a tag.
-    4.  Use <ul> and <li> for bullet points.
-    5.  Use <strong> for bold text.
-    6.  Wrap important business keywords (like "revenue", "inventory") in an <em class="highlight"> tag.
-    7.  Wrap financial amounts in a <span class="positive-amount"> or <span class="negative-amount"> tag.
+        Now, answer the user's question: "${userQuestion}"
 
-    HERE IS A PERFECT EXAMPLE of the required output format:
-    <h2>This is a Header</h2>
-    <p>This is a paragraph of text. One important keyword is <em class="highlight">inventory</em>.</p>
-    <ul>
-        <li>This is the first bullet point.</li>
-        <li>This is the second bullet point with a <span class="positive-amount">$500</span> profit.</li>
-    </ul>
-    <p>This is another paragraph.</p>
+        Generate the complete HTML response in ${targetLanguage}, following all rules and the example format exactly.
+    `;
 
-    CRITICAL RULE REMINDER: Unformatted plain text is strictly forbidden. For example, instead of 'Hello world', your output must be '<p>Hello world</p>'. You must provide a valid HTML response with normal spaces between words.
-
-    Here is the JSON data context for the business: 
-    ${JSON.stringify(contextData, null, 2)}
-
-    Now, answer the user's question: "${userQuestion}"
-
-    Generate the complete HTML response in ${targetLanguage}, following all rules and the example format exactly.
-`;
     try {
         const geminiResponse = await axios.post(GEMINI_API_URL, {
             contents: [{ parts: [{ text: prompt }] }],
@@ -82,5 +82,3 @@ const prompt = `
 app.listen(PORT, () => {
     console.log(`Ledgerly AI server is running on port ${PORT}`);
 });
-
-
