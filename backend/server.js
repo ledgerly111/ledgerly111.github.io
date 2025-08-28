@@ -38,7 +38,7 @@ app.post('/api/ask-ai', async (req, res) => {
         
         Response Structure and Formatting Rules (MUST be followed):
         1. Your response MUST be in clean, professional, and user-friendly HTML format.
-        2. Use <h2> tags for all section headers. Always begin every <h2> header with the '>' character.
+        2. Use <h2> tags for all section headers.
         3. Use <ol>, <ul>, <li>, and <strong> for structure.
         4. When you mention important keywords (like "revenue", "inventory"), wrap them in an <em class="highlight"> tag.
         5. When you state a financial amount, wrap it in a span tag with a class of "positive-amount" for good numbers or "negative-amount" for cautionary numbers.
