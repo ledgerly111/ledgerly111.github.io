@@ -47,7 +47,7 @@ app.post('/api/ask-ai', async (req, res) => {
         </ul>
         <p>This is another paragraph.</p>
 
-        DO NOT return plain text like "PlantoBeatYourExpenses...". You MUST use HTML tags like <p> and <h2> to structure the content.
+        DO NOT return plain text like "PlantoBeatYourExpenses...". You MUST use HTML tags like <p> and <h2> to structure the content with normal spaces between words.
 
         Here is the JSON data context for the business: 
         ${JSON.stringify(contextData, null, 2)}
