@@ -1,8 +1,30 @@
- // Suppress console warnings for Tailwind JIT
-        console.warn = function(msg) {
-            if (msg.includes('cdn.tailwindcss.com')) return;
-            console.log('Warning:', msg);
-        };
+// Suppress console warnings for Tailwind JIT
+(function() {
+    const originalWarn = console.warn;
+    console.warn = function() {
+        // Convert arguments to string to check content
+        const args = Array.from(arguments);
+        const message = args.map(arg => {
+            if (typeof arg === 'string') return arg;
+            if (typeof arg === 'object') {
+                try {
+                    return JSON.stringify(arg);
+                } catch (e) {
+                    return String(arg);
+                }
+            }
+            return String(arg);
+        }).join(' ');
+        
+        // Skip Tailwind CDN warnings
+        if (message && message.includes('cdn.tailwindcss.com')) {
+            return;
+        }
+        
+        // Call original console.warn for other warnings
+        originalWarn.apply(console, arguments);
+    };
+})();
 
         // GCC Countries Configuration
         const GCC_COUNTRIES = {
@@ -533,16 +555,15 @@ nboxNotificationInterval: null,
                 currentLedgerAccount: null // To store the account code for the ledger view
             },
 
-            init() {
-                this.loadData();
-                const savedTheme = DataStorage.load('ledgerlyTheme') || 'default';
-                this.setTheme(savedTheme);
-                this.render();
-                this.bindEvents();
-                this.updateAIInsights();
-                this.updateBotAnalysis();
-            },
-
+           init() {
+    this.loadData();
+    const savedTheme = DataStorage.load('ledgerlyTheme') || 'dark-theme'; // Default to dark
+    this.setTheme(savedTheme);
+    this.render();
+    this.bindEvents();
+    this.updateAIInsights();
+    this.updateBotAnalysis();
+},
             loadData() {
                 const saved = DataStorage.load('ledgerlyData');
                 if (saved) {
@@ -795,12 +816,18 @@ nboxNotificationInterval: null,
         this.closeMobileSidebar();
     }
 },
-            toggleAIMode() {
-                this.state.aiMode = this.state.aiMode === 'ai' ? 'bot' : 'ai';
-                this.saveData();
-                this.render();
-                NotificationSystem.success(`Switched to Accura${this.state.aiMode === 'ai' ? 'AI' : 'Bot'} mode`);
-            },
+          toggleAIMode() {
+    if (this.state.aiMode === 'ai') {
+        this.state.aiMode = 'bot';
+        this.state.currentView = 'bot'; // This line navigates to the bot view
+    } else {
+        this.state.aiMode = 'ai';
+        this.state.currentView = 'accura-ai'; // This line navigates back to the AI view
+    }
+    this.saveData();
+    this.render(); // Re-render the app to show the new page
+    NotificationSystem.success(`Switched to Accura${this.state.aiMode === 'ai' ? 'AI' : 'Bot'} mode`);
+},
 
             changeCountry(countryCode) {
                 if (['admin', 'manager'].includes(this.state.currentUser.role)) {
@@ -3670,14 +3697,7 @@ handleInboxSearch(event) {
     this.renderInbox();
 },
 
-// Start conversation with specific user
-startConversationWith(userId) {
-    const user = this.state.users.find(u => u.id === userId);
-    if (user) {
-        document.getElementById('employee-search-results').classList.add('hidden');
-        this.showModal('compose-message', userId);
-    }
-},
+
 
 // Set inbox filter
 setInboxFilter(filter) {
@@ -3756,16 +3776,7 @@ setInboxFilter(filter) {
     this.render();
 },
 
-// Mark message as read
-markAsRead(messageId) {
-    const message = this.state.messages.find(m => m.id === messageId);
-    if (message) {
-        message.read = true;
-        this.saveData();
-        this.renderInbox();
-        NotificationSystem.success('Message marked as read');
-    }
-},
+
 
 // Open message in modal
 openMessage(messageId) {
@@ -3777,30 +3788,6 @@ openMessage(messageId) {
     this.showModal('view-message', messageId);
 },
 
-// Quick reply function
-quickReply(messageId) {
-    const message = this.state.messages.find(m => m.id === messageId);
-    if (message) {
-        const replyContent = prompt('Type your quick reply:');
-        if (replyContent) {
-            const reply = {
-                id: Date.now(),
-                from: this.state.currentUser.id,
-                to: message.from === this.state.currentUser.id ? message.to : message.from,
-                subject: `Re: ${message.subject}`,
-                content: replyContent,
-                type: 'personal',
-                category: 'reply',
-                timestamp: new Date().toISOString(),
-                read: false
-            };
-            this.state.messages.push(reply);
-            this.saveData();
-            this.renderInbox();
-            NotificationSystem.success('Reply sent!');
-        }
-    }
-},
 
 
 
@@ -4549,11 +4536,11 @@ initializeHeaderAnimation() {
     this.animationInterval = setInterval(playAnimation, 15000);
 },
 
-            setTheme(themeName) {
-    document.body.className = themeName === 'default' ? '' : themeName;
+           setTheme(themeName) {
+    document.body.className = themeName;
     DataStorage.save('ledgerlyTheme', themeName);
     if (this.state.currentView === 'settings') {
-        this.render(); // Re-render the settings view to update the selection border
+        this.render(); // Re-render to update selection
     }
     NotificationSystem.success(`Theme changed successfully!`);
 },
@@ -4657,13 +4644,16 @@ initializeHeaderAnimation() {
 
             
 
-           getNavbar() {
+// In script.js
+// FINAL VERSION of getNavbar() with shine effect class
+getNavbar() {
     const unreadCount = this.getUnreadMessageCount();
-    const aiButtonClass = this.state.aiMode === 'ai' ? 'ai-button ai-pulse' : 'bot-button bot-pulse';
-    const aiIcon = this.state.aiMode === 'ai' ? 'fas fa-brain' : 'fas fa-robot';
+    const aiIcon = this.state.aiMode === 'ai' ? 'fas fa-crosshairs' : 'fas fa-robot';
+    // This new line adds a class for the shine effect based on the current mode
+    const aiIconShineClass = this.state.aiMode === 'ai' ? 'ai-icon-shine' : 'bot-icon-shine';
     const aiText = this.state.aiMode === 'ai' ? 'AccuraAI' : 'AccuraBot';
     const countryInfo = GCC_COUNTRIES[this.state.selectedCountry];
-    
+
     return `
         <div class="navbar">
             <div class="flex justify-between items-center">
@@ -4671,16 +4661,13 @@ initializeHeaderAnimation() {
                     <div class="burger-menu" data-action="toggle-mobile-menu">
                         <i class="fas fa-bars text-white text-lg"></i>
                     </div>
-                    
-                    <!-- GRADIENT TEXT LOGO -->
                     <div class="flex items-center">
                         <div id="navbar-logo-container" class="animated-header-container">
-    <h1 class="animated-header text-2xl font-bold">
-        <span style="--i:1">L</span><span style="--i:2">e</span><span style="--i:3">d</span><span style="--i:4">g</span><span style="--i:5">e</span><span style="--i:6">r</span><span style="--i:7">l</span><span style="--i:8">y</span>
-    </h1>
-</div>
+                            <h1 class="animated-header text-2xl font-bold">
+                                <span style="--i:1">L</span><span style="--i:2">e</span><span style="--i:3">d</span><span style="--i:4">g</span><span style="--i:5">e</span><span style="--i:6">r</span><span style="--i:7">l</span><span style="--i:8">y</span>
+                            </h1>
+                        </div>
                     </div>
-                    
                     <div class="hidden md:flex items-center space-x-4">
                         <span class="text-gray-500">|</span>
                         <div class="flex items-center space-x-3">
@@ -4701,29 +4688,28 @@ initializeHeaderAnimation() {
                         ` : ''}
                     </div>
                 </div>
-                
+
                 <div class="flex items-center space-x-2">
                     <button data-action="start-quick-sale" class="quick-sale-button quick-sale-pulse px-3 py-2 rounded-lg text-sm font-medium" title="Quick Sale">
                         <i class="fas fa-bolt text-lg"></i>
                         <span class="hidden sm:inline ml-2">Quick Sale</span>
                     </button>
 
-                    <button data-action="ai-assistant" class="${aiButtonClass} px-3 py-2 rounded-lg text-sm font-medium" title="${aiText}">
-                        <i class="${aiIcon} fa-fw text-lg"></i>
-                        <span class="hidden sm:inline ml-2">${aiText}</span>
+                    <button data-action="ai-assistant" class="text-gray-400 hover:text-white transition-colors p-2 rounded-lg hover:bg-gray-700/50" title="${aiText}">
+                        <i class="${aiIcon} text-lg ${aiIconShineClass}"></i>
                     </button>
-                    
+
                     <div class="relative">
                         <button data-action="inbox" class="text-gray-400 hover:text-teal-400 transition-colors p-2 rounded-lg hover:bg-gray-700/50" title="Messages">
                             <i class="fas fa-envelope text-lg"></i>
                             ${unreadCount > 0 ? `<span class="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">${unreadCount}</span>` : ''}
                         </button>
                     </div>
-                    
+
                     <button data-action="export-data" class="text-gray-400 hover:text-teal-400 transition-colors p-2 rounded-lg hover:bg-gray-700/50 hidden sm:block" title="Export Data">
                         <i class="fas fa-download text-lg"></i>
                     </button>
-                    
+
                     <button data-action="logout" class="bg-red-600 hover:bg-red-700 text-white px-3 py-2 rounded-lg text-sm font-medium transition-all" title="Logout">
                         <i class="fas fa-sign-out-alt"></i>
                         <span class="hidden sm:inline ml-2">Logout</span>
@@ -4733,12 +4719,12 @@ initializeHeaderAnimation() {
         </div>
     `;
 },
-
-       getSidebar() {
+// In script.js
+getSidebar() {
     const menuItems = [
         { key: 'dashboard', icon: 'fas fa-tachometer-alt', label: 'Dashboard', roles: ['admin', 'manager', 'worker'] },
         { key: 'tasks', icon: 'fas fa-tasks', label: 'Tasks', roles: ['admin', 'manager', 'worker'] },
-        { key: 'ai-assistant', icon: this.state.aiMode === 'ai' ? 'fas fa-brain' : 'fas fa-robot', label: this.state.aiMode === 'ai' ? 'AccuraAI' : 'AccuraBot', roles: ['admin', 'manager', 'worker'] },
+        { key: 'ai-assistant', icon: this.state.aiMode === 'ai' ? 'fas fa-crosshairs' : 'fas fa-robot', label: this.state.aiMode === 'ai' ? 'AccuraAI' : 'AccuraBot', roles: ['admin', 'manager', 'worker'] },
         { key: 'products', icon: 'fas fa-box', label: 'Products', roles: ['admin', 'manager', 'worker'] },
         { key: 'customers', icon: 'fas fa-users', label: 'Customers', roles: ['admin', 'manager', 'worker'] },
         { key: 'sales', icon: 'fas fa-shopping-cart', label: 'Sales', roles: ['admin', 'manager', 'worker'] },
@@ -4761,30 +4747,32 @@ initializeHeaderAnimation() {
 
     const sidebarContent = `
         <div class="p-6">
-            <!-- GRADIENT TEXT LOGO -->
             <div class="flex items-center mb-8">
               <div id="sidebar-logo-container" class="animated-header-container">
-    <h1 class="animated-header text-2xl font-bold">
-        <span style="--i:1">L</span><span style="--i:2">e</span><span style="--i:3">d</span><span style="--i:4">g</span><span style="--i:5">e</span><span style="--i:6">r</span><span style="--i:7">l</span><span style="--i:8">y</span>
-    </h1>
-</div>
+                <h1 class="animated-header text-2xl font-bold">
+                    <span style="--i:1">L</span><span style="--i:2">e</span><span style="--i:3">d</span><span style="--i:4">g</span><span style="--i:5">e</span><span style="--i:6">r</span><span style="--i:7">l</span><span style="--i:8">y</span>
+                </h1>
+              </div>
             </div>
-            
+
             <h3 class="text-sm font-semibold text-gray-400 uppercase tracking-wider mb-3">Navigation</h3>
             <ul class="space-y-2">
-                ${visibleItems.map(item => `
+                ${visibleItems.map(item => {
+                    const iconHtml = item.icon.startsWith('<div') ? item.icon : `<i class="${item.icon} fa-fw"></i>`;
+
+                    return `
                     <li>
                         <button data-action="${item.key}" 
                                 class="menu-item ${this.state.currentView === item.key ? 'active' : ''} ${item.key === 'ai-assistant' && this.state.aiMode === 'ai' ? 'ai-pulse' : item.key === 'ai-assistant' && this.state.aiMode === 'bot' ? 'bot-pulse' : ''}">
-                            <i class="${item.icon} fa-fw"></i>
+                            ${iconHtml}
                             <span class="font-medium">${item.label}</span>
                             ${item.key === 'inbox' && unreadCount > 0 ? `<span class="ml-auto bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">${unreadCount}</span>` : ''}
                             ${item.key === 'ai-assistant' ? `<span class="${this.state.aiMode === 'ai' ? 'text-purple-400' : 'text-green-400'} text-xs ml-auto">✨</span>` : ''}
                         </button>
                     </li>
-                `).join('')}
+                    `}).join('')}
             </ul>
-            
+
             <div class="mt-8 p-4 bg-gradient-to-r from-gray-800/50 to-gray-700/50 rounded-xl border border-gray-600/50">
                 <div class="text-center">
                     <h4 class="text-lg font-bold bg-gradient-to-r from-yellow-500 to-orange-500 bg-clip-text text-transparent mb-1">${this.state.companyName}</h4>
@@ -4801,7 +4789,7 @@ initializeHeaderAnimation() {
         <div id="mobile-sidebar" class="mobile-sidebar">
             ${sidebarContent}
         </div>
-        
+
         <div class="desktop-sidebar">
             ${sidebarContent}
         </div>
@@ -5131,6 +5119,7 @@ initializeHeaderAnimation() {
                 `;
             },
 
+// In script.js
 getAIAssistantView() {
     const categories = {
         admin: [
@@ -5154,13 +5143,14 @@ getAIAssistantView() {
     };
     const userRole = this.state.currentUser.role;
     const availableCategories = categories[userRole] || categories['worker'];
+    const aiIcon = this.state.aiMode === 'ai' ? 'fas fa-crosshairs' : 'fas fa-robot';
 
     return `
         <div class="space-y-6 fade-in">
             <div class="flex items-center justify-between flex-wrap gap-x-4 gap-y-2">
                 <div class="flex items-center space-x-4">
                     <div class="w-14 h-14 bg-gradient-to-r from-purple-500 to-pink-500 rounded-2xl flex items-center justify-center ai-pulse">
-                        <i class="fas fa-brain fa-fw text-white text-2xl"></i>
+                        <i class="${aiIcon} fa-fw text-white text-2xl"></i>
                     </div>
                     <div>
                         <h2 class="text-2xl font-bold ai-gradient-text">AccuraAI Assistant</h2>
@@ -5179,7 +5169,7 @@ getAIAssistantView() {
             </div>
 
             <div id="ai-response-container" class="mt-6 space-y-4"></div>
-            
+
             <div class="perplexity-card p-6 mt-6">
                  <div class="flex justify-between items-center mb-4 flex-wrap gap-y-2">
                     <h3 class="text-xl font-bold text-white flex items-center">
@@ -5230,7 +5220,7 @@ getAIAssistantView() {
                         </div>
                     `).join('')}
                 </div>
-                
+
                 <div id="custom-question-input-container" class="hidden mt-2">
                     <p class="text-gray-300 mb-3">Ask your question about <span id="selected-category-text" class="font-bold text-white"></span>:</p>
                     <div class="flex space-x-3">
@@ -5264,163 +5254,28 @@ showAICategories() {
 },
   
 // In script.js
-
-// FINAL FIX: Replace your entire animateTextGenerateEffect function with this one.
-animateTextGenerateEffect(container, htmlContent) {
-    const tempDiv = document.createElement('div');
-    tempDiv.innerHTML = htmlContent;
-
-    // Check if the AI returned structured HTML or just plain text
-    const hasStructure = tempDiv.querySelector('h2, p, li, h4, ol, ul');
-    
-    // If there is no structure, the AI has returned a malformed response.
-    // This new logic displays a clear error message instead of trying to fix it.
-    if (!hasStructure) {
-        container.innerHTML = `
-            <div class="ai-response-error">
-                <h4><i class="fas fa-exclamation-triangle"></i> AI Formatting Error</h4>
-                <p>The AI returned an improperly formatted response. This can sometimes happen with complex requests. Please try again.</p>
-            </div>
-        `;
-        return; // Stop the function here
-    }
-
-    // This code only runs if the HTML from the AI is valid.
-    container.innerHTML = htmlContent;
-
-    const lines = Array.from(container.children);
-    container.innerHTML = ''; // Clear container for animation
-
-    const lineDelay = 150;
-
-    lines.forEach((line, lineIndex) => {
-        line.style.opacity = 0;
-        
-        const textNodes = [];
-        const walk = document.createTreeWalker(line, NodeFilter.SHOW_TEXT, null, false);
-        let node;
-        while (node = walk.nextNode()) {
-            if (node.nodeValue.trim()) {
-                textNodes.push(node);
-            }
-        }
-
-        textNodes.forEach(node => {
-            const words = node.nodeValue.split(' ');
-            const fragment = document.createDocumentFragment();
-            words.forEach((word, wordIndex) => {
-                const span = document.createElement('span');
-                span.className = 'generated-word';
-                span.textContent = word + (wordIndex === words.length - 1 ? '' : ' ');
-                fragment.appendChild(span);
-            });
-            node.parentNode.replaceChild(fragment, node);
-        });
-
-        container.appendChild(line);
-
-        setTimeout(() => {
-            line.classList.add('animated-line');
-            line.style.opacity = 1;
-        }, lineIndex * lineDelay);
-
-        const wordSpans = line.querySelectorAll('.generated-word');
-        wordSpans.forEach((span, wordIndex) => {
-            const wordDelay = (lineIndex * lineDelay) + 200 + (wordIndex * 30);
-            span.style.animationDelay = `${wordDelay}ms`;
-        });
-    });
-},
+// This version uses the new "Accuracy" Target icon.
 async handleAiQuestion(questionText, categoryKey = 'general') {
     const responseContainer = document.getElementById('ai-response-container');
     if (!responseContainer) return;
 
-    // --- 1. SETUP & START THE GOOEY ANIMATION ---
     const interactionId = `interaction-${Date.now()}`;
     const newInteractionDiv = document.createElement('div');
     newInteractionDiv.id = interactionId;
     responseContainer.appendChild(newInteractionDiv);
 
-    if (this.state.morphAnimation) cancelAnimationFrame(this.state.morphAnimation);
-
-    const userName = this.state.currentUser.name.split(' ')[0];
-    const texts = this.generatePersonalizedMessages(userName, this.state.currentUser.role);
-    
+    // 1. Display the "thinking" message with the MORPHING target icon.
     newInteractionDiv.innerHTML = `
-        <div class="ai-answer-wrapper fade-in">
-            <div class="ai-answer-header">
-                <div class="ai-answer-icon"><i class="fas fa-brain ai-response-icon"></i></div>
-            </div>
-            <div class="ai-answer-body">
-                <div class="gooey-text-container" style="justify-content: flex-start; min-height: 60px; padding: 0;">
-                    <svg class="absolute h-0 w-0" aria-hidden="true">
-                        <defs><filter id="threshold"><feColorMatrix in="SourceGraphic" type="matrix" values="1 0 0 0 0 0 1 0 0 0 0 0 0 0 0 255 -160"/></filter></defs>
-                    </svg>
-                    <div class="gooey-text-wrapper" style="text-align: left;">
-                        <span id="gooey-text-1-${interactionId}" class="gooey-text"></span>
-                        <span id="gooey-text-2-${interactionId}" class="gooey-text"></span>
-                    </div>
-                </div>
+        <div class="ai-answer-header fade-in">
+            <div class="accura-icon loading"><i class="fas fa-crosshairs"></i></div>
+            <div class="clean-thinking-container">
+                <p class="thinking-text">AccuraAI is thinking</p>
             </div>
         </div>
     `;
     newInteractionDiv.scrollIntoView({ behavior: 'smooth', block: 'end' });
-    
-    const text1 = document.getElementById(`gooey-text-1-${interactionId}`);
-    const text2 = document.getElementById(`gooey-text-2-${interactionId}`);
-    if (!text1 || !text2) return;
 
-    let textIndex = 0;
-    let time = new Date();
-    let morph = 0;
-    const morphTime = 1;
-    const cooldownTime = 0.25;
-    let cooldown = cooldownTime;
-
-    text1.textContent = texts[textIndex % texts.length];
-    text2.textContent = texts[(textIndex + 1) % texts.length];
-
-    const setMorph = (fraction) => {
-        text2.style.filter = `blur(${Math.min(4 / fraction - 4, 100)}px)`;
-        text2.style.opacity = `${Math.pow(fraction, 0.4) * 100}%`;
-        fraction = 1 - fraction;
-        text1.style.filter = `blur(${Math.min(4 / fraction - 4, 100)}px)`;
-        text1.style.opacity = `${Math.pow(fraction, 0.4) * 100}%`;
-    };
-
-    const doCooldown = () => {
-        morph = 0;
-        text2.style.filter = ""; text2.style.opacity = "100%";
-        text1.style.filter = ""; text1.style.opacity = "0%";
-    };
-
-    const doMorph = () => {
-        morph -= cooldown; cooldown = 0;
-        let fraction = morph / morphTime;
-        if (fraction > 1) { cooldown = cooldownTime; fraction = 1; }
-        setMorph(fraction);
-    };
-
-    const animate = () => {
-        this.state.morphAnimation = requestAnimationFrame(animate);
-        const newTime = new Date();
-        const shouldIncrementIndex = cooldown > 0;
-        const dt = (newTime.getTime() - time.getTime()) / 1000;
-        time = newTime; cooldown -= dt;
-        if (cooldown <= 0) {
-            if (shouldIncrementIndex) {
-                textIndex = (textIndex + 1) % texts.length;
-                text1.textContent = texts[textIndex % texts.length];
-                text2.textContent = texts[(textIndex + 1) % texts.length];
-            }
-            doMorph();
-        } else {
-            doCooldown();
-        }
-    };
-    animate();
-
-    // --- 2. CALL THE REAL AI BACKEND ---
+    // 2. Call the AI backend.
     try {
         let contextData = {};
         const { sales, expenses, products, users, customers, lowStockThreshold, selectedCountry } = this.state;
@@ -5464,32 +5319,29 @@ async handleAiQuestion(questionText, categoryKey = 'general') {
 
         const data = await res.json();
         let aiResponseHtml = data.htmlResponse;
-        
-        if(this.state.morphAnimation) cancelAnimationFrame(this.state.morphAnimation);
-        
+
         const currentInteractionDiv = document.getElementById(interactionId);
         if (currentInteractionDiv) {
             const cleanedHtml = aiResponseHtml.replace(/^```html\s*|```$/g, '').trim();
+            const direction = selectedLanguage === 'Arabic' ? 'rtl' : 'ltr';
 
+            // 3. Display the final AI response with the STATIC target icon.
             currentInteractionDiv.innerHTML = `
-                <div class="ai-answer-wrapper fade-in">
-                    <div class="ai-answer-header">
-                        <div class="ai-answer-icon"><i class="fas fa-brain ai-response-icon"></i></div>
+                <div dir="${direction}">
+                    <div class="ai-answer-header fade-in">
+                        <div class="accura-icon"><i class="fas fa-crosshairs"></i></div>
                         <h3 class="ai-answer-title text-white text-xl font-bold">AccuraAI Response</h3>
                     </div>
-                    <div class="ai-answer-body"></div>
+                    <div class="ai-answer-body">
+                        ${cleanedHtml}
+                    </div>
                 </div>`;
-            
-            const answerBody = currentInteractionDiv.querySelector('.ai-answer-body');
-            this.animateTextGenerateEffect(answerBody, cleanedHtml);
 
             currentInteractionDiv.scrollIntoView({ behavior: 'smooth', block: 'end' });
         }
 
     } catch (error) {
         console.error("Error fetching AI response:", error);
-        if(this.state.morphAnimation) cancelAnimationFrame(this.state.morphAnimation);
-        
         const currentInteractionDiv = document.getElementById(interactionId);
         if (currentInteractionDiv) {
             currentInteractionDiv.innerHTML = `
@@ -5505,93 +5357,7 @@ async handleAiQuestion(questionText, categoryKey = 'general') {
 
 
 
-// Add this helper function for smooth morphing
-setMorphStyles(fraction, text1Content, text2Content) {
-    const text1 = document.getElementById('text1');
-    const text2 = document.getElementById('text2');
-    
-    if (!text1 || !text2) return;
-    
-    text2.style.filter = `blur(${Math.min(8 / fraction - 8, 100)}px)`;
-    text2.style.opacity = `${Math.pow(fraction, 0.4) * 100}%`;
-    
-    const invertedFraction = 1 - fraction;
-    text1.style.filter = `blur(${Math.min(8 / invertedFraction - 8, 100)}px)`;
-    text1.style.opacity = `${Math.pow(invertedFraction, 0.4) * 100}%`;
-    
-    text1.textContent = text1Content;
-    text2.textContent = text2Content;
-},
 
-// Modify your existing generateDetailedAnswer function to accept a categoryKey
-generateDetailedAnswer(questionText, userName, categoryKey = 'general') {
-    const currentData = this.state;
-    let answer = '';
-
-    // Example of how you might use categoryKey and questionText to generate a dynamic answer
-    // This is a placeholder. You would implement your actual AI logic here.
-    switch (categoryKey) {
-        case 'financial':
-            answer = `<p>Hello ${userName}, you asked about financial analysis: "${questionText}".</p>
-                      <p>Based on your current financial data, here's a detailed breakdown:</p>
-                      <ul>
-                          <li><strong>Total Revenue:</strong> ${this.formatCurrency(currentData.sales.reduce((sum, s) => sum + s.total, 0))}</li>
-                          <li><strong>Total Expenses:</strong> ${this.formatCurrency(currentData.expenses.reduce((sum, e) => sum + e.amount, 0))}</li>
-                          <li><strong>Net Profit:</strong> ${this.formatCurrency(currentData.sales.reduce((sum, s) => sum + s.total, 0) - currentData.expenses.reduce((sum, e) => sum + e.amount, 0))}</li>
-                          <li><strong>Recommendation:</strong> Consider reviewing your expense categories for potential savings.</li>
-                      </ul>`;
-            break;
-        case 'inventory':
-            const lowStockProducts = currentData.products.filter(p => p.stock <= currentData.lowStockThreshold);
-            answer = `<p>Hello ${userName}, you asked about inventory: "${questionText}".</p>
-                      <p>Here's an overview of your inventory:</p>
-                      <ul>
-                          <li><strong>Total Products:</strong> ${currentData.products.length}</li>
-                          <li><strong>Low Stock Items (below ${currentData.lowStockThreshold}):</strong> ${lowStockProducts.length > 0 ? lowStockProducts.map(p => p.name).join(', ') : 'None'}</li>
-                          <li><strong>Recommendation:</strong> Ensure timely reorders for critical items to avoid stockouts.</li>
-                      </ul>`;
-            break;
-        case 'employee':
-            const topEmployee = currentData.users.reduce((prev, current) => (prev.commission || 0) > (current.commission || 0) ? prev : current, { commission: 0 });
-            answer = `<p>Hello ${userName}, you asked about employee performance: "${questionText}".</p>
-                      <p>Here's some insight into your team:</p>
-                      <ul>
-                          <li><strong>Total Employees:</strong> ${currentData.users.length}</li>
-                          <li><strong>Top Performer (by commission):</strong> ${topEmployee.name} (${this.formatCurrency(topEmployee.commission)})</li>
-                          <li><strong>Recommendation:</strong> Implement regular performance reviews and training programs.</li>
-                      </ul>`;
-            break;
-        case 'sales-team':
-            const managerSales = currentData.sales.filter(s => s.salesPersonId === currentData.currentUser.id);
-            const teamSales = currentData.sales.filter(s => currentData.users.filter(u => u.role === 'worker').map(u => u.id).includes(s.salesPersonId));
-            answer = `<p>Hello ${userName}, you asked about sales team performance: "${questionText}".</p>
-                      <p>Your personal sales: ${this.formatCurrency(managerSales.reduce((sum, s) => sum + s.total, 0))}</p>
-                      <p>Total team sales: ${this.formatCurrency(teamSales.reduce((sum, s) => sum + s.total, 0))}</p>
-                      <p><strong>Recommendation:</strong> Consider setting team sales targets and incentives.</p>`;
-            break;
-        case 'my-performance':
-            const mySales = currentData.sales.filter(s => s.salesPersonId === currentData.currentUser.id);
-            answer = `<p>Hello ${userName}, you asked about your performance: "${questionText}".</p>
-                      <p>Your total sales: ${this.formatCurrency(mySales.reduce((sum, s) => sum + s.total, 0))}</p>
-                      <p>Your current commission: ${this.formatCurrency(currentData.currentUser.commission)}</p>
-                      <p><strong>Recommendation:</strong> Focus on high-value products to maximize commission.</p>`;
-            break;
-        // Add more cases for other categories and roles as needed
-        case 'general':
-        default:
-            answer = `<p>Hello ${userName}, you asked: "${questionText}".</p>
-                      <p>Thank you for your question. AccuraAI is processing your request within the '${categoryKey}' context.</p>
-                      <p>For a more specific answer, please provide more details. This is a placeholder response.</p>
-                      <p><strong>Recommendation:</strong> Ensure your data is up-to-date for the most accurate insights.</p>`;
-            break;
-    }
-
-    return `
-        <div class="ai-response-content">
-            ${answer}
-        </div>
-    `;
-},
 
  
 // Add this new function to the app object
@@ -5648,63 +5414,11 @@ copyToClipboard() {
 },
 
 
-// Add this helper function for smooth morphing
-setMorphStyles(fraction, text1Content, text2Content) {
-    const text1 = document.getElementById('text1');
-    const text2 = document.getElementById('text2');
-    
-    if (!text1 || !text2) return;
-    
-    text2.style.filter = `blur(${Math.min(8 / fraction - 8, 100)}px)`;
-    text2.style.opacity = `${Math.pow(fraction, 0.4) * 100}%`;
-    
-    const invertedFraction = 1 - fraction;
-    text1.style.filter = `blur(${Math.min(8 / invertedFraction - 8, 100)}px)`;
-    text1.style.opacity = `${Math.pow(invertedFraction, 0.4) * 100}%`;
-    
-    text1.textContent = text1Content;
-    text2.textContent = text2Content;
-},
-
-
-// Add copy to clipboard function
-copyToClipboard() {
-    const answerBody = document.querySelector('.ai-answer-body');
-    if (answerBody) {
-        const text = answerBody.innerText;
-        navigator.clipboard.writeText(text).then(() => {
-            NotificationSystem.success('Answer copied to clipboard!');
-        });
-    }
-},
 
 
 
-// Helper function to generate more personalized messages
-generatePersonalizedMessages(userName, role) {
-    const baseMessages = [
-        `Hello ${userName}, I'm analyzing your data...`,
-        `Processing insights specifically for you...`,
-        `${userName}, examining your performance metrics...`,
-        `Calculating optimal strategies for your role...`,
-        `Reviewing your recent activities...`,
-        `Almost done ${userName}, preparing recommendations...`
-    ];
-    
-    // Add role-specific messages
-    if (role === 'admin') {
-        baseMessages.push(`${userName}, analyzing company-wide performance...`);
-        baseMessages.push(`Reviewing all department metrics for you...`);
-    } else if (role === 'manager') {
-        baseMessages.push(`${userName}, evaluating team performance...`);
-        baseMessages.push(`Analyzing your department's efficiency...`);
-    } else if (role === 'worker') {
-        baseMessages.push(`${userName}, calculating your sales performance...`);
-        baseMessages.push(`Reviewing your commission opportunities...`);
-    }
-    
-    return baseMessages;
-},
+
+
 
             getAccuraBotView() {
                 const analysis = this.state.botAnalysis;
@@ -6719,83 +6433,84 @@ getReportsView() {
     `;
 },
 
+// In script.js
+// This is the updated function for the Settings page.
 getSettingsView() {
-                const currentUserRole = this.state.currentUser.role;
-                const currentTheme = document.body.className || 'default';
+    const currentUserRole = this.state.currentUser.role;
+    const currentTheme = document.body.className || 'dark-theme';
 
-                return `
-                    <div class="space-y-6 fade-in">
-                        <div>
-                            <h2 class="text-2xl font-bold text-white mb-2">Settings</h2>
-                            <p class="text-gray-400">Configure your application preferences</p>
-                        </div>
+    return `
+        <div class="space-y-6 fade-in">
+            <div>
+                <h2 class="text-2xl font-bold text-white mb-2">Settings</h2>
+                <p class="text-gray-400">Configure your application preferences</p>
+            </div>
 
-                        <div class="perplexity-card p-6">
-                            <h3 class="text-xl font-bold text-white mb-4 flex items-center">
-                                <i class="fas fa-paint-brush text-teal-400 mr-2"></i>
-                                Appearance
-                            </h3>
-                            <p class="text-gray-400 mb-4">Choose a theme that suits your style.</p>
-                            <div id="theme-selector" class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                                <div data-action="set-theme" data-theme="default" class="p-4 rounded-xl cursor-pointer border-2 ${currentTheme === 'default' ? 'border-accent-primary' : 'border-gray-700'} hover:border-accent-primary transition-all text-center" style="background-color: #0f1419;">
-                                    <div class="w-full h-16 rounded-lg mb-3 flex items-center justify-center" style="background: linear-gradient(135deg, #0f1419, #1a1f2e);"><span class="text-white font-bold">Aa</span></div>
-                                    <h4 class="font-semibold text-white">Default Dark</h4>
-                                </div>
-                               <div data-action="set-theme" data-theme="theme-light" class="p-4 rounded-xl cursor-pointer border-2 ${currentTheme === 'theme-light' ? 'border-accent-primary' : 'border-gray-700'} hover:border-accent-primary transition-all text-center" style="background-color: #ffffff;">
-                             <div class="w-full h-16 rounded-lg mb-3 flex items-center justify-center" style="background: #f8f9fa;"><span class="font-bold" style="color: #212529;">Aa</span></div>
-                            <h4 class="font-semibold" style="color: #212529;">Clear White</h4>
-                        </div>
-                                <div data-action="set-theme" data-theme="theme-black" class="p-4 rounded-xl cursor-pointer border-2 ${currentTheme === 'theme-black' ? 'border-accent-primary' : 'border-gray-700'} hover:border-accent-primary transition-all text-center" style="background-color: #000000;">
-                                     <div class="w-full h-16 rounded-lg mb-3 flex items-center justify-center" style="background: linear-gradient(135deg, #000000, #0c0c0c);"><span class="text-white font-bold">Aa</span></div>
-                                    <h4 class="font-semibold text-white">Pitch Black</h4>
-                                </div>
-                            </div>
-                        </div>
-
-                        ${['admin', 'manager'].includes(currentUserRole) ? `
-                        <div class="perplexity-card p-6">
-                            <h3 class="text-xl font-bold text-white mb-4 flex items-center">
-                                <i class="fas fa-building text-blue-400 mr-2"></i>
-                                Company Information
-                            </h3>
-                            <form id="company-settings-form" class="space-y-4">
-                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                    <div>
-                                        <label for="companyName" class="block text-sm font-medium text-gray-300 mb-2">Company Name</label>
-                                        <input type="text" id="companyName" name="companyName" class="form-input w-full" value="${this.state.companyName}" required>
-                                    </div>
-                                    <div>
-                                        <label for="lowStockThreshold" class="block text-sm font-medium text-gray-300 mb-2">Low Stock Threshold</label>
-                                        <input type="number" id="lowStockThreshold" name="lowStockThreshold" min="0" class="form-input w-full" value="${this.state.lowStockThreshold}" required>
-                                    </div>
-                                </div>
-                                <div class="flex justify-start pt-4">
-                                    <button type="submit" class="perplexity-button">Save Changes</button>
-                                </div>
-                            </form>
-                        </div>
-                        ` : ''}
-
-                        ${currentUserRole === 'admin' ? `
-                        <div class="perplexity-card p-6 border-l-4 border-red-500">
-                            <h3 class="text-xl font-bold text-white mb-4 flex items-center">
-                                <i class="fas fa-shield-alt text-red-400 mr-2"></i>
-                                Advanced Settings (Admin Only)
-                            </h3>
-                            <div class="space-y-4">
-                                <p class="text-gray-400">Manage security and critical data. Changes here are permanent.</p>
-                                <button data-action="export-data" class="bg-gray-600 hover:bg-gray-700 text-white font-medium py-2 px-4 rounded-xl w-full text-left">
-                                    <i class="fas fa-download mr-2"></i> Export All Business Data
-                                </button>
-                                <button class="bg-red-800 hover:bg-red-700 text-white font-medium py-2 px-4 rounded-xl w-full text-left">
-                                    <i class="fas fa-trash mr-2"></i> Clear All Data (Reset Application)
-                                </button>
-                            </div>
-                        </div>
-                        ` : ''}
+            <div class="perplexity-card p-6">
+                <h3 class="text-xl font-bold text-white mb-4 flex items-center">
+                    <i class="fas fa-paint-brush text-teal-400 mr-2"></i>
+                    Appearance
+                </h3>
+                <p class="text-gray-400 mb-4">Choose a theme that suits your style.</p>
+                <div id="theme-selector" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    
+                    <div data-action="set-theme" data-theme="dark-theme" class="p-4 rounded-xl cursor-pointer border-2 ${currentTheme === 'dark-theme' ? 'border-accent-primary' : 'border-gray-700'} hover:border-accent-primary transition-all text-center" style="background-color: #111827;">
+                        <div class="w-full h-16 rounded-lg mb-3 flex items-center justify-center" style="background: linear-gradient(135deg, #111827, #1F2937);"><span class="text-white font-bold">Aa</span></div>
+                        <h4 class="font-semibold text-white">Dark Mode</h4>
                     </div>
-                `;
-            },
+                    
+                    <div data-action="set-theme" data-theme="light-theme" class="p-4 rounded-xl cursor-pointer border-2 ${currentTheme === 'light-theme' ? 'border-accent-primary' : 'border-gray-700'} hover:border-accent-primary transition-all text-center" style="background-color: #ffffff;">
+                        <div class="w-full h-16 rounded-lg mb-3 flex items-center justify-center" style="background: #f8f9fa;"><span class="font-bold" style="color: #212529;">Aa</span></div>
+                        <h4 class="font-semibold" style="color: #212529;">Light Mode</h4>
+                    </div>
+
+                </div>
+            </div>
+
+            ${['admin', 'manager'].includes(currentUserRole) ? `
+            <div class="perplexity-card p-6">
+                <h3 class="text-xl font-bold text-white mb-4 flex items-center">
+                    <i class="fas fa-building text-blue-400 mr-2"></i>
+                    Company Information
+                </h3>
+                <form id="company-settings-form" class="space-y-4">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label for="companyName" class="block text-sm font-medium text-gray-300 mb-2">Company Name</label>
+                            <input type="text" id="companyName" name="companyName" class="form-input w-full" value="${this.state.companyName}" required>
+                        </div>
+                        <div>
+                            <label for="lowStockThreshold" class="block text-sm font-medium text-gray-300 mb-2">Low Stock Threshold</label>
+                            <input type="number" id="lowStockThreshold" name="lowStockThreshold" min="0" class="form-input w-full" value="${this.state.lowStockThreshold}" required>
+                        </div>
+                    </div>
+                    <div class="flex justify-start pt-4">
+                        <button type="submit" class="perplexity-button">Save Changes</button>
+                    </div>
+                </form>
+            </div>
+            ` : ''}
+
+            ${currentUserRole === 'admin' ? `
+            <div class="perplexity-card p-6 border-l-4 border-red-500">
+                <h3 class="text-xl font-bold text-white mb-4 flex items-center">
+                    <i class="fas fa-shield-alt text-red-400 mr-2"></i>
+                    Advanced Settings (Admin Only)
+                </h3>
+                <div class="space-y-4">
+                    <p class="text-gray-400">Manage security and critical data. Changes here are permanent.</p>
+                    <button data-action="export-data" class="bg-gray-600 hover:bg-gray-700 text-white font-medium py-2 px-4 rounded-xl w-full text-left">
+                        <i class="fas fa-download mr-2"></i> Export All Business Data
+                    </button>
+                    <button class="bg-red-800 hover:bg-red-700 text-white font-medium py-2 px-4 rounded-xl w-full text-left">
+                        <i class="fas fa-trash mr-2"></i> Clear All Data (Reset Application)
+                    </button>
+                </div>
+            </div>
+            ` : ''}
+        </div>
+    `;
+},
           // REPLACE your old getBranchHubView function with this new one.
 
 // REPLACE your old getBranchHubView function with this final version.
