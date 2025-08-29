@@ -426,6 +426,28 @@ const inboxNotifications = [
         duration: 5000,
     },
 ];
+// PASTE THIS ENTIRE BLOCK OF CODE RIGHT BEFORE "const app = { ... }"
+
+const AI_CATEGORIES = {
+    admin: [
+        { key: 'financial', icon: '<path d="M16 7h6v6"></path><path d="m22 7-8.5 8.5-5-5L2 17"></path>', text: 'Financial Analysis', subtext: 'Analyze revenue, expenses, and profit.', image: 'https://images.unsplash.com/photo-1635776062360-af423602aff3?w=800&q=80' },
+        { key: 'inventory', icon: '<path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"></path><path d="m3.3 7 8.7 5 8.7-5"></path><path d="M12 22V12"></path>', text: 'Inventory Insights', subtext: 'Get insights on stock levels and reorder points.', image: 'https://images.unsplash.com/photo-1579548122080-c35fd6820ecb?w=800&q=80' },
+        { key: 'employee', icon: '<path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M22 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path>', text: 'Employee Performance', subtext: 'Review sales, commissions, and productivity.', image: 'https://images.unsplash.com/photo-1635776062127-d379bfcba9f8?w=800&q=80' },
+        { key: 'general', icon: '<path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>', text: 'General Inquiry', subtext: 'Ask any other business-related question.', image: 'https://images.unsplash.com/photo-1635776063328-153b13e3c245?w=800&q=80' },
+    ],
+    manager: [
+        { key: 'sales-team', icon: '<path d="M3 13V9a4 4 0 0 1 4-4h10a4 4 0 0 1 4 4v4"></path><path d="M21 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-6"></path><path d="M8 21v-4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v4"></path><path d="M12 5V3"></path>', text: 'Sales Team Analysis', subtext: 'Analyze team sales and individual contributions.', image: 'https://images.unsplash.com/photo-1635776062360-af423602aff3?w=800&q=80' },
+        { key: 'expense-control', icon: '<path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10"></path><path d="m9 12 2 2 4-4"></path>', text: 'Expense Control', subtext: 'Identify spending patterns and savings opportunities.', image: 'https://images.unsplash.com/photo-1579548122080-c35fd6820ecb?w=800&q=80' },
+        { key: 'customer-relations', icon: '<path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"></path><path d="M12 5 9.04 7.96a2.17 2.17 0 0 0 0 3.08v0c.82.82 2.13.82 2.94 0l.06-.06L12 11l2.96-2.96a2.17 2.17 0 0 0 0-3.08v0c-.82-.82-2.13-.82-2.94 0L12 5Z"></path>', text: 'Customer Relations', subtext: 'Discover top customers and buying habits.', image: 'https://images.unsplash.com/photo-1635776062127-d379bfcba9f8?w=800&q=80' },
+        { key: 'task-management', icon: '<path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"></path><polyline points="14 2 14 8 20 8"></polyline><path d="m9 15 2 2 4-4"></path>', text: 'Task Management', subtext: 'Get updates on team tasks and progress.', image: 'https://images.unsplash.com/photo-1635776063328-153b13e3c245?w=800&q=80' },
+    ],
+    worker: [
+        { key: 'my-performance', icon: '<circle cx="12" cy="12" r="10"></circle><path d="m15 9-6 6"></path><path d="m9 9 6 6"></path>', text: 'My Performance', subtext: 'Check your sales, earnings, and commissions.', image: 'https://images.unsplash.com/photo-1635776062360-af423602aff3?w=800&q=80' },
+        { key: 'product-info', icon: '<path d="M10.1 2.2 3.2 5.1a2 2 0 0 0-1.2 1.8v8a2 2 0 0 0 1.2 1.8l6.9 2.9c.9.3 1.9.3 2.8 0l6.9-2.9a2 2 0 0 0 1.2-1.8v-8a2 2 0 0 0-1.2-1.8L13.9 2.2c-.9-.4-1.9-.4-2.8 0Z"></path><path d="m12 17-7-3 7-3 7 3-7 3Z"></path>', text: 'Product Information', subtext: 'Get details about stock, pricing, and features.', image: 'https://images.unsplash.com/photo-1579548122080-c35fd6820ecb?w=800&q=80' },
+        { key: 'customer-support', icon: '<circle cx="12" cy="12" r="10"></circle><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path><path d="M12 17h.01"></path>', text: 'Customer Support', subtext: 'Find customer history and information.', image: 'https://images.unsplash.com/photo-1635776062127-d379bfcba9f8?w=800&q=80' },
+        { key: 'daily-tasks', icon: '<path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><path d="m9 11 3 3L22 4"></path>', text: 'Daily Tasks & Goals', subtext: 'Review your current tasks and objectives.', image: 'https://images.unsplash.com/photo-1635776063328-153b13e3c245?w=800&q=80' },
+    ]
+};
         // Main Application
         const app = {
             serverUrl: 'https://ledgerly-backend-e8au.onrender.com',
@@ -720,7 +742,13 @@ nboxNotificationInterval: null,
         'reports': () => this.navigateToView('reports'),
         'settings': () => this.navigateToView('settings'),
         'inbox': () => this.navigateToView('inbox'),
-        'ai-assistant': () => this.navigateToView('accura-ai'),
+        'navigate-to-ai-or-bot': () => {
+    if (this.state.aiMode === 'bot') {
+        this.navigateToView('bot');
+    } else {
+        this.navigateToView('accura-ai');
+    }
+},
         'journal': () => this.navigateToView('journal'),
         'pnl': () => this.navigateToView('pnl'),
         'ledger': () => this.navigateToView('ledger'),
@@ -4535,15 +4563,16 @@ initializeHeaderAnimation() {
     // Then, set it to play again every 60 seconds
     this.animationInterval = setInterval(playAnimation, 15000);
 },
-
+// START: REPLACEMENT FOR setTheme
            setTheme(themeName) {
-    document.body.className = themeName;
+    document.body.className = themeName === 'default' ? '' : themeName;
     DataStorage.save('ledgerlyTheme', themeName);
     if (this.state.currentView === 'settings') {
-        this.render(); // Re-render to update selection
+        this.render(); // Re-render the settings view to update the selection border
     }
     NotificationSystem.success(`Theme changed successfully!`);
 },
+// END: REPLACEMENT FOR setTheme
 
            animateDashboardNumbers() {
                 document.querySelectorAll('.animated-number').forEach(element => {
@@ -4641,15 +4670,11 @@ initializeHeaderAnimation() {
             },
 
          
+// START: REPLACEMENT FOR getNavbar
 
-            
-
-// In script.js
-// FINAL VERSION of getNavbar() with shine effect class
 getNavbar() {
     const unreadCount = this.getUnreadMessageCount();
     const aiIcon = this.state.aiMode === 'ai' ? 'fas fa-crosshairs' : 'fas fa-robot';
-    // This new line adds a class for the shine effect based on the current mode
     const aiIconShineClass = this.state.aiMode === 'ai' ? 'ai-icon-shine' : 'bot-icon-shine';
     const aiText = this.state.aiMode === 'ai' ? 'AccuraAI' : 'AccuraBot';
     const countryInfo = GCC_COUNTRIES[this.state.selectedCountry];
@@ -4695,7 +4720,7 @@ getNavbar() {
                         <span class="hidden sm:inline ml-2">Quick Sale</span>
                     </button>
 
-                    <button data-action="ai-assistant" class="text-gray-400 hover:text-white transition-colors p-2 rounded-lg hover:bg-gray-700/50" title="${aiText}">
+                    <button data-action="navigate-to-ai-or-bot" class="text-gray-400 hover:text-white transition-colors p-2 rounded-lg hover:bg-gray-700/50" title="${aiText}">
                         <i class="${aiIcon} text-lg ${aiIconShineClass}"></i>
                     </button>
 
@@ -4719,12 +4744,17 @@ getNavbar() {
         </div>
     `;
 },
-// In script.js
+
+// END: REPLACEMENT FOR getNavbar
+            
+
+
+
 getSidebar() {
     const menuItems = [
         { key: 'dashboard', icon: 'fas fa-tachometer-alt', label: 'Dashboard', roles: ['admin', 'manager', 'worker'] },
         { key: 'tasks', icon: 'fas fa-tasks', label: 'Tasks', roles: ['admin', 'manager', 'worker'] },
-        { key: 'ai-assistant', icon: this.state.aiMode === 'ai' ? 'fas fa-crosshairs' : 'fas fa-robot', label: this.state.aiMode === 'ai' ? 'AccuraAI' : 'AccuraBot', roles: ['admin', 'manager', 'worker'] },
+        { key: 'navigate-to-ai-or-bot', icon: this.state.aiMode === 'ai' ? 'fas fa-crosshairs' : 'fas fa-robot', label: this.state.aiMode === 'ai' ? 'AccuraAI' : 'AccuraBot', roles: ['admin', 'manager', 'worker'] },
         { key: 'products', icon: 'fas fa-box', label: 'Products', roles: ['admin', 'manager', 'worker'] },
         { key: 'customers', icon: 'fas fa-users', label: 'Customers', roles: ['admin', 'manager', 'worker'] },
         { key: 'sales', icon: 'fas fa-shopping-cart', label: 'Sales', roles: ['admin', 'manager', 'worker'] },
@@ -4758,19 +4788,22 @@ getSidebar() {
             <h3 class="text-sm font-semibold text-gray-400 uppercase tracking-wider mb-3">Navigation</h3>
             <ul class="space-y-2">
                 ${visibleItems.map(item => {
-                    const iconHtml = item.icon.startsWith('<div') ? item.icon : `<i class="${item.icon} fa-fw"></i>`;
+                    
+                    const isAiBotLink = item.key === 'navigate-to-ai-or-bot';
+                    const shineClass = isAiBotLink 
+                        ? (this.state.aiMode === 'ai' ? 'ai-icon-shine' : 'bot-icon-shine') 
+                        : '';
 
                     return `
                     <li>
-                        <button data-action="${item.key}" 
-                                class="menu-item ${this.state.currentView === item.key ? 'active' : ''} ${item.key === 'ai-assistant' && this.state.aiMode === 'ai' ? 'ai-pulse' : item.key === 'ai-assistant' && this.state.aiMode === 'bot' ? 'bot-pulse' : ''}">
-                            ${iconHtml}
+                        <button data-action="${item.key}" class="menu-item ${this.state.currentView === item.key || (isAiBotLink && ['accura-ai', 'bot'].includes(this.state.currentView)) ? 'active' : ''}">
+                            <i class="${item.icon} fa-fw ${shineClass}"></i>
                             <span class="font-medium">${item.label}</span>
                             ${item.key === 'inbox' && unreadCount > 0 ? `<span class="ml-auto bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">${unreadCount}</span>` : ''}
-                            ${item.key === 'ai-assistant' ? `<span class="${this.state.aiMode === 'ai' ? 'text-purple-400' : 'text-green-400'} text-xs ml-auto">✨</span>` : ''}
                         </button>
                     </li>
                     `}).join('')}
+                    
             </ul>
 
             <div class="mt-8 p-4 bg-gradient-to-r from-gray-800/50 to-gray-700/50 rounded-xl border border-gray-600/50">
@@ -4795,6 +4828,8 @@ getSidebar() {
         </div>
     `;
 },
+
+
 
          getDashboardView() {
                 const { currentUser, users, sales, expenses, products, customers } = this.state;
@@ -5120,29 +5155,11 @@ getSidebar() {
             },
 
 // In script.js
+// REPLACE your old getAIAssistantView function with this new one
+
 getAIAssistantView() {
-    const categories = {
-        admin: [
-            { key: 'financial', icon: '<path d="m16 18 6-6-6-6"></path><path d="m8 6-6 6 6 6"></path>', text: 'Financial Analysis', subtext: 'Analyze revenue, expenses, and profit.', image: 'https://images.unsplash.com/photo-1635776062360-af423602aff3?w=800&q=80', stat_icon: '<path d="M16 7h6v6"></path><path d="m22 7-8.5 8.5-5-5L2 17"></path>', stat_text: '95% accuracy rate'},
-            { key: 'inventory', icon: '<path d="M15.707 21.293a1 1 0 0 1-1.414 0l-1.586-1.586a1 1 0 0 1 0-1.414l5.586-5.586a1 1 0 0 1 1.414 0l1.586 1.586a1 1 0 0 1 0 1.414z"></path><path d="m18 13-1.375-6.874a1 1 0 0 0-.746-.776L3.235 2.028a1 1 0 0 0-1.207 1.207L5.35 15.879a1 1 0 0 0 .776.746L13 18"></path><path d="m2.3 2.3 7.286 7.286"></path><circle cx="11" cy="11" r="2"></circle>', text: 'Inventory Management', subtext: 'Get insights on stock levels and reorder points.', image: 'https://images.unsplash.com/photo-1579548122080-c35fd6820ecb?w=800&q=80', stat_icon: '<path d="M9.937 15.5A2 2 0 0 0 8.5 14.063l-6.135-1.582a.5.5 0 0 1 0-.962L8.5 9.936A2 2 0 0 0 9.937 8.5l1.582-6.135a.5.5 0 0 1 .963 0L14.063 8.5A2 2 0 0 0 15.5 9.937l6.135 1.581a.5.5 0 0 1 0 .964L15.5 14.063a2 2 0 0 0-1.437 1.437l-1.582 6.135a.5.5 0 0 1-.963 0z"></path><path d="M20 3v4"></path><path d="M22 5h-4"></path><path d="M4 17v2"></path><path d="M5 18H3"></path>', stat_text: 'Human-like quality' },
-            { key: 'employee', icon: '<line x1="12" x2="12" y1="20" y2="10"></line><line x1="18" x2="18" y1="20" y2="4"></line><line x1="6" x2="6" y1="20" y2="16"></line>', text: 'Employee Performance', subtext: 'Review sales, commissions, and productivity.', image: 'https://images.unsplash.com/photo-1635776062127-d379bfcba9f8?w=800&q=80', stat_icon: '<path d="M2.062 12.348a1 1 0 0 1 0-.696 10.75 10.75 0 0 1 19.876 0 1 1 0 0 1 0 .696 10.75 10.75 0 0 1-19.876 0"></path><circle cx="12" cy="12" r="3"></circle>', stat_text: 'Real-time insights'},
-            { key: 'general', icon: '<rect width="8" height="8" x="3" y="3" rx="2"></rect><path d="M7 11v4a2 2 0 0 0 2 2h4"></path><rect width="8" height="8" x="13" y="13" rx="2"></rect>', text: 'General Inquiry', subtext: 'Ask any other business-related question.', image: 'https://images.unsplash.com/photo-1635776063328-153b13e3c245?w=800&q=80', stat_icon: '<path d="M12 6v6l4 2"></path><circle cx="12" cy="12" r="10"></circle>', stat_text: 'Save 40+ hours/week' },
-        ],
-        manager: [
-            { key: 'sales-team', icon: '<path d="m16 18 6-6-6-6"></path><path d="m8 6-6 6 6 6"></path>', text: 'Sales Team Performance', subtext: 'Analyze team sales and individual contributions.', image: 'https://images.unsplash.com/photo-1635776062360-af423602aff3?w=800&q=80', stat_icon: '<path d="M16 7h6v6"></path><path d="m22 7-8.5 8.5-5-5L2 17"></path>', stat_text: '95% accuracy rate'},
-            { key: 'expense-control', icon: '<path d="M15.707 21.293a1 1 0 0 1-1.414 0l-1.586-1.586a1 1 0 0 1 0-1.414l5.586-5.586a1 1 0 0 1 1.414 0l1.586 1.586a1 1 0 0 1 0 1.414z"></path><path d="m18 13-1.375-6.874a1 1 0 0 0-.746-.776L3.235 2.028a1 1 0 0 0-1.207 1.207L5.35 15.879a1 1 0 0 0 .776.746L13 18"></path><path d="m2.3 2.3 7.286 7.286"></path><circle cx="11" cy="11" r="2"></circle>', text: 'Expense Control', subtext: 'Identify spending patterns and savings opportunities.', image: 'https://images.unsplash.com/photo-1579548122080-c35fd6820ecb?w=800&q=80', stat_icon: '<path d="M9.937 15.5A2 2 0 0 0 8.5 14.063l-6.135-1.582a.5.5 0 0 1 0-.962L8.5 9.936A2 2 0 0 0 9.937 8.5l1.582-6.135a.5.5 0 0 1 .963 0L14.063 8.5A2 2 0 0 0 15.5 9.937l6.135 1.581a.5.5 0 0 1 0 .964L15.5 14.063a2 2 0 0 0-1.437 1.437l-1.582 6.135a.5.5 0 0 1-.963 0z"></path><path d="M20 3v4"></path><path d="M22 5h-4"></path><path d="M4 17v2"></path><path d="M5 18H3"></path>', stat_text: 'Human-like quality' },
-            { key: 'customer-relations', icon: '<line x1="12" x2="12" y1="20" y2="10"></line><line x1="18" x2="18" y1="20" y2="4"></line><line x1="6" x2="6" y1="20" y2="16"></line>', text: 'Customer Relations', subtext: 'Discover top customers and buying habits.', image: 'https://images.unsplash.com/photo-1635776062127-d379bfcba9f8?w=800&q=80', stat_icon: '<path d="M2.062 12.348a1 1 0 0 1 0-.696 10.75 10.75 0 0 1 19.876 0 1 1 0 0 1 0 .696 10.75 10.75 0 0 1-19.876 0"></path><circle cx="12" cy="12" r="3"></circle>', stat_text: 'Real-time insights'},
-            { key: 'task-management', icon: '<rect width="8" height="8" x="3" y="3" rx="2"></rect><path d="M7 11v4a2 2 0 0 0 2 2h4"></path><rect width="8" height="8" x="13" y="13" rx="2"></rect>', text: 'Task Management', subtext: 'Get updates on team tasks and progress.', image: 'https://images.unsplash.com/photo-1635776063328-153b13e3c245?w=800&q=80', stat_icon: '<path d="M12 6v6l4 2"></path><circle cx="12" cy="12" r="10"></circle>', stat_text: 'Save 40+ hours/week' },
-        ],
-        worker: [
-            { key: 'my-performance', icon: '<path d="m16 18 6-6-6-6"></path><path d="m8 6-6 6 6 6"></path>', text: 'My Performance', subtext: 'Check your sales, earnings, and commissions.', image: 'https://images.unsplash.com/photo-1635776062360-af423602aff3?w=800&q=80', stat_icon: '<path d="M16 7h6v6"></path><path d="m22 7-8.5 8.5-5-5L2 17"></path>', stat_text: '95% accuracy rate'},
-            { key: 'product-info', icon: '<path d="M15.707 21.293a1 1 0 0 1-1.414 0l-1.586-1.586a1 1 0 0 1 0-1.414l5.586-5.586a1 1 0 0 1 1.414 0l1.586 1.586a1 1 0 0 1 0 1.414z"></path><path d="m18 13-1.375-6.874a1 1 0 0 0-.746-.776L3.235 2.028a1 1 0 0 0-1.207 1.207L5.35 15.879a1 1 0 0 0 .776.746L13 18"></path><path d="m2.3 2.3 7.286 7.286"></path><circle cx="11" cy="11" r="2"></circle>', text: 'Product Information', subtext: 'Get details about stock, pricing, and features.', image: 'https://images.unsplash.com/photo-1579548122080-c35fd6820ecb?w=800&q=80', stat_icon: '<path d="M9.937 15.5A2 2 0 0 0 8.5 14.063l-6.135-1.582a.5.5 0 0 1 0-.962L8.5 9.936A2 2 0 0 0 9.937 8.5l1.582-6.135a.5.5 0 0 1 .963 0L14.063 8.5A2 2 0 0 0 15.5 9.937l6.135 1.581a.5.5 0 0 1 0 .964L15.5 14.063a2 2 0 0 0-1.437 1.437l-1.582 6.135a.5.5 0 0 1-.963 0z"></path><path d="M20 3v4"></path><path d="M22 5h-4"></path><path d="M4 17v2"></path><path d="M5 18H3"></path>', stat_text: 'Human-like quality' },
-            { key: 'customer-support', icon: '<line x1="12" x2="12" y1="20" y2="10"></line><line x1="18" x2="18" y1="20" y2="4"></line><line x1="6" x2="6" y1="20" y2="16"></line>', text: 'Customer Support', subtext: 'Find customer history and information.', image: 'https://images.unsplash.com/photo-1635776062127-d379bfcba9f8?w=800&q=80', stat_icon: '<path d="M2.062 12.348a1 1 0 0 1 0-.696 10.75 10.75 0 0 1 19.876 0 1 1 0 0 1 0 .696 10.75 10.75 0 0 1-19.876 0"></path><circle cx="12" cy="12" r="3"></circle>', stat_text: 'Real-time insights'},
-            { key: 'daily-tasks', icon: '<rect width="8" height="8" x="3" y="3" rx="2"></rect><path d="M7 11v4a2 2 0 0 0 2 2h4"></path><rect width="8" height="8" x="13" y="13" rx="2"></rect>', text: 'Daily Tasks & Goals', subtext: 'Review your current tasks and objectives.', image: 'https://images.unsplash.com/photo-1635776063328-153b13e3c245?w=800&q=80', stat_icon: '<path d="M12 6v6l4 2"></path><circle cx="12" cy="12" r="10"></circle>', stat_text: 'Save 40+ hours/week' },
-        ]
-    };
     const userRole = this.state.currentUser.role;
-    const availableCategories = categories[userRole] || categories['worker'];
+    const availableCategories = AI_CATEGORIES[userRole] || AI_CATEGORIES['worker'];
     const aiIcon = this.state.aiMode === 'ai' ? 'fas fa-crosshairs' : 'fas fa-robot';
 
     return `
@@ -5180,9 +5197,6 @@ getAIAssistantView() {
                         <select id="ai-language-selector" class="form-input bg-gray-800/50 !border-gray-600 py-1 text-sm w-auto">
                             <option value="English">English</option>
                             <option value="Arabic">Arabic</option>
-                            <option value="Spanish">Spanish</option>
-                            <option value="French">French</option>
-                            <option value="Hindi">Hindi</option>
                         </select>
                         <button id="ai-back-button" class="hidden text-sm text-blue-400 hover:text-blue-300 transition-colors whitespace-nowrap" onclick="app.showAICategories()">
                             <i class="fas fa-arrow-left mr-2"></i>Back to Categories
@@ -5190,37 +5204,24 @@ getAIAssistantView() {
                     </div>
                 </div>
 
-                <div id="ai-category-grid" class="grid w-full grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                <div id="ai-category-grid" class="grid grid-cols-2 lg:grid-cols-4 gap-4">
                     ${availableCategories.map((cat, index) => `
                         <div 
-                            class="scale-in group cursor-pointer"
-                            style="animation-delay: ${index * 100}ms;"
+                            class="ai-category-card scale-in"
+                            style="--bg-image: url(${cat.image}); animation-delay: ${index * 100}ms;"
                             onclick="app.showCustomQuestionInput('${cat.key}', '${cat.text}')"
                         >
-                            <div
-                                class="relative transform overflow-hidden rounded-2xl p-6 shadow-lg transition-all duration-300 group-hover:scale-105 hover:shadow-xl h-full flex flex-col"
-                                style="background-image: url(${cat.image}); background-size: cover;"
-                            >
-                                <div class="relative flex-grow">
-                                    <div class="mb-4 flex h-12 w-12 items-center justify-center rounded-lg bg-white/20 backdrop-blur-sm">
-                                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-6 w-6 text-white">
-                                            ${cat.icon}
-                                        </svg>
-                                    </div>
-                                    <h3 class="mb-2 text-lg font-medium text-white">${cat.text}</h3>
-                                    <p class="mb-4 text-sm text-white/80">${cat.subtext}</p>
-                                </div>
-                                <div class="flex items-center text-white/60 mt-auto">
-                                      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-1 h-4 w-4">
-                                        ${cat.stat_icon}
-                                      </svg>
-                                      <span class="text-xs">${cat.stat_text}</span>
-                                </div>
+                            <div class="ai-category-icon-wrapper">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    ${cat.icon}
+                                </svg>
                             </div>
+                            <h3 class="text-lg font-semibold text-white mt-4">${cat.text}</h3>
+                            <p class="text-sm text-white/70 mt-1 mb-4 flex-grow">${cat.subtext}</p>
                         </div>
                     `).join('')}
                 </div>
-
+                
                 <div id="custom-question-input-container" class="hidden mt-2">
                     <p class="text-gray-300 mb-3">Ask your question about <span id="selected-category-text" class="font-bold text-white"></span>:</p>
                     <div class="flex space-x-3">
@@ -6433,11 +6434,10 @@ getReportsView() {
     `;
 },
 
-// In script.js
-// This is the updated function for the Settings page.
+// START: REPLACEMENT FOR getSettingsView
 getSettingsView() {
     const currentUserRole = this.state.currentUser.role;
-    const currentTheme = document.body.className || 'dark-theme';
+    const currentTheme = document.body.className || 'default';
 
     return `
         <div class="space-y-6 fade-in">
@@ -6452,18 +6452,19 @@ getSettingsView() {
                     Appearance
                 </h3>
                 <p class="text-gray-400 mb-4">Choose a theme that suits your style.</p>
-                <div id="theme-selector" class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    
-                    <div data-action="set-theme" data-theme="dark-theme" class="p-4 rounded-xl cursor-pointer border-2 ${currentTheme === 'dark-theme' ? 'border-accent-primary' : 'border-gray-700'} hover:border-accent-primary transition-all text-center" style="background-color: #111827;">
-                        <div class="w-full h-16 rounded-lg mb-3 flex items-center justify-center" style="background: linear-gradient(135deg, #111827, #1F2937);"><span class="text-white font-bold">Aa</span></div>
-                        <h4 class="font-semibold text-white">Dark Mode</h4>
+                <div id="theme-selector" class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div data-action="set-theme" data-theme="default" class="p-4 rounded-xl cursor-pointer border-2 ${currentTheme === 'default' ? 'border-accent-primary' : 'border-gray-700'} hover:border-accent-primary transition-all text-center" style="background-color: #0f1419;">
+                        <div class="w-full h-16 rounded-lg mb-3 flex items-center justify-center" style="background: linear-gradient(135deg, #0f1419, #1a1f2e);"><span class="text-white font-bold">Aa</span></div>
+                        <h4 class="font-semibold text-white">Default Dark</h4>
                     </div>
-                    
-                    <div data-action="set-theme" data-theme="light-theme" class="p-4 rounded-xl cursor-pointer border-2 ${currentTheme === 'light-theme' ? 'border-accent-primary' : 'border-gray-700'} hover:border-accent-primary transition-all text-center" style="background-color: #ffffff;">
-                        <div class="w-full h-16 rounded-lg mb-3 flex items-center justify-center" style="background: #f8f9fa;"><span class="font-bold" style="color: #212529;">Aa</span></div>
-                        <h4 class="font-semibold" style="color: #212529;">Light Mode</h4>
+                   <div data-action="set-theme" data-theme="theme-light" class="p-4 rounded-xl cursor-pointer border-2 ${currentTheme === 'theme-light' ? 'border-accent-primary' : 'border-gray-700'} hover:border-accent-primary transition-all text-center" style="background-color: #ffffff;">
+                 <div class="w-full h-16 rounded-lg mb-3 flex items-center justify-center" style="background: #f8f9fa;"><span class="font-bold" style="color: #212529;">Aa</span></div>
+                <h4 class="font-semibold" style="color: #212529;">Clear White</h4>
+            </div>
+                    <div data-action="set-theme" data-theme="theme-black" class="p-4 rounded-xl cursor-pointer border-2 ${currentTheme === 'theme-black' ? 'border-accent-primary' : 'border-gray-700'} hover:border-accent-primary transition-all text-center" style="background-color: #000000;">
+                         <div class="w-full h-16 rounded-lg mb-3 flex items-center justify-center" style="background: linear-gradient(135deg, #000000, #0c0c0c);"><span class="text-white font-bold">Aa</span></div>
+                        <h4 class="font-semibold text-white">Pitch Black</h4>
                     </div>
-
                 </div>
             </div>
 
@@ -6511,6 +6512,7 @@ getSettingsView() {
         </div>
     `;
 },
+// END: REPLACEMENT FOR getSettingsView
           // REPLACE your old getBranchHubView function with this new one.
 
 // REPLACE your old getBranchHubView function with this final version.
