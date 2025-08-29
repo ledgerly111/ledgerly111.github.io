@@ -48,140 +48,111 @@
     from { width: 0%; left: 50%; }
     to { width: 100%; left: 0; }
 }
-:root {
-    --bg-primary: #0f1419;
-    --bg-secondary: #1a1f2e;
-    --bg-tertiary: #242938;
-    --text-primary: #00eeffbe;
-    --text-secondary: #b4bcd0;
-    --text-muted: #6b7280;
-    --accent-primary: #00d4aa;
-    --accent-secondary: #0ea5e9;
-    --border-color: #374151;
-    --hover-bg: #1f2937;
-    --ai-color: #6726ff;
-    --bot-color: #00a46d;
-    --positive-color: #3b82f6;
-    --negative-color: #ef4444;
-    --gold-color: #f59e0b;
-    --quick-sale-bg: #0a1a3a; /* Darker blue for quick sale */
-    --quick-sale-accent: #0419f8; /* Shining blue for quick sale */
+/* In style.css */
+/* === NEW THEME SYSTEM (DARK & LIGHT) === */
+
+/* This is now the default dark theme for the entire application. */
+.dark-theme {
+    --bg-primary: #3a3838fa;      /* Very dark indigo */
+    --bg-secondary: #2b2b2b;    /* Dark slate for cards */
+    --bg-tertiary: #2d2d2d;     /* Lighter slate for inner elements */
+    --text-primary: #F9FAFB;     /* Near-white for primary text */
+    --text-secondary: #D1D5DB;   /* Light gray for secondary text */
+    --text-muted: #9CA3AF;       /* Muted gray */
+    --border-color: #4B5563;     /* Subtle border color */
+    --hover-bg: #4B5563;
+    --ai-color: #A78BFA;         /* Vibrant Purple */
+    --bot-color: #34D399;        /* Vibrant Green */
+    --positive-color: #60A5FA;   /* Vibrant Blue */
+    --negative-color: #F87171;   /* Vibrant Red */
+    --gold-color: #FBBF24;       /* Vibrant Yellow/Gold */
+    --quick-sale-bg: #1e293b;
+    --quick-sale-accent: #3b82f6;
+    --accent-primary: #34D399;   /* Main accent (Green) */
+    --accent-secondary: #60A5FA; /* Secondary accent (Blue) */
+    --card-bg: var(--bg-secondary); /* Or #1F2937 */
 }
 
-        
-
-     /* === FINAL "CLEAR WHITE" (LIGHT) THEME V4 === */
-        .theme-light {
-            --bg-primary: #ffffff;
-            --bg-secondary: #f8f9fa;
-            --bg-tertiary: #e9ecef;
-            --text-primary: #212529;
-            --text-secondary: #495057;
-            --text-muted: #6c757d;
-            --border-color: #dee2e6;
-            --hover-bg: #e9ecef;
-        }
-        /* General Text & Element Overrides */
-        .theme-light .text-white,
-        .theme-light .text-gray-300,
-        .theme-light .text-gray-400,
-        .theme-light .text-d1d5db {
-            color: var(--text-primary) !important;
-        }
-        .theme-light p, .theme-light h1, .theme-light h2, .theme-light h3, .theme-light h4, .theme-light span, .theme-light div, .theme-light th, .theme-light td {
-            border-color: var(--border-color) !important;
-        }
-        .theme-light h1, .theme-light h2, .theme-light h3, .theme-light h4, .theme-light .font-bold, .theme-light .font-semibold {
-             color: var(--text-primary);
-        }
-        .theme-light .text-gray-500 {
-            color: var(--text-muted) !important;
-        }
-
-        /* Specific Color Text Overrides */
-        .theme-light .text-red-400 { color: #dc3545 !important; }
-        .theme-light .text-green-400 { color: #198754 !important; }
-        .theme-light .text-blue-400 { color: #0d6efd !important; }
-        .theme-light .text-yellow-400 { color: #D48806 !important; }
-        .theme-light .text-purple-400 { color: #6f42c1 !important; }
-        .theme-light .text-teal-400 { color: #20c997 !important; }
-        
-        /* Gradient Text Override */
-        .theme-light .gradient-text {
-            background: linear-gradient(135deg, #0d6efd 0%, #6f42c1 100%);
-            -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
-        }
-        
-        /* Header Buttons */
-        .theme-light .quick-sale-button, .theme-light .ai-button, .theme-light .bot-button, .theme-light .bg-red-600 {
-            background: var(--bg-secondary) !important; border: 1px solid var(--border-color) !important;
-            color: var(--text-secondary) !important; box-shadow: none !important;
-        }
-        .theme-light .quick-sale-button:hover, .theme-light .ai-button:hover, .theme-light .bot-button:hover, .theme-light .bg-red-600:hover {
-            background: var(--hover-bg) !important; color: var(--text-primary) !important; border-color: #b3b3b3 !important;
-        }
-
-        /* THIS RESTORES THE MAIN AI/BOT ICON BACKGROUNDS */
-        .theme-light .ai-pulse {
-            background: linear-gradient(135deg, var(--ai-color) 0%, #a855f7 100%) !important;
-        }
-        .theme-light .bot-pulse {
-            background: linear-gradient(135deg, var(--bot-color) 0%, #059669 100%) !important;
-        }
-        .theme-light .ai-pulse i, .theme-light .bot-pulse i {
-            color: white !important; /* Ensures icon inside is white */
-        }
-
-        /* Card and Form Overrides */
-        .theme-light .perplexity-card { background: var(--bg-primary); box-shadow: 0 4px 12px rgba(0,0,0,0.08); border-color: var(--border-color); }
-        .theme-light .form-input { background: #ffffff !important; border-color: #ced4da !important; color: var(--text-primary) !important; }
-        .theme-light .modal-content { background: var(--bg-primary); border-color: var(--border-color); }
-
-        /* Special Card Overrides with Brand Colors */
-        .theme-light .ai-card { background: rgba(111, 66, 193, 0.07) !important; border-color: rgba(111, 66, 193, 0.2) !important; }
-        .theme-light .bot-card { background: rgba(25, 135, 84, 0.07) !important; border-color: rgba(25, 135, 84, 0.2) !important; }
-        .theme-light .ai-answer-container { background: var(--bg-secondary); }
-
-        /* Gray Background Overrides */
-        .theme-light .bg-gray-800\/50, .theme-light .odd\:bg-gray-800\/10:nth-child(odd) { background-color: var(--bg-tertiary) !important; }
-        .theme-light [class*="bg-"][class*="\/10"], .theme-light [class*="bg-"][class*="\/20"] { background-color: rgba(0, 0, 0, 0.03) !important; }
-        .theme-light [class*="border-"][class*="\/30"] { border-color: var(--border-color) !important; }
-
-        /* Sidebar, Navbar, and Tabs */
-        .theme-light .menu-item.active { color: var(--accent-primary); background: rgba(0, 212, 170, 0.1); }
-        .theme-light .navbar, .theme-light .mobile-sidebar, .theme-light .desktop-sidebar { 
-    background: color-mix(in srgb, var(--bg-primary) 80%, transparent); 
-    border-color: color-mix(in srgb, var(--text-primary) 15%, transparent); 
+/* This is the light theme. */
+.light-theme {
+    --bg-primary: #ffffff;
+    --bg-secondary: #f8f9fa;
+    --bg-tertiary: #e9ecef;
+    --text-primary: #1d1e1f;
+    --text-secondary: #495057;
+    --text-muted: #6c757d;
+    --border-color: #dee2e6;
+    --hover-bg: #e9ecef;
+    --ai-color: #8B5CF6;
+    --bot-color: #10B981;
+    --positive-color: #3B82F6;
+    --negative-color: #EF4444;
+    --gold-color: #F59E0B;
+    --quick-sale-bg: #1e293b;
+    --quick-sale-accent: #3b82f6;
+    --accent-primary: #10B981;
+    --accent-secondary: #3B82F6;
+    --card-bg: var(--bg-primary); /* This is #ffffff */
 }
-        .theme-light .inbox-tab-active { background: var(--text-primary); color: var(--bg-primary); }
-        .theme-light .inbox-tab-active i { color: var(--bg-primary) !important; }
-        .theme-light .inbox-notification-bar { background: var(--bg-secondary); border-color: var(--border-color); }
-        
-        /* THIS RESTORES THE SIDEBAR ICON HIGHLIGHTS FOR THE LIGHT THEME */
-        .theme-light .menu-item.active i.fa-brain {
-            color: #6f42c1 !important; /* Dark Purple ONLY when active */
-        }
-        .theme-light .menu-item.active i.fa-robot {
-            color: #198754 !important; /* Dark Green ONLY when active */
-        }
 
-        /* Final Consistency Rules */
-        .theme-light .quick-sale-container { background: linear-gradient(135deg, #0a1a3a, #000a1a); }
-        .theme-light .quick-sale-container .text-gray-300, .theme-light .quick-sale-container .text-white { color: #ffffff !important; }
-        .theme-light .text-black { color: #000000 !important; }
-
-        /* Pitch Black Theme */
-        .theme-black {
-            --bg-primary: #000000;
-            --bg-secondary: #0c0c0c;
-            --bg-tertiary: #141414;
-            --text-primary: #e5e5e5;
-            --text-secondary: #a3a3a3;
-            --border-color: #262626;
-            --hover-bg: #1f1f1f;
-        }
-        .theme-black .perplexity-card { background: #0c0c0c; border: 1px solid var(--border-color); }
-        .theme-black .form-input { background: #141414 !important; }
+/* --- Light Theme Specific Overrides --- */
+/* These rules adjust specific elements only when light theme is active. */
+.light-theme .text-white,
+.light-theme .text-gray-300,
+.light-theme .text-gray-400,
+.light-theme .text-d1d5db {
+    color: var(--text-primary) !important;
+}
+.light-theme p, .light-theme h1, .light-theme h2, .light-theme h3, .light-theme h4, .light-theme span, .light-theme div, .light-theme th, .light-theme td {
+    border-color: var(--border-color) !important;
+}
+.light-theme h1, .light-theme h2, .light-theme h3, .light-theme h4, .light-theme .font-bold, .light-theme .font-semibold {
+     color: var(--text-primary);
+}
+.light-theme .text-gray-500 {
+    color: var(--text-muted) !important;
+}
+.light-theme .text-red-400 { color: #dc3545 !important; }
+.light-theme .text-green-400 { color: #198754 !important; }
+.light-theme .text-blue-400 { color: #0d6efd !important; }
+.light-theme .text-yellow-400 { color: #D48806 !important; }
+.light-theme .text-purple-400 { color: #6f42c1 !important; }
+.light-theme .text-teal-400 { color: #20c997 !important; }
+.light-theme .gradient-text {
+    background: linear-gradient(135deg, #0d6efd 0%, #6f42c1 100%);
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+}
+.light-theme .quick-sale-button, .light-theme .ai-button, .light-theme .bot-button, .light-theme .bg-red-600 {
+    background: var(--bg-secondary) !important; border: 1px solid var(--border-color) !important;
+    color: var(--text-secondary) !important; box-shadow: none !important;
+}
+.light-theme .quick-sale-button:hover, .light-theme .ai-button:hover, .light-theme .bot-button:hover, .light-theme .bg-red-600:hover {
+    background: var(--hover-bg) !important; color: var(--text-primary) !important; border-color: #b3b3b3 !important;
+}
+.light-theme .ai-pulse {
+    background: linear-gradient(135deg, var(--ai-color) 0%, #a855f7 100%) !important;
+}
+.light-theme .bot-pulse {
+    background: linear-gradient(135deg, var(--bot-color) 0%, #059669 100%) !important;
+}
+.light-theme .ai-pulse i, .light-theme .bot-pulse i {
+    color: white !important;
+}
+.light-theme .form-input { background: #ffffff !important; border-color: #ced4da !important; color: var(--text-primary) !important; }
+.light-theme .modal-content { background: var(--bg-primary); border-color: var(--border-color); }
+.light-theme .ai-card { background: rgba(111, 66, 193, 0.07) !important; border-color: rgba(111, 66, 193, 0.2) !important; }
+.light-theme .bot-card { background: rgba(25, 135, 84, 0.07) !important; border-color: rgba(25, 135, 84, 0.2) !important; }
+.light-theme .ai-answer-container { background: var(--bg-secondary); }
+.light-theme .bg-gray-800\/50, .light-theme .odd\:bg-gray-800\/10:nth-child(odd) { background-color: var(--bg-tertiary) !important; }
+.light-theme [class*="bg-"][class*="\/10"], .light-theme [class*="bg-"][class*="\/20"] { background-color: rgba(0, 0, 0, 0.03) !important; }
+.light-theme [class*="border-"][class*="\/30"] { border-color: var(--border-color) !important; }
+.light-theme .menu-item.active { color: var(--accent-primary); background: rgba(0, 212, 170, 0.1); }
+.light-theme .inbox-tab-active { background: var(--text-primary); color: var(--bg-primary); }
+.light-theme .inbox-tab-active i { color: var(--bg-primary) !important; }
+.light-theme .inbox-notification-bar { background: var(--bg-secondary); border-color: var(--border-color); }
+.light-theme .quick-sale-container { background: linear-gradient(135deg, #0a1a3a, #000a1a); }
+.light-theme .quick-sale-container .text-gray-300, .light-theme .quick-sale-container .text-white { color: #ffffff !important; }
+.light-theme .text-black { color: #000000 !important; }
 
         * {
             box-sizing: border-box;
@@ -679,7 +650,7 @@
 
         /* Enhanced Cards */
         .perplexity-card {
-            background: rgba(36, 41, 56, 0.9);
+            background: var(--card-bg);
             backdrop-filter: blur(15px);
             -webkit-backdrop-filter: blur(15px);
             border: 1px solid var(--border-color);
@@ -809,7 +780,7 @@
 
         /* Special Cards */
         .ai-card {
-            background: linear-gradient(135deg, rgba(139, 92, 246, 0.15) 0%, rgba(168, 85, 247, 0.15) 100%);
+           background: var(--card-bg);
             border: 1px solid rgba(139, 92, 246, 0.4);
             border-radius: 16px;
             backdrop-filter: blur(10px);
@@ -1252,11 +1223,15 @@
         }
 
         /* === REPLACEMENT: Enhanced Toggle Switch Animation === */
+
+
+        /* In style.css */
+/* === FINAL, CORRECTED TOGGLE SWITCH STYLES === */
 .toggle-switch {
     position: relative;
     width: 60px;
     height: 30px;
-    background: linear-gradient(135deg, #374151 0%, #4b5563 100%); /* Dark/Off state */
+    background: linear-gradient(135deg, #374151 0%, #4b5563 100%); /* Dark/AI state */
     border-radius: 15px;
     cursor: pointer;
     transition: all 0.3s ease;
@@ -1264,7 +1239,7 @@
 }
 
 .toggle-switch.active {
-    background: linear-gradient(135deg, var(--bot-color) 0%, #059669 100%); /* Green/On state */
+    background: linear-gradient(135deg, var(--bot-color) 0%, #059669 100%); /* Green/Bot state */
     box-shadow: 0 0 15px rgba(16, 185, 129, 0.5);
 }
 
@@ -1274,38 +1249,15 @@
     left: 3px;
     width: 24px;
     height: 24px;
-    background: linear-gradient(135deg, #e5e7eb 0%, #f9fafb 100%); /* Light colored knob */
+    background: linear-gradient(135deg, #e5e7eb 0%, #f9fafb 100%);
     border-radius: 50%;
-    transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); /* Smooth, bouncy transition */
+    transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
 }
 
 .toggle-switch.active .toggle-knob {
-    transform: translateX(30px); /* This is what makes it slide */
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+    transform: translateX(30px); /* This makes it slide to the right */
 }
-
-        .toggle-switch.active {
-            background: linear-gradient(135deg, var(--bot-color) 0%, #059669 100%);
-            box-shadow: 0 0 20px rgba(16, 185, 129, 0.4);
-        }
-
-        .toggle-knob {
-            position: absolute;
-            top: 3px;
-            left: 3px;
-            width: 24px;
-            height: 24px;
-            background: linear-gradient(135deg, #ffffff 0%, #f3f4f6 100%);
-            border-radius: 50%;
-            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
-        }
-
-        .toggle-switch.active .toggle-knob {
-            transform: translateX(30px);
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
-        }
 
         /* Quick Sale Specific Styles */
         .quick-sale-container {
@@ -1851,23 +1803,7 @@
 
     /* --- For Dark/Default Theme --- */
     /* This rule applies the purple color ONLY when the menu item is active */
-    .menu-item.active i.fa-brain {
-        color: var(--ai-color) !important;
-    }
-    /* This rule applies the green color ONLY when the menu item is active */
-    .menu-item.active i.fa-robot {
-        color: var(--bot-color) !important;
-    }
-
-    /* --- For Light Theme --- */
-    /* This rule applies the dark purple color ONLY when the menu item is active */
-    .theme-light .menu-item.active i.fa-brain {
-        color: #6f42c1 !important;
-    }
-    /* This rule applies the dark green color ONLY when the menu item is active */
-    .theme-light .menu-item.active i.fa-robot {
-        color: #198754 !important;
-    }
+   
 .stroke-bg-secondary { stroke: var(--bg-secondary); }
 /* === END: Inbox Notification Bar CSS === */
 /* === NEW Branch Hub & Task System CSS === */
@@ -2109,23 +2045,7 @@
 }
 
 
-/* Wrapper for the final AI answer, handles theme backgrounds */
-.ai-answer-wrapper {
-    margin-top: 1.5rem;
-    border-radius: 1rem;
-    padding: 1.5rem;
-    background: #2a2e3a; /* Default theme background */
-}
 
-.theme-light .ai-answer-wrapper {
-    background: white; /* Light theme background */
-    border: 1px solid #dee2e6;
-}
-
-.theme-black .ai-answer-wrapper {
-    background: #0c0c0c; /* Pitch Black theme background */
-    border: 1px solid #262626;
-}
 
 
 
@@ -2135,58 +2055,7 @@
     color: var(--accent-primary);
     font-size: 1rem;
 }
-/* === START: NEW, CLEAN "THINKING" ANIMATION STYLES === */
 
-/* The main container for the animation */
-.clean-thinking-container {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    min-height: 100px; /* Provides space for the text */
-    padding: 1rem;
-    overflow: hidden; /* Prevents any accidental overflow */
-}
-
-/* The text element that will be animated */
-.thinking-text {
-    font-size: 1.5rem;
-    font-weight: 600;
-    color: #a78bfa; /* Purple color */
-    text-shadow: 0 0 15px rgba(167, 139, 250, 0.5); /* Adds a soft glow */
-    transition: opacity 0.5s ease, transform 0.5s ease;
-}
-
-/* Animation classes controlled by JavaScript */
-.thinking-text.fade-in {
-    animation: fadeInSlideUp 0.5s ease-out forwards;
-}
-
-.thinking-text.fade-out {
-    animation: fadeOutSlideUp 0.5s ease-in forwards;
-}
-
-/* Keyframe animations for the text transition */
-@keyframes fadeInSlideUp {
-    from {
-        opacity: 0;
-        transform: translateY(20px);
-    }
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
-}
-
-@keyframes fadeOutSlideUp {
-    from {
-        opacity: 1;
-        transform: translateY(0);
-    }
-    to {
-        opacity: 0;
-        transform: translateY(-20px);
-    }
-}
 
 /* Responsive adjustments */
 @media (max-width: 768px) {
@@ -2194,50 +2063,62 @@
         font-size: 1.2rem;
     }
 }
-/* === START: GOOEY TEXT ANIMATION STYLES (Restored & Refined) === */
 
-/* Container for the "thinking" animation */
-.gooey-text-container {
-    position: relative;
+
+/* 3. Styles for the "AccuraAI is thinking..." text and its animated ellipsis */
+.clean-thinking-container {
     display: flex;
     align-items: center;
-    justify-content: center;
-    min-height: 100px;
-    padding: 1rem;
-    overflow: hidden;
 }
 
-/* Wrapper that applies the SVG filter */
-.gooey-text-wrapper {
-    filter: url(#threshold);
-    width: 100%;
-    text-align: center;
+.thinking-text {
+    font-size: 1.125rem;
+    font-weight: 600;
+    color: var(--text-secondary);
+    white-space: nowrap;
 }
 
-/* The two text elements that morph into each other */
-.gooey-text {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    width: 100%;
+.thinking-text::after {
+    content: ".";
+    animation: ellipsis 1.4s infinite;
     display: inline-block;
-    font-size: 1.5rem;
-    font-weight: bold;
-    background: linear-gradient(135deg, var(--ai-color) 0%, #a855f7 100%);
-    -webkit-background-clip: text;
-    background-clip: text;
-    -webkit-text-fill-color: transparent;
-    text-shadow: 0 0 10px rgba(103, 38, 255, 0.3); /* REFINED: Softer purple glow */
-    text-align: center;
-    user-select: none;
+    width: 1em; /* Allocate space for 3 dots */
+    text-align: left;
 }
 
-/* Responsive adjustments */
-@media (max-width: 768px) {
-    .gooey-text {
-        font-size: 1.2rem;
-    }
+@keyframes ellipsis {
+    0% { content: "."; }
+    33% { content: ".."; }
+    66% { content: "..."; }
+}
+
+
+/* In style.css */
+/* --- NEW STYLES FOR STATIC ICONS IN UI --- */
+
+.accura-icon-static {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    background-color: var(--bg-tertiary);
+    border-radius: 50%;
+    color: var(--ai-color);
+    font-size: 1rem; /* Adjusted for an icon */
+}
+
+/* Sizing for the icon in the sidebar menu */
+.menu-item .accura-icon-static {
+    width: 24px;
+    height: 24px;
+    margin-right: 12px;
+}
+
+/* Sizing for the icon in the top navbar */
+.nav-icon.accura-icon-static {
+    width: 28px;
+    height: 28px;
+    font-size: 1.1rem;
 }
 /* Add this to style.css to style AI-generated headers */
 
@@ -2327,52 +2208,37 @@
     font-weight: 700;
     line-height: 2rem; /* 32px */
     color: #c4b5fd; /* Tailwind's purple-300 */
-    margin-bottom: 1rem; /* Add some space below the header */
-    border-bottom: 1px solid var(--border-color); /* Add a subtle underline */
-    padding-bottom: 0.5rem; /* Space between text and underline */
+    margin-top: 2rem; /* <-- THIS IS THE FIX: Adds space above the header */
+    margin-bottom: 1rem;
+    border-bottom: 1px solid var(--border-color);
+    padding-bottom: 0.5rem;
 }
 
+.ai-answer-body ul {
+    margin-bottom: 1.5rem; /* Adds space after lists */
+    list-style-position: inside;
+    padding-left: 0.5rem;
+}
 /* This targets any h4 tag inside the AI's response body (legacy support) */
 .ai-answer-body h4 {
     color: #c4b5fd; /* Tailwind's purple-300 */
 }
 
+/* In style.css */
+/* --- NEW LAYOUT FIXES FOR GOOEY TEXT & RTL --- */
+
+/* 1. Make the AI Answer Header a flex container to align icon and text */
+
+.ai-answer-header {
+    display: flex;
+    align-items: center;
+    gap: 1rem; /* Creates space between the icon and the text */
+    margin-bottom: 1.5rem; /* <-- ADDED THIS LINE for spacing */
+}
+
 /* --- NEW TWO-STAGE ANIMATION --- */
 
-/* Stage 1: Animates entire lines (headers, paragraphs, list items) */
-@keyframes fadeInLine {
-  from {
-    opacity: 0;
-    transform: translateY(10px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
 
-.animated-line {
-    opacity: 0; /* Start lines invisible */
-    animation: fadeInLine 0.5s ease forwards;
-}
-
-/* Stage 2: Animates words inside each line */
-@keyframes fadeInWord {
-  from {
-    opacity: 0;
-    filter: blur(4px);
-  }
-  to {
-    opacity: 1;
-    filter: blur(0px);
-  }
-}
-
-.generated-word {
-  opacity: 0; /* Start words invisible */
-  animation: fadeInWord 0.4s ease forwards;
-  display: inline-block;
-}
 
 /* In style.css */
 
@@ -2392,23 +2258,124 @@
     align-items: center;
     gap: 0.5rem;
 }
-/* === END: AI Response Styling (FINAL & WORKING) === */
 
-/* === END: AI Response Styling (FINAL & WORKING) === */
+/* In style.css */
+/* === CUSTOM 'a' ICON & MORPHING ANIMATION (RESTORED) === */
 
+/* 1. Styles for the icon's default (round) state */
+.accura-icon {
+    flex-shrink: 0;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: var(--bg-tertiary);
+    border: 1px solid var(--border-color);
+    border-radius: 50%;
+    transition: all 0.3s ease;
+    /* The icon inside will now inherit its color */
+    color: var(--ai-color);
+    font-size: 1.2rem; /* Adjusted for an icon */
+}
 
+/* 2. The animation that triggers when the AI is thinking */
+.accura-icon.loading {
+    animation: morph-round-to-square 2.5s ease-in-out infinite;
+}
 
-/* === END: AI Response Header Styling === */
+@keyframes morph-round-to-square {
+    0% {
+        transform: rotate(0deg);
+        border-radius: 50%; /* Circle */
+    }
+    50% {
+        transform: rotate(180deg);
+        border-radius: 25%; /* Rounded Square */
+        background-color: var(--ai-color);
+        color: var(--bg-tertiary);
+    }
+    100% {
+        transform: rotate(360deg);
+        border-radius: 50%; /* Circle */
+    }
+}
 
-/* === END: Minimalistic AI Response Highlighting === */
+/* 3. Styles for the "AccuraAI is thinking..." text and its animated ellipsis */
+.clean-thinking-container {
+    display: flex;
+    align-items: center;
+}
 
+.thinking-text {
+    font-size: 1.125rem;
+    font-weight: 600;
+    color: var(--text-secondary);
+    white-space: nowrap;
+}
 
-/* === END: GOOEY TEXT ANIMATION STYLES (Restored & Refined) === */
-/* ... (the rest of your file closing comments) ... */
-/* === END: GOOEY TEXT ANIMATION STYLES (Restored & Refined) === */
+.thinking-text::after {
+    content: ".";
+    animation: ellipsis 1.4s infinite;
+    display: inline-block;
+    width: 1em; /* Allocate space for 3 dots */
+    text-align: left;
+}
 
-/* === END: GOOEY TEXT ANIMATION STYLES === */
-/* === END: NEW, CLEAN "THINKING" ANIMATION STYLES === */
+@keyframes ellipsis {
+    0% { content: "."; }
+    33% { content: ".."; }
+    66% { content: "..."; }
+}
+/* In style.css */
+/* In style.css */
+/* === NEW, CORRECTED "METALLIC SHINE" EFFECT === */
 
+/* The keyframe animation that slides the gradient */
+@keyframes shine-sweep {
+    from {
+        background-position: 200% center;
+    }
+    to {
+        background-position: -200% center;
+    }
+}
 
+/* Base styles for any shining icon */
+.ai-icon-shine,
+.bot-icon-shine {
+    /* This makes the icon's color transparent so the background gradient can show through */
+    color: transparent;
+    -webkit-background-clip: text;
+    background-clip: text;
+    
+    /* The gradient is twice as wide as the icon to create the sweep effect */
+    background-size: 200% 100%;
+    
+    /* Apply the animation */
+    animation: shine-sweep 3s linear infinite;
+}
 
+/* This creates the PURPLE shine for AI mode */
+.ai-icon-shine {
+    background-image: linear-gradient(
+        110deg,
+        var(--ai-color),
+        var(--ai-color),
+        #ffffff, /* The white highlight */
+        var(--ai-color),
+        var(--ai-color)
+    );
+}
+
+/* This creates the GREEN shine for Bot mode */
+.bot-icon-shine {
+    background-image: linear-gradient(
+        110deg,
+        var(--bot-color),
+        var(--bot-color),
+        #ffffff, /* The white highlight */
+        var(--bot-color),
+        var(--bot-color)
+    );
+}
