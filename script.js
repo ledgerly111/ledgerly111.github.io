@@ -449,11 +449,18 @@ const AI_CATEGORIES = {
     ]
 };
         // Main Application
-        const app = {
-            serverUrl: 'https://ledgerly-backend-e8au.onrender.com',
-            charts: {},
-            currentSaleCart: [], // This will hold items for the current sale being added
-            state: {
+   // Main Application
+const app = {
+    serverUrl: 'https://ledgerly-backend-e8au.onrender.com',
+    charts: {},
+    currentSaleCart: [],
+    state: {
+        aiChatHistory: [], // <--- CORRECT SPOT
+        aiSettings: {
+    language: 'English',
+    highlightKeywords: false, // Default is OFF
+    highlightNumbers: false   // Default is OFF
+},
                 currentUser: null,
                 animationInterval: null,
                 currentView: 'login',
@@ -543,6 +550,7 @@ quickSale: {
     taxAmount: 0,
     total: 0
 },
+aiViewPhase: 'selection',
 // Add this new empty array inside app.state
 journal: [],
 currentBranchId: null,
@@ -828,7 +836,12 @@ nboxNotificationInterval: null,
     }
 },
 
-          navigateToView(view) {
+
+            navigateToView(view) {
+    if (view === 'accura-ai') {
+        this.state.aiViewPhase = 'selection';
+        this.state.aiChatHistory = []; // Clear previous chat history
+    }   
     this.stopInboxNotifications();
     this.state.quickSale.active = false; // Close quick sale if navigating away
     this.state.currentLedgerAccount = null; // Reset selected ledger account
@@ -5154,62 +5167,33 @@ getSidebar() {
                 `;
             },
 
+
 // In script.js
-// REPLACE your old getAIAssistantView function with this new one
-
+// ==> REPLACE THIS FUNCTION <==
 getAIAssistantView() {
-    const userRole = this.state.currentUser.role;
-    const availableCategories = AI_CATEGORIES[userRole] || AI_CATEGORIES['worker'];
-    const aiIcon = this.state.aiMode === 'ai' ? 'fas fa-crosshairs' : 'fas fa-robot';
-
-    return `
-        <div class="space-y-6 fade-in">
-            <div class="flex items-center justify-between flex-wrap gap-x-4 gap-y-2">
-                <div class="flex items-center space-x-4">
-                    <div class="w-14 h-14 bg-gradient-to-r from-purple-500 to-pink-500 rounded-2xl flex items-center justify-center ai-pulse">
-                        <i class="${aiIcon} fa-fw text-white text-2xl"></i>
-                    </div>
-                    <div>
-                        <h2 class="text-2xl font-bold ai-gradient-text">AccuraAI Assistant</h2>
-                        <p class="text-gray-400">Your intelligent business companion</p>
-                    </div>
-                </div>
-                <div class="flex items-center space-x-4">
-                    <div class="flex items-center space-x-2">
-                        <span class="text-sm text-gray-400">AI</span>
-                        <div class="toggle-switch ${this.state.aiMode === 'bot' ? 'active' : ''}" data-action="toggle-ai-mode">
-                            <div class="toggle-knob"></div>
+    if (this.state.aiViewPhase === 'selection') {
+        // --- PHASE 1: SHOW CATEGORY SELECTION CARDS ---
+        const userRole = this.state.currentUser.role;
+        const availableCategories = AI_CATEGORIES[userRole] || AI_CATEGORIES['worker'];
+        return `
+            <div class="space-y-6 fade-in">
+                <div class="flex items-center justify-between flex-wrap gap-x-4 gap-y-2">
+                    <div class="flex items-center space-x-4">
+                        <div class="w-14 h-14 bg-gradient-to-r from-purple-500 to-pink-500 rounded-2xl flex items-center justify-center ai-pulse">
+                            <i class="fas fa-crosshairs fa-fw text-white text-2xl"></i>
                         </div>
-                        <span class="text-sm text-gray-400">Bot</span>
+                        <div>
+                            <h2 class="text-2xl font-bold ai-gradient-text">AccuraAI Assistant</h2>
+                            <p class="text-gray-400">Select a category to begin.</p>
+                        </div>
                     </div>
                 </div>
-            </div>
-
-            <div id="ai-response-container" class="mt-6 space-y-4"></div>
-
-            <div class="perplexity-card p-6 mt-6">
-                 <div class="flex justify-between items-center mb-4 flex-wrap gap-y-2">
-                    <h3 class="text-xl font-bold text-white flex items-center">
-                        <i class="fas fa-question-circle text-teal-400 mr-2"></i>
-                        <span id="ai-action-title">Ask AccuraAI</span>
-                    </h3>
-                    <div class="flex items-center space-x-3">
-                        <select id="ai-language-selector" class="form-input bg-gray-800/50 !border-gray-600 py-1 text-sm w-auto">
-                            <option value="English">English</option>
-                            <option value="Arabic">Arabic</option>
-                        </select>
-                        <button id="ai-back-button" class="hidden text-sm text-blue-400 hover:text-blue-300 transition-colors whitespace-nowrap" onclick="app.showAICategories()">
-                            <i class="fas fa-arrow-left mr-2"></i>Back to Categories
-                        </button>
-                    </div>
-                </div>
-
                 <div id="ai-category-grid" class="grid grid-cols-2 lg:grid-cols-4 gap-4">
                     ${availableCategories.map((cat, index) => `
                         <div 
                             class="ai-category-card scale-in"
                             style="--bg-image: url(${cat.image}); animation-delay: ${index * 100}ms;"
-                            onclick="app.showCustomQuestionInput('${cat.key}', '${cat.text}')"
+                            onclick="app.startAIChatSession('${cat.key}', '${cat.text}')"
                         >
                             <div class="ai-category-icon-wrapper">
                                 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -5221,197 +5205,230 @@ getAIAssistantView() {
                         </div>
                     `).join('')}
                 </div>
-                
-                <div id="custom-question-input-container" class="hidden mt-2">
-                    <p class="text-gray-300 mb-3">Ask your question about <span id="selected-category-text" class="font-bold text-white"></span>:</p>
-                    <div class="flex space-x-3">
-                        <input type="text" id="custom-ai-question-input" class="form-input flex-1" placeholder="Type your question here...">
-                        <button class="perplexity-button px-4 py-2 rounded-xl" onclick="app.submitCustomQuestion()">
-                            <i class="fas fa-paper-plane mr-2"></i>Send
+            </div>
+        `;
+    } else {
+        // --- PHASE 2: SHOW THE CONTINUOUS CHAT INTERFACE ---
+        return `
+            <div class="ai-chat-view-container fade-in">
+                <div class="p-4 border-b border-gray-700 flex justify-end">
+                    <button class="text-sm text-blue-400 hover:text-blue-300 transition-colors whitespace-nowrap" onclick="app.showAICategories()">
+                        <i class="fas fa-arrow-left mr-2"></i>Back to Categories
+                    </button>
+                </div>
+                <div id="ai-chat-log" class="ai-chat-log">
+                    </div>
+                <div class="ai-chat-input-bar">
+                    ${this.getAISettingsMenuHTML()} 
+                    <div class="flex items-center space-x-3">
+    <button class="ai-settings-button" onclick="app.toggleAISettingsMenu()">
+        <i class="fas fa-sliders-h"></i>
+    </button>
+                        <input type="text" id="ai-chat-input" class="form-input flex-1" placeholder="Ask a follow-up question..." onkeypress="if(event.key === 'Enter') app.submitAIChatMessage()">
+                        <button class="perplexity-button px-4" onclick="app.submitAIChatMessage()">
+                            <i class="fas fa-paper-plane"></i>
                         </button>
                     </div>
                 </div>
             </div>
-        </div>
-    `;
-},
-
-showAICategories() {
-    const categoryGrid = document.getElementById('ai-category-grid');
-    const inputContainer = document.getElementById('custom-question-input-container');
-    const backButton = document.getElementById('ai-back-button');
-    const titleElement = document.getElementById('ai-action-title');
-    const responseContainer = document.getElementById('ai-response-container');
-
-    if (categoryGrid && inputContainer && backButton && titleElement) {
-        categoryGrid.classList.remove('hidden');
-        inputContainer.classList.add('hidden');
-        backButton.classList.add('hidden');
-        titleElement.textContent = 'Ask AccuraAI'; // Reset title
-    }
-    if (responseContainer) {
-        responseContainer.innerHTML = ''; // This line clears the chat history
+        `;
     }
 },
-  
+
 // In script.js
-// This version uses the new "Accuracy" Target icon.
-async handleAiQuestion(questionText, categoryKey = 'general') {
-    const responseContainer = document.getElementById('ai-response-container');
-    if (!responseContainer) return;
+// ==> REPLACE THE ENTIRE BLOCK OF AI HELPER FUNCTIONS WITH THIS FINAL VERSION <==
 
-    const interactionId = `interaction-${Date.now()}`;
-    const newInteractionDiv = document.createElement('div');
-    newInteractionDiv.id = interactionId;
-    responseContainer.appendChild(newInteractionDiv);
+// --- FINAL TWO-PHASE CHAT & SETTINGS LOGIC ---
 
-    // 1. Display the "thinking" message with the MORPHING target icon.
-    newInteractionDiv.innerHTML = `
-        <div class="ai-answer-header fade-in">
-            <div class="accura-icon loading"><i class="fas fa-crosshairs"></i></div>
-            <div class="clean-thinking-container">
-                <p class="thinking-text">AccuraAI is thinking</p>
-            </div>
-        </div>
-    `;
-    newInteractionDiv.scrollIntoView({ behavior: 'smooth', block: 'end' });
+// In script.js
+// ==> REPLACE THIS FUNCTION <==
+startAIChatSession(categoryKey, categoryText) {
+    this.state.aiViewPhase = 'chat';
+    this.state.currentAICategory = categoryKey;
+    this.state.currentAICategoryText = categoryText;
+    this.state.aiChatHistory = [{
+        sender: 'welcome', // Use a special sender type for the first message
+        content: `<p>Great, how can I help you with <strong>${categoryText}</strong>?</p>`
+    }];
+    this.render();
+},
+// STEP 3 (or clicking back): This function returns to the category selection
+showAICategories() {
+    this.state.aiViewPhase = 'selection';
+    this.state.aiChatHistory = [];
+    this.render();
+},
 
-    // 2. Call the AI backend.
-    try {
-        let contextData = {};
-        const { sales, expenses, products, users, customers, lowStockThreshold, selectedCountry } = this.state;
-        switch (categoryKey) {
-            case 'financial': case 'expense-control':
-                contextData = { sales, expenses, currency: GCC_COUNTRIES[selectedCountry].currency };
-                break;
-            case 'inventory': case 'product-info':
-                contextData = { products, lowStockThreshold };
-                break;
-            case 'employee': case 'sales-team':
-                contextData = { users, sales };
-                break;
-            case 'customer-relations': case 'customer-support':
-                contextData = { customers, sales };
-                break;
-            case 'my-performance':
-                contextData = { myDetails: this.state.currentUser, mySales: sales.filter(s => s.salesPersonId === this.state.currentUser.id) };
-                break;
-            default:
-                contextData = { overview: { salesCount: sales.length, productCount: products.length, customerCount: customers.length } };
+// In script.js
+// ==> REPLACE THIS FUNCTION <==
+renderAIChatHistory() {
+    const chatLog = document.getElementById('ai-chat-log');
+    if (!chatLog) return;
+
+    chatLog.innerHTML = this.state.aiChatHistory.map(msg => {
+        if (msg.sender === 'user') {
+            return `<div class="user-question-bubble">${msg.content}</div>`;
+        } else if (msg.sender === 'welcome') {
+            // New case for the initial message with NO icon
+            return `<div class="ai-answer-body">${msg.content}</div>`;
+        } else if (msg.sender === 'ai') {
+            const direction = this.state.aiSettings.language === 'Arabic' ? 'rtl' : 'ltr';
+            return `
+                <div 
+                    dir="${direction}" 
+                    data-highlight-keywords="${this.state.aiSettings.highlightKeywords}" 
+                    data-highlight-numbers="${this.state.aiSettings.highlightNumbers}"
+                >
+                    <div class="ai-answer-header fade-in">
+                        <div class="accura-icon">
+                            <i class="fas fa-crosshairs ai-icon-shine-effect"></i>
+                        </div>
+                    </div>
+                    <div class="ai-answer-body">
+                        ${msg.content}
+                    </div>
+                </div>
+            `;
+        } else if (msg.sender === 'thinking') {
+            return `
+                <div class="ai-answer-header fade-in">
+                    <div class="accura-icon loading"><i class="fas fa-crosshairs"></i></div>
+                    <div class="clean-thinking-container">
+                        <p class="thinking-text">AccuraAI is thinking</p>
+                    </div>
+                </div>
+            `;
         }
+        return '';
+    }).join('');
 
-        const languageSelector = document.getElementById('ai-language-selector');
-        const selectedLanguage = languageSelector ? languageSelector.value : 'English';
+    chatLog.scrollTop = chatLog.scrollHeight;
+},
 
+// Handles sending the question and receiving the answer
+async handleAiQuestion(questionText) {
+    this.state.aiChatHistory.push({ sender: 'user', content: questionText });
+    const thinkingMessageIndex = this.state.aiChatHistory.length;
+    this.state.aiChatHistory.push({ sender: 'thinking' });
+    this.renderAIChatHistory();
+
+    let contextData = {};
+    const categoryKey = this.state.currentAICategory;
+    const { sales, expenses, products, users, customers, lowStockThreshold, selectedCountry } = this.state;
+    switch (categoryKey) {
+        case 'financial': case 'expense-control':
+            contextData = { sales, expenses, currency: GCC_COUNTRIES[selectedCountry].currency };
+            break;
+        case 'inventory': case 'product-info':
+            contextData = { products, lowStockThreshold };
+            break;
+        case 'employee': case 'sales-team':
+            contextData = { users, sales };
+            break;
+        case 'customer-relations': case 'customer-support':
+            contextData = { customers, sales };
+            break;
+        case 'my-performance':
+            contextData = { myDetails: this.state.currentUser, mySales: sales.filter(s => s.salesPersonId === this.state.currentUser.id) };
+            break;
+        default:
+            contextData = { overview: { salesCount: sales.length, productCount: products.length, customerCount: customers.length } };
+    }
+
+    try {
         const res = await fetch(`${this.serverUrl}/api/ask-ai`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
                 userQuestion: questionText,
                 contextData: contextData,
-                targetLanguage: selectedLanguage
+                targetLanguage: this.state.aiSettings.language
             })
         });
 
-        if (!res.ok) {
-            const errorData = await res.json();
-            throw new Error(`AI server responded with status: ${res.status}. Message: ${errorData.error}`);
-        }
-
+        if (!res.ok) throw new Error(`AI server error: ${res.status}`);
+        
         const data = await res.json();
-        let aiResponseHtml = data.htmlResponse;
-
-        const currentInteractionDiv = document.getElementById(interactionId);
-        if (currentInteractionDiv) {
-            const cleanedHtml = aiResponseHtml.replace(/^```html\s*|```$/g, '').trim();
-            const direction = selectedLanguage === 'Arabic' ? 'rtl' : 'ltr';
-
-            // 3. Display the final AI response with the STATIC target icon.
-            currentInteractionDiv.innerHTML = `
-                <div dir="${direction}">
-                    <div class="ai-answer-header fade-in">
-                        <div class="accura-icon"><i class="fas fa-crosshairs"></i></div>
-                        <h3 class="ai-answer-title text-white text-xl font-bold">AccuraAI Response</h3>
-                    </div>
-                    <div class="ai-answer-body">
-                        ${cleanedHtml}
-                    </div>
-                </div>`;
-
-            currentInteractionDiv.scrollIntoView({ behavior: 'smooth', block: 'end' });
-        }
+        const cleanedHtml = data.htmlResponse.replace(/^```html\s*|```$/g, '').trim();
+        this.state.aiChatHistory[thinkingMessageIndex] = { sender: 'ai', content: cleanedHtml };
 
     } catch (error) {
         console.error("Error fetching AI response:", error);
-        const currentInteractionDiv = document.getElementById(interactionId);
-        if (currentInteractionDiv) {
-            currentInteractionDiv.innerHTML = `
-                <div class="ai-answer-wrapper border border-red-500/50">
-                    <h4 class="text-red-400 font-bold">Connection Error</h4>
-                    <p class="text-gray-300">Sorry, I couldn't connect to the AI server. Please check your connection and try again.</p>
-                </div>
-            `;
-        }
+        this.state.aiChatHistory[thinkingMessageIndex] = { sender: 'ai', content: `<p class="text-red-400">Sorry, I encountered an error. Please try again.</p>` };
     }
+
+    this.renderAIChatHistory();
 },
 
-
-
-
-
-
- 
-// Add this new function to the app object
-// REPLACE your old showCustomQuestionInput function with this
-showCustomQuestionInput(categoryKey, categoryText) {
-    const categoryGrid = document.getElementById('ai-category-grid');
-    const inputContainer = document.getElementById('custom-question-input-container');
-    const backButton = document.getElementById('ai-back-button');
-    const titleElement = document.getElementById('ai-action-title');
-    const selectedCategoryText = document.getElementById('selected-category-text');
-    const customQuestionInput = document.getElementById('custom-ai-question-input');
-
-    if (categoryGrid && inputContainer && backButton && titleElement && selectedCategoryText && customQuestionInput) {
-        categoryGrid.classList.add('hidden');
-        inputContainer.classList.remove('hidden');
-        backButton.classList.remove('hidden');
-        
-        titleElement.textContent = 'Ask a Question'; // Update title
-        selectedCategoryText.textContent = categoryText;
-        customQuestionInput.value = '';
-        customQuestionInput.focus();
-        this.state.currentAICategory = categoryKey;
-    }
-},
-
-// REPLACE your old submitCustomQuestion function with this
-submitCustomQuestion() {
-    const customQuestionInput = document.getElementById('custom-ai-question-input');
-    const questionText = customQuestionInput.value.trim();
-    const categoryKey = this.state.currentAICategory; // Retrieve the stored category
-
+// Triggered by the send button in the chat view
+submitAIChatMessage() {
+    const input = document.getElementById('ai-chat-input');
+    const questionText = input.value.trim();
     if (questionText) {
-        // Hide the input container, but keep the back button and title visible
-        const inputContainer = document.getElementById('custom-question-input-container');
-        if (inputContainer) {
-            inputContainer.classList.add('hidden');
-        }
-
-        this.handleAiQuestion(questionText, categoryKey);
-    } else {
-        NotificationSystem.warning('Please type your question before sending.');
+        this.handleAiQuestion(questionText);
+        input.value = '';
     }
 },
 
-// Add copy to clipboard function
-copyToClipboard() {
-    const answerBody = document.querySelector('.ai-answer-body');
-    if (answerBody) {
-        const text = answerBody.innerText;
-        navigator.clipboard.writeText(text).then(() => {
-            NotificationSystem.success('Answer copied to clipboard!');
-        });
+// --- SETTINGS MENU UI & LOGIC ---
+
+// Generates the HTML for the slide-down menu
+getAISettingsMenuHTML() {
+    const { language, highlightKeywords, highlightNumbers } = this.state.aiSettings;
+    return `
+        <div id="ai-settings-menu" class="ai-settings-menu">
+            <div class="ai-settings-header" onclick="this.classList.toggle('expanded'); this.nextElementSibling.style.maxHeight = this.classList.contains('expanded') ? '200px' : '0';">
+                <span>Language</span><i class="fas fa-chevron-down chevron"></i>
+            </div>
+            <div class="ai-settings-options">
+                <div class="ai-settings-option ${language === 'English' ? 'selected' : ''}" onclick="app.setAISetting('language', 'English')">English ${language === 'English' ? '<i class="fas fa-check"></i>' : ''}</div>
+                <div class="ai-settings-option ${language === 'Arabic' ? 'selected' : ''}" onclick="app.setAISetting('language', 'Arabic')">Arabic ${language === 'Arabic' ? '<i class="fas fa-check"></i>' : ''}</div>
+            </div>
+
+            <div class="ai-settings-header" onclick="this.classList.toggle('expanded'); this.nextElementSibling.style.maxHeight = this.classList.contains('expanded') ? '200px' : '0';">
+                <span>Answer Styling</span><i class="fas fa-chevron-down chevron"></i>
+            </div>
+            <div class="ai-settings-options">
+                <div class="ai-settings-option" onclick="app.setAISetting('highlightKeywords')">
+                    <span>Highlight Keywords</span>
+                    <span class="font-bold text-xs ${highlightKeywords ? 'text-green-400' : 'text-red-400'}">${highlightKeywords ? 'ON' : 'OFF'}</span>
+                </div>
+                <div class="ai-settings-option" onclick="app.setAISetting('highlightNumbers')">
+                    <span>Highlight Numbers</span>
+                    <span class="font-bold text-xs ${highlightNumbers ? 'text-green-400' : 'text-red-400'}">${highlightNumbers ? 'ON' : 'OFF'}</span>
+                </div>
+            </div>
+        </div>
+    `;
+},
+
+// Toggles the visibility of the settings menu
+toggleAISettingsMenu() {
+    const menu = document.getElementById('ai-settings-menu');
+    // Close other accordion sections when opening a new one
+    menu.querySelectorAll('.ai-settings-header').forEach(header => {
+        header.classList.remove('expanded');
+        header.nextElementSibling.style.maxHeight = '0';
+    });
+    menu.classList.toggle('open');
+},
+
+// Sets a specific AI setting
+setAISetting(key, value) {
+    if (typeof value === 'undefined') {
+        // This is a toggle (for booleans)
+        this.state.aiSettings[key] = !this.state.aiSettings[key];
+    } else {
+        // This is a direct value set (for language)
+        this.state.aiSettings[key] = value;
     }
+    
+    // Re-render the menu to show the updated selection and then close it
+    const inputBar = document.querySelector('.ai-chat-input-bar');
+    if (inputBar) {
+        inputBar.querySelector('.ai-settings-menu').outerHTML = this.getAISettingsMenuHTML();
+    }
+    this.toggleAISettingsMenu();
 },
 
 
@@ -6810,33 +6827,30 @@ getTasksView() {
         </div>
     `;
 },
-            // ADD THIS NEW HELPER FUNCTION AFTER getSettingsView()
-            postRenderSetup() {
-                // This function runs after the main HTML is on the page
-                this.animateDashboardNumbers();
-                this.initializeHeaderAnimation();
-                       
-                if (this.state.currentView === 'dashboard') {
-                    this.createDashboardCharts();
-                }
-                if (this.state.currentView === 'reports') {
-                    this.renderReportCharts();
-                }
-                if (this.state.currentView === 'inbox') {
-                    // This function from a previous step might need updating if inbox is changed
-                    // For now, it will render the list view correctly.
-                    this.renderInbox();
-                    this.startInboxNotifications();
-                }
-                if (this.state.currentView === 'accura-ai') {
-                    const canvasElement = document.getElementById('ai-loading-canvas');
-                    if (canvasElement && this.state.aiLoading) {
-                        this.state.pixelAnimation = new PixelAnimationController('ai-loading-canvas');
-                        this.state.pixelAnimation.start();
-                    }
-                }
-            },
-// === NEW QUICK SALE VIEW FUNCTION ===
+            // In script.js
+// ==> REPLACE BOTH of the old postRenderSetup functions with this single, correct version <==
+
+postRenderSetup() {
+    // This function runs after the main HTML is on the page
+    this.animateDashboardNumbers();
+    this.initializeHeaderAnimation();
+            
+    if (this.state.currentView === 'dashboard') {
+        this.createDashboardCharts();
+    }
+    if (this.state.currentView === 'reports') {
+        this.renderReportCharts();
+    }
+    if (this.state.currentView === 'inbox') {
+        this.renderInbox();
+        this.startInboxNotifications();
+    }
+    if (this.state.currentView === 'accura-ai') {
+        // This is the new line to render the chat history
+        this.renderAIChatHistory();
+    }
+},
+
             getQuickSaleView() {
                 // Define the SVG path for the gradient tracing animation
                 const svgPath = "M1-4.5l71,118.5l92-118.5l92,118.5l92-118.5l92,118.5l92-118.5l92,118.5l92-118.5l92,118.5l92-118.5l92,118.5l92-118.5l92,118.5l92-118.5l92,118.5l92-118.5l92,118.5l92-118.5l71,118.5";
