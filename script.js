@@ -5274,7 +5274,7 @@ showAICategories() {
 },
 
 // In script.js
-// ==> REPLACE THIS FUNCTION <==
+
 renderAIChatHistory() {
     const chatLog = document.getElementById('ai-chat-log');
     if (!chatLog) return;
@@ -5283,44 +5283,43 @@ renderAIChatHistory() {
         if (msg.sender === 'user') {
             return `<div class="user-question-bubble">${msg.content}</div>`;
         } else if (msg.sender === 'welcome') {
-            // New case for the initial message with NO icon
             return `<div class="ai-answer-body">${msg.content}</div>`;
-        // ... inside renderAIChatHistory() ...
-} else if (msg.sender === 'ai') {
-    // THE FIX IS HERE: We use the message's own language property
-    const direction = msg.language === 'Arabic' ? 'rtl' : 'ltr';
-    return `
-
-        <div 
-            data-highlight-keywords="${this.state.aiSettings.highlightKeywords}" 
-            data-highlight-numbers="${this.state.aiSettings.highlightNumbers}"
-        >
-            <div class="ai-answer-header fade-in">
-                <div class="accura-icon">
-                    <span class="material-symbols-outlined ai-icon-shine-effect">bubble_chart</span>
+        } else if (msg.sender === 'ai') {
+            const direction = msg.language === 'Arabic' ? 'rtl' : 'ltr';
+            return `
+                <div 
+                    data-highlight-keywords="${this.state.aiSettings.highlightKeywords}" 
+                    data-highlight-numbers="${this.state.aiSettings.highlightNumbers}"
+                >
+                    <div class="ai-answer-header fade-in">
+                        <div class="accura-icon">
+                            <span class="material-symbols-outlined ai-icon-shine-effect">bubble_chart</span>
+                        </div>
+                    </div>
+                    <div class="ai-answer-body" dir="${direction}">
+                        ${msg.content}
+                    </div>
                 </div>
-            </div>
-            <div class="ai-answer-body" dir="${direction}">
-                ${msg.content}
-            </div>
-        </div>
-    `;
-       // ... inside the renderAIChatHistory function
-} else if (msg.sender === 'thinking') {
-    return `
-        <div class="ai-answer-header fade-in">
-            <div class="accura-icon loading"><span class="material-symbols-outlined">bubble_chart</span></div>
-            <div class="clean-thinking-container">
-                <p class="thinking-text">Thinking</p>
-            </div>
-        </div>
-    `;
-}
-// ...
+            `;
+        } else if (msg.sender === 'thinking') {
+            return `
+                <div class="ai-answer-header fade-in">
+                    <div class="accura-icon loading"><span class="material-symbols-outlined">bubble_chart</span></div>
+                    <div class="clean-thinking-container">
+                        <p class="thinking-text">Thinking</p>
+                    </div>
+                </div>
+            `;
+        }
         return '';
     }).join('');
 
-    chatLog.scrollTop = chatLog.scrollHeight;
+    // --- UPDATED SCROLLING LOGIC ---
+    const lastMessage = chatLog.lastElementChild;
+    if (lastMessage) {
+        // This scrolls to the top of the newly added message element
+        chatLog.scrollTop = lastMessage.offsetTop;
+    }
 },
 
 // In script.js
