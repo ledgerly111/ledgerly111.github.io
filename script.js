@@ -4484,72 +4484,80 @@ updatePnlView() {
 
            
             render() {
-                const appContainer = document.getElementById('app');
-                const currentView = this.state.currentView;
+    const appContainer = document.getElementById('app');
+    const currentView = this.state.currentView;
 
-                // Step 1: Handle views that do NOT need the main layout (sidebar/navbar)
-                if (currentView === 'login') {
-                    appContainer.className = 'app-container'; // Reset class
-                    appContainer.innerHTML = this.getLoginView();
-                    return; // Stop here
-                }
-                if (currentView === 'userSelection') {
-                    appContainer.className = 'app-container'; // Reset class
-                    appContainer.innerHTML = this.getUserSelectionView();
-                    return; // Stop here
-                }
-                if (this.state.quickSale.active) {
-                    appContainer.className = 'app-container'; // Reset class
-                    appContainer.innerHTML = this.getQuickSaleView();
-                    setTimeout(() => this.bindQuickSaleEvents(), 50);
-                    return; // Stop here
-                }
+    // Step 1: Handle views that do NOT need the main layout (sidebar/navbar)
+    if (currentView === 'login') {
+        appContainer.className = 'app-container'; // Reset class
+        appContainer.innerHTML = this.getLoginView();
+        return; // Stop here
+    }
+    if (currentView === 'userSelection') {
+        appContainer.className = 'app-container'; // Reset class
+        appContainer.innerHTML = this.getUserSelectionView();
+        return; // Stop here
+    }
+    if (this.state.quickSale.active) {
+        appContainer.className = 'app-container'; // Reset class
+        appContainer.innerHTML = this.getQuickSaleView();
+        setTimeout(() => this.bindQuickSaleEvents(), 50);
+        return; // Stop here
+    }
 
-                // Step 2: If we are past the special views, a user MUST be logged in.
-                // If not, something is wrong, so we safely log them out.
-                if (!this.state.currentUser) {
-                    this.logout();
-                    return;
-                }
+    // Step 2: If we are past the special views, a user MUST be logged in.
+    if (!this.state.currentUser) {
+        this.logout();
+        return;
+    }
 
-                // Step 3: Determine the main content for logged-in views using the viewMap
-                const viewMap = {
-                    'dashboard': () => this.getDashboardView(),
-                    'accura-ai': () => this.getAIAssistantView(),
-                    'tasks': () => this.getTasksView(),
-                    'products': () => this.getProductsView(),
-                    'customers': () => this.getCustomersView(),
-                    'sales': () => this.getSalesView(),
-                    'expenses': () => this.getExpensesView(),
-                    'employees': () => this.getEmployeesView(),
-                    'invoices': () => this.getInvoicesView(),
-                    'reports': () => this.getReportsView(),
-                    'journal': () => this.getJournalView(),
-                    'pnl': () => this.getPnlView(),
-                    'ledger': () => this.getLedgerView(),
-                    'trial-balance': () => this.getTrialBalanceView(),
-                    'balance-sheet': () => this.getBalanceSheetView(),
-                    'inbox': () => this.getInboxView(),
-                    'branch-hub': () => this.getBranchHubView(),
-                    'settings': () => this.getSettingsView(),
-                    'bot': () => this.getAccuraBotView(),
-                
-                };
+    // Step 3: Determine the main content for logged-in views using the viewMap
+    const viewMap = {
+        'dashboard': () => this.getDashboardView(),
+        'accura-ai': () => this.getAIAssistantView(),
+        'tasks': () => this.getTasksView(),
+        'products': () => this.getProductsView(),
+        'customers': () => this.getCustomersView(),
+        'sales': () => this.getSalesView(),
+        'expenses': () => this.getExpensesView(),
+        'employees': () => this.getEmployeesView(),
+        'invoices': () => this.getInvoicesView(),
+        'reports': () => this.getReportsView(),
+        'journal': () => this.getJournalView(),
+        'pnl': () => this.getPnlView(),
+        'ledger': () => this.getLedgerView(),
+        'trial-balance': () => this.getTrialBalanceView(),
+        'balance-sheet': () => this.getBalanceSheetView(),
+        'inbox': () => this.getInboxView(),
+        'branch-hub': () => this.getBranchHubView(),
+        'settings': () => this.getSettingsView(),
+        'bot': () => this.getAccuraBotView(),
+    
+    };
 
-                const contentHTML = viewMap[currentView] ? viewMap[currentView]() : this.getDashboardView();
+    const contentHTML = viewMap[currentView] ? viewMap[currentView]() : this.getDashboardView();
 
-                // Step 4: Render the main application grid layout with the content
-                appContainer.className = 'app-container app-container-grid';
-                appContainer.innerHTML = `
-                    ${this.getSidebar()}
-                    ${this.getNavbar()}
-                    <main class="main-content">${contentHTML}</main>
-                `;
-                
-                // Step 5: Run post-render scripts (like charts and animations)
-                this.postRenderSetup();
-                
-            },
+    // Step 4: Render the main application grid layout with the content
+    appContainer.className = 'app-container app-container-grid';
+    appContainer.innerHTML = `
+        ${this.getSidebar()}
+        ${this.getNavbar()}
+        <main class="main-content">${contentHTML}</main>
+    `;
+
+    // Step 5: Run post-render scripts AND apply special classes
+    this.postRenderSetup();
+
+    // --- THIS IS THE NEW LOGIC ---
+    const mainContent = appContainer.querySelector('.main-content');
+    if (mainContent) {
+        if (currentView === 'accura-ai') {
+            mainContent.classList.add('ai-view-active');
+        } else {
+            mainContent.classList.remove('ai-view-active');
+        }
+    }
+}, // <-- THIS IS THE FIX: The closing brace '}' for the render function and the comma were added here.
 
 initializeHeaderAnimation() {
     // Clear any existing timer to prevent duplicates when re-rendering
@@ -4734,7 +4742,7 @@ getNavbar() {
                     </button>
 
                     <button data-action="navigate-to-ai-or-bot" class="text-gray-400 hover:text-white transition-colors p-2 rounded-lg hover:bg-gray-700/50" title="${aiText}">
-                        <i class="${aiIcon} text-lg ${aiIconShineClass}"></i>
+                      <span class="material-symbols-outlined text-2xl ${aiIconShineClass}">bubble_chart</span
                     </button>
 
                     <div class="relative">
@@ -4800,22 +4808,26 @@ getSidebar() {
 
             <h3 class="text-sm font-semibold text-gray-400 uppercase tracking-wider mb-3">Navigation</h3>
             <ul class="space-y-2">
-                ${visibleItems.map(item => {
-                    
-                    const isAiBotLink = item.key === 'navigate-to-ai-or-bot';
-                    const shineClass = isAiBotLink 
-                        ? (this.state.aiMode === 'ai' ? 'ai-icon-shine' : 'bot-icon-shine') 
-                        : '';
+               ${visibleItems.map(item => {
+    
+    const isAiBotLink = item.key === 'navigate-to-ai-or-bot';
+    const shineClass = isAiBotLink 
+        ? (this.state.aiMode === 'ai' ? 'ai-icon-shine' : 'bot-icon-shine') 
+        : '';
 
-                    return `
-                    <li>
-                        <button data-action="${item.key}" class="menu-item ${this.state.currentView === item.key || (isAiBotLink && ['accura-ai', 'bot'].includes(this.state.currentView)) ? 'active' : ''}">
-                            <i class="${item.icon} fa-fw ${shineClass}"></i>
-                            <span class="font-medium">${item.label}</span>
-                            ${item.key === 'inbox' && unreadCount > 0 ? `<span class="ml-auto bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">${unreadCount}</span>` : ''}
-                        </button>
-                    </li>
-                    `}).join('')}
+   const iconHtml = isAiBotLink
+    ? `<span class="material-symbols-outlined fa-fw ${shineClass}">bubble_chart</span>`
+    : `<i class="${item.icon} fa-fw ${shineClass}"></i>`;
+
+    return `
+    <li>
+        <button data-action="${item.key}" class="menu-item ${this.state.currentView === item.key || (isAiBotLink && ['accura-ai', 'bot'].includes(this.state.currentView)) ? 'active' : ''}">
+            ${iconHtml}
+            <span class="font-medium">${item.label}</span>
+            ${item.key === 'inbox' && unreadCount > 0 ? `<span class="ml-auto bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">${unreadCount}</span>` : ''}
+        </button>
+    </li>
+    `}).join('')}
                     
             </ul>
 
@@ -5180,7 +5192,7 @@ getAIAssistantView() {
                 <div class="flex items-center justify-between flex-wrap gap-x-4 gap-y-2">
                     <div class="flex items-center space-x-4">
                         <div class="w-14 h-14 bg-gradient-to-r from-purple-500 to-pink-500 rounded-2xl flex items-center justify-center ai-pulse">
-                            <i class="fas fa-crosshairs fa-fw text-white text-2xl"></i>
+                         <span class="material-symbols-outlined text-white text-4xl">bubble_chart</span>
                         </div>
                         <div>
                             <h2 class="text-2xl font-bold ai-gradient-text">AccuraAI Assistant</h2>
@@ -5219,17 +5231,19 @@ getAIAssistantView() {
                 <div id="ai-chat-log" class="ai-chat-log">
                     </div>
                 <div class="ai-chat-input-bar">
-                    ${this.getAISettingsMenuHTML()} 
-                    <div class="flex items-center space-x-3">
-    <button class="ai-settings-button" onclick="app.toggleAISettingsMenu()">
-        <i class="fas fa-sliders-h"></i>
-    </button>
-                        <input type="text" id="ai-chat-input" class="form-input flex-1" placeholder="Ask a follow-up question..." onkeypress="if(event.key === 'Enter') app.submitAIChatMessage()">
-                        <button class="perplexity-button px-4" onclick="app.submitAIChatMessage()">
-                            <i class="fas fa-paper-plane"></i>
-                        </button>
-                    </div>
-                </div>
+    ${this.getAISettingsMenuHTML()}
+    <div class="ai-input-row">
+        <input type="text" id="ai-chat-input" class="form-input flex-1" placeholder="Ask a follow-up question..." onkeypress="if(event.key === 'Enter') app.submitAIChatMessage()">
+        <button class="perplexity-button px-4" onclick="app.submitAIChatMessage()">
+            <i class="fas fa-arrow-up"></i>
+        </button>
+    </div>
+    <div class="ai-settings-row">
+        <button class="ai-settings-button-repositioned" onclick="app.toggleAISettingsMenu()">
+            <i class="fas fa-sliders-h"></i> AI Settings
+        </button>
+    </div>
+</div>
             </div>
         `;
     }
@@ -5271,28 +5285,30 @@ renderAIChatHistory() {
         } else if (msg.sender === 'welcome') {
             // New case for the initial message with NO icon
             return `<div class="ai-answer-body">${msg.content}</div>`;
-        } else if (msg.sender === 'ai') {
-            const direction = this.state.aiSettings.language === 'Arabic' ? 'rtl' : 'ltr';
-            return `
-                <div 
-                    dir="${direction}" 
-                    data-highlight-keywords="${this.state.aiSettings.highlightKeywords}" 
-                    data-highlight-numbers="${this.state.aiSettings.highlightNumbers}"
-                >
-                    <div class="ai-answer-header fade-in">
-                        <div class="accura-icon">
-                            <i class="fas fa-crosshairs ai-icon-shine-effect"></i>
-                        </div>
-                    </div>
-                    <div class="ai-answer-body">
-                        ${msg.content}
-                    </div>
+        // ... inside renderAIChatHistory() ...
+} else if (msg.sender === 'ai') {
+    // THE FIX IS HERE: We use the message's own language property
+    const direction = msg.language === 'Arabic' ? 'rtl' : 'ltr';
+    return `
+
+        <div 
+            data-highlight-keywords="${this.state.aiSettings.highlightKeywords}" 
+            data-highlight-numbers="${this.state.aiSettings.highlightNumbers}"
+        >
+            <div class="ai-answer-header fade-in">
+                <div class="accura-icon">
+                    <span class="material-symbols-outlined ai-icon-shine-effect">bubble_chart</span>
                 </div>
-            `;
+            </div>
+            <div class="ai-answer-body" dir="${direction}">
+                ${msg.content}
+            </div>
+        </div>
+    `;
         } else if (msg.sender === 'thinking') {
             return `
                 <div class="ai-answer-header fade-in">
-                    <div class="accura-icon loading"><i class="fas fa-crosshairs"></i></div>
+                    <div class="accura-icon loading"><span class="material-symbols-outlined">bubble_chart</span></div>
                     <div class="clean-thinking-container">
                         <p class="thinking-text">AccuraAI is thinking</p>
                     </div>
@@ -5348,11 +5364,17 @@ async handleAiQuestion(questionText) {
 
         if (!res.ok) throw new Error(`AI server error: ${res.status}`);
         
-        const data = await res.json();
-        const cleanedHtml = data.htmlResponse.replace(/^```html\s*|```$/g, '').trim();
-        this.state.aiChatHistory[thinkingMessageIndex] = { sender: 'ai', content: cleanedHtml };
+    const data = await res.json();
+    const cleanedHtml = data.htmlResponse.replace(/^```html\s*|```$/g, '').trim();
+    
+    // THE FIX IS HERE: We capture the language used for THIS response
+    this.state.aiChatHistory[thinkingMessageIndex] = { 
+        sender: 'ai', 
+        content: cleanedHtml,
+        language: this.state.aiSettings.language // Save the language with the message
+    };
 
-    } catch (error) {
+} catch (error) {
         console.error("Error fetching AI response:", error);
         this.state.aiChatHistory[thinkingMessageIndex] = { sender: 'ai', content: `<p class="text-red-400">Sorry, I encountered an error. Please try again.</p>` };
     }
