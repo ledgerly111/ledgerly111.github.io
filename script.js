@@ -5305,25 +5305,31 @@ renderAIChatHistory() {
             </div>
         </div>
     `;
-        } else if (msg.sender === 'thinking') {
-            return `
-                <div class="ai-answer-header fade-in">
-                    <div class="accura-icon loading"><span class="material-symbols-outlined">bubble_chart</span></div>
-                    <div class="clean-thinking-container">
-                        <p class="thinking-text">AccuraAI is thinking</p>
-                    </div>
-                </div>
-            `;
-        }
+       // ... inside the renderAIChatHistory function
+} else if (msg.sender === 'thinking') {
+    return `
+        <div class="ai-answer-header fade-in">
+            <div class="accura-icon loading"><span class="material-symbols-outlined">bubble_chart</span></div>
+            <div class="clean-thinking-container">
+                <p class="thinking-text">Thinking</p>
+            </div>
+        </div>
+    `;
+}
+// ...
         return '';
     }).join('');
 
     chatLog.scrollTop = chatLog.scrollHeight;
 },
 
+// In script.js
+
 // Handles sending the question and receiving the answer
 async handleAiQuestion(questionText) {
+    // Store the user's message with a 'user' role for the history
     this.state.aiChatHistory.push({ sender: 'user', content: questionText });
+    
     const thinkingMessageIndex = this.state.aiChatHistory.length;
     this.state.aiChatHistory.push({ sender: 'thinking' });
     this.renderAIChatHistory();
@@ -5352,31 +5358,35 @@ async handleAiQuestion(questionText) {
     }
 
     try {
+        // --- THIS IS THE UPDATED API CALL ---
         const res = await fetch(`${this.serverUrl}/api/ask-ai`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
                 userQuestion: questionText,
                 contextData: contextData,
-                targetLanguage: this.state.aiSettings.language
+                targetLanguage: this.state.aiSettings.language,
+                // **THE KEY ADDITION:** Send the history, but exclude the "thinking..." message
+                chatHistory: this.state.aiChatHistory.slice(0, -1) 
             })
         });
 
         if (!res.ok) throw new Error(`AI server error: ${res.status}`);
         
-    const data = await res.json();
-    const cleanedHtml = data.htmlResponse.replace(/^```html\s*|```$/g, '').trim();
+        const data = await res.json();
+        const cleanedHtml = data.htmlResponse.replace(/^```html\s*|```$/g, '').trim();
     
-    // THE FIX IS HERE: We capture the language used for THIS response
-    this.state.aiChatHistory[thinkingMessageIndex] = { 
-        sender: 'ai', 
-        content: cleanedHtml,
-        language: this.state.aiSettings.language // Save the language with the message
-    };
+        // Replace the "thinking..." message with the actual AI response
+        this.state.aiChatHistory[thinkingMessageIndex] = { 
+            sender: 'ai', // Your frontend uses 'ai', which is fine
+            content: cleanedHtml,
+            language: this.state.aiSettings.language
+        };
 
-} catch (error) {
+    } catch (error) {
         console.error("Error fetching AI response:", error);
-        this.state.aiChatHistory[thinkingMessageIndex] = { sender: 'ai', content: `<p class="text-red-400">Sorry, I encountered an error. Please try again.</p>` };
+        // Also replace the "thinking..." message on error
+        this.state.aiChatHistory[thinkingMessageIndex] = { sender: 'ai', content: `<div class="ai-response-error"><h4><i class="fas fa-exclamation-triangle"></i>Connection Error</h4><p>I'm sorry, I couldn't connect to the AI service. Please check your connection and try again.</p></div>` };
     }
 
     this.renderAIChatHistory();
