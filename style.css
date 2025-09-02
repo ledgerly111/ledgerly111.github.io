@@ -2608,3 +2608,83 @@ div[data-highlight-numbers="true"] .ai-answer-body .negative-amount {
     border-color: var(--accent-secondary);
     color: var(--text-primary);
 }
+.material-symbols-outlined {
+  font-variation-settings:
+  'FILL' 0,
+  'wght' 400,
+  'GRAD' 0,
+  'opsz' 24
+}
+/* === NEW: AI Chat Input Bar Gemini Layout === */
+
+/* 1. Fix the container height to fill the screen on mobile */
+@media (max-width: 1023px) {
+  .ai-chat-view-container {
+    max-height: none;
+    height: 100%;
+  }
+}
+
+/* 2. Style the new input bar layout */
+.ai-chat-input-bar {
+    padding: 0.75rem 1rem;
+    flex-shrink: 0; /* Prevents the input bar from shrinking */
+}
+
+.ai-input-row {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.ai-settings-row {
+    display: flex;
+    justify-content: center;
+    margin-top: 0.5rem;
+}
+
+.ai-settings-button-repositioned {
+    background: none;
+    border: none;
+    color: var(--text-secondary);
+    font-size: 0.8rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    padding: 4px 10px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.ai-settings-button-repositioned:hover {
+    color: var(--text-primary);
+    background-color: var(--hover-bg);
+}
+/* === FINAL FIX: AI Chat Layout & Positioning === */
+
+/* === FINAL FIX v2: AI Chat Layout & Positioning === */
+
+/* When the AI chat is active, turn the parent into a positioning container */
+.main-content.ai-view-active {
+    padding: 0;
+    overflow: hidden;
+    position: relative; /* This is crucial for the child */
+}
+
+/* Force the chat container to absolutely fill its parent */
+.main-content.ai-view-active .ai-chat-view-container {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+}
+/* === NEW: Luxury Font for AI Response === */
+
+.ai-answer-body {
+    font-family: "Playfair Display", serif;
+    font-size: 1.1rem;      /* Slightly larger for better readability */
+    line-height: 1.7;       /* More space between lines for an elegant look */
+}
