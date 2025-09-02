@@ -13,10 +13,11 @@ app.use(cors());
 app.use(express.json());
 
 // =================================================================
-// === AI TEXT MODEL ENDPOINT (The "Brain") ===
+// === AI TEXT MODEL ENDPOINT (The "Brain") - NEW & IMPROVED ===
 // =================================================================
 app.post('/api/ask-ai', async (req, res) => {
-    const { userQuestion, contextData, targetLanguage = 'English' } = req.body;
+    // Destructure the new chatHistory property from the request body
+    const { userQuestion, contextData, targetLanguage = 'English', chatHistory } = req.body;
     
     const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
 
@@ -27,45 +28,66 @@ app.post('/api/ask-ai', async (req, res) => {
     
     const GEMINI_API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-pro-latest:generateContent?key=${GEMINI_API_KEY}`;
 
-    // THIS IS THE NEW, STRICTER PROMPT
-    const prompt = `
-        You are an expert business analyst AI. Your response MUST be properly formatted HTML with correct spacing.
-        
-        CRITICAL RULES:
-        1. ALWAYS include proper spaces between ALL words in your response
-        2. Use <h2> tags for main headers
-        3. Use <p> tags for ALL paragraphs
-        4. Use <ul> and <li> for bullet points
-        5. Use <strong> for bold text
-        6. Wrap important keywords in <em class="highlight"> tags
-        7. Wrap financial amounts in <span class="positive-amount"> or <span class="negative-amount">
-        
-        IMPORTANT: Your text MUST have normal spacing between words. Never concatenate words together.
-        
-        Example of CORRECT format:
-        <h2>Financial Analysis</h2>
-        <p>Your current <em class="highlight">revenue</em> shows positive growth trends.</p>
-        <ul>
-            <li>Total sales: <span class="positive-amount">$5,000</span></li>
-            <li>Net profit margin: 25%</li>
-        </ul>
-        
-        NEVER return text without spaces like "Thisistextwithoutspaces". 
-        ALWAYS ensure proper word spacing like "This is text with spaces".
+    // --- NEW, ADVANCED PROMPT ---
+    const system_prompt = `
+        You are AccuraAI, a professional, friendly, and highly intelligent business analyst integrated into an application named "Ledgerly". Your primary goal is to assist users by providing insightful analysis of their business data.
 
-        Here is the JSON data context for the business: 
-        ${JSON.stringify(contextData, null, 2)}
+        **Your Persona & Rules of Engagement:**
+        1.  **Identity:** Your name is AccuraAI. The application you are in is Ledgerly.
+        2.  **Tone:** Maintain a professional, helpful, and encouraging tone. Be concise and clear.
+        3.  **Intent Recognition (CRITICAL):** First, analyze the user's message.
+            -   **If the user provides a simple greeting** (like "hello", "hi", "how are you?") or small talk, respond conversationally and briefly. DO NOT generate a business analysis for simple greetings. For example, if the user says "Hello", you say "Hello! How can I assist you with your business data today?".
+            -   **If the user asks a question requiring data analysis**, proceed to the analysis phase using the provided JSON context.
+        4.  **Conversation Memory:** The user will provide the previous chat history. Use this history to understand the context of the current question and provide relevant follow-up answers. Refer to past turns if necessary.
 
-        Now, answer the user's question: "${userQuestion}"
-
-        Generate the complete HTML response in ${targetLanguage}, following all rules and the example format exactly.
+        **Business Analysis Formatting Rules (Only for data-related questions):**
+        -   Your response MUST be properly formatted HTML with correct spacing.
+        -   Use <h2> tags for main headers.
+        -   Use <p> tags for ALL paragraphs.
+        -   Use <ul> and <li> for bullet points.
+        -   Use <strong> for bold text.
+        -   Wrap important keywords in <em class="highlight"> tags.
+        -   Wrap financial amounts in <span class="positive-amount"> or <span class="negative-amount">.
+        -   IMPORTANT: Your text MUST have normal spacing between words. Never concatenate words.
+        
+        **Business Data Context (if applicable):** ${JSON.stringify(contextData, null, 2)}
     `;
+
+    // --- NEW: CONSTRUCTING THE CONVERSATIONAL HISTORY ---
+    // Gemini API expects a specific format: { role: 'user'/'model', parts: [...] }
+    const conversationContents = [];
+
+    // Transform your simple chat history into the Gemini format
+    if (chatHistory && chatHistory.length > 0) {
+        chatHistory.forEach(msg => {
+            // Map your 'sender' to Gemini's 'role'
+            const role = msg.sender === 'user' ? 'user' : 'model';
+            conversationContents.push({
+                role: role,
+                parts: [{ text: msg.content }]
+            });
+        });
+    }
+
+    // Add the latest user question at the end
+    // We combine the system prompt with the latest question for better context
+    conversationContents.push({
+        role: 'user',
+        parts: [{ text: `${system_prompt}\n\nNow, answer the user's latest question: "${userQuestion}" in ${targetLanguage}.` }]
+    });
 
     try {
         const geminiResponse = await axios.post(GEMINI_API_URL, {
-            contents: [{ parts: [{ text: prompt }] }],
+            // Send the constructed conversational history
+            contents: conversationContents,
         });
         
+        // Handle cases where the model might not return a candidate
+        if (!geminiResponse.data.candidates || geminiResponse.data.candidates.length === 0) {
+             console.error('Error in AI backend: No candidates returned from API.');
+             return res.status(500).json({ error: 'AI service returned an empty response.' });
+        }
+
         const geminiHtmlResponse = geminiResponse.data.candidates[0].content.parts[0].text;
         
         res.json({
