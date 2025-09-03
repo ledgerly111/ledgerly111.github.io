@@ -5324,40 +5324,34 @@ renderAIChatHistory() {
 
 // In script.js
 
+// In script.js - This function is already correct
+
 // Handles sending the question and receiving the answer
 async handleAiQuestion(questionText) {
-    // Store the user's message with a 'user' role for the history
     this.state.aiChatHistory.push({ sender: 'user', content: questionText });
     
     const thinkingMessageIndex = this.state.aiChatHistory.length;
     this.state.aiChatHistory.push({ sender: 'thinking' });
     this.renderAIChatHistory();
 
-    let contextData = {};
-    const categoryKey = this.state.currentAICategory;
-    const { sales, expenses, products, users, customers, lowStockThreshold, selectedCountry } = this.state;
-    switch (categoryKey) {
-        case 'financial': case 'expense-control':
-            contextData = { sales, expenses, currency: GCC_COUNTRIES[selectedCountry].currency };
-            break;
-        case 'inventory': case 'product-info':
-            contextData = { products, lowStockThreshold };
-            break;
-        case 'employee': case 'sales-team':
-            contextData = { users, sales };
-            break;
-        case 'customer-relations': case 'customer-support':
-            contextData = { customers, sales };
-            break;
-        case 'my-performance':
-            contextData = { myDetails: this.state.currentUser, mySales: sales.filter(s => s.salesPersonId === this.state.currentUser.id) };
-            break;
-        default:
-            contextData = { overview: { salesCount: sales.length, productCount: products.length, customerCount: customers.length } };
-    }
+    // This part gathers all the raw data for the backend to summarize
+    const { sales, expenses, products, users, customers, selectedCountry } = this.state;
+    const contextData = {
+        sales,
+        products,
+        customers,
+        expenses,
+        users,
+        currency: GCC_COUNTRIES[selectedCountry].currency,
+        currentUser: {
+            id: this.state.currentUser.id,
+            name: this.state.currentUser.name,
+            role: this.state.currentUser.role
+        }
+    };
 
     try {
-        // --- THIS IS THE UPDATED API CALL ---
+        // This sends the full raw data to the server
         const res = await fetch(`${this.serverUrl}/api/ask-ai`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -5365,7 +5359,6 @@ async handleAiQuestion(questionText) {
                 userQuestion: questionText,
                 contextData: contextData,
                 targetLanguage: this.state.aiSettings.language,
-                // **THE KEY ADDITION:** Send the history, but exclude the "thinking..." message
                 chatHistory: this.state.aiChatHistory.slice(0, -1) 
             })
         });
@@ -5375,21 +5368,20 @@ async handleAiQuestion(questionText) {
         const data = await res.json();
         const cleanedHtml = data.htmlResponse.replace(/^```html\s*|```$/g, '').trim();
     
-        // Replace the "thinking..." message with the actual AI response
         this.state.aiChatHistory[thinkingMessageIndex] = { 
-            sender: 'ai', // Your frontend uses 'ai', which is fine
+            sender: 'ai',
             content: cleanedHtml,
             language: this.state.aiSettings.language
         };
 
     } catch (error) {
         console.error("Error fetching AI response:", error);
-        // Also replace the "thinking..." message on error
         this.state.aiChatHistory[thinkingMessageIndex] = { sender: 'ai', content: `<div class="ai-response-error"><h4><i class="fas fa-exclamation-triangle"></i>Connection Error</h4><p>I'm sorry, I couldn't connect to the AI service. Please check your connection and try again.</p></div>` };
     }
 
     this.renderAIChatHistory();
 },
+
 
 // Triggered by the send button in the chat view
 submitAIChatMessage() {
@@ -7316,5 +7308,6 @@ renderBranchMessageBubbleHTML(msg) {
 
   // Initialize the application
     app.init(); 
+
 
 
