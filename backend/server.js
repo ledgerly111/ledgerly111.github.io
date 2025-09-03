@@ -12,20 +12,23 @@ const PORT = process.env.PORT || 10000;
 app.use(cors());
 app.use(express.json());
 
-// --- NEW HELPER FUNCTION TO CREATE A SMART SUMMARY ---
+// --- NEW, MORE RESILIENT HELPER FUNCTION ---
 function createContextSummary(data) {
-    if (!data || !data.sales || !data.expenses || !data.products) {
-        return { error: "Incomplete data provided for summary." };
-    }
+    // Provide default empty arrays to prevent errors if data is missing
+    const sales = data.sales || [];
+    const expenses = data.expenses || [];
+    const products = data.products || [];
+    const customers = data.customers || [];
+    const users = data.users || [];
 
-    const totalRevenue = data.sales.reduce((sum, sale) => sum + sale.total, 0);
-    const totalExpenses = data.expenses.reduce((sum, exp) => sum + exp.amount, 0);
+    const totalRevenue = sales.reduce((sum, sale) => sum + sale.total, 0);
+    const totalExpenses = expenses.reduce((sum, exp) => sum + exp.amount, 0);
     
     // Find top 3 selling product names by quantity
     const productSales = {};
-    data.sales.forEach(sale => {
+    sales.forEach(sale => {
         sale.items.forEach(item => {
-            const product = data.products.find(p => p.id === item.productId);
+            const product = products.find(p => p.id === item.productId);
             if (product) {
                 productSales[product.name] = (productSales[product.name] || 0) + item.quantity;
             }
@@ -44,12 +47,11 @@ function createContextSummary(data) {
             total_revenue: totalRevenue.toFixed(2),
             total_expenses: totalExpenses.toFixed(2),
             net_profit: (totalRevenue - totalExpenses).toFixed(2),
-            product_count: data.products.length,
-            customer_count: data.customers.length,
-            employee_count: data.users.length,
+            product_count: products.length,
+            customer_count: customers.length,
+            employee_count: users.length,
             top_selling_products: topSellingProducts
         },
-        // We can add more high-level summaries here in the future
     };
 }
 
@@ -67,7 +69,6 @@ app.post('/api/ask-ai', async (req, res) => {
     
     const GEMINI_API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-pro-latest:generateContent?key=${GEMINI_API_KEY}`;
 
-    // --- THIS IS THE KEY CHANGE ---
     // 1. Create the small, efficient summary from the raw data sent by the frontend
     const summary = createContextSummary(contextData);
 
