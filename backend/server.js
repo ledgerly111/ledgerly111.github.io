@@ -12,7 +12,7 @@ const PORT = process.env.PORT || 10000;
 app.use(cors());
 app.use(express.json());
 
-// --- UPDATED HELPER FUNCTION TO CREATE AN ENRICHED SUMMARY ---
+// --- FINAL HELPER FUNCTION TO CREATE THE DEFINITIVE SUMMARY ---
 function createContextSummary(data) {
     const sales = data.sales || [];
     const expenses = data.expenses || [];
@@ -22,20 +22,32 @@ function createContextSummary(data) {
 
     const totalRevenue = sales.reduce((sum, sale) => sum + sale.total, 0);
     const totalExpenses = expenses.reduce((sum, exp) => sum + exp.amount, 0);
-    
-    const productSales = {};
+
+    // --- NEW: Detailed Product Sales Calculation ---
+    const productPerformance = {};
+    // Initialize all products with 0 sales to ensure every product is in the summary
+    products.forEach(p => {
+        productPerformance[p.name] = { units_sold: 0, total_revenue: 0 };
+    });
+
+    // Aggregate sales data for each product
     sales.forEach(sale => {
         sale.items.forEach(item => {
             const product = products.find(p => p.id === item.productId);
-            if (product) {
-                productSales[product.name] = (productSales[product.name] || 0) + item.quantity;
+            if (product && productPerformance[product.name]) {
+                productPerformance[product.name].units_sold += item.quantity;
+                productPerformance[product.name].total_revenue += item.quantity * item.unitPrice;
             }
         });
     });
-    const topSellingProducts = Object.entries(productSales)
-        .sort((a, b) => b[1] - a[1])
-        .slice(0, 3)
-        .map(p => p[0]);
+
+    // Convert the performance object to an array for the summary
+    const product_sales_summary = Object.entries(productPerformance).map(([name, data]) => ({
+        name,
+        units_sold: data.units_sold,
+        total_revenue: parseFloat(data.total_revenue.toFixed(2))
+    }));
+
 
     return {
         business_overview: {
@@ -45,21 +57,19 @@ function createContextSummary(data) {
             total_revenue: totalRevenue.toFixed(2),
             total_expenses: totalExpenses.toFixed(2),
             net_profit: (totalRevenue - totalExpenses).toFixed(2),
-            customer_count: customers.length,
-            employee_count: users.length,
-            top_selling_products: topSellingProducts
         },
-        // --- THIS IS THE KEY CHANGE ---
-        // Instead of just a count, we now provide a list with names and stock levels.
         inventory_details: {
             product_count: products.length,
             products_stock_list: products.map(p => ({ name: p.name, stock: p.stock }))
-        }
+        },
+        // --- ADD THE NEW, DETAILED SALES SUMMARY ---
+        product_sales_summary: product_sales_summary
     };
 }
 
+
 // =================================================================
-// === AI TEXT MODEL ENDPOINT - USING THE ENRICHED SUMMARY ===
+// === AI TEXT MODEL ENDPOINT - USING THE FINAL SUMMARY ===
 // =================================================================
 app.post('/api/ask-ai', async (req, res) => {
     const { userQuestion, contextData, targetLanguage = 'English', chatHistory } = req.body;
@@ -74,14 +84,14 @@ app.post('/api/ask-ai', async (req, res) => {
 
     const summary = createContextSummary(contextData);
 
-    // The prompt is updated to know about the new 'inventory_details'
+    // The prompt is updated to know about the new 'product_sales_summary'
     const system_prompt = `
         You are AccuraAI, a professional business analyst in the "Ledgerly" app.
         **Your Persona & Rules:**
         1.  Your name is AccuraAI.
         2.  Your tone is professional, friendly, and helpful.
-        3.  **Intent Recognition:** If the user gives a simple greeting (like "hello"), respond conversationally. Do not perform an analysis.
-        4.  **Context:** Use the conversation history and the business summary below to answer questions. The summary contains a 'products_stock_list' which includes names and stock levels for all products.
+        3.  **Intent Recognition:** If the user gives a simple greeting, respond conversationally.
+        4.  **Context:** Use the conversation history and the business summary below to answer questions. The summary contains 'inventory_details' for stock levels and a 'product_sales_summary' with units sold and revenue for every single product. Use this data to make recommendations.
         
         **High-Level Business Summary:**
         ${JSON.stringify(summary, null, 2)}
