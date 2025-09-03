@@ -12,9 +12,8 @@ const PORT = process.env.PORT || 10000;
 app.use(cors());
 app.use(express.json());
 
-// --- NEW, MORE RESILIENT HELPER FUNCTION ---
+// --- UPDATED HELPER FUNCTION TO CREATE AN ENRICHED SUMMARY ---
 function createContextSummary(data) {
-    // Provide default empty arrays to prevent errors if data is missing
     const sales = data.sales || [];
     const expenses = data.expenses || [];
     const products = data.products || [];
@@ -24,7 +23,6 @@ function createContextSummary(data) {
     const totalRevenue = sales.reduce((sum, sale) => sum + sale.total, 0);
     const totalExpenses = expenses.reduce((sum, exp) => sum + exp.amount, 0);
     
-    // Find top 3 selling product names by quantity
     const productSales = {};
     sales.forEach(sale => {
         sale.items.forEach(item => {
@@ -47,16 +45,21 @@ function createContextSummary(data) {
             total_revenue: totalRevenue.toFixed(2),
             total_expenses: totalExpenses.toFixed(2),
             net_profit: (totalRevenue - totalExpenses).toFixed(2),
-            product_count: products.length,
             customer_count: customers.length,
             employee_count: users.length,
             top_selling_products: topSellingProducts
         },
+        // --- THIS IS THE KEY CHANGE ---
+        // Instead of just a count, we now provide a list with names and stock levels.
+        inventory_details: {
+            product_count: products.length,
+            products_stock_list: products.map(p => ({ name: p.name, stock: p.stock }))
+        }
     };
 }
 
 // =================================================================
-// === AI TEXT MODEL ENDPOINT - USING THE HYBRID METHOD ===
+// === AI TEXT MODEL ENDPOINT - USING THE ENRICHED SUMMARY ===
 // =================================================================
 app.post('/api/ask-ai', async (req, res) => {
     const { userQuestion, contextData, targetLanguage = 'English', chatHistory } = req.body;
@@ -69,17 +72,16 @@ app.post('/api/ask-ai', async (req, res) => {
     
     const GEMINI_API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-pro-latest:generateContent?key=${GEMINI_API_KEY}`;
 
-    // 1. Create the small, efficient summary from the raw data sent by the frontend
     const summary = createContextSummary(contextData);
 
-    // 2. The prompt now uses this small summary instead of the huge raw data blob
+    // The prompt is updated to know about the new 'inventory_details'
     const system_prompt = `
         You are AccuraAI, a professional business analyst in the "Ledgerly" app.
         **Your Persona & Rules:**
         1.  Your name is AccuraAI.
         2.  Your tone is professional, friendly, and helpful.
         3.  **Intent Recognition:** If the user gives a simple greeting (like "hello"), respond conversationally. Do not perform an analysis.
-        4.  **Context:** Use the conversation history and the business summary below to answer questions. If you need more specific details to answer, you must ask the user for them.
+        4.  **Context:** Use the conversation history and the business summary below to answer questions. The summary contains a 'products_stock_list' which includes names and stock levels for all products.
         
         **High-Level Business Summary:**
         ${JSON.stringify(summary, null, 2)}
