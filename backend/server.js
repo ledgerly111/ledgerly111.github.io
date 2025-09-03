@@ -23,14 +23,9 @@ function createContextSummary(data) {
     const totalRevenue = sales.reduce((sum, sale) => sum + sale.total, 0);
     const totalExpenses = expenses.reduce((sum, exp) => sum + exp.amount, 0);
 
-    // --- NEW: Detailed Product Sales Calculation ---
+    // Calculate sales per product
     const productPerformance = {};
-    // Initialize all products with 0 sales to ensure every product is in the summary
-    products.forEach(p => {
-        productPerformance[p.name] = { units_sold: 0, total_revenue: 0 };
-    });
-
-    // Aggregate sales data for each product
+    products.forEach(p => { productPerformance[p.name] = { units_sold: 0, total_revenue: 0 }; });
     sales.forEach(sale => {
         sale.items.forEach(item => {
             const product = products.find(p => p.id === item.productId);
@@ -40,13 +35,18 @@ function createContextSummary(data) {
             }
         });
     });
+    const product_sales_summary = Object.entries(productPerformance).map(([name, data]) => ({ name, units_sold: data.units_sold, total_revenue: parseFloat(data.total_revenue.toFixed(2)) }));
 
-    // Convert the performance object to an array for the summary
-    const product_sales_summary = Object.entries(productPerformance).map(([name, data]) => ({
-        name,
-        units_sold: data.units_sold,
-        total_revenue: parseFloat(data.total_revenue.toFixed(2))
-    }));
+    // --- NEW: Employee Performance Calculation ---
+    const employeePerformance = {};
+    users.forEach(u => { employeePerformance[u.name] = { total_sales_value: 0 }; });
+    sales.forEach(sale => {
+        const employee = users.find(u => u.id === sale.salesPersonId);
+        if (employee && employeePerformance[employee.name]) {
+            employeePerformance[employee.name].total_sales_value += sale.total;
+        }
+    });
+    const employee_sales_summary = Object.entries(employeePerformance).map(([name, data]) => ({ name, total_sales_value: parseFloat(data.total_sales_value.toFixed(2)) }));
 
 
     return {
@@ -62,14 +62,15 @@ function createContextSummary(data) {
             product_count: products.length,
             products_stock_list: products.map(p => ({ name: p.name, stock: p.stock }))
         },
-        // --- ADD THE NEW, DETAILED SALES SUMMARY ---
-        product_sales_summary: product_sales_summary
+        product_sales_summary: product_sales_summary,
+        // --- ADD THE NEW EMPLOYEE SUMMARY ---
+        employee_performance_summary: employee_sales_summary
     };
 }
 
 
 // =================================================================
-// === AI TEXT MODEL ENDPOINT - USING THE FINAL SUMMARY ===
+// === AI TEXT MODEL ENDPOINT - FINAL VERSION ===
 // =================================================================
 app.post('/api/ask-ai', async (req, res) => {
     const { userQuestion, contextData, targetLanguage = 'English', chatHistory } = req.body;
@@ -84,14 +85,21 @@ app.post('/api/ask-ai', async (req, res) => {
 
     const summary = createContextSummary(contextData);
 
-    // The prompt is updated to know about the new 'product_sales_summary'
     const system_prompt = `
         You are AccuraAI, a professional business analyst in the "Ledgerly" app.
+
         **Your Persona & Rules:**
-        1.  Your name is AccuraAI.
-        2.  Your tone is professional, friendly, and helpful.
-        3.  **Intent Recognition:** If the user gives a simple greeting, respond conversationally.
-        4.  **Context:** Use the conversation history and the business summary below to answer questions. The summary contains 'inventory_details' for stock levels and a 'product_sales_summary' with units sold and revenue for every single product. Use this data to make recommendations.
+        1.  Your name is AccuraAI. Your tone is professional and helpful.
+        2.  **Intent Recognition:** If the user gives a simple greeting, respond conversationally.
+        3.  **Context:** Use the conversation history and the business summary below. The summary contains inventory, product sales, and employee sales data.
+
+        **Formatting Rules (CRITICAL):**
+        - Your response MUST be valid HTML.
+        - Use <h2> for main headers.
+        - Use <h3> for sub-headers.
+        - Use <ul> and <li> for bullet points. Do not use asterisks.
+        - Use <p> for paragraphs.
+        - Use <strong> for bold text.
         
         **High-Level Business Summary:**
         ${JSON.stringify(summary, null, 2)}
