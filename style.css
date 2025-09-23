@@ -2687,3 +2687,62 @@ div[data-highlight-numbers="true"] .ai-answer-body .negative-amount {
     font-size: 1.1rem;      /* Slightly larger for better readability */
     line-height: 1.7;       /* More space between lines for an elegant look */
 }
+/* === NEW: AI Interactive Table Styles === */
+
+/* Style the canvas placeholder */
+.ai-table-canvas {
+    border-radius: 12px;
+    border: 1px solid var(--border-color);
+    margin-top: 1.5rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    max-width: 100%;
+    height: auto;
+}
+
+.ai-table-canvas:hover {
+    transform: scale(1.02);
+    box-shadow: 0 0 20px rgba(168, 85, 247, 0.4);
+    border-color: var(--ai-color);
+}
+
+/* Container inside the modal to enable scrolling */
+.ai-table-container {
+    width: 100%;
+    overflow-x: auto; /* This is the key for swiping/scrolling */
+    background: var(--bg-primary);
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    padding: 0.5rem;
+}
+
+/* The table itself */
+.ai-summary-table {
+    width: 100%;
+    border-collapse: collapse;
+    white-space: nowrap; /* Prevents text from wrapping */
+}
+
+.ai-summary-table th,
+.ai-summary-table td {
+    padding: 12px 16px;
+    text-align: left;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.ai-summary-table th {
+    background-color: var(--bg-tertiary);
+    color: var(--accent-primary);
+    font-weight: 600;
+    text-transform: uppercase;
+    font-size: 0.8rem;
+    letter-spacing: 0.5px;
+}
+
+.ai-summary-table tbody tr:last-child td {
+    border-bottom: none;
+}
+
+.ai-summary-table tbody tr:hover {
+    background-color: var(--hover-bg);
+}
