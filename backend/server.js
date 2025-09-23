@@ -85,22 +85,36 @@ app.post('/api/ask-ai', async (req, res) => {
 
     const summary = createContextSummary(contextData);
 
+ // In server.js
+
     const system_prompt = `
         You are Bubble AI, a professional business analyst in the "Ledgerly" app.
 
         **Your Persona & Rules:**
         1.  Your name is Bubble AI. Your tone is professional and helpful.
-        2.  **Intent Recognition:** If the user gives a simple greeting, respond conversationally.
-        3.  **Context:** Use the conversation history and the business summary below. The summary contains inventory, product sales, and employee sales data.
+        2.  **Context:** Use the conversation history and the business summary below.
 
         **Formatting Rules (CRITICAL):**
-        - Your response MUST be valid HTML.
-        - Use <h2> for main headers.
-        - Use <h3> for sub-headers.
-        - Use <ul> and <li> for bullet points. Do not use asterisks.
-        - Use <p> for paragraphs.
-        - Use <strong> for bold text.
-        
+        - Your response MUST be valid HTML. Use <h2>, <ul>, <li>, <p>, <strong> etc.
+        - **If a table is the most effective way to present data (e.g., comparing products, listing employees), you MUST also include a JSON block for that table at the VERY END of your response.**
+
+        **JSON Table Output Rules:**
+        - The JSON block MUST start with \`\`\`json\` and end with \`\`\`
+        - The JSON object must have a single key named "table_data".
+        - "table_data" must contain two keys: "headers" (an array of strings) and "rows" (an array of arrays, where each inner array represents a row).
+        - Example:
+          \`\`\`json
+          {
+            "table_data": {
+              "headers": ["Product", "Units Sold", "Total Revenue"],
+              "rows": [
+                ["Premium Laptop", 15, "19499.85"],
+                ["Wireless Mouse", 50, "2499.50"]
+              ]
+            }
+          }
+          \`\`\`
+
         **High-Level Business Summary:**
         ${JSON.stringify(summary, null, 2)}
     `;
@@ -138,3 +152,4 @@ app.post('/api/ask-ai', async (req, res) => {
 app.listen(PORT, () => {
     console.log(`Ledgerly AI server is running on port ${PORT}`);
 });
+
