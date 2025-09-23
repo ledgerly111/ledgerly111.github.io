@@ -52,7 +52,7 @@ function createContextSummary(data) {
     return {
         business_overview: {
             appName: "Ledgerly",
-            aiName: "AccuraAI",
+            aiName: "Bubble AI", // CHANGED
             currency: data.currency,
             total_revenue: totalRevenue.toFixed(2),
             total_expenses: totalExpenses.toFixed(2),
@@ -86,10 +86,10 @@ app.post('/api/ask-ai', async (req, res) => {
     const summary = createContextSummary(contextData);
 
     const system_prompt = `
-        You are AccuraAI, a professional business analyst in the "Ledgerly" app.
+        You are Bubble AI, a professional business analyst in the "Ledgerly" app.
 
         **Your Persona & Rules:**
-        1.  Your name is AccuraAI. Your tone is professional and helpful.
+        1.  Your name is Bubble AI. Your tone is professional and helpful.
         2.  **Intent Recognition:** If the user gives a simple greeting, respond conversationally.
         3.  **Context:** Use the conversation history and the business summary below. The summary contains inventory, product sales, and employee sales data.
 
