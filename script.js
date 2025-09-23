@@ -1733,6 +1733,37 @@ getModalContent(type, id = null) {
             }
             break;
 
+            // In script.js, inside the switch statement of getModalContent()
+
+        case 'view-ai-table':
+            title = 'Interactive Data Table';
+            // 'id' here is the canvasId we passed in the onclick event
+            const tableData = this.state.aiTableData[id];
+            
+            if (tableData) {
+                content = `
+                    <div class="ai-table-container">
+                        <table class="ai-summary-table">
+                            <thead>
+                                <tr>
+                                    ${tableData.headers.map(header => `<th>${header}</th>`).join('')}
+                                </tr>
+                            </thead>
+                            <tbody>
+                                ${tableData.rows.map(row => `
+                                    <tr>
+                                        ${row.map(cell => `<td>${cell}</td>`).join('')}
+                                    </tr>
+                                `).join('')}
+                            </tbody>
+                        </table>
+                    </div>
+                `;
+            } else {
+                content = `<p class="text-red-400">Could not find table data.</p>`;
+            }
+            break; // Don't forget the break!
+
         // ... all other cases remain the same but are included for completeness ...
 
         case 'compose-message':
@@ -5326,7 +5357,8 @@ renderAIChatHistory() {
 
 // In script.js - This function is already correct
 
-// Handles sending the question and receiving the answer
+// In script.js
+
 async handleAiQuestion(questionText) {
     this.state.aiChatHistory.push({ sender: 'user', content: questionText });
     
@@ -5334,45 +5366,53 @@ async handleAiQuestion(questionText) {
     this.state.aiChatHistory.push({ sender: 'thinking' });
     this.renderAIChatHistory();
 
-    // This part gathers all the raw data for the backend to summarize
     const { sales, expenses, products, users, customers, selectedCountry } = this.state;
-    const contextData = {
-        sales,
-        products,
-        customers,
-        expenses,
-        users,
-        currency: GCC_COUNTRIES[selectedCountry].currency,
-        currentUser: {
-            id: this.state.currentUser.id,
-            name: this.state.currentUser.name,
-            role: this.state.currentUser.role
-        }
-    };
+    const contextData = { sales, products, customers, expenses, users, currency: GCC_COUNTRIES[selectedCountry].currency, currentUser: { id: this.state.currentUser.id, name: this.state.currentUser.name, role: this.state.currentUser.role } };
 
     try {
-        // This sends the full raw data to the server
         const res = await fetch(`${this.serverUrl}/api/ask-ai`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                userQuestion: questionText,
-                contextData: contextData,
-                targetLanguage: this.state.aiSettings.language,
-                chatHistory: this.state.aiChatHistory.slice(0, -1) 
-            })
+            body: JSON.stringify({ userQuestion: questionText, contextData: contextData, targetLanguage: this.state.aiSettings.language, chatHistory: this.state.aiChatHistory.slice(0, -1) })
         });
 
         if (!res.ok) throw new Error(`AI server error: ${res.status}`);
         
         const data = await res.json();
-        const cleanedHtml = data.htmlResponse.replace(/^```html\s*|```$/g, '').trim();
+        let htmlResponse = data.htmlResponse;
+        
+        // --- NEW LOGIC TO DETECT AND HANDLE TABLE JSON ---
+        const jsonRegex = /```json\s*([\s\S]*?)\s*```/;
+        const jsonMatch = htmlResponse.match(jsonRegex);
+        
+        if (jsonMatch && jsonMatch[1]) {
+            // Remove the JSON block from the visible HTML response
+            htmlResponse = htmlResponse.replace(jsonRegex, '').trim();
+
+            try {
+                const parsedJson = JSON.parse(jsonMatch[1]);
+                if (parsedJson.table_data) {
+                    const canvasId = `ai-table-canvas-${Date.now()}`;
+                    // Store the table data in the state, keyed by the unique canvas ID
+                    this.state.aiTableData = this.state.aiTableData || {};
+                    this.state.aiTableData[canvasId] = parsedJson.table_data;
+                    
+                    // Add the canvas element to the HTML response
+                    htmlResponse += `
+                        <canvas id="${canvasId}" class="ai-table-canvas" width="600" height="120" 
+                                onclick="app.showModal('view-ai-table', '${canvasId}')">
+                        </canvas>
+                    `;
+                }
+            } catch (e) {
+                console.error("Failed to parse AI table JSON:", e);
+            }
+        }
+        // --- END OF NEW LOGIC ---
+
+        const cleanedHtml = htmlResponse.replace(/^```html\s*|```$/g, '').trim();
     
-        this.state.aiChatHistory[thinkingMessageIndex] = { 
-            sender: 'ai',
-            content: cleanedHtml,
-            language: this.state.aiSettings.language
-        };
+        this.state.aiChatHistory[thinkingMessageIndex] = { sender: 'ai', content: cleanedHtml, language: this.state.aiSettings.language };
 
     } catch (error) {
         console.error("Error fetching AI response:", error);
@@ -5380,8 +5420,16 @@ async handleAiQuestion(questionText) {
     }
 
     this.renderAIChatHistory();
+    
+    // After rendering, find any new canvases and draw on them
+    setTimeout(() => {
+        Object.keys(this.state.aiTableData || {}).forEach(canvasId => {
+            if (document.getElementById(canvasId)) {
+                this.drawTablePlaceholder(canvasId);
+            }
+        });
+    }, 100);
 },
-
 
 // Triggered by the send button in the chat view
 submitAIChatMessage() {
@@ -5393,6 +5441,33 @@ submitAIChatMessage() {
     }
 },
 
+// In script.js, add this function to the app object
+
+drawTablePlaceholder(canvasId) {
+    const canvas = document.getElementById(canvasId);
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    const width = canvas.width;
+    const height = canvas.height;
+
+    // Create a background gradient
+    const gradient = ctx.createLinearGradient(0, 0, width, height);
+    gradient.addColorStop(0, '#2a2f4c'); // Darker purple
+    gradient.addColorStop(1, '#1e2233'); // Even darker blue/purple
+    ctx.fillStyle = gradient;
+    ctx.fillRect(0, 0, width, height);
+
+    // Draw the icon
+    ctx.fillStyle = '#a855f7'; // A bright purple
+    ctx.font = 'bold 36px "Font Awesome 6 Free"';
+    ctx.textAlign = 'center';
+    ctx.fillText('\uf0ce', width / 2, height / 2 + 5); // Unicode for table icon
+
+    // Draw the text
+    ctx.fillStyle = 'rgba(255, 255, 255, 0.8)';
+    ctx.font = '500 18px "Inter", sans-serif';
+    ctx.fillText('Click to View Interactive Table', width / 2, height / 2 + 45);
+},
 // --- SETTINGS MENU UI & LOGIC ---
 
 // Generates the HTML for the slide-down menu
