@@ -1,24 +1,4 @@
-// === START: NEW FIREBASE SETUP ===
-// This is the configuration key you just created.
-const firebaseConfig = {
-  apiKey: "AIzaSyC9LQOpd2ysrl5VfiaKHjSLqtwFy9PbnTM",
-  authDomain: "ledgerly-fe114.firebaseapp.com",
-  projectId: "ledgerly-fe114",
-  storageBucket: "ledgerly-fe114.firebasestorage.app",
-  messagingSenderId: "948615659595",
-  appId: "1:948615659595:web:914c4d7d51400ab8510dce",
-  measurementId: "G-CDSDB7YVWJ"
-};
-
-// Initialize Firebase and connect to the Firestore database
-const firebaseApp = firebase.initializeApp(firebaseConfig);
-const db = firebase.firestore(); 
-const auth = firebase.auth(); // This gives us access to user authentication features// This 'db' object is our connection to the database
-// === END: NEW FIREBASE SETUP ===
-
-
-
-        // ... THE REST OF YOUR EXISTING CODE CONTINUES HERE ...// Suppress console warnings for Tailwind JIT
+// Suppress console warnings for Tailwind JIT
 (function() {
     const originalWarn = console.warn;
     console.warn = function() {
@@ -102,65 +82,34 @@ const auth = firebase.auth(); // This gives us access to user authentication fea
             static info(message) { this.show(message, 'info'); }
         }
 
-       // Find and replace the entire FirebaseDataStorage class with this new version
-
-// Find and replace the entire FirebaseDataStorage class with this new, simpler version
-
-// Find and replace the entire FirebaseDataStorage class with this final version
-
-class FirebaseDataStorage {
-    // This now saves data to a document named after the user's ROLE
-    static async save(data) {
-        // THE FIX IS HERE: We get the current ROLE (e.g., 'worker', 'admin') from the app state.
-        const role = app.state.currentUser?.role;
-        if (!role) {
-            console.error("Save failed: No user role is selected.");
-            return false;
-        }
-
-        try {
-            // THE FIX IS HERE: The path is now tied to the role. All 'worker' data goes to the 'worker' document.
-            await db.collection('roleData').doc(role).set(data);
-            console.log(`Data saved for ROLE: ${role}!`);
-            return true;
-        } catch (error) {
-            console.error('Firebase save failed:', error);
-            return false;
-        }
-    }
-
-    // This now loads data from a document named after the user's ROLE
-    static async load() {
-        // THE FIX IS HERE: We get the current ROLE from the app state.
-        const role = app.state.currentUser?.role;
-        if (!role) {
-            console.error("Load failed: No user role is selected.");
-            return null;
-        }
-
-        try {
-            // THE FIX IS HERE: We load data from the specific document for that role.
-            const docRef = db.collection('roleData').doc(role);
-            const doc = await docRef.get();
-
-            if (doc.exists) {
-                console.log(`Data loaded for ROLE: ${role}!`);
-                return doc.data();
-            } else {
-                console.log(`No data found for ROLE: ${role}. Starting fresh.`);
-                return null;
+        // Enhanced Data Storage
+        class DataStorage {
+            static save(key, data) {
+                try {
+                    const dataString = JSON.stringify(data);
+                    localStorage.setItem(key, dataString);
+                    return true;
+                } catch (error) {
+                    console.error('Storage failed:', error);
+                    NotificationSystem.error('Storage failed. Data not saved.');
+                    return false;
+                }
             }
-        } catch (error) {
-            console.error('Firebase data loading failed:', error);
-            return null;
+            
+            static load(key) {
+                try {
+                    const data = localStorage.getItem(key);
+                    return data ? JSON.parse(data) : null;
+                } catch (error) {
+                    console.error('Data loading failed:', error);
+                    return null;
+                }
+            }
         }
-    }
-}
-// === END: DATA STORAGE MIGRATION TO FIREBASE ===
 
-        // AccuraAI Implementation
-        const AccuraAI = {
-            analyzeSentiment(text) {
+        // Bubble AI Implementation
+const BubbleAI = {
+    analyzeSentiment(text) {
                 const positiveWords = ['great', 'excellent', 'good', 'amazing', 'wonderful', 'fantastic', 'awesome', 'love', 'perfect', 'happy', 'success'];
                 const negativeWords = ['bad', 'terrible', 'awful', 'horrible', 'hate', 'problem', 'issue', 'urgent', 'emergency', 'complaint'];
                 
@@ -471,7 +420,7 @@ const inboxNotifications = [
     },
      {
         avatarBackground: "bg-gradient-to-r from-purple-500 to-pink-500",
-        username: "AccuraAI",
+        username: "Bubble AI",
         content: "💡 New insight: Consider a marketing campaign for External SSDs.",
         color: "text-purple-400",
         duration: 5000,
@@ -531,7 +480,6 @@ const app = {
                     { id: 4, username: 'worker2', role: 'worker', name: 'Bob Worker', email: 'worker2@company.com', phone: '+971501234570', address: 'Dubai Marina', hireDate: '2023-03-02', salary: 45000, commission: 0 },
                     { id: 5, username: 'manager2', role: 'manager', name: 'Sarah Manager', email: 'manager2@company.com', phone: '+971501234571', address: 'Downtown Dubai', hireDate: '2023-02-02', salary: 60000, commission: 0 }
                 ],
-              // Find and replace this entire 'products' array
                 products: [
                     { id: 1, name: 'Premium Laptop', price: 1299.99, cost: 800, stock: 25, category: 'Electronics', description: 'High-performance business laptop', sku: 'LAP001', supplier: 'TechCorp', reorderLevel: 5, imageUrl: 'https://via.placeholder.com/150/00d4aa/FFFFFF?text=Laptop' },
                     { id: 2, name: 'Wireless Mouse', price: 49.99, cost: 25, stock: 100, category: 'Accessories', description: 'Ergonomic wireless mouse', sku: 'MOU002', supplier: 'AccessoryPlus', reorderLevel: 20, imageUrl: 'https://via.placeholder.com/150/0ea5e9/FFFFFF?text=Mouse' },
@@ -637,53 +585,42 @@ nboxNotificationInterval: null,
                 currentLedgerAccount: null // To store the account code for the ledger view
             },
 
-// Replace the entire init() function with this new one
-    // Find and replace this entire function in your script.js file
-
-// Find and replace this entire function in your script.js file
-
-init() {
-    // We set up the listener to handle anonymous login in the background.
-    auth.onAuthStateChanged((user) => {
-        if (!user) {
-            // If the user is ever signed out completely, sign them in anonymously again.
-            auth.signInAnonymously().catch((error) => {
-                console.error("Anonymous sign-in failed:", error);
-            });
-        } else {
-            console.log("Anonymous user is ready:", user.uid);
-        }
-    });
-
-    // We start the app by simply rendering. Since no user role is selected yet,
-    // this will correctly show the login screen.
+           init() {
+    this.loadData();
+    const savedTheme = DataStorage.load('ledgerlyTheme') || 'dark-theme'; // Default to dark
+    this.setTheme(savedTheme);
     this.render();
     this.bindEvents();
+    this.updateAIInsights();
+    this.updateBotAnalysis();
 },
-          async loadData() {
-    const saved = await FirebaseDataStorage.load(); // The key is no longer needed
-    if (saved) {
-        this.state = { ...this.state, ...saved };
-    } else {
-        this.state.products = [];
-        this.state.customers = [];
-        this.state.sales = [];
-        this.state.expenses = [];
-        this.state.invoices = [];
-        this.state.journal = [];
-        this.state.tasks = [];
-        this.state.announcements = [];
-    }
-},
+            loadData() {
+                const saved = DataStorage.load('ledgerlyData');
+                if (saved) {
+                    this.state = { ...this.state, ...saved };
+                }
+            },
 
-             saveData() {
-    const stateToSave = { ...this.state };
-    const transientKeys = [
-        'pixelAnimation', 'mobileMenuOpen', 'aiLoading', 'aiAnswer', 'quickSale'
-    ];
-    transientKeys.forEach(key => delete stateToSave[key]);
-    return FirebaseDataStorage.save(stateToSave); // The key is no longer needed
-},
+             // THIS IS THE CORRECTED saveData FUNCTION
+            saveData() {
+                // Create a copy of the state to avoid modifying the live application state.
+                const stateToSave = { ...this.state };
+
+                // List all the temporary properties that should NOT be saved.
+                const transientKeys = [
+                    'pixelAnimation',
+                    'mobileMenuOpen',
+                    'aiLoading',
+                    'aiAnswer',
+                    'quickSale' // <-- ADDED THIS KEY TO PREVENT SAVING THE QUICK SALE STATE
+                ];
+
+                // Remove each of these temporary properties from the copy before we save it.
+                transientKeys.forEach(key => delete stateToSave[key]);
+
+                // Now, save the cleaned object that only contains the important, persistent data.
+                return DataStorage.save('ledgerlyData', stateToSave);
+            },
 
             toggleMobileSidebar() {
                 this.state.mobileMenuOpen = !this.state.mobileMenuOpen;
@@ -710,7 +647,7 @@ init() {
 
             updateAIInsights() {
                 if (this.state.currentUser) {
-                    this.state.aiInsights = AccuraAI.generateBusinessInsights(
+                    this.state.aiInsights = BubbleAI.generateBusinessInsights(
                         this.state.sales, 
                         this.state.products, 
                         this.state.customers,
@@ -954,25 +891,12 @@ init() {
                 }
             },
 
-           // Find and replace this entire function in your script.js file
-
-async loginAsUser(userId) {
-    // Step 1: Set which user role we are now acting as.
-    this.state.currentUser = this.state.users.find(u => u.id === parseInt(userId));
-    
-    // Step 2: Now that we know the role, LOAD the data for that role from Firebase.
-    await this.loadData();
-    
-    // Step 3: Change the view to the dashboard.
-    this.state.currentView = 'dashboard';
-    
-    // Step 4: Now that the data is loaded, render the dashboard.
-    this.render();
-    
-    // We need to run these again to update the AI with the new data
-    this.updateAIInsights();
-    this.updateBotAnalysis();
-},
+            loginAsUser(userId) {
+                this.state.currentUser = this.state.users.find(u => u.id === parseInt(userId));
+                this.state.currentView = 'dashboard';
+                this.render();
+                
+            },
 // PASTE THE NEW LOGOUT FUNCTION HERE
 getUserSelectionView() {
                 const role = this.state.pendingRole;
@@ -1003,15 +927,14 @@ getUserSelectionView() {
                     </div>
                 `;
             },
-           // Replace the entire logout() function with this new one
-    logout() {
-        auth.signOut().then(() => {
-            // This will trigger the onAuthStateChanged listener, which will handle everything else
-            console.log("User signed out successfully.");
-            // We need to reload the page to restart the app in a clean state
-            window.location.reload(); 
-        });
-    },
+            logout() {
+                this.state.currentUser = null;
+                this.state.currentView = 'login';
+                this.state.pendingRole = null; // Reset this from the user selection flow
+                this.saveData(); // Save the logged-out state
+                this.render();
+                NotificationSystem.info('You have been logged out.');
+            },
 
             
 
@@ -1088,44 +1011,37 @@ getUserSelectionView() {
                 }
             },
 
-           // Find and replace this entire function in your script.js file
+            handleProductForm(data) {
+                const isEdit = document.getElementById('product-id').value;
+                const product = {
+                    id: isEdit ? parseInt(isEdit) : Date.now(),
+                    name: data.name,
+                    price: parseFloat(data.price),
+                    cost: parseFloat(data.cost),
+                    stock: parseInt(data.stock),
+                    category: data.category,
+                    description: data.description,
+                    sku: data.sku,
+                    supplier: data.supplier,
+                    reorderLevel: parseInt(data.reorderLevel),
+                    imageUrl: data.imageUrl || 'https://via.placeholder.com/150/CCCCCC/FFFFFF?text=Product'
+                };
 
-handleProductForm(data) {
-    const isEdit = document.getElementById('product-id').value;
-    const product = {
-        id: isEdit ? parseInt(isEdit) : Date.now(),
-        name: data.name,
-        price: parseFloat(data.price),
-        cost: parseFloat(data.cost),
-        stock: parseInt(data.stock),
-        category: data.category,
-        description: data.description,
-        
-        // === THE FIX IS HERE ===
-        // We are providing default "fallback" values for the missing form fields.
-        // If the form doesn't provide a SKU, we use an empty string '' instead of undefined.
-        sku: data.sku || '', 
-        supplier: data.supplier || '',
-        reorderLevel: parseInt(data.reorderLevel) || 10, // Default to 10 if not provided
-        // We also fix the broken image URL by adding "https://"
-        imageUrl: data.imageUrl || 'https://via.placeholder.com/150/CCCCCC/FFFFFF?text=Product'
-    };
+                if (isEdit) {
+                    const index = this.state.products.findIndex(p => p.id === product.id);
+                    this.state.products[index] = product;
+                    NotificationSystem.success('✅ Product updated successfully!');
+                } else {
+                    this.state.products.push(product);
+                    NotificationSystem.success('🎉 Product added successfully!');
+                }
 
-    if (isEdit) {
-        const index = this.state.products.findIndex(p => p.id === product.id);
-        this.state.products[index] = product;
-        NotificationSystem.success('✅ Product updated successfully!');
-    } else {
-        this.state.products.push(product);
-        NotificationSystem.success('🎉 Product added successfully!');
-    }
-
-    this.closeModal();
-    this.saveData();
-    this.updateAIInsights();
-    this.updateBotAnalysis();
-    this.render();
-},
+                this.closeModal();
+                this.saveData();
+                this.updateAIInsights();
+                this.updateBotAnalysis();
+                this.render();
+            },
 
             handleCustomerForm(data) {
                 const isEdit = document.getElementById('customer-id').value;
@@ -1411,8 +1327,8 @@ handleTaskForm(data) {
                     content: data.content,
                     timestamp: new Date().toISOString(),
                     read: false,
-                    sentiment: AccuraAI.analyzeSentiment(data.content),
-                    aiAnalysis: `Message categorized as ${AccuraAI.analyzeSentiment(data.content)} sentiment. Context: Business communication with professional tone recommended.`
+                    sentiment: BubbleAI.analyzeSentiment(data.content),
+aiAnalysis: `Message categorized as ${BubbleAI.analyzeSentiment(data.content)} sentiment. Context: Business communication with professional tone recommended.`
                 };
 
                 this.state.messages.push(message);
@@ -2152,18 +2068,13 @@ getModalContent(type, id = null) {
             }, 50);
             break;
 
-  case 'add-product':
+        case 'add-product':
         case 'edit-product':
             title = isEdit ? 'Edit Product' : 'Add New Product';
             const product = isEdit ? this.state.products.find(p => p.id === parseInt(id)) : {};
             content = `
                 <form id="product-form" class="space-y-4">
-                    
-                    <!-- THE FIX IS HERE: This hidden input is now always included. -->
-                    <!-- When adding a new product, its value is empty. -->
-                    <!-- When editing, it holds the product's ID. -->
                     <input type="hidden" id="product-id" value="${id || ''}">
-
                     <div class="form-grid-responsive">
                         <div>
                             <label for="name" class="block text-sm font-medium text-gray-300 mb-2">Product Name</label>
@@ -4673,14 +4584,14 @@ initializeHeaderAnimation() {
     // Then, set it to play again every 60 seconds
     this.animationInterval = setInterval(playAnimation, 15000);
 },
-setTheme(themeName) {
+// START: REPLACEMENT FOR setTheme
+           setTheme(themeName) {
     document.body.className = themeName === 'default' ? '' : themeName;
-    // THE FIX IS HERE: We are using localStorage directly, which is correct for a theme setting.
-    localStorage.setItem('ledgerlyTheme', themeName); 
+    DataStorage.save('ledgerlyTheme', themeName);
     if (this.state.currentView === 'settings') {
-        this.render(); 
+        this.render(); // Re-render the settings view to update the selection border
     }
-    // We remove the success notification for theme changes to make it smoother.
+    NotificationSystem.success(`Theme changed successfully!`);
 },
 // END: REPLACEMENT FOR setTheme
 
@@ -4731,7 +4642,7 @@ setTheme(themeName) {
                                 <p class="text-xl font-semibold text-gray-300 mb-1">Sales</p>
                                 <p class="text-gray-400 mb-2">AI-Powered Business Management</p>
                                 <div class="flex items-center justify-center space-x-2 text-sm">
-                                    <span class="text-purple-400">✨ AccuraAI</span>
+    <span class="text-purple-400">✨ Bubble AI</span>
                                     <span class="text-gray-500">•</span>
                                     <span class="text-green-400">🤖 AccuraBot</span>
                                     <span class="text-gray-500">•</span>
@@ -4864,7 +4775,7 @@ getSidebar() {
     const menuItems = [
         { key: 'dashboard', icon: 'fas fa-tachometer-alt', label: 'Dashboard', roles: ['admin', 'manager', 'worker'] },
         { key: 'tasks', icon: 'fas fa-tasks', label: 'Tasks', roles: ['admin', 'manager', 'worker'] },
-        { key: 'navigate-to-ai-or-bot', icon: this.state.aiMode === 'ai' ? 'fas fa-crosshairs' : 'fas fa-robot', label: this.state.aiMode === 'ai' ? 'AccuraAI' : 'AccuraBot', roles: ['admin', 'manager', 'worker'] },
+        { key: 'navigate-to-ai-or-bot', icon: this.state.aiMode === 'ai' ? 'fas fa-crosshairs' : 'fas fa-robot', label: this.state.aiMode === 'ai' ? 'Bubble AI' : 'AccuraBot', roles: ['admin', 'manager', 'worker'] },
         { key: 'products', icon: 'fas fa-box', label: 'Products', roles: ['admin', 'manager', 'worker'] },
         { key: 'customers', icon: 'fas fa-users', label: 'Customers', roles: ['admin', 'manager', 'worker'] },
         { key: 'sales', icon: 'fas fa-shopping-cart', label: 'Sales', roles: ['admin', 'manager', 'worker'] },
@@ -4923,7 +4834,7 @@ getSidebar() {
             <div class="mt-8 p-4 bg-gradient-to-r from-gray-800/50 to-gray-700/50 rounded-xl border border-gray-600/50">
                 <div class="text-center">
                     <h4 class="text-lg font-bold bg-gradient-to-r from-yellow-500 to-orange-500 bg-clip-text text-transparent mb-1">${this.state.companyName}</h4>
-                    <p class="text-gray-400 text-xs">Powered by AccuraAI</p>
+                    <p class="text-gray-400 text-xs">Powered by Bubble AI</p>
                     <div class="mt-2 text-xs text-gray-500">
                         ${GCC_COUNTRIES[this.state.selectedCountry].currency} • ${GCC_COUNTRIES[this.state.selectedCountry].name.split(' ')[0]}
                     </div>
@@ -5093,9 +5004,9 @@ getSidebar() {
                             <div class="${this.state.aiMode === 'ai' ? 'ai-card' : 'bot-card'} p-6 slide-up">
                                 <div class="flex items-center justify-between mb-6">
                                     <h3 class="text-xl font-bold text-white flex items-center">
-                                        <i class="fas ${this.state.aiMode === 'ai' ? 'fa-brain text-purple-400' : 'fa-robot text-green-400'} mr-2"></i>
-                                        Accura${this.state.aiMode === 'ai' ? 'AI' : 'Bot'} Business Insights
-                                    </h3>
+    <i class="fas ${this.state.aiMode === 'ai' ? 'fa-brain text-purple-400' : 'fa-robot text-green-400'} mr-2"></i>
+    ${this.state.aiMode === 'ai' ? 'Bubble AI' : 'AccuraBot'} Business Insights
+</h3>
                                     <div class="px-3 py-1 ${this.state.aiMode === 'ai' ? 'bg-purple-500/20 text-purple-400' : 'bg-green-500/20 text-green-400'} rounded-full text-sm font-medium">
                                         ${this.state.aiMode === 'ai' ? 'AI Powered' : 'Bot Analysis'}
                                     </div>
@@ -5284,7 +5195,7 @@ getAIAssistantView() {
                          <span class="material-symbols-outlined text-white text-4xl">bubble_chart</span>
                         </div>
                         <div>
-                            <h2 class="text-2xl font-bold ai-gradient-text">AccuraAI Assistant</h2>
+                            <h2 class="text-2xl font-bold ai-gradient-text">Bubble AI Assistant</h2>
                             <p class="text-gray-400">Select a category to begin.</p>
                         </div>
                     </div>
@@ -7397,7 +7308,6 @@ renderBranchMessageBubbleHTML(msg) {
 
   // Initialize the application
     app.init(); 
-
 
 
 
