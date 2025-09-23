@@ -167,7 +167,7 @@
     --bg-primary: #000000;
     --bg-secondary: #0c0c0c;
     --bg-tertiary: #141414;
-    --text-primary: #e0ddc2;
+    --text-primary: #e5e5e5;
     --text-secondary: #a3a3a3;
     --border-color: #262626;
     --hover-bg: #1f1f1f;
@@ -2280,8 +2280,7 @@
     color: #c4b5fd; /* Tailwind's purple-300 */
 }
 
-
-/* Style for the AccuraAI Icon Glow */
+/* Style for the Bubble AI Icon Glow */
 .ai-answer-header .ai-answer-icon i.fas.fa-brain { /* Adjust the selector if your icon's structure is different */
     background: linear-gradient(45deg, #a78bfa, #818cf8, #6366f1, #4f46e5, #a78bfa); /* Vibrant gradient */
     -webkit-background-clip: text;
@@ -2453,7 +2452,7 @@
     }
 }
 
-/* 3. Styles for the "AccuraAI is thinking..." text and its animated ellipsis */
+/* 3. Styles for the "Bubble AI is thinking..." text and its animated ellipsis */
 .clean-thinking-container {
     display: flex;
     align-items: center;
