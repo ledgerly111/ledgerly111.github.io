@@ -81,8 +81,8 @@ app.post('/api/ask-ai', async (req, res) => {
     }
 
     // This is the most standard and compatible endpoint.
-    // If this fails, the issue is with the API Key's permissions in Google Cloud.
-const GEMINI_API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-pro-latest:generateContent?key=${GEMINI_API_KEY}`;
+    // If this fails, the issue is 100% with the API Key's permissions in Google Cloud.
+    const GEMINI_API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=${GEMINI_API_KEY}`;
 
     const summary = createContextSummary(contextData);
 
@@ -149,4 +149,3 @@ const GEMINI_API_URL = `https://generativelanguage.googleapis.com/v1beta/models/
 app.listen(PORT, () => {
     console.log(`Owlio AI server is running on port ${PORT}`);
 });
-
