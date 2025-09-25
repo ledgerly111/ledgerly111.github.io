@@ -1,7 +1,9 @@
 /* === FINAL, WORKING ANIMATION FIX === */
 .animated-header-container {
     position: relative;
-    display: inline-block;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
 }
 
 /* The parent H1 now directly contains the gradient styles */
@@ -17,6 +19,17 @@
     -webkit-text-fill-color: transparent; /* KEY CHANGE: Start with a transparent fill */
     transform: translateY(20px);
     animation-fill-mode: forwards;
+}
+
+.owl-logo-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2.25rem;
+    line-height: 1;
+    color: var(--accent-primary);
+    font-variation-settings: 'FILL' 0, 'wght' 600, 'GRAD' 0, 'opsz' 48;
+    text-shadow: 0 0 12px rgba(14, 165, 233, 0.35);
 }
 
 /* When .animate is added, trigger the animation */
@@ -48,6 +61,7 @@
     from { width: 0%; left: 50%; }
     to { width: 100%; left: 0; }
 }
+
 /* In style.css */
 /* === NEW THEME SYSTEM (DARK & LIGHT) === */
 
@@ -492,11 +506,11 @@
     .message-bubble {
         max-width: 85%;
     }
-    
+}
     #inbox-list-container > div {
         padding: 0.75rem;
     }
-}
+
 
 /* Employee search dropdown */
 #employee-search-results:not(.hidden) {
@@ -572,6 +586,7 @@
     }
 }
 
+
 /* Tab navigation active state */
 .inbox-tab-active {
     background: linear-gradient(135deg, var(--accent-primary) 0%, var(--accent-secondary) 100%);
@@ -590,6 +605,7 @@
             display: none;
         }
 /* ---- CORRECTED DESKTOP AND LAPTOP LAYOUT ---- */
+/* ---- CORRECTED DESKTOP AND LAPTOP LAYOUT ---- */
 @media (min-width: 1024px) {
     /* 1. DEFINE THE MAIN APP GRID (This now targets the main #app container) */
     .app-container-grid {
@@ -602,6 +618,7 @@
         height: 100vh;
         overflow: hidden; /* Prevent the main container from scrolling */
     }
+    /* <<<< THE BRACE WAS MOVED FROM UP HERE... */
 
     /* 2. POSITION THE MAIN CONTENT */
     .main-content {
@@ -619,15 +636,16 @@
 
     /* 4. POSITION THE DESKTOP SIDEBAR (FIXED) */
     .desktop-sidebar {
-    grid-area: sidebar;
-    display: flex;
-    flex-direction: column;
-    background: color-mix(in srgb, var(--bg-tertiary) 70%, transparent);
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
-    border-right: 1px solid color-mix(in srgb, var(--accent-secondary) 25%, transparent);
-    overflow-y: auto;
-}
+        grid-area: sidebar;
+        display: flex;
+        flex-direction: column;
+        background: color-mix(in srgb, var(--bg-tertiary) 70%, transparent);
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
+        border-right: 1px solid color-mix(in srgb, var(--accent-secondary) 25%, transparent);
+        overflow-y: auto;
+    }
+
     /* 5. POSITION THE NAVBAR */
     .navbar {
         grid-area: nav;
@@ -636,7 +654,8 @@
         z-index: 1000;
         margin-left: 0;
     }
-}
+} /* <<<< ...DOWN TO HERE, WRAPPING ALL DESKTOP STYLES */
+
         @media (min-width: 1536px) {
             .main-content {
                 margin-left: 320px;
@@ -1901,6 +1920,7 @@
     .chat-panel {
         grid-column: span 1 / span 1;
     }
+
 }
 
 .task-card {
@@ -1988,13 +2008,13 @@
 
 /* Specific ring colors for focus visibility (accessibility) */
 #announcement-form input[type="radio"]:checked#label-green:focus + label {
-    ring-color: #22c55e;
+    outline: 3px solid #22c55e;
 }
 #announcement-form input[type="radio"]:checked#label-yellow:focus + label {
-    ring-color: #f59e0b;
+    outline: 3px solid #f59e0b;
 }
 #announcement-form input[type="radio"]:checked#label-red:focus + label {
-    ring-color: #ef4444;
+    outline: 3px solid #ef4444;
 }
 /* === NEW: AccuraBot Modal Message Animation === */
 .bot-message-fade-in {
@@ -2004,7 +2024,8 @@
 @keyframes fadeInBotMessage {
     from { opacity: 0; transform: translateY(10px); }
     to { opacity: 1; transform: translateY(0); }
-}
+    }
+
 /* In style.css */
 /* ==> ADD THIS ENTIRE NEW BLOCK <== */
 
@@ -2242,7 +2263,8 @@
     0% { content: "."; }
     33% { content: ".."; }
     66% { content: "..."; }
-}
+    }
+
 
 
 /* In style.css */
@@ -2304,7 +2326,8 @@
         background-position: 100% 50%;
         box-shadow: 0 0 15px 8px rgba(179, 41, 243, 0.7);
     }
-} /* The animation block is now correctly closed here. */
+}
+/* The animation block is now correctly closed here. */
 
 /* === START: Minimalistic AI Response Highlighting === */
 
@@ -2477,7 +2500,8 @@
     0% { content: "."; }
     33% { content: ".."; }
     66% { content: "..."; }
-}
+    }
+
 /* In style.css */
 /* In style.css */
 /* === NEW, CORRECTED "METALLIC SHINE" EFFECT === */
@@ -2491,6 +2515,7 @@
         background-position: -200% center;
     }
 }
+
 /* In style.css */
 /* ==> ADD THIS NEW BLOCK <== */
 
@@ -2500,6 +2525,7 @@
     font-style: normal; /* Keep this to prevent italics */
     border-bottom: none; /* No underline by default */
 }
+
 .ai-answer-body .positive-amount,
 .ai-answer-body .negative-amount {
     color: inherit; /* Use the default text color */
@@ -2608,22 +2634,29 @@ div[data-highlight-numbers="true"] .ai-answer-body .negative-amount {
     color: var(--text-primary);
 }
 .material-symbols-outlined {
+  font-family: 'Material Symbols Outlined';
+  font-weight: normal;
+  font-style: normal;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+  letter-spacing: normal;
+  text-transform: none;
+  white-space: nowrap;
+  word-wrap: normal;
+  direction: ltr;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  font-feature-settings: 'liga';
+  text-rendering: optimizeLegibility;
   font-variation-settings:
-  'FILL' 0,
-  'wght' 400,
-  'GRAD' 0,
-  'opsz' 24
+    'FILL' 0,
+    'wght' 500,
+    'GRAD' 0,
+    'opsz' 48;
+  font-size: inherit;
 }
-/* === NEW: AI Chat Input Bar Gemini Layout === */
-
-/* 1. Fix the container height to fill the screen on mobile */
-@media (max-width: 1023px) {
-  .ai-chat-view-container {
-    max-height: none;
-    height: 100%;
-  }
-}
-
 /* 2. Style the new input bar layout */
 .ai-chat-input-bar {
     padding: 0.75rem 1rem;
@@ -2745,4 +2778,233 @@ div[data-highlight-numbers="true"] .ai-answer-body .negative-amount {
 
 .ai-summary-table tbody tr:hover {
     background-color: var(--hover-bg);
+}
+
+.ai-answer-body[data-typing="true"]::after {
+    content: '';
+    display: inline-block;
+    width: 2px;
+    height: 1em;
+    margin-left: 4px;
+    background: var(--accent-secondary);
+    animation: ai-caret-blink 0.8s steps(2, start) infinite;
+    vertical-align: bottom;
+}
+
+@keyframes ai-caret-blink {
+    to { opacity: 0; }
+    }
+
+
+
+
+
+
+
+/* === Refined Login Experience === */
+.login-hero {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 2.5rem 1.5rem;
+    background: radial-gradient(circle at top, rgba(14, 165, 233, 0.18), transparent 55%),
+                radial-gradient(circle at bottom, rgba(124, 58, 237, 0.15), transparent 50%),
+                linear-gradient(135deg, var(--bg-primary) 0%, var(--bg-secondary) 100%);
+}
+
+.login-shell {
+    position: relative;
+    width: 100%;
+    max-width: 960px;
+    background: rgba(17, 24, 39, 0.85);
+    border: 1px solid rgba(148, 163, 184, 0.18);
+    border-radius: 28px;
+    padding: 2.5rem;
+    box-shadow: 0 30px 80px rgba(0, 0, 0, 0.45);
+    backdrop-filter: blur(16px);
+}
+
+.login-shell::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    pointer-events: none;
+}
+
+.login-brand {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+}
+
+.login-brand-title {
+    font-size: 2.75rem;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+}
+
+.login-brand-subtitle {
+    color: var(--text-secondary);
+    margin-top: 0.25rem;
+}
+
+.login-tagline {
+    color: var(--text-secondary);
+    text-align: center;
+    font-size: 1rem;
+    margin-bottom: 1.25rem;
+}
+
+.login-pill-row {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 0.75rem;
+}
+
+.login-pill {
+    padding: 0.4rem 0.85rem;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 999px;
+    font-size: 0.75rem;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--text-secondary);
+}
+
+.user-selection-grid {
+    margin-top: 2rem;
+    display: grid;
+    gap: 1.5rem;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+}
+
+.user-selection-card {
+    --card-accent: var(--accent-primary);
+    --card-glow: rgba(14, 165, 233, 0.35);
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: 0.85rem;
+    padding: 1.75rem;
+    min-height: 230px;
+    background: linear-gradient(160deg, rgba(15, 23, 42, 0.92) 0%, rgba(15, 23, 42, 0.78) 100%);
+    border: 1px solid rgba(148, 163, 184, 0.16);
+    border-radius: 20px;
+    cursor: pointer;
+    transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease;
+    backdrop-filter: blur(12px);
+}
+
+.user-selection-card::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    background: radial-gradient(circle at top right, rgba(255, 255, 255, 0.07), transparent 55%);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.user-selection-card:hover {
+    transform: translateY(-10px);
+    border-color: var(--card-accent);
+    box-shadow: 0 22px 45px rgba(0, 0, 0, 0.45), 0 0 35px var(--card-glow);
+}
+
+.user-selection-card:hover::before {
+    opacity: 1;
+}
+
+.user-selection-card:focus-visible {
+    outline: 2px solid var(--card-accent);
+    outline-offset: 6px;
+}
+
+.user-card-icon {
+    font-size: 2.5rem;
+    line-height: 1;
+    color: var(--card-accent);
+    text-shadow: 0 0 18px var(--card-glow);
+}
+
+.user-card-title {
+    font-size: 1.4rem;
+    font-weight: 700;
+    color: var(--text-primary);
+}
+
+.user-card-description {
+    font-size: 0.95rem;
+    color: var(--text-secondary);
+    line-height: 1.6;
+    flex: 1;
+}
+
+.user-card-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+}
+
+.user-card-tags span {
+    padding: 0.35rem 0.85rem;
+    border-radius: 999px;
+    font-size: 0.75rem;
+    letter-spacing: 0.04em;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    color: var(--card-accent);
+}
+
+.user-selection-supervision {
+    --card-accent: #c084fc;
+    --card-glow: rgba(192, 132, 252, 0.38);
+    background: linear-gradient(165deg, rgba(91, 33, 182, 0.25) 0%, rgba(30, 27, 75, 0.9) 70%, rgba(49, 46, 129, 0.95) 100%);
+    border-color: rgba(192, 132, 252, 0.35);
+}
+
+.user-selection-sales {
+    --card-accent: #34d399;
+    --card-glow: rgba(52, 211, 153, 0.35);
+    background: linear-gradient(165deg, rgba(6, 95, 70, 0.25) 0%, rgba(6, 78, 59, 0.88) 65%, rgba(2, 44, 34, 0.96) 100%);
+    border-color: rgba(52, 211, 153, 0.35);
+}
+
+.login-footer-note {
+    margin-top: 2.25rem;
+    text-align: center;
+    color: var(--text-muted);
+    font-size: 0.85rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+}
+
+@media (max-width: 768px) {
+    .login-shell {
+        padding: 1.75rem;
+        border-radius: 22px;
+    }
+    .login-brand-title {
+        font-size: 2.2rem;
+    }
+    .user-selection-card {
+        min-height: 200px;
+    }
+}
+.login-brand .owl-logo-icon {
+    font-size: 3rem;
+    text-shadow: 0 0 22px rgba(14, 165, 233, 0.45);
+}
+
+.user-selection-admin {
+    --card-accent: #38bdf8;
+    --card-glow: rgba(56, 189, 248, 0.35);
+    background: linear-gradient(165deg, rgba(14, 116, 144, 0.22) 0%, rgba(15, 23, 42, 0.88) 65%, rgba(8, 47, 73, 0.96) 100%);
+    border-color: rgba(56, 189, 248, 0.35);
 }
