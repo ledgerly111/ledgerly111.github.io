@@ -95,7 +95,7 @@
     --bg-tertiary: #e9ecef;
     --text-primary: #212529;
     --text-secondary: #495057;
-    --text-muted: #ffffff;
+    --text-muted: #6c757d;
     --border-color: #dee2e6;
     --hover-bg: #e9ecef;
 }
@@ -144,6 +144,30 @@
 .theme-light .ai-pulse i, .theme-light .bot-pulse i {
     color: white !important;
 }
+/* AI selection cards */
+.theme-light .ai-category-card {
+    background: rgba(255, 255, 255, 0.92);
+    border-color: rgba(0, 0, 0, 0.08);
+    box-shadow: 0 12px 32px rgba(15, 23, 42, 0.08);
+}
+.theme-light .ai-category-card::before {
+    background: linear-gradient(160deg, rgba(248, 249, 250, 0.85) 0%, rgba(233, 236, 239, 0.9) 100%);
+}
+.theme-light .ai-category-card:hover {
+    box-shadow: 0 18px 36px rgba(15, 23, 42, 0.12);
+}
+.theme-light .ai-category-card h3,
+.theme-light .ai-category-card p {
+    color: var(--text-primary) !important;
+}
+.theme-light .ai-category-card .text-white\/70 {
+    color: rgba(33, 37, 41, 0.65) !important;
+}
+.theme-light .ai-category-icon-wrapper {
+    background: rgba(13, 110, 253, 0.08);
+    border: 1px solid rgba(13, 110, 253, 0.18);
+    color: var(--accent-secondary);
+}
 /* Card and Form Overrides */
 .theme-light .perplexity-card { background: var(--bg-primary); box-shadow: 0 4px 12px rgba(0,0,0,0.08); border-color: var(--border-color); }
 .theme-light .form-input { background: #ffffff !important; border-color: #ced4da !important; color: var(--text-primary) !important; }
@@ -152,6 +176,25 @@
 .theme-light .ai-card { background: rgba(111, 66, 193, 0.07) !important; border-color: rgba(111, 66, 193, 0.2) !important; }
 .theme-light .bot-card { background: rgba(25, 135, 84, 0.07) !important; border-color: rgba(25, 135, 84, 0.2) !important; }
 .theme-light .ai-answer-container { background: var(--bg-secondary); }
+/* Login role cards */
+.theme-light .user-selection-card {
+    background: linear-gradient(160deg, rgba(255, 255, 255, 0.94) 0%, rgba(248, 249, 250, 0.9) 100%);
+    border-color: rgba(0, 0, 0, 0.08);
+    box-shadow: 0 12px 32px rgba(15, 23, 42, 0.08);
+}
+.theme-light .user-selection-card::before {
+    background: radial-gradient(circle at top right, rgba(0, 0, 0, 0.06), transparent 55%);
+}
+.theme-light .user-card-description {
+    color: var(--text-secondary);
+}
+.theme-light .user-card-tags span {
+    background: rgba(13, 110, 253, 0.08);
+    color: var(--text-secondary);
+}
+.theme-light .user-selection-card:hover {
+    box-shadow: 0 18px 36px rgba(15, 23, 42, 0.12);
+}
 /* Gray Background Overrides */
 .theme-light .bg-gray-800\/50, .theme-light .odd\:bg-gray-800\/10:nth-child(odd) { background-color: var(--bg-tertiary) !important; }
 .theme-light [class*="bg-"][class*="\/10"], .theme-light [class*="bg-"][class*="\/20"] { background-color: rgba(0, 0, 0, 0.03) !important; }
@@ -188,6 +231,11 @@
 }
 .theme-black .perplexity-card { background: #0c0c0c; border: 1px solid var(--border-color); }
 .theme-black .form-input { background: #141414 !important; }
+.theme-black .modal-content {
+    background: #050505;
+    border-color: #1f1f1f;
+    box-shadow: 0 24px 60px rgba(0, 0, 0, 0.75);
+}
 
         * {
             box-sizing: border-box;
@@ -2051,6 +2099,16 @@
     border-top: 1px solid var(--border-color);
     background: var(--bg-secondary);
     position: relative; /* For positioning the settings menu */
+}
+
+.theme-light .ai-chat-input-bar {
+    background: var(--bg-secondary);
+    box-shadow: 0 -6px 24px rgba(15, 23, 42, 0.08);
+}
+.theme-light .ai-settings-menu {
+    background: var(--bg-primary);
+    border-color: rgba(0, 0, 0, 0.08);
+    box-shadow: 0 16px 40px rgba(15, 23, 42, 0.12);
 }
 
 .user-question-bubble {
