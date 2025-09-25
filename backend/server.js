@@ -51,7 +51,6 @@ function createContextSummary(data) {
 
     return {
         business_overview: {
-            // --- UPDATED APP NAME ---
             appName: "Owlio",
             aiName: "Bubble AI",
             currency: data.currency,
@@ -81,11 +80,12 @@ app.post('/api/ask-ai', async (req, res) => {
         return res.status(500).json({ error: 'AI API key not configured on the server.' });
     }
 
-const GEMINI_API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-pro-latest:generateContent?key=${GEMINI_API_KEY}`;
+    // This is the most standard and compatible endpoint.
+    // If this fails, the issue is with the API Key's permissions in Google Cloud.
+    const GEMINI_API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=${GEMINI_API_KEY}`;
 
     const summary = createContextSummary(contextData);
 
-    // --- UPDATED SYSTEM PROMPT ---
     const system_prompt = `
         You are Bubble AI, a professional business analyst in the "Owlio" app.
 
@@ -96,21 +96,17 @@ const GEMINI_API_URL = `https://generativelanguage.googleapis.com/v1beta/models/
 
         **Formatting Rules (CRITICAL for Business Questions):**
         - Your response MUST be valid HTML. Use <h2>, <ul>, <li>, <p>, <strong> etc.
-        - **If a table is the most effective way to present data (e.g., comparing products, listing employees), you MUST also include a JSON block for that table at the VERY END of your response.**
+        - **If a table is the most effective way to present data, you MUST also include a JSON block for that table at the VERY END of your response.**
 
         **JSON Table Output Rules (for Business Questions):**
         - The JSON block MUST start with \`\`\`json\` and end with \`\`\`
         - The JSON object must have a single key named "table_data".
-        - "table_data" must contain two keys: "headers" (an array of strings) and "rows" (an array of arrays, where each inner array represents a row).
+        - "table_data" must contain "headers" (array of strings) and "rows" (array of arrays).
         - Example:
           \`\`\`json
           {
             "table_data": {
-              "headers": ["Product", "Units Sold", "Total Revenue"],
-              "rows": [
-                ["Premium Laptop", 15, "19499.85"],
-                ["Wireless Mouse", 50, "2499.50"]
-              ]
+              "headers": ["Product", "Units Sold"], "rows": [["Laptop", 15], ["Mouse", 50]]
             }
           }
           \`\`\`
@@ -123,7 +119,6 @@ const GEMINI_API_URL = `https://generativelanguage.googleapis.com/v1beta/models/
     if (chatHistory && chatHistory.length > 0) {
         chatHistory.forEach(msg => {
             const role = msg.sender === 'user' ? 'user' : 'model';
-            // Simple sanitization to avoid breaking the prompt with complex HTML
             const cleanContent = typeof msg.content === 'string' ? msg.content.replace(/<[^>]*>?/gm, '') : '';
             conversationContents.push({ role: role, parts: [{ text: cleanContent }] });
         });
@@ -154,5 +149,3 @@ const GEMINI_API_URL = `https://generativelanguage.googleapis.com/v1beta/models/
 app.listen(PORT, () => {
     console.log(`Owlio AI server is running on port ${PORT}`);
 });
-
-
