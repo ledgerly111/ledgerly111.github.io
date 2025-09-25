@@ -51,8 +51,9 @@ function createContextSummary(data) {
 
     return {
         business_overview: {
-            appName: "Ledgerly",
-            aiName: "Bubble AI", // CHANGED
+            // --- UPDATED APP NAME ---
+            appName: "Owlio",
+            aiName: "Bubble AI",
             currency: data.currency,
             total_revenue: totalRevenue.toFixed(2),
             total_expenses: totalExpenses.toFixed(2),
@@ -63,7 +64,6 @@ function createContextSummary(data) {
             products_stock_list: products.map(p => ({ name: p.name, stock: p.stock }))
         },
         product_sales_summary: product_sales_summary,
-        // --- ADD THE NEW EMPLOYEE SUMMARY ---
         employee_performance_summary: employee_sales_summary
     };
 }
@@ -74,31 +74,31 @@ function createContextSummary(data) {
 // =================================================================
 app.post('/api/ask-ai', async (req, res) => {
     const { userQuestion, contextData, targetLanguage = 'English', chatHistory } = req.body;
-    
+
     const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
 
     if (!GEMINI_API_KEY) {
         return res.status(500).json({ error: 'AI API key not configured on the server.' });
     }
-    
-    const GEMINI_API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-pro-latest:generateContent?key=${GEMINI_API_KEY}`;
+
+    const GEMINI_API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=${GEMINI_API_KEY}`;
 
     const summary = createContextSummary(contextData);
 
- // In server.js
-
+    // --- UPDATED SYSTEM PROMPT ---
     const system_prompt = `
-        You are Bubble AI, a professional business analyst in the "Ledgerly" app.
+        You are Bubble AI, a professional business analyst in the "Owlio" app.
 
         **Your Persona & Rules:**
         1.  Your name is Bubble AI. Your tone is professional and helpful.
         2.  **Context:** Use the conversation history and the business summary below.
+        3.  **Conversational AI Rule:** If the user's question is a simple greeting or casual conversation (e.g., 'hi', 'hello', 'how are you?', 'thanks'), provide a friendly, conversational HTML response without including any business data or analysis. Just be a normal chatbot for these cases. For all other business-related questions, proceed with the full analysis using the context and summary provided.
 
-        **Formatting Rules (CRITICAL):**
+        **Formatting Rules (CRITICAL for Business Questions):**
         - Your response MUST be valid HTML. Use <h2>, <ul>, <li>, <p>, <strong> etc.
         - **If a table is the most effective way to present data (e.g., comparing products, listing employees), you MUST also include a JSON block for that table at the VERY END of your response.**
 
-        **JSON Table Output Rules:**
+        **JSON Table Output Rules (for Business Questions):**
         - The JSON block MUST start with \`\`\`json\` and end with \`\`\`
         - The JSON object must have a single key named "table_data".
         - "table_data" must contain two keys: "headers" (an array of strings) and "rows" (an array of arrays, where each inner array represents a row).
@@ -115,7 +115,7 @@ app.post('/api/ask-ai', async (req, res) => {
           }
           \`\`\`
 
-        **High-Level Business Summary:**
+        **High-Level Business Summary (ignore for simple greetings):**
         ${JSON.stringify(summary, null, 2)}
     `;
 
@@ -123,7 +123,9 @@ app.post('/api/ask-ai', async (req, res) => {
     if (chatHistory && chatHistory.length > 0) {
         chatHistory.forEach(msg => {
             const role = msg.sender === 'user' ? 'user' : 'model';
-            conversationContents.push({ role: role, parts: [{ text: msg.content }] });
+            // Simple sanitization to avoid breaking the prompt with complex HTML
+            const cleanContent = typeof msg.content === 'string' ? msg.content.replace(/<[^>]*>?/gm, '') : '';
+            conversationContents.push({ role: role, parts: [{ text: cleanContent }] });
         });
     }
 
@@ -150,6 +152,5 @@ app.post('/api/ask-ai', async (req, res) => {
 
 // Start the server
 app.listen(PORT, () => {
-    console.log(`Ledgerly AI server is running on port ${PORT}`);
+    console.log(`Owlio AI server is running on port ${PORT}`);
 });
-
