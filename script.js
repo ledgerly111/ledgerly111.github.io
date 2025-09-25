@@ -587,7 +587,7 @@ nboxNotificationInterval: null,
 
            init() {
     this.loadData();
-    const savedTheme = DataStorage.load('ledgerlyTheme') || 'dark-theme'; // Default to dark
+    const savedTheme = DataStorage.load('OwlioTheme') || 'dark-theme'; // Default to dark
     this.setTheme(savedTheme);
     this.render();
     this.bindEvents();
@@ -595,7 +595,7 @@ nboxNotificationInterval: null,
     this.updateBotAnalysis();
 },
             loadData() {
-                const saved = DataStorage.load('ledgerlyData');
+                const saved = DataStorage.load('OwlioData');
                 if (saved) {
                     this.state = { ...this.state, ...saved };
                 }
@@ -619,7 +619,7 @@ nboxNotificationInterval: null,
                 transientKeys.forEach(key => delete stateToSave[key]);
 
                 // Now, save the cleaned object that only contains the important, persistent data.
-                return DataStorage.save('ledgerlyData', stateToSave);
+                return DataStorage.save('OwlioData', stateToSave);
             },
 
             toggleMobileSidebar() {
@@ -2579,7 +2579,7 @@ getTaskReportHtml(taskId) {
     <div id="task-report-content" style="background-color: #ffffff; color: #111827; font-family: 'Inter', sans-serif; font-size: 14px; line-height: 1.5; padding: 2rem;">
         <div style="display: flex; justify-content: space-between; align-items: flex-start; border-bottom: 2px solid #00a46d; padding-bottom: 1rem; margin-bottom: 2rem;">
             <div>
-                <h1 style="font-size: 2.25rem; font-weight: 700; margin: 0; color: #00a46d; line-height: 1;">Ledgerly</h1>
+                <h1 style="font-size: 2.25rem; font-weight: 700; margin: 0; color: #00a46d; line-height: 1;">Owlio</h1>
                 <p style="margin: 0.25rem 0 0; color: #6b7280;">Task Performance Report</p>
             </div>
             <div style="text-align: right;">
@@ -4618,7 +4618,7 @@ initializeHeaderAnimation() {
 // START: REPLACEMENT FOR setTheme
            setTheme(themeName) {
     document.body.className = themeName === 'default' ? '' : themeName;
-    DataStorage.save('ledgerlyTheme', themeName);
+    DataStorage.save('OwlioTheme', themeName);
     if (this.state.currentView === 'settings') {
         this.render(); // Re-render the settings view to update the selection border
     }
@@ -4661,67 +4661,57 @@ initializeHeaderAnimation() {
 
             getLoginView() {
                 return `
-                    <div class="min-h-screen flex items-center justify-center p-4" style="background: linear-gradient(135deg, #0f1419 0%, #1a1f2e 50%, #242938 100%);">
-                        <div class="perplexity-card p-8 w-full max-w-md fade-in">
-                            <div class="text-center mb-8">
-                                <div class="mb-6">
-                                    <div class="inline-flex items-center justify-center w-20 h-20 rounded-full bg-gradient-to-r from-teal-500 to-blue-500 mb-4">
-                                        <i class="fas fa-chart-line text-white text-3xl"></i>
-                                    </div>
-                                </div>
-                                <h1 class="text-4xl font-bold gradient-text mb-2">Ledgerly</h1>
-                                <p class="text-xl font-semibold text-gray-300 mb-1">Sales</p>
-                                <p class="text-gray-400 mb-2">AI-Powered Business Management</p>
-                                <div class="flex items-center justify-center space-x-2 text-sm">
-    <span class="text-purple-400">✨ Bubble AI</span>
-                                    <span class="text-gray-500">•</span>
-                                    <span class="text-green-400">🤖 AccuraBot</span>
-                                    <span class="text-gray-500">•</span>
-                                    <span class="text-yellow-400">💰 GCC Support</span>
+                    <div class="login-hero">
+                        <div class="login-shell fade-in">
+                            <div class="login-brand">
+                                <span class="material-symbols-outlined owl-logo-icon">owl</span>
+                                <div>
+                                    <h1 class="login-brand-title">Owlio</h1>
+                                    <p class="login-brand-subtitle">AI-Powered Business Command Center</p>
                                 </div>
                             </div>
-                            
-                            <div class="space-y-4">
-                                <div class="user-selection-card" data-action="login-admin">
-                                    <div class="text-3xl mb-3">👑</div>
-                                    <h3 class="text-xl font-bold text-white mb-2">Administrator</h3>
-                                    <p class="text-gray-400 text-sm mb-3">Complete system control with AI insights</p>
-                                    <div class="flex justify-center space-x-2">
-                                        <span class="px-2 py-1 bg-red-500/20 text-red-400 rounded-full text-xs">Full Access</span>
-                                        <span class="px-2 py-1 bg-yellow-500/20 text-yellow-400 rounded-full text-xs">GCC Currency</span>
+                            <p class="login-tagline">Choose your vantage point and jump into the data.</p>
+                            <div class="login-pill-row">
+                                <span class="login-pill">Bubble AI Insights</span>
+                                <span class="login-pill">AccuraBot Automation</span>
+                                <span class="login-pill">GCC Ready</span>
+                            </div>
+                            <div class="user-selection-grid">
+                                <div class="user-selection-card user-selection-admin" data-action="login-admin" tabindex="0">
+                                    <span class="material-symbols-outlined user-card-icon">verified_user</span>
+                                    <h3 class="user-card-title">Admin</h3>
+                                    <p class="user-card-description">Command every module, configure teams, and launch AI workflows.</p>
+                                    <div class="user-card-tags">
+                                        <span>Full Suite</span>
+                                        <span>AI Control</span>
                                     </div>
                                 </div>
-                                
-                                <div class="user-selection-card" data-action="login-manager">
-                                    <div class="text-3xl mb-3">👔</div>
-                                    <h3 class="text-xl font-bold text-white mb-2">Manager</h3>
-                                    <p class="text-gray-400 text-sm mb-3">Team leadership with advanced analytics</p>
-                                    <div class="flex justify-center space-x-2">
-                                        <span class="px-2 py-1 bg-blue-500/20 text-blue-400 rounded-full text-xs">Management</span>
-                                        <span class="px-2 py-1 bg-purple-500/20 text-purple-400 rounded-full text-xs">AI Reports</span>
+                                <div class="user-selection-card user-selection-supervision" data-action="login-manager" tabindex="0">
+                                    <span class="material-symbols-outlined user-card-icon">supervisor_account</span>
+                                    <h3 class="user-card-title">Supervision</h3>
+                                    <p class="user-card-description">Guide performance, approve insights, and keep operations on track.</p>
+                                    <div class="user-card-tags">
+                                        <span>Team Analytics</span>
+                                        <span>Approvals</span>
                                     </div>
                                 </div>
-                                
-                                <div class="user-selection-card" data-action="login-worker">
-                                    <div class="text-3xl mb-3">👨‍💼</div>
-                                    <h3 class="text-xl font-bold text-white mb-2">Sales Worker</h3>
-                                    <p class="text-gray-400 text-sm mb-3">Sales management with live commissions</p>
-                                    <div class="flex justify-center space-x-2">
-                                        <span class="px-2 py-1 bg-green-500/20 text-green-400 rounded-full text-xs">Sales Focus</span>
-                                        <span class="px-2 py-1 bg-teal-500/20 text-teal-400 rounded-full text-xs">Live Earnings</span>
+                                <div class="user-selection-card user-selection-sales" data-action="login-worker" tabindex="0">
+                                    <span class="material-symbols-outlined user-card-icon">trending_up</span>
+                                    <h3 class="user-card-title">Sales</h3>
+                                    <p class="user-card-description">Close deals, record activity, and track live commissions effortlessly.</p>
+                                    <div class="user-card-tags">
+                                        <span>Sales Cockpit</span>
+                                        <span>Live Earnings</span>
                                     </div>
                                 </div>
                             </div>
-                            
-                            <div class="mt-6 text-center text-xs text-gray-500">
-                                Experience the future of business management
+                            <div class="login-footer-note">
+                                Precision finance | Realtime intelligence | Human-friendly AI
                             </div>
                         </div>
                     </div>
                 `;
             },
-
-         
 // START: REPLACEMENT FOR getNavbar
 
 getNavbar() {
@@ -4741,7 +4731,7 @@ getNavbar() {
                     <div class="flex items-center">
                         <div id="navbar-logo-container" class="animated-header-container">
                             <h1 class="animated-header text-2xl font-bold">
-                                <span style="--i:1">L</span><span style="--i:2">e</span><span style="--i:3">d</span><span style="--i:4">g</span><span style="--i:5">e</span><span style="--i:6">r</span><span style="--i:7">l</span><span style="--i:8">y</span>
+                                <span style="--i:1">O</span><span style="--i:2">w</span><span style="--i:3">l</span><span style="--i:4">i</span><span style="--i:5">o</span>
                             </h1>
                         </div>
                     </div>
@@ -4831,12 +4821,12 @@ getSidebar() {
         <div class="p-6">
             <div class="flex items-center mb-8">
               <div id="sidebar-logo-container" class="animated-header-container">
+                <span class="material-symbols-outlined owl-logo-icon">owl</span>
                 <h1 class="animated-header text-2xl font-bold">
-                    <span style="--i:1">L</span><span style="--i:2">e</span><span style="--i:3">d</span><span style="--i:4">g</span><span style="--i:5">e</span><span style="--i:6">r</span><span style="--i:7">l</span><span style="--i:8">y</span>
+                    <span style="--i:1">O</span><span style="--i:2">w</span><span style="--i:3">l</span><span style="--i:4">i</span><span style="--i:5">o</span>
                 </h1>
               </div>
             </div>
-
             <h3 class="text-sm font-semibold text-gray-400 uppercase tracking-wider mb-3">Navigation</h3>
             <ul class="space-y-2">
                ${visibleItems.map(item => {
@@ -5310,13 +5300,14 @@ renderAIChatHistory() {
     const chatLog = document.getElementById('ai-chat-log');
     if (!chatLog) return;
 
-    chatLog.innerHTML = this.state.aiChatHistory.map(msg => {
+    chatLog.innerHTML = this.state.aiChatHistory.map((msg, index) => {
         if (msg.sender === 'user') {
             return `<div class="user-question-bubble">${msg.content}</div>`;
         } else if (msg.sender === 'welcome') {
             return `<div class="ai-answer-body">${msg.content}</div>`;
         } else if (msg.sender === 'ai') {
             const direction = msg.language === 'Arabic' ? 'rtl' : 'ltr';
+            const shouldAnimate = !!msg.animate;
             return `
                 <div 
                     data-highlight-keywords="${this.state.aiSettings.highlightKeywords}" 
@@ -5327,7 +5318,7 @@ renderAIChatHistory() {
                             <span class="material-symbols-outlined ai-icon-shine-effect">bubble_chart</span>
                         </div>
                     </div>
-                    <div class="ai-answer-body" dir="${direction}">
+                    <div class="ai-answer-body" dir="${direction}" data-message-index="${index}" ${shouldAnimate ? 'data-animate="true"' : ''}>
                         ${msg.content}
                     </div>
                 </div>
@@ -5346,11 +5337,94 @@ renderAIChatHistory() {
     }).join('');
 
     // --- UPDATED SCROLLING LOGIC ---
-    const lastMessage = chatLog.lastElementChild;
-    if (lastMessage) {
-        // This scrolls to the top of the newly added message element
-        chatLog.scrollTop = lastMessage.offsetTop;
-    }
+    this.scrollAIChatToBottom();
+
+    requestAnimationFrame(() => this.applyAIResponseAnimation());
+},
+
+scrollAIChatToBottom() {
+    const chatLog = document.getElementById('ai-chat-log');
+    if (!chatLog) return;
+    chatLog.scrollTop = chatLog.scrollHeight;
+},
+
+applyAIResponseAnimation() {
+    const targets = document.querySelectorAll('.ai-answer-body[data-animate="true"]');
+    if (!targets.length) return;
+
+    targets.forEach(target => {
+        if (target.dataset.animating === 'true') return;
+
+        const originalHtml = target.innerHTML;
+        target.dataset.animating = 'true';
+        target.setAttribute('data-typing', 'true');
+        target.innerHTML = '';
+        this.scrollAIChatToBottom();
+
+        this.typewriterRenderHTML(target, originalHtml, () => this.scrollAIChatToBottom()).then(() => {
+            target.removeAttribute('data-typing');
+            delete target.dataset.animating;
+            target.removeAttribute('data-animate');
+            this.scrollAIChatToBottom();
+
+            const index = parseInt(target.getAttribute('data-message-index'), 10);
+            if (!Number.isNaN(index) && this.state.aiChatHistory[index]) {
+                this.state.aiChatHistory[index].animate = false;
+            }
+        }).catch(() => {
+            target.innerHTML = originalHtml;
+            target.removeAttribute('data-typing');
+            delete target.dataset.animating;
+            target.removeAttribute('data-animate');
+            this.scrollAIChatToBottom();
+        });
+    });
+},
+
+typewriterRenderHTML(target, html, onChunk) {
+    const tempContainer = document.createElement('div');
+    tempContainer.innerHTML = html;
+    const textSpeed = 16;
+
+    const animateText = (text, parent, onChunk) => new Promise(resolve => {
+        if (!text) {
+            resolve();
+            return;
+        }
+
+        const textNode = document.createTextNode('');
+        parent.appendChild(textNode);
+        const chunkSize = text.length > 800 ? 6 : text.length > 400 ? 4 : text.length > 200 ? 3 : 2;
+        let index = 0;
+
+        const step = () => {
+            textNode.textContent += text.slice(index, index + chunkSize);
+            index += chunkSize;
+            if (typeof onChunk === 'function') onChunk();
+            if (index < text.length) {
+                setTimeout(step, textSpeed);
+            } else {
+                resolve();
+            }
+        };
+
+        step();
+    });
+
+    const processNodes = async (nodes, parent, onChunk) => {
+        for (const node of nodes) {
+            if (node.nodeType === Node.TEXT_NODE) {
+                await animateText(node.textContent, parent, onChunk);
+            } else if (node.nodeType === Node.ELEMENT_NODE) {
+                const clone = node.cloneNode(false);
+                parent.appendChild(clone);
+                if (typeof onChunk === 'function') onChunk();
+                await processNodes(Array.from(node.childNodes), clone, onChunk);
+            }
+        }
+    };
+
+    return processNodes(Array.from(tempContainer.childNodes), target, onChunk);
 },
 
 // In script.js
@@ -5412,11 +5486,11 @@ async handleAiQuestion(questionText) {
 
         const cleanedHtml = htmlResponse.replace(/^```html\s*|```$/g, '').trim();
     
-        this.state.aiChatHistory[thinkingMessageIndex] = { sender: 'ai', content: cleanedHtml, language: this.state.aiSettings.language };
+        this.state.aiChatHistory[thinkingMessageIndex] = { sender: 'ai', content: cleanedHtml, language: this.state.aiSettings.language, animate: true };
 
     } catch (error) {
         console.error("Error fetching AI response:", error);
-        this.state.aiChatHistory[thinkingMessageIndex] = { sender: 'ai', content: `<div class="ai-response-error"><h4><i class="fas fa-exclamation-triangle"></i>Connection Error</h4><p>I'm sorry, I couldn't connect to the AI service. Please check your connection and try again.</p></div>` };
+        this.state.aiChatHistory[thinkingMessageIndex] = { sender: 'ai', content: `<div class="ai-response-error"><h4><i class="fas fa-exclamation-triangle"></i>Connection Error</h4><p>I'm sorry, I couldn't connect to the AI service. Please check your connection and try again.</p></div>`, animate: true };
     }
 
     this.renderAIChatHistory();
@@ -5576,7 +5650,7 @@ setAISetting(key, value) {
                                 </div>
                                 <div class="flex-1">
                                     <h3 class="text-xl font-bold text-white mb-3">AccuraBot Monitoring Active! 🤖</h3>
-                                    <p class="text-gray-300 mb-4 leading-relaxed">I'm continuously monitoring your Ledgerly Sales application, tracking GCC currency fluctuations, analyzing sales performance, and providing real-time actionable business intelligence.</p>
+                                    <p class="text-gray-300 mb-4 leading-relaxed">I'm continuously monitoring your Owlio Sales application, tracking GCC currency fluctuations, analyzing sales performance, and providing real-time actionable business intelligence.</p>
                                     <div class="grid grid-cols-2 lg:grid-cols-4 gap-3">
                                         <div class="bg-green-500/10 border border-green-500/30 rounded-xl p-3 text-center">
                                             <div class="text-xl mb-1">💱</div>
@@ -7383,6 +7457,28 @@ renderBranchMessageBubbleHTML(msg) {
 
   // Initialize the application
     app.init(); 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
