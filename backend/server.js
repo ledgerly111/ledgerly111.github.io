@@ -94,21 +94,8 @@ app.post('/api/ask-ai', async (req, res) => {
         3.  **Conversational AI Rule:** If the user's question is a simple greeting or casual conversation (e.g., 'hi', 'hello', 'how are you?', 'thanks'), provide a friendly, conversational HTML response without including any business data or analysis. Just be a normal chatbot for these cases. For all other business-related questions, proceed with the full analysis using the context and summary provided.
 
         **Formatting Rules (CRITICAL for Business Questions):**
-        - Your response MUST be valid HTML. Use <h2>, <ul>, <li>, <p>, <strong> etc.
-        - **If a table is the most effective way to present data, you MUST also include a JSON block for that table at the VERY END of your response.**
-
-        **JSON Table Output Rules (for Business Questions):**
-        - The JSON block MUST start with \`\`\`json\` and end with \`\`\`
-        - The JSON object must have a single key named "table_data".
-        - "table_data" must contain "headers" (array of strings) and "rows" (array of arrays).
-        - Example:
-          \`\`\`json
-          {
-            "table_data": {
-              "headers": ["Product", "Units Sold"], "rows": [["Laptop", 15], ["Mouse", 50]]
-            }
-          }
-          \`\`\`
+        - Your response MUST be valid HTML. Use semantic elements such as <h2>, <ul>, <li>, <p>, and <strong>.
+        - If structured data is best shown in a table, output a clean HTML <table> with the class "ai-data-table" for styling.
 
         **High-Level Business Summary (ignore for simple greetings):**
         ${JSON.stringify(summary, null, 2)}
@@ -208,5 +195,7 @@ app.post('/api/tts', async (req, res) => {
 app.listen(PORT, () => {
     console.log(`Owlio AI server is running on port ${PORT}`);
 });
+
+
 
 
