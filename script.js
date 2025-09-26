@@ -26,403 +26,335 @@
     };
 })();
 
-        // GCC Countries Configuration
-        const GCC_COUNTRIES = {
-            'AE': { name: 'United Arab Emirates', currency: 'AED', symbol: 'DHS', rate: 3.67, tax: 0.05, taxName: 'VAT' },
-            'SA': { name: 'Saudi Arabia', currency: 'SAR', symbol: '﷼', rate: 3.75, tax: 0.15, taxName: 'VAT' },
-            'KW': { name: 'Kuwait', currency: 'KWD', symbol: 'د.ك', rate: 0.30, tax: 0.00, taxName: 'No Tax' },
-            'QA': { name: 'Qatar', currency: 'QAR', symbol: '﷼', rate: 3.64, tax: 0.00, taxName: 'No Tax' },
-            'BH': { name: 'Bahrain', currency: 'BHD', symbol: '.د.ب', rate: 0.38, tax: 0.10, taxName: 'VAT' },
-            'OM': { name: 'Oman', currency: 'OMR', symbol: '﷼', rate: 0.38, tax: 0.05, taxName: 'VAT' }
+const GCC_COUNTRIES = {
+    'AE': { name: 'United Arab Emirates', currency: 'AED', symbol: 'AED', rate: 3.67, tax: 0.05, taxName: 'VAT' },
+    'SA': { name: 'Saudi Arabia', currency: 'SAR', symbol: 'SAR', rate: 3.75, tax: 0.15, taxName: 'VAT' },
+    'KW': { name: 'Kuwait', currency: 'KWD', symbol: 'KWD', rate: 0.30, tax: 0.00, taxName: 'No Tax' },
+    'QA': { name: 'Qatar', currency: 'QAR', symbol: 'QAR', rate: 3.64, tax: 0.00, taxName: 'No Tax' },
+    'BH': { name: 'Bahrain', currency: 'BHD', symbol: 'BHD', rate: 0.38, tax: 0.10, taxName: 'VAT' },
+    'OM': { name: 'Oman', currency: 'OMR', symbol: 'OMR', rate: 0.38, tax: 0.05, taxName: 'VAT' }
+};
+
+// Enhanced Notification System
+class NotificationSystem {
+    static show(message, type = 'info', duration = 4000) {
+        const container = document.getElementById('notification-container');
+        const notification = document.createElement('div');
+        notification.className = `notification ${type}`;
+        
+        const icons = {
+            success: 'fas fa-check-circle',
+            error: 'fas fa-exclamation-circle',
+            warning: 'fas fa-exclamation-triangle',
+            info: 'fas fa-info-circle'
         };
-
-        // Enhanced Notification System
-        class NotificationSystem {
-            static show(message, type = 'info', duration = 4000) {
-                const container = document.getElementById('notification-container');
-                const notification = document.createElement('div');
-                notification.className = `notification ${type}`;
-                
-                const icons = {
-                    success: 'fas fa-check-circle',
-                    error: 'fas fa-exclamation-circle',
-                    warning: 'fas fa-exclamation-triangle',
-                    info: 'fas fa-info-circle'
-                };
-                
-                const colors = {
-                    success: 'text-green-400',
-                    error: 'text-red-400',
-                    warning: 'text-yellow-400',
-                    info: 'text-blue-400'
-                };
-                
-                notification.innerHTML = `
-                    <i class="${icons[type]} ${colors[type]} text-lg"></i>
-                    <div class="flex-1">
-                        <p class="text-white font-medium text-sm">${message}</p>
-                    </div>
-                    <button onclick="this.parentElement.remove()" class="text-gray-400 hover:text-white transition-colors ml-2">
-                        <i class="fas fa-times"></i>
-                    </button>
-                `;
-                
-                container.appendChild(notification);
-                
-                setTimeout(() => {
-                    if (notification.parentElement) {
-                        notification.remove();
-                    }
-                }, duration);
+        
+        const colors = {
+            success: 'text-green-400',
+            error: 'text-red-400',
+            warning: 'text-yellow-400',
+            info: 'text-blue-400'
+        };
+        
+        notification.innerHTML = `
+            <i class="${icons[type]} ${colors[type]} text-lg"></i>
+            <div class="flex-1">
+                <p class="text-white font-medium text-sm">${message}</p>
+            </div>
+            <button onclick="this.parentElement.remove()" class="text-gray-400 hover:text-white transition-colors ml-2">
+                <i class="fas fa-times"></i>
+            </button>
+        `;
+        
+        container.appendChild(notification);
+        
+        setTimeout(() => {
+            if (notification.parentElement) {
+                notification.remove();
             }
-            
-            static success(message) { this.show(message, 'success'); }
-            static error(message) { this.show(message, 'error'); }
-            static warning(message) { this.show(message, 'warning'); }
-            static info(message) { this.show(message, 'info'); }
+        }, duration);
+    }
+    
+    static success(message) { this.show(message, 'success'); }
+    static error(message) { this.show(message, 'error'); }
+    static warning(message) { this.show(message, 'warning'); }
+    static info(message) { this.show(message, 'info'); }
+}
+
+// Enhanced Data Storage
+class DataStorage {
+    static save(key, data) {
+        try {
+            const dataString = JSON.stringify(data);
+            localStorage.setItem(key, dataString);
+            return true;
+        } catch (error) {
+            console.error('Storage failed:', error);
+            NotificationSystem.error('Storage failed. Data not saved.');
+            return false;
         }
-
-        // Enhanced Data Storage
-        class DataStorage {
-            static save(key, data) {
-                try {
-                    const dataString = JSON.stringify(data);
-                    localStorage.setItem(key, dataString);
-                    return true;
-                } catch (error) {
-                    console.error('Storage failed:', error);
-                    NotificationSystem.error('Storage failed. Data not saved.');
-                    return false;
-                }
-            }
-            
-            static load(key) {
-                try {
-                    const data = localStorage.getItem(key);
-                    return data ? JSON.parse(data) : null;
-                } catch (error) {
-                    console.error('Data loading failed:', error);
-                    return null;
-                }
-            }
+    }
+    
+    static load(key) {
+        try {
+            const data = localStorage.getItem(key);
+            return data ? JSON.parse(data) : null;
+        } catch (error) {
+            console.error('Data loading failed:', error);
+            return null;
         }
+    }
+}
 
-        // Bubble AI Implementation
+// Bubble AI Implementation
 const BubbleAI = {
     analyzeSentiment(text) {
-                const positiveWords = ['great', 'excellent', 'good', 'amazing', 'wonderful', 'fantastic', 'awesome', 'love', 'perfect', 'happy', 'success'];
-                const negativeWords = ['bad', 'terrible', 'awful', 'horrible', 'hate', 'problem', 'issue', 'urgent', 'emergency', 'complaint'];
-                
-                const lowerText = text.toLowerCase();
-                let positiveScore = 0;
-                let negativeScore = 0;
-                
-                positiveWords.forEach(word => {
-                    if (lowerText.includes(word)) positiveScore++;
+        const positiveWords = ['great', 'excellent', 'good', 'amazing', 'wonderful', 'fantastic', 'awesome', 'love', 'perfect', 'happy', 'success'];
+        const negativeWords = ['bad', 'terrible', 'awful', 'horrible', 'hate', 'problem', 'issue', 'urgent', 'emergency', 'complaint'];
+
+        const lowerText = text.toLowerCase();
+        let positiveScore = 0;
+        let negativeScore = 0;
+
+        positiveWords.forEach(word => {
+            if (lowerText.includes(word)) positiveScore++;
+        });
+
+        negativeWords.forEach(word => {
+            if (lowerText.includes(word)) negativeScore++;
+        });
+
+        if (positiveScore > negativeScore) return 'positive';
+        if (negativeScore > positiveScore) return 'negative';
+        return 'neutral';
+    },
+
+    generateBusinessInsights(salesData, products, customers, expenses) {
+        const insights = [];
+        const totalRevenue = salesData.reduce((sum, sale) => sum + sale.total, 0);
+        const totalExpenses = expenses.reduce((sum, expense) => sum + expense.amount, 0);
+        const netProfit = totalRevenue - totalExpenses;
+
+        if (netProfit > 10000) {
+            insights.push({
+                type: 'success',
+                icon: 'fas fa-chart-line',
+                title: 'Excellent Performance!',
+                message: 'Outstanding net profit! Your business is thriving with strong financials.',
+                action: 'Consider expansion opportunities or strategic investments for growth.'
+            });
+        } else if (netProfit < 0) {
+            insights.push({
+                type: 'warning',
+                icon: 'fas fa-exclamation-triangle',
+                title: 'Profit Alert',
+                message: 'Expenses are exceeding revenue. Immediate attention required.',
+                action: 'Review and optimize your expense structure and pricing strategy.'
+            });
+        }
+
+        const lowStockProducts = products.filter(p => p.stock <= 10);
+        if (lowStockProducts.length > 0) {
+            insights.push({
+                type: 'alert',
+                icon: 'fas fa-box-open',
+                title: 'Inventory Warning',
+                message: `${lowStockProducts.length} products need immediate restocking.`,
+                action: 'Prevent stockouts by reordering inventory now to maintain sales flow.'
+            });
+        }
+
+        if (customers.length > 50) {
+            insights.push({
+                type: 'info',
+                icon: 'fas fa-users',
+                title: 'Growing Customer Base',
+                message: `Impressive! You have ${customers.length} customers in your database.`,
+                action: 'Implement loyalty programs to maximize customer lifetime value and retention.'
+            });
+        }
+
+        return insights;
+    },
+
+    getPerformanceRecommendations(userRole, commission, salary) {
+        const recommendations = [];
+
+        if (userRole === 'worker') {
+            if (commission > 1000) {
+                recommendations.push({
+                    type: 'celebration',
+                    icon: 'fas fa-trophy',
+                    title: 'Top Performer!',
+                    message: 'Your commission shows exceptional sales performance!',
+                    tip: 'You\'re excelling! Consider mentoring team members and exploring leadership opportunities.'
                 });
-                
-                negativeWords.forEach(word => {
-                    if (lowerText.includes(word)) negativeScore++;
+            } else if (commission < 200) {
+                recommendations.push({
+                    type: 'improvement',
+                    icon: 'fas fa-lightbulb',
+                    title: 'Growth Opportunity',
+                    message: 'Your commission potential can be significantly improved with focus.',
+                    tip: 'Focus on building stronger customer relationships and consultative selling techniques.'
                 });
-                
-                if (positiveScore > negativeScore) return 'positive';
-                if (negativeScore > positiveScore) return 'negative';
-                return 'neutral';
-            },
-
-            generateBusinessInsights(salesData, products, customers, expenses) {
-                const insights = [];
-                const totalRevenue = salesData.reduce((sum, sale) => sum + sale.total, 0);
-                const totalExpenses = expenses.reduce((sum, expense) => sum + expense.amount, 0);
-                const netProfit = totalRevenue - totalExpenses;
-                
-                if (netProfit > 10000) {
-                    insights.push({
-                        type: 'success',
-                        icon: '🎉',
-                        title: 'Excellent Performance!',
-                        message: `Outstanding net profit! Your business is thriving with strong financials.`,
-                        action: 'Consider expansion opportunities or strategic investments for growth.'
-                    });
-                } else if (netProfit < 0) {
-                    insights.push({
-                        type: 'warning',
-                        icon: '⚠️',
-                        title: 'Profit Alert',
-                        message: `Expenses are exceeding revenue. Immediate attention required.`,
-                        action: 'Review and optimize your expense structure and pricing strategy.'
-                    });
-                }
-                
-                const lowStockProducts = products.filter(p => p.stock <= 10);
-                if (lowStockProducts.length > 0) {
-                    insights.push({
-                        type: 'alert',
-                        icon: '📦',
-                        title: 'Inventory Warning',
-                        message: `${lowStockProducts.length} products need immediate restocking.`,
-                        action: 'Prevent stockouts by reordering inventory now to maintain sales flow.'
-                    });
-                }
-
-                if (customers.length > 50) {
-                    insights.push({
-                        type: 'info',
-                        icon: '👥',
-                        title: 'Growing Customer Base',
-                        message: `Impressive! You have ${customers.length} customers in your database.`,
-                        action: 'Implement loyalty programs to maximize customer lifetime value and retention.'
-                    });
-                }
-                
-                return insights;
-            },
-
-            getPerformanceRecommendations(userRole, commission, salary) {
-                const recommendations = [];
-                
-                if (userRole === 'worker') {
-                    if (commission > 1000) {
-                        recommendations.push({
-                            type: 'celebration',
-                            icon: '🏆',
-                            title: 'Top Performer!',
-                            message: `Your commission shows exceptional sales performance!`,
-                            tip: 'You\'re excelling! Consider mentoring team members and exploring leadership opportunities.'
-                        });
-                    } else if (commission < 200) {
-                        recommendations.push({
-                            type: 'improvement',
-                            icon: '💪',
-                            title: 'Growth Opportunity',
-                            message: 'Your commission potential can be significantly improved with focus.',
-                            tip: 'Focus on building stronger customer relationships and consultative selling techniques.'
-                        });
-                    }
-                }
-                
-                return recommendations;
             }
+        }
+
+        return recommendations;
+    }
+};
+
+// AccuraBot Implementation
+const AccuraBot = {
+    analyzeApp(state) {
+        return {
+            overview: this.getAppOverview(state),
+            alerts: this.getAlerts(state),
+            recommendations: this.getRecommendations(state),
+            quickActions: this.getQuickActions(state)
         };
+    },
 
-        // AccuraBot Implementation
-        const AccuraBot = {
-            analyzeApp(state) {
-                return {
-                    overview: this.getAppOverview(state),
-                    alerts: this.getAlerts(state),
-                    recommendations: this.getRecommendations(state),
-                    quickActions: this.getQuickActions(state)
-                };
-            },
+    getAppOverview(state) {
+        const totalRevenue = state.sales.reduce((sum, sale) => sum + sale.total, 0);
+        const totalExpenses = state.expenses.reduce((sum, expense) => sum + expense.amount, 0);
+        const lowStockCount = state.products.filter(p => p.stock <= state.lowStockThreshold).length;
+        const unreadMessages = state.messages.filter(m => m.to === state.currentUser.id && !m.read).length;
 
-            getAppOverview(state) {
+        return {
+            revenue: totalRevenue,
+            expenses: totalExpenses,
+            netProfit: totalRevenue - totalExpenses,
+            products: state.products.length,
+            customers: state.customers.length,
+            employees: state.users.length,
+            lowStock: lowStockCount,
+            unreadMessages: unreadMessages,
+            healthScore: this.calculateHealthScore(state)
+        };
+    },
+
+    calculateHealthScore(state) {
+        let score = 0;
+        const revenue = state.sales.reduce((sum, sale) => sum + sale.total, 0);
+        const expenses = state.expenses.reduce((sum, expense) => sum + expense.amount, 0);
+        const netProfit = revenue - expenses;
+        if (netProfit > 50000) score += 30; else if (netProfit > 10000) score += 25; else if (netProfit > 0) score += 15; else score += 5;
+        const lowStockProducts = state.products.filter(p => p.stock <= state.lowStockThreshold).length;
+        const stockRatio = state.products.length > 0 ? lowStockProducts / state.products.length : 0;
+        if (stockRatio === 0) score += 25; else if (stockRatio < 0.1) score += 20; else if (stockRatio < 0.25) score += 15; else score += 5;
+        if (state.customers.length > 100) score += 20; else if (state.customers.length > 50) score += 15; else if (state.customers.length > 20) score += 10; else score += 5;
+        if (state.products.length > 0 && state.customers.length > 0 && state.sales.length > 0) score += 25; else score += 10;
+        return Math.min(score, 100);
+    },
+
+    getAlerts(state) {
+        const alerts = [];
+        const lowStockProducts = state.products.filter(p => p.stock <= state.lowStockThreshold);
+        if (lowStockProducts.length > 0) {
+            alerts.push({ type: 'urgent', icon: 'fas fa-exclamation-triangle', title: 'Critical Stock Alert', message: `${lowStockProducts.length} products critically low on stock`, action: 'products' });
+        }
+        const unreadMessages = state.messages.filter(m => m.to === state.currentUser.id && !m.read);
+        if (unreadMessages.length > 5) {
+            alerts.push({ type: 'info', icon: 'fas fa-info-circle', title: 'Unread Messages', message: `${unreadMessages.length} unread messages require attention`, action: 'inbox' });
+        }
+        return alerts;
+    },
+
+    getRecommendations(state) {
+        const recommendations = [];
+        const totalRevenue = state.sales.reduce((sum, sale) => sum + sale.total, 0);
+        const avgSale = totalRevenue / state.sales.length || 0;
+        if (avgSale < 100 && state.sales.length > 10) {
+            recommendations.push({ type: 'growth', icon: 'fas fa-level-up-alt', title: 'Boost Average Sale Value', message: 'Current average sale shows growth potential', tip: 'Implement cross-selling and upselling strategies to increase transaction values' });
+        }
+        if (state.customers.length < 10) {
+            recommendations.push({ type: 'expansion', icon: 'fas fa-users', title: 'Expand Customer Base', message: 'Growing your customer base will drive sustainable revenue growth', tip: 'Focus on marketing and customer acquisition strategies' });
+        }
+        return recommendations;
+    },
+
+    getQuickActions(state) {
+        const actions = [];
+        if (state.currentUser.role === 'admin') {
+            actions.push({ id: 'add-employee', icon: 'fas fa-user-plus', label: 'Add Employee', color: 'blue' }, { id: 'view-reports', icon: 'fas fa-chart-bar', label: 'View Reports', color: 'purple' }, { id: 'settings', icon: 'fas fa-cog', label: 'Settings', color: 'gray' });
+        }
+        if (['admin', 'manager'].includes(state.currentUser.role)) {
+            actions.push({ id: 'add-product', icon: 'fas fa-box', label: 'Add Product', color: 'green' }, { id: 'view-employees', icon: 'fas fa-users', label: 'View Team', color: 'blue' });
+        }
+        actions.push({ id: 'add-sale', icon: 'fas fa-shopping-cart', label: 'Record Sale', color: 'green' }, { id: 'add-expense', icon: 'fas fa-receipt', label: 'Add Expense', color: 'yellow' }, { id: 'add-customer', icon: 'fas fa-handshake', label: 'Add Customer', color: 'blue' }, { id: 'view-products', icon: 'fas fa-inventory', label: 'View Inventory', color: 'gray' });
+        return actions;
+    },
+
+    processCommand(command, state) {
+        const lowerCommand = command.toLowerCase().trim();
+        let responseHtml = '';
+        switch (lowerCommand) {
+            case '#credit':
+                const customersWithBalance = state.customers.filter(c => c.balance > 0);
+                const totalOutstandingCredit = customersWithBalance.reduce((sum, c) => sum + c.balance, 0);
+                responseHtml += `<p class="text-white font-medium mb-2">Total Outstanding Credit: ${app.formatCurrency(totalOutstandingCredit)}</p>`;
+                if (customersWithBalance.length > 0) {
+                    responseHtml += `<p class="text-gray-300 mb-1">Customers with outstanding balance:</p><ul class="list-disc list-inside text-gray-300">`;
+                    customersWithBalance.forEach(c => { responseHtml += `<li>${c.name}: ${app.formatCurrency(c.balance)}</li>`; });
+                    responseHtml += `</ul>`;
+                } else {
+                    responseHtml += `<p class="text-gray-300">No customers with outstanding credit balance.</p>`;
+                }
+                break;
+            case '#sales':
+                const totalSalesCount = state.sales.length;
                 const totalRevenue = state.sales.reduce((sum, sale) => sum + sale.total, 0);
-                const totalExpenses = state.expenses.reduce((sum, expense) => sum + expense.amount, 0);
-                const lowStockCount = state.products.filter(p => p.stock <= state.lowStockThreshold).length;
-                const unreadMessages = state.messages.filter(m => m.to === state.currentUser.id && !m.read).length;
-
-                return {
-                    revenue: totalRevenue,
-                    expenses: totalExpenses,
-                    netProfit: totalRevenue - totalExpenses,
-                    products: state.products.length,
-                    customers: state.customers.length,
-                    employees: state.users.length,
-                    lowStock: lowStockCount,
-                    unreadMessages: unreadMessages,
-                    healthScore: this.calculateHealthScore(state)
-                };
-            },
-
-            calculateHealthScore(state) {
-                let score = 0;
-                
-                const revenue = state.sales.reduce((sum, sale) => sum + sale.total, 0);
-                const expenses = state.expenses.reduce((sum, expense) => sum + expense.amount, 0);
-                const netProfit = revenue - expenses;
-                
-                if (netProfit > 50000) score += 30;
-                else if (netProfit > 10000) score += 25;
-                else if (netProfit > 0) score += 15;
-                else score += 5;
-
-                const lowStockProducts = state.products.filter(p => p.stock <= state.lowStockThreshold).length;
-                const stockRatio = state.products.length > 0 ? lowStockProducts / state.products.length : 0;
-                if (stockRatio === 0) score += 25;
-                else if (stockRatio < 0.1) score += 20;
-                else if (stockRatio < 0.25) score += 15;
-                else score += 5;
-
-                if (state.customers.length > 100) score += 20;
-                else if (state.customers.length > 50) score += 15;
-                else if (state.customers.length > 20) score += 10;
-                else score += 5;
-
-                if (state.products.length > 0 && state.customers.length > 0 && state.sales.length > 0) score += 25;
-                else score += 10;
-
-                return Math.min(score, 100);
-            },
-
-            getAlerts(state) {
-                const alerts = [];
-
-                const lowStockProducts = state.products.filter(p => p.stock <= state.lowStockThreshold);
+                responseHtml += `<p class="text-white font-medium mb-2">Total Sales Recorded: ${totalSalesCount}</p><p class="text-white font-medium">Total Revenue: ${app.formatCurrency(totalRevenue)}</p>`;
+                break;
+            case '#lowstock':
+                const lowStockProducts = state.products.filter(p => p.stock <= p.reorderLevel);
                 if (lowStockProducts.length > 0) {
-                    alerts.push({
-                        type: 'urgent',
-                        icon: '🚨',
-                        title: 'Critical Stock Alert',
-                        message: `${lowStockProducts.length} products critically low on stock`,
-                        action: 'products'
-                    });
+                    responseHtml += `<p class="text-white font-medium mb-2">Products critically low on stock (below reorder level):</p><ul class="list-disc list-inside text-gray-300">`;
+                    lowStockProducts.forEach(p => { responseHtml += `<li>${p.name} (SKU: ${p.sku}): ${p.stock} in stock (Reorder Level: ${p.reorderLevel})</li>`; });
+                    responseHtml += `</ul>`;
+                } else {
+                    responseHtml += `<p class="text-white font-medium">Great! No products are currently below their reorder level.</p>`;
                 }
+                break;
+            default:
+                responseHtml = `<p class="text-red-400">Command not recognized. Try #credit, #sales, or #lowstock.</p>`;
+                break;
+        }
+        return responseHtml;
+    }
+};
+            
 
-                const unreadMessages = state.messages.filter(m => m.to === state.currentUser.id && !m.read);
-                if (unreadMessages.length > 5) {
-                    alerts.push({
-                        type: 'info',
-                        icon: '📧',
-                        title: 'Unread Messages',
-                        message: `${unreadMessages.length} unread messages require attention`,
-                        action: 'inbox'
-                    });
-                }
-
-                return alerts;
-            },
-
-            getRecommendations(state) {
-                const recommendations = [];
-                const totalRevenue = state.sales.reduce((sum, sale) => sum + sale.total, 0);
-                const avgSale = totalRevenue / state.sales.length || 0;
-
-                if (avgSale < 100 && state.sales.length > 10) {
-                    recommendations.push({
-                        type: 'growth',
-                        icon: '📈',
-                        title: 'Boost Average Sale Value',
-                        message: `Current average sale shows growth potential`,
-                        tip: 'Implement cross-selling and upselling strategies to increase transaction values'
-                    });
-                }
-
-                if (state.customers.length < 10) {
-                    recommendations.push({
-                        type: 'expansion',
-                        icon: '👥',
-                        title: 'Expand Customer Base',
-                        message: 'Growing your customer base will drive sustainable revenue growth',
-                        tip: 'Focus on marketing and customer acquisition strategies'
-                    });
-                }
-
-                return recommendations;
-            },
-
-            getQuickActions(state) {
-                const actions = [];
-
-                if (state.currentUser.role === 'admin') {
-                    actions.push(
-                        { id: 'add-employee', icon: 'fas fa-user-plus', label: 'Add Employee', color: 'blue' },
-                        { id: 'view-reports', icon: 'fas fa-chart-bar', label: 'View Reports', color: 'purple' },
-                        { id: 'settings', icon: 'fas fa-cog', label: 'Settings', color: 'gray' }
-                    );
-                }
-
-                if (['admin', 'manager'].includes(state.currentUser.role)) {
-                    actions.push(
-                        { id: 'add-product', icon: 'fas fa-box', label: 'Add Product', color: 'green' },
-                        { id: 'view-employees', icon: 'fas fa-users', label: 'View Team', color: 'blue' }
-                    );
-                }
-
-                actions.push(
-                    { id: 'add-sale', icon: 'fas fa-shopping-cart', label: 'Record Sale', color: 'green' },
-                    { id: 'add-expense', icon: 'fas fa-receipt', label: 'Add Expense', color: 'yellow' },
-                    { id: 'add-customer', icon: 'fas fa-handshake', label: 'Add Customer', color: 'blue' },
-                    { id: 'view-products', icon: 'fas fa-inventory', label: 'View Inventory', color: 'gray' }
-                );
-
-                return actions;
-            },
-
-            processCommand(command, state) {
-                const lowerCommand = command.toLowerCase().trim();
-                let responseHtml = '';
-
-                switch (lowerCommand) {
-                    case '#credit':
-                        const customersWithBalance = state.customers.filter(c => c.balance > 0);
-                        const totalOutstandingCredit = customersWithBalance.reduce((sum, c) => sum + c.balance, 0);
-
-                        responseHtml += `<p class="text-white font-medium mb-2">Total Outstanding Credit: ${app.formatCurrency(totalOutstandingCredit)}</p>`;
-                        if (customersWithBalance.length > 0) {
-                            responseHtml += `<p class="text-gray-300 mb-1">Customers with outstanding balance:</p>`;
-                            responseHtml += `<ul class="list-disc list-inside text-gray-300">`;
-                            customersWithBalance.forEach(c => {
-                                responseHtml += `<li>${c.name}: ${app.formatCurrency(c.balance)}</li>`;
-                            });
-                            responseHtml += `</ul>`;
-                        } else {
-                            responseHtml += `<p class="text-gray-300">No customers with outstanding credit balance.</p>`;
-                        }
-                        break;
-                    case '#sales':
-                        const totalSalesCount = state.sales.length;
-                        const totalRevenue = state.sales.reduce((sum, sale) => sum + sale.total, 0);
-                        responseHtml += `<p class="text-white font-medium mb-2">Total Sales Recorded: ${totalSalesCount}</p>`;
-                        responseHtml += `<p class="text-white font-medium">Total Revenue: ${app.formatCurrency(totalRevenue)}</p>`;
-                        break;
-                    case '#lowstock':
-                        const lowStockProducts = state.products.filter(p => p.stock <= p.reorderLevel);
-                        if (lowStockProducts.length > 0) {
-                            responseHtml += `<p class="text-white font-medium mb-2">Products critically low on stock (below reorder level):</p>`;
-                            responseHtml += `<ul class="list-disc list-inside text-gray-300">`;
-                            lowStockProducts.forEach(p => {
-                                responseHtml += `<li>${p.name} (SKU: ${p.sku}): ${p.stock} in stock (Reorder Level: ${p.reorderLevel})</li>`;
-                            });
-                            responseHtml += `</ul>`;
-                        } else {
-                            responseHtml += `<p class="text-white font-medium">Great! No products are currently below their reorder level.</p>`;
-                        }
-                        break;
-                    default:
-                        responseHtml = `<p class="text-red-400">Command not recognized. Try #credit, #sales, or #lowstock.</p>`;
-                        break;
-                }
-                return responseHtml;
-            }
-        };
+            
+// REPLACE your old inboxNotifications array with this one
 const inboxNotifications = [
     {
-        avatarBackground: "bg-gradient-to-r from-green-500 to-emerald-500",
-        username: "System",
-        content: "✅ New sale recorded for Emirates Tech Solutions.",
-        color: "text-green-400",
+        avatarBackground: 'bg-gradient-to-r from-green-500 to-emerald-500',
+        username: 'System',
+        content: '📦 New sale recorded for Emirates Tech Solutions.',
+        color: 'text-green-400',
         duration: 4000,
     },
     {
-        avatarBackground: "bg-gradient-to-r from-yellow-500 to-orange-500",
-        username: "AccuraBot",
-        content: "⚠️ Low stock warning for Wireless Mouse.",
-        color: "text-yellow-400",
+        avatarBackground: 'bg-gradient-to-r from-yellow-500 to-orange-500',
+        username: 'AccuraBot',
+        content: '⚠️ Low stock warning for Wireless Mouse.',
+        color: 'text-yellow-400',
         duration: 4000,
     },
     {
-        avatarBackground: "bg-gradient-to-r from-blue-500 to-cyan-500",
-        username: "John Manager",
-        content: "📦 Stock request for Premium Laptops approved.",
-        color: "text-blue-400",
+        avatarBackground: 'bg-gradient-to-r from-blue-500 to-cyan-500',
+        username: 'John Manager',
+        content: '📝 Stock request for Premium Laptops approved.',
+        color: 'text-blue-400',
         duration: 4500,
     },
-     {
-        avatarBackground: "bg-gradient-to-r from-purple-500 to-pink-500",
-        username: "Bubble AI",
-        content: "💡 New insight: Consider a marketing campaign for External SSDs.",
-        color: "text-purple-400",
+    {
+        avatarBackground: 'bg-gradient-to-r from-purple-500 to-pink-500',
+        username: 'Bubble AI',
+        content: '💡 New insight: Consider a marketing campaign for External SSDs.',
+        color: 'text-purple-400',
         duration: 5000,
     },
 ];
@@ -728,6 +660,57 @@ nboxNotificationInterval: null,
         'login-manager': () => this.selectUser('manager'),
         'login-worker': () => this.selectUser('worker'),
         'ask-ai': (id) => this.handleAiQuestion(id),
+        'share-ai-response': () => {
+            NotificationSystem.info('Sharing options coming soon.');
+        },
+        'copy-ai-response': async (id) => {
+            const index = parseInt(id, 10);
+            const message = this.state.aiChatHistory?.[index];
+            if (!message) {
+                NotificationSystem.error('Nothing to copy for this message.');
+                return;
+            }
+            try {
+                const text = this.extractPlainTextFromHtml(message.content || message.html || message.messageHtml || message.text || '');
+                if (!text) {
+                    NotificationSystem.warning('Response is empty.');
+                    return;
+                }
+                if (navigator?.clipboard?.writeText) {
+                    await navigator.clipboard.writeText(text);
+                } else {
+                    const textarea = document.createElement('textarea');
+                    textarea.value = text;
+                    textarea.style.position = 'fixed';
+                    textarea.style.opacity = '0';
+                    document.body.appendChild(textarea);
+                    textarea.select();
+                    document.execCommand('copy');
+                    document.body.removeChild(textarea);
+                }
+                NotificationSystem.success('Response copied to clipboard.');
+            } catch (err) {
+                console.error('Copy failed', err);
+                NotificationSystem.error('Unable to copy response right now.');
+            }
+        },
+        'like-ai-response': (id) => {
+            const likeBtn = event?.target?.closest('[data-action="like-ai-response"]');
+            const dislikeBtn = document.querySelector(`.ai-answer-footer[data-message-index="${id}"] [data-action="dislike-ai-response"]`);
+            if (likeBtn) likeBtn.classList.toggle('active');
+            if (likeBtn?.classList.contains('active')) {
+                dislikeBtn?.classList.remove('active');
+            }
+        },
+        'dislike-ai-response': (id) => {
+            const dislikeBtn = event?.target?.closest('[data-action="dislike-ai-response"]');
+            const likeBtn = document.querySelector(`.ai-answer-footer[data-message-index="${id}"] [data-action="like-ai-response"]`);
+            if (dislikeBtn) dislikeBtn.classList.toggle('active');
+            if (dislikeBtn?.classList.contains('active')) {
+                likeBtn?.classList.remove('active');
+            }
+        },
+        'tts-ai-response': (id) => this.handleAiTtsClick(parseInt(id, 10)),
         'logout': () => this.logout(),
         'toggle-mobile-menu': () => this.toggleMobileSidebar(),
         'toggle-notification-bar': () => this.toggleNotificationBar(),
@@ -1032,10 +1015,10 @@ getUserSelectionView() {
                 if (isEdit) {
                     const index = this.state.products.findIndex(p => p.id === product.id);
                     this.state.products[index] = product;
-                    NotificationSystem.success('✅ Product updated successfully!');
+                    NotificationSystem.success('ÃƒÆ’Ã‚Â¢Ãƒâ€¦Ã¢â‚¬Å“ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¦ Product updated successfully!');
                 } else {
                     this.state.products.push(product);
-                    NotificationSystem.success('🎉 Product added successfully!');
+                    NotificationSystem.success('ÃƒÆ’Ã‚Â°Ãƒâ€¦Ã‚Â¸Ãƒâ€¦Ã‚Â½ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â° Product added successfully!');
                 }
 
                 this.closeModal();
@@ -1062,10 +1045,10 @@ getUserSelectionView() {
                 if (isEdit) {
                     const index = this.state.customers.findIndex(c => c.id === customer.id);
                     this.state.customers[index] = customer;
-                    NotificationSystem.success('✅ Customer updated successfully!');
+                    NotificationSystem.success('ÃƒÆ’Ã‚Â¢Ãƒâ€¦Ã¢â‚¬Å“ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¦ Customer updated successfully!');
                 } else {
                     this.state.customers.push(customer);
-                    NotificationSystem.success('🎉 Customer added successfully!');
+                    NotificationSystem.success('ÃƒÆ’Ã‚Â°Ãƒâ€¦Ã‚Â¸Ãƒâ€¦Ã‚Â½ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â° Customer added successfully!');
                 }
 
                 this.closeModal();
@@ -1179,7 +1162,7 @@ getUserSelectionView() {
     this.closeModal();
     this.saveData();
     this.render();
-    NotificationSystem.success(`🎉 Sale recorded! Total: ${this.formatCurrency(sale.total)}`);
+    NotificationSystem.success(`ÃƒÆ’Ã‚Â°Ãƒâ€¦Ã‚Â¸Ãƒâ€¦Ã‚Â½ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â° Sale recorded! Total: ${this.formatCurrency(sale.total)}`);
     this.triggerStockAlertCheck();
 },
 
@@ -1208,7 +1191,7 @@ handleTaskForm(data) {
             // Preserve existing data that isn't in the form
             const oldTask = this.state.tasks[taskIndex];
             this.state.tasks[taskIndex] = { ...oldTask, ...taskData };
-            NotificationSystem.success('✅ Task updated successfully!');
+            NotificationSystem.success('ÃƒÆ’Ã‚Â¢Ãƒâ€¦Ã¢â‚¬Å“ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¦ Task updated successfully!');
         }
     } else {
         // This is the logic for CREATING a new task
@@ -1223,7 +1206,7 @@ handleTaskForm(data) {
             lastNotifiedProgress: 0
         };
         this.state.tasks.push(newTask);
-        NotificationSystem.success('🚀 New main task created! You can now assign it to a branch.');
+        NotificationSystem.success('ÃƒÆ’Ã‚Â°Ãƒâ€¦Ã‚Â¸Ãƒâ€¦Ã‚Â¡ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ New main task created! You can now assign it to a branch.');
     }
 
     this.saveData();
@@ -1250,10 +1233,10 @@ handleTaskForm(data) {
                     // Preserve original creator when editing
                     expense.createdByUserId = this.state.expenses[index].createdByUserId;
                     this.state.expenses[index] = expense;
-                    NotificationSystem.success('✅ Expense updated successfully!');
+                    NotificationSystem.success('ÃƒÆ’Ã‚Â¢Ãƒâ€¦Ã¢â‚¬Å“ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¦ Expense updated successfully!');
                 } else {
                     this.state.expenses.push(expense);
-                    NotificationSystem.success('💸 Expense recorded successfully!');
+                    NotificationSystem.success('ÃƒÆ’Ã‚Â°Ãƒâ€¦Ã‚Â¸ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢Ãƒâ€šÃ‚Â¸ Expense recorded successfully!');
                 }
 
                 const expenseAccountCode = expense.category;
@@ -1296,14 +1279,14 @@ handleTaskForm(data) {
                             this.state.currentUser = { ...employee };
                         }
                         
-                        NotificationSystem.success('✅ Employee updated successfully!');
+                        NotificationSystem.success('ÃƒÆ’Ã‚Â¢Ãƒâ€¦Ã¢â‚¬Å“ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¦ Employee updated successfully!');
                     } else {
                         NotificationSystem.error('Employee not found for update.');
                         return;
                     }
                 } else {
                     this.state.users.push(employee);
-                    NotificationSystem.success('👨‍💼 Employee added successfully!');
+                    NotificationSystem.success('ÃƒÆ’Ã‚Â°Ãƒâ€¦Ã‚Â¸ÃƒÂ¢Ã¢â€šÂ¬Ã‹Å“Ãƒâ€šÃ‚Â¨ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚ÂÃƒÆ’Ã‚Â°Ãƒâ€¦Ã‚Â¸ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢Ãƒâ€šÃ‚Â¼ Employee added successfully!');
                 }
 
                 this.closeModal();
@@ -1338,7 +1321,7 @@ aiAnalysis: `Message categorized as ${BubbleAI.analyzeSentiment(data.content)} s
                 this.saveData();
                 this.updateBotAnalysis();
                 this.render();
-                NotificationSystem.success('📧 Message sent with AI analysis!');
+                NotificationSystem.success('ÃƒÆ’Ã‚Â°Ãƒâ€¦Ã‚Â¸ÃƒÂ¢Ã¢â€šÂ¬Ã…â€œÃƒâ€šÃ‚Â§ Message sent with AI analysis!');
             },
 
             handleCompanySettingsForm(data) {
@@ -1347,7 +1330,7 @@ aiAnalysis: `Message categorized as ${BubbleAI.analyzeSentiment(data.content)} s
                 
                 this.saveData();
                 this.render();
-                NotificationSystem.success('⚙️ Company settings updated successfully!');
+                NotificationSystem.success('ÃƒÆ’Ã‚Â¢Ãƒâ€¦Ã‚Â¡ÃƒÂ¢Ã¢â‚¬Å¾Ã‚Â¢ÃƒÆ’Ã‚Â¯Ãƒâ€šÃ‚Â¸Ãƒâ€šÃ‚Â Company settings updated successfully!');
             },
            
 
@@ -1427,7 +1410,7 @@ updateTaskProgress(sale, profit) {
 getTaskHealthReportHTML(task) {
     const progressPercentage = Math.min((task.progress / task.goalTarget) * 100, 100).toFixed(1);
     const isCompleted = task.status === 'completed';
-    const title = isCompleted ? `🏆 Task Completed!` : `🚀 Task Progress Update`;
+    const title = isCompleted ? `ÃƒÆ’Ã‚Â°Ãƒâ€¦Ã‚Â¸Ãƒâ€šÃ‚ÂÃƒÂ¢Ã¢â€šÂ¬Ã‚Â  Task Completed!` : `ÃƒÆ’Ã‚Â°Ãƒâ€¦Ã‚Â¸Ãƒâ€¦Ã‚Â¡ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ Task Progress Update`;
     const participants = task.participants.map(pId => this.state.users.find(u => u.id === pId)?.name || 'Unknown');
 
     return `
@@ -1522,7 +1505,7 @@ handleSendTaskForm(data) {
     this.closeModal();
     this.render();
     // Updated success message
-    NotificationSystem.success(`✅ Task is now available for the "${branch.name}" branch to join.`);
+    NotificationSystem.success(`ÃƒÆ’Ã‚Â¢Ãƒâ€¦Ã¢â‚¬Å“ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¦ Task is now available for the "${branch.name}" branch to join.`);
 },
 
 // PASTE THIS NEW HELPER FUNCTION
@@ -1736,37 +1719,6 @@ getModalContent(type, id = null) {
             break;
 
             // In script.js, inside the switch statement of getModalContent()
-
-        case 'view-ai-table':
-            title = 'Interactive Data Table';
-            // 'id' here is the canvasId we passed in the onclick event
-            const tableData = this.state.aiTableData[id];
-            
-            if (tableData) {
-                content = `
-                    <div class="ai-table-container">
-                        <table class="ai-summary-table">
-                            <thead>
-                                <tr>
-                                    ${tableData.headers.map(header => `<th>${header}</th>`).join('')}
-                                </tr>
-                            </thead>
-                            <tbody>
-                                ${tableData.rows.map(row => `
-                                    <tr>
-                                        ${row.map(cell => `<td>${cell}</td>`).join('')}
-                                    </tr>
-                                `).join('')}
-                            </tbody>
-                        </table>
-                    </div>
-                `;
-            } else {
-                content = `<p class="text-red-400">Could not find table data.</p>`;
-            }
-            break; // Don't forget the break!
-
-        // ... all other cases remain the same but are included for completeness ...
 
         case 'compose-message':
             title = 'New Message';
@@ -2330,7 +2282,7 @@ getModalContent(type, id = null) {
                     this.updateAIInsights();
                     this.updateBotAnalysis();
                     this.render();
-                    NotificationSystem.success('🗑️ Product deleted successfully!');
+                    NotificationSystem.success('ÃƒÆ’Ã‚Â°Ãƒâ€¦Ã‚Â¸ÃƒÂ¢Ã¢â€šÂ¬Ã¢â‚¬ÂÃƒÂ¢Ã¢â€šÂ¬Ã‹Å“ÃƒÆ’Ã‚Â¯Ãƒâ€šÃ‚Â¸Ãƒâ€šÃ‚Â Product deleted successfully!');
                 }
             },
 
@@ -2341,7 +2293,7 @@ getModalContent(type, id = null) {
                     this.updateAIInsights();
                     this.updateBotAnalysis();
                     this.render();
-                    NotificationSystem.success('🗑️ Customer deleted successfully!');
+                    NotificationSystem.success('ÃƒÆ’Ã‚Â°Ãƒâ€¦Ã‚Â¸ÃƒÂ¢Ã¢â€šÂ¬Ã¢â‚¬ÂÃƒÂ¢Ã¢â€šÂ¬Ã‹Å“ÃƒÆ’Ã‚Â¯Ãƒâ€šÃ‚Â¸Ãƒâ€šÃ‚Â Customer deleted successfully!');
                 }
             },
 
@@ -2352,7 +2304,7 @@ getModalContent(type, id = null) {
                     this.updateAIInsights();
                     this.updateBotAnalysis();
                     this.render();
-                    NotificationSystem.success('🗑️ Expense deleted successfully!');
+                    NotificationSystem.success('ÃƒÆ’Ã‚Â°Ãƒâ€¦Ã‚Â¸ÃƒÂ¢Ã¢â€šÂ¬Ã¢â‚¬ÂÃƒÂ¢Ã¢â€šÂ¬Ã‹Å“ÃƒÆ’Ã‚Â¯Ãƒâ€šÃ‚Â¸Ãƒâ€šÃ‚Â Expense deleted successfully!');
                 }
             },
 
@@ -2363,7 +2315,7 @@ getModalContent(type, id = null) {
                     this.updateAIInsights();
                     this.updateBotAnalysis();
                     this.render();
-                    NotificationSystem.success('🗑️ Employee deleted successfully!');
+                    NotificationSystem.success('ÃƒÆ’Ã‚Â°Ãƒâ€¦Ã‚Â¸ÃƒÂ¢Ã¢â€šÂ¬Ã¢â‚¬ÂÃƒÂ¢Ã¢â€šÂ¬Ã‹Å“ÃƒÆ’Ã‚Â¯Ãƒâ€šÃ‚Â¸Ãƒâ€šÃ‚Â Employee deleted successfully!');
                 }
             },
 
@@ -2382,7 +2334,7 @@ getModalContent(type, id = null) {
             this.saveData();
             this.render();
             this.closeModal();
-            NotificationSystem.success('🗑️ Task deleted successfully!');
+            NotificationSystem.success('ÃƒÆ’Ã‚Â°Ãƒâ€¦Ã‚Â¸ÃƒÂ¢Ã¢â€šÂ¬Ã¢â‚¬ÂÃƒÂ¢Ã¢â€šÂ¬Ã‹Å“ÃƒÆ’Ã‚Â¯Ãƒâ€šÃ‚Â¸Ãƒâ€šÃ‚Â Task deleted successfully!');
         }
     });
 },
@@ -2458,7 +2410,7 @@ handleJoinTask(id) {
     
     this.saveData();
     this.render(); // Re-render to update the UI
-    NotificationSystem.success(`🎉 You have joined the task: "${mainTask.title}"!`);
+    NotificationSystem.success(`ÃƒÆ’Ã‚Â°Ãƒâ€¦Ã‚Â¸Ãƒâ€¦Ã‚Â½ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â° You have joined the task: "${mainTask.title}"!`);
 },
 
 
@@ -2495,7 +2447,7 @@ updateTaskProgress(sale, profit) {
                 this.sendTaskProgressNotification(currentTask, '100');
                 currentTask.lastNotifiedProgress = 100;
             }
-             NotificationSystem.success(`🏆 Task "${currentTask.title}" completed! Great job!`);
+             NotificationSystem.success(`ÃƒÆ’Ã‚Â°Ãƒâ€¦Ã‚Â¸Ãƒâ€šÃ‚ÂÃƒÂ¢Ã¢â€šÂ¬Ã‚Â  Task "${currentTask.title}" completed! Great job!`);
         } else if (progressPercentage >= 75 && currentTask.lastNotifiedProgress < 75) {
             this.sendTaskProgressNotification(currentTask, '75');
             currentTask.lastNotifiedProgress = 75;
@@ -2526,7 +2478,7 @@ checkMainTaskCompletion(parentTaskId) {
         if (mainTaskIndex !== -1) {
             this.state.tasks[mainTaskIndex].status = 'completed';
             const mainTask = this.state.tasks[mainTaskIndex];
-            NotificationSystem.success(`🏆 Main Task Completed: "${mainTask.title}"! Great work, team!`);
+            NotificationSystem.success(`ÃƒÆ’Ã‚Â°Ãƒâ€¦Ã‚Â¸Ãƒâ€šÃ‚ÂÃƒÂ¢Ã¢â€šÂ¬Ã‚Â  Main Task Completed: "${mainTask.title}"! Great work, team!`);
             
             // Optional: Send a final report notification for the main task
             if (mainTask.accuraBotEnabled) {
@@ -2759,7 +2711,7 @@ downloadTaskTxt(taskId) {
                 this.saveData();
                 this.render();
                 this.downloadInvoice(invoice.id);
-                NotificationSystem.success('📄 Professional invoice generated successfully!');
+                NotificationSystem.success('ÃƒÆ’Ã‚Â°Ãƒâ€¦Ã‚Â¸ÃƒÂ¢Ã¢â€šÂ¬Ã…â€œÃƒÂ¢Ã¢â€šÂ¬Ã…Â¾ Professional invoice generated successfully!');
             },
 
             exportData() {
@@ -2771,7 +2723,7 @@ downloadTaskTxt(taskId) {
                 link.download = `${this.state.companyName.replace(/\s+/g, '-').toLowerCase()}-data.json`;
                 link.click();
                 URL.revokeObjectURL(url);
-                NotificationSystem.success('📤 Business data exported successfully!');
+                NotificationSystem.success('ÃƒÆ’Ã‚Â°Ãƒâ€¦Ã‚Â¸ÃƒÂ¢Ã¢â€šÂ¬Ã…â€œÃƒâ€šÃ‚Â¤ Business data exported successfully!');
             },
 
             markMessageRead(id) {
@@ -3233,7 +3185,7 @@ downloadInvoice(invoiceId) {
     this.updateBotAnalysis();
     this.state.quickSale.active = false;
     this.render();
-    NotificationSystem.success(`⚡ Quick Sale recorded! Total: ${this.formatCurrency(sale.total)}`);
+    NotificationSystem.success(`ÃƒÆ’Ã‚Â¢Ãƒâ€¦Ã‚Â¡Ãƒâ€šÃ‚Â¡ Quick Sale recorded! Total: ${this.formatCurrency(sale.total)}`);
     this.triggerStockAlertCheck();
 },
 
@@ -3674,7 +3626,7 @@ renderInbox() {
                             <div class="flex items-center justify-between mb-1">
                                 <div class="flex items-center space-x-2">
                                     <span class="font-semibold ${isSystemAlert ? 'text-red-400' : 'text-white'}">
-                                        ${isSystemAlert ? '🤖 AccuraBot Alert' : senderName}
+                                        ${isSystemAlert ? 'ÃƒÆ’Ã‚Â°Ãƒâ€¦Ã‚Â¸Ãƒâ€šÃ‚Â¤ÃƒÂ¢Ã¢â€šÂ¬Ã¢â‚¬Å“ AccuraBot Alert' : senderName}
                                     </span>
                                     ${isSentByMe ? '<span class="text-xs text-gray-500"><i class="fas fa-check-double text-blue-400"></i></span>' : ''}
                                     ${message.type === 'task' ? `
@@ -4751,7 +4703,7 @@ getNavbar() {
                         ${['admin', 'manager'].includes(this.state.currentUser.role) ? `
                             <div class="flex items-center space-x-2">
                                 <span class="px-3 py-1 bg-gradient-to-r from-yellow-500 to-orange-500 text-white text-xs rounded-full font-medium">
-                                    ${countryInfo.currency} • ${countryInfo.name.split(' ')[0]}
+                                    ${countryInfo.currency} ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â¢ ${countryInfo.name.split(' ')[0]}
                                 </span>
                             </div>
                         ` : ''}
@@ -4859,7 +4811,7 @@ getSidebar() {
                     <h4 class="text-lg font-bold bg-gradient-to-r from-yellow-500 to-orange-500 bg-clip-text text-transparent mb-1">${this.state.companyName}</h4>
                     <p class="text-gray-400 text-xs">Powered by Bubble AI</p>
                     <div class="mt-2 text-xs text-gray-500">
-                        ${GCC_COUNTRIES[this.state.selectedCountry].currency} • ${GCC_COUNTRIES[this.state.selectedCountry].name.split(' ')[0]}
+                        ${GCC_COUNTRIES[this.state.selectedCountry].currency} ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â¢ ${GCC_COUNTRIES[this.state.selectedCountry].name.split(' ')[0]}
                     </div>
                 </div>
             </div>
@@ -4944,17 +4896,17 @@ getSidebar() {
                                 </div>
                                 <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                                     <div class="text-center p-4 bg-gradient-to-r from-green-500/10 to-emerald-500/10 rounded-xl border border-green-500/20">
-                                        <div class="text-green-400 text-2xl mb-2">💰</div>
+                                        <div class="text-green-400 text-2xl mb-2">ÃƒÆ’Ã‚Â°Ãƒâ€¦Ã‚Â¸ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢Ãƒâ€šÃ‚Â°</div>
                                         <p class="text-gray-400 text-sm mb-2">Monthly Salary</p>
                                         <p class="text-lg font-bold text-green-400 animated-number" data-target="${monthlySalary}" data-format="currency">${this.formatCurrency(0)}</p>
                                     </div>
                                     <div class="text-center p-4 bg-gradient-to-r from-blue-500/10 to-cyan-500/10 rounded-xl border border-blue-500/20">
-                                        <div class="text-blue-400 text-2xl mb-2">🎯</div>
+                                        <div class="text-blue-400 text-2xl mb-2">ÃƒÆ’Ã‚Â°Ãƒâ€¦Ã‚Â¸Ãƒâ€¦Ã‚Â½Ãƒâ€šÃ‚Â¯</div>
                                         <p class="text-gray-400 text-sm mb-2">Commission</p>
                                         <p class="text-lg font-bold text-blue-400 animated-number" data-target="${currentUser.commission || 0}" data-format="currency">${this.formatCurrency(0)}</p>
                                     </div>
                                     <div class="text-center p-4 bg-gradient-to-r from-teal-500/10 to-blue-500/10 rounded-xl border border-teal-500/20">
-                                        <div class="text-teal-400 text-2xl mb-2">🏆</div>
+                                        <div class="text-teal-400 text-2xl mb-2">ÃƒÆ’Ã‚Â°Ãƒâ€¦Ã‚Â¸Ãƒâ€šÃ‚ÂÃƒÂ¢Ã¢â€šÂ¬Ã‚Â </div>
                                         <p class="text-gray-400 text-sm mb-2">Total Earnings</p>
                                         <p class="text-xl font-bold text-teal-400 animated-number" data-target="${totalEarnings}" data-format="currency">${this.formatCurrency(0)}</p>
                                     </div>
@@ -5043,7 +4995,7 @@ getSidebar() {
                                                     <h4 class="font-bold text-white mb-2">${insight.title}</h4>
                                                     <p class="text-gray-300 mb-3 leading-relaxed">${insight.message}</p>
                                                     <div class="bg-${this.state.aiMode === 'ai' ? 'purple' : 'green'}-500/10 border-l-4 border-${this.state.aiMode === 'ai' ? 'purple' : 'green'}-500 p-3 rounded-r-lg">
-                                                        <p class="text-sm text-${this.state.aiMode === 'ai' ? 'purple' : 'green'}-400 font-medium">💡 Recommendation: ${insight.action}</p>
+                                                        <p class="text-sm text-${this.state.aiMode === 'ai' ? 'purple' : 'green'}-400 font-medium">ÃƒÆ’Ã‚Â°Ãƒâ€¦Ã‚Â¸ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢Ãƒâ€šÃ‚Â¡ Recommendation: ${insight.action}</p>
                                                     </div>
                                                 </div>
                                             </div>
@@ -5300,6 +5252,8 @@ showAICategories() {
 
 // In script.js
 
+// REPLACE THE OLD renderAIChatHistory FUNCTION WITH THIS ONE
+
 renderAIChatHistory() {
     const chatLog = document.getElementById('ai-chat-log');
     if (!chatLog) return;
@@ -5312,22 +5266,59 @@ renderAIChatHistory() {
         } else if (msg.sender === 'ai') {
             const direction = msg.language === 'Arabic' ? 'rtl' : 'ltr';
             const shouldAnimate = !!msg.animate;
+            const player = this.state.aiAudioPlayers?.[index] || {};
+            const isLoading = !!player.isLoading;
+            const isPlaying = !!player.isPlaying;
+            
+            let ttsIcon = 'fa-volume-up';
+            let ttsTitle = 'Listen to this answer';
+            if (isLoading) {
+                ttsIcon = 'fa-spinner fa-spin';
+                ttsTitle = 'Generating voice...';
+            } else if (isPlaying) {
+                ttsIcon = 'fa-stop';
+                ttsTitle = 'Stop narration';
+            }
+            
+            const vizClass = isPlaying ? ' is-playing' : '';
+
             return `
                 <div
                     data-highlight-keywords="${this.state.aiSettings.highlightKeywords}"
                     data-highlight-numbers="${this.state.aiSettings.highlightNumbers}"
                 >
-                    <div class="ai-answer-header fade-in">
+                    <div class="ai-answer-header fade-in" data-message-index="${index}">
                         <div class="accura-icon">
                             <span class="material-symbols-outlined ai-icon-shine-effect">bubble_chart</span>
                         </div>
+                        <div class="audio-visualizer${vizClass}" aria-hidden="true">
+                            <div class="visualizer-bar"></div>
+                            <div class="visualizer-bar"></div>
+                            <div class="visualizer-bar"></div>
+                            <div class="visualizer-bar"></div>
+                        </div>
                     </div>
                     <div class="ai-answer-wrapper" data-message-index="${index}">
-                        ${this.renderAiAudioCard(index)}
                         <div class="ai-answer-body" dir="${direction}" data-message-index="${index}" ${shouldAnimate ? 'data-animate="true"' : ''}>
                             ${msg.content}
                         </div>
-                        ${this.renderAiTtsToolbar(index)}
+                        <div class="ai-answer-footer" data-message-index="${index}">
+                            <button class="ai-action-btn" data-action="share-ai-response" data-id="${index}" title="Share response">
+                                <i class="fas fa-share-alt"></i>
+                            </button>
+                            <button class="ai-action-btn" data-action="copy-ai-response" data-id="${index}" title="Copy response">
+                                <i class="fas fa-copy"></i>
+                            </button>
+                            <button class="ai-action-btn" data-action="like-ai-response" data-id="${index}" title="Like response">
+                                <i class="fas fa-thumbs-up"></i>
+                            </button>
+                            <button class="ai-action-btn" data-action="dislike-ai-response" data-id="${index}" title="Dislike response">
+                                <i class="fas fa-thumbs-down"></i>
+                            </button>
+                            <button class="ai-action-btn ai-tts-btn" data-action="tts-ai-response" data-id="${index}" title="${ttsTitle}" onclick="event.stopPropagation(); app.handleAiTtsClick(${index})">
+                                <i class="fas ${ttsIcon}"></i>
+                            </button>
+                        </div>
                     </div>
                 </div>
             `;
@@ -5344,195 +5335,141 @@ renderAIChatHistory() {
         return '';
     }).join('');
 
-    // --- UPDATED SCROLLING LOGIC ---
     this.scrollAIChatToBottom();
-
     requestAnimationFrame(() => this.applyAIResponseAnimation());
 },
 
-renderAiTtsToolbar(index) {
-    const player = this.state.aiAudioPlayers?.[index];
-    const isLoading = player?.status === 'loading';
-    const isActive = player?.status === 'ready' && player?.isVisible;
-    const buttonIcon = isLoading ? 'fas fa-spinner fa-spin' : 'fas fa-volume-up';
-    const buttonTitle = isLoading ? 'Generating voice...' : (isActive ? 'Hide narration' : 'Listen to this answer');
+// REPLACE THE OLD FUNCTION WITH THIS WORKING JAVASCRIPT VERSION
 
-    return `
-        <div class="ai-tts-toolbar">
-            <button
-                class="ai-tts-button ${isActive ? 'active' : ''}"
-                title="${buttonTitle}"
-                ${isLoading ? 'disabled' : ''}
-                onclick="app.handleAiTtsClick(${index})"
-            >
-                <i class="${buttonIcon}"></i>
-            </button>
-        </div>
-    `;
-},
-
-renderAiAudioCard(index) {
-    const player = this.state.aiAudioPlayers?.[index];
-    if (!player || !player.isVisible) return '';
-
-    if (player.status === 'loading') {
-        return `
-            <div class="ai-tts-card loading" data-message-index="${index}">
-                <div class="ai-tts-card-header">
-                    <div class="ai-tts-label">
-                        <i class="fas fa-volume-up"></i>
-                        Generating narration
-                    </div>
-                    <button class="ai-tts-close" onclick="app.closeAiAudioCard(${index})">
-                        <i class="fas fa-times"></i>
-                    </button>
-                </div>
-                <p class="ai-tts-status"><i class="fas fa-spinner fa-spin"></i> Crafting Bubble AI's voice...</p>
-            </div>
-        `;
-    }
-
-    if (player.status === 'error') {
-        return `
-            <div class="ai-tts-card error" data-message-index="${index}">
-                <div class="ai-tts-card-header">
-                    <div class="ai-tts-label">
-                        <i class="fas fa-volume-xmark"></i>
-                        Text-to-speech unavailable
-                    </div>
-                    <button class="ai-tts-close" onclick="app.closeAiAudioCard(${index})">
-                        <i class="fas fa-times"></i>
-                    </button>
-                </div>
-                <p class="ai-tts-status">${player.error || 'We could not generate narration for this response.'}</p>
-            </div>
-        `;
-    }
-
-    const voiceInfo = player.voiceName ? `<span class="ai-tts-meta">${player.voiceName.replace(/_/g, ' ')}</span>` : '';
-
-    return `
-        <div class="ai-tts-card ready" data-message-index="${index}">
-            <div class="ai-tts-card-header">
-                <div class="ai-tts-label">
-                    <i class="fas fa-wave-square"></i>
-                    Bubble AI voice
-                </div>
-                <button class="ai-tts-close" onclick="app.closeAiAudioCard(${index})" title="Hide narration">
-                    <i class="fas fa-times"></i>
-                </button>
-            </div>
-            <div class="ai-tts-meta-row">
-                ${voiceInfo}
-                ${player.speakingRate ? `<span class="ai-tts-meta">Speed ×${player.speakingRate.toFixed(1)}</span>` : ''}
-            </div>
-            <audio controls preload="auto" src="${player.audioUrl}"></audio>
-        </div>
-    `;
-},
-
+// REPLACE THE OLD handleAiTtsClick FUNCTION WITH THIS ONE
 async handleAiTtsClick(index) {
-    const message = this.state.aiChatHistory[index];
-    if (!message || message.sender !== 'ai') return;
-
-    const players = this.state.aiAudioPlayers || {};
-    const existing = players[index];
-
-    if (existing && existing.status === 'loading') {
-        return;
+    const headerEl = document.querySelector(`.ai-answer-header[data-message-index="${index}"]`);
+    if (headerEl) {
+        headerEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
     }
 
-    if (existing && existing.status === 'ready') {
-        players[index] = { ...existing, isVisible: !existing.isVisible };
-        this.state.aiAudioPlayers = { ...players };
-        this.renderAIChatHistory();
-        if (players[index].isVisible) {
-            this.autoPlayAiAudio(index);
-        }
-        return;
-    }
+    this.state.aiAudioPlayers = this.state.aiAudioPlayers || {};
+    const players = this.state.aiAudioPlayers;
+    let existing = players[index];
+    const sessionId = `${Date.now()}-${Math.random()}`;
 
-    players[index] = { status: 'loading', isVisible: true };
-    this.state.aiAudioPlayers = { ...players };
-    this.renderAIChatHistory();
+    const stopPlayback = () => {
+        const player = players[index];
+        if (!player) return;
 
-    try {
-        const textContent = this.extractPlainTextFromHtml(message.content);
-        if (!textContent.trim()) {
-            throw new Error('No narratable content found in the response.');
-        }
-        const res = await fetch(`${this.serverUrl}/api/tts`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                text: textContent,
-                language: message.language || this.state.aiSettings.language,
-            }),
-        });
-
-        if (!res.ok) {
-            throw new Error(`TTS request failed with status ${res.status}`);
-        }
-
-        const data = await res.json();
-        const audioMime = data.audioMimeType || 'audio/mpeg';
-        const audioUrl = `data:${audioMime};base64,${data.audioContent}`;
-
-        players[index] = {
-            status: 'ready',
-            isVisible: true,
-            audioUrl,
-            voiceName: data.voiceName,
-            speakingRate: data.speakingRate,
-        };
-        this.state.aiAudioPlayers = { ...players };
-        this.renderAIChatHistory();
-        this.autoPlayAiAudio(index);
-    } catch (error) {
-        console.error('Failed to generate AI narration:', error);
-        const friendlyMessage = (error && error.message && error.message.includes('No narratable'))
-            ? 'This response cannot be narrated.'
-            : 'Unable to generate narration right now. Please try again later.';
-        players[index] = {
-            status: 'error',
-            isVisible: true,
-            error: friendlyMessage,
-        };
-        this.state.aiAudioPlayers = { ...players };
-        this.renderAIChatHistory();
-    }
-},
-
-closeAiAudioCard(index) {
-    if (!this.state.aiAudioPlayers?.[index]) return;
-    const players = { ...this.state.aiAudioPlayers };
-    const player = players[index];
-    if (player?.status === 'ready') {
-        const audioEl = document.querySelector(`.ai-tts-card[data-message-index="${index}"] audio`);
-        if (audioEl) {
-            audioEl.pause();
-        }
-    }
-    players[index] = { ...player, isVisible: false };
-    this.state.aiAudioPlayers = players;
-    this.renderAIChatHistory();
-},
-
-extractPlainTextFromHtml(html = '') {
-    const temp = document.createElement('div');
-    temp.innerHTML = html;
-    return temp.textContent || temp.innerText || '';
-},
-
-autoPlayAiAudio(index) {
-    setTimeout(() => {
-        const audioEl = document.querySelector(`.ai-tts-card[data-message-index="${index}"] audio`);
-        if (audioEl) {
-            audioEl.play().catch(() => {
-                /* Autoplay might be blocked; user can press play manually. */
+        if (player.queue && Array.isArray(player.queue)) {
+            player.queue.forEach(audio => {
+                if (audio) {
+                    audio.pause();
+                    audio.src = '';
+                }
             });
         }
-    }, 50);
+        if (player.objectUrls && Array.isArray(player.objectUrls)) {
+            player.objectUrls.forEach(url => { try { URL.revokeObjectURL(url); } catch(e) {} });
+        }
+        
+        players[index] = { isPlaying: false, isLoading: false, queue: [], objectUrls: [] };
+        this.renderAIChatHistory();
+    };
+
+    if (existing && (existing.isPlaying || existing.isLoading)) {
+        stopPlayback();
+        return;
+    }
+    
+    if (existing) {
+        stopPlayback();
+    }
+
+    try {
+        const message = this.state.aiChatHistory[index];
+        if (!message || message.sender !== 'ai') return;
+
+        players[index] = { isPlaying: false, isLoading: true, sessionId: sessionId, queue: [], objectUrls: [] };
+        this.renderAIChatHistory();
+
+        const cleanText = this.extractPlainTextFromHtml(message.content);
+        const sentences = (cleanText.match(/[^.!?]+[.!?]*|[^.!?]+$/g) || []).map(s => s.trim()).filter(Boolean);
+
+        if (sentences.length === 0) {
+            players[index].isLoading = false;
+            this.renderAIChatHistory();
+            return;
+        }
+
+        const audioPromises = sentences.map(async (sentence) => {
+            const res = await fetch(`${this.serverUrl}/api/tts`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ text: sentence, language: message.language || this.state.aiSettings.language }),
+            });
+            if (!res.ok) throw new Error(`TTS request failed.`);
+            const data = await res.json();
+            const byteString = atob(data.audioContent);
+            const byteArray = new Uint8Array(byteString.length);
+            for (let i = 0; i < byteString.length; i++) {
+                byteArray[i] = byteString.charCodeAt(i);
+            }
+            const blob = new Blob([byteArray.buffer], { type: 'audio/mpeg' });
+            const url = URL.createObjectURL(blob);
+            
+            const currentPlayer = players[index];
+            if (currentPlayer && currentPlayer.sessionId === sessionId) {
+                 currentPlayer.objectUrls.push(url);
+            }
+            
+            return new Audio(url);
+        });
+
+        const audioQueue = await Promise.all(audioPromises);
+        
+        const currentPlayer = players[index];
+        if (!currentPlayer || currentPlayer.sessionId !== sessionId) {
+             audioQueue.forEach(audio => URL.revokeObjectURL(audio.src));
+             return;
+        }
+
+        currentPlayer.queue = audioQueue;
+        currentPlayer.isLoading = false;
+
+        const playFrom = (i) => {
+            const currentPlayerState = players[index];
+            if (!currentPlayerState || i >= currentPlayerState.queue.length || currentPlayerState.sessionId !== sessionId) {
+                stopPlayback();
+                return;
+            }
+            
+            currentPlayerState.isPlaying = true;
+            this.renderAIChatHistory();
+            
+            const audio = currentPlayerState.queue[i];
+            audio.play();
+            audio.onended = () => {
+                playFrom(i + 1);
+            };
+        };
+
+        playFrom(0);
+
+    } catch (error) {
+        console.error("TTS Error:", error);
+        stopPlayback();
+    }
+}, 
+
+extractPlainTextFromHtml(html = '') {
+    if (!html) return '';
+    const container = document.createElement('div');
+    container.innerHTML = html;
+
+    // Remove non-prose elements that should not be read aloud
+    container.querySelectorAll('pre, code, table, canvas').forEach(el => el.remove());
+    // Extra safety: strip elements that should never be read
+    container.querySelectorAll('script, style, noscript, iframe').forEach(el => el.remove());
+
+    const text = container.textContent || container.innerText || '';
+    return text.replace(/\u00A0/g, ' ').replace(/\s+/g, ' ').trim();
 },
 
 scrollAIChatToBottom() {
@@ -5548,16 +5485,23 @@ applyAIResponseAnimation() {
     targets.forEach(target => {
         if (target.dataset.animating === 'true') return;
 
+        const wrapper = target.closest('.ai-answer-wrapper');
+        const header = wrapper?.querySelector('.ai-answer-header');
+        if (header && target.dataset.scrolledIntoView !== 'true') {
+            header.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            target.dataset.scrolledIntoView = 'true';
+        }
+
         const originalHtml = target.innerHTML;
         target.dataset.animating = 'true';
         target.setAttribute('data-typing', 'true');
         target.innerHTML = '';
-        this.scrollAIChatToBottom();
 
-        this.typewriterRenderHTML(target, originalHtml, () => this.scrollAIChatToBottom()).then(() => {
+        this.typewriterRenderHTML(target, originalHtml).then(() => {
             target.removeAttribute('data-typing');
             delete target.dataset.animating;
             target.removeAttribute('data-animate');
+            delete target.dataset.scrolledIntoView;
             this.scrollAIChatToBottom();
 
             const index = parseInt(target.getAttribute('data-message-index'), 10);
@@ -5569,7 +5513,7 @@ applyAIResponseAnimation() {
             target.removeAttribute('data-typing');
             delete target.dataset.animating;
             target.removeAttribute('data-animate');
-            this.scrollAIChatToBottom();
+            delete target.dataset.scrolledIntoView;
         });
     });
 },
@@ -5646,38 +5590,7 @@ async handleAiQuestion(questionText) {
         if (!res.ok) throw new Error(`AI server error: ${res.status}`);
         
         const data = await res.json();
-        let htmlResponse = data.htmlResponse;
-        
-        // --- NEW LOGIC TO DETECT AND HANDLE TABLE JSON ---
-        const jsonRegex = /```json\s*([\s\S]*?)\s*```/;
-        const jsonMatch = htmlResponse.match(jsonRegex);
-        
-        if (jsonMatch && jsonMatch[1]) {
-            // Remove the JSON block from the visible HTML response
-            htmlResponse = htmlResponse.replace(jsonRegex, '').trim();
-
-            try {
-                const parsedJson = JSON.parse(jsonMatch[1]);
-                if (parsedJson.table_data) {
-                    const canvasId = `ai-table-canvas-${Date.now()}`;
-                    // Store the table data in the state, keyed by the unique canvas ID
-                    this.state.aiTableData = this.state.aiTableData || {};
-                    this.state.aiTableData[canvasId] = parsedJson.table_data;
-                    
-                    // Add the canvas element to the HTML response
-                    htmlResponse += `
-                        <canvas id="${canvasId}" class="ai-table-canvas" width="600" height="120" 
-                                onclick="app.showModal('view-ai-table', '${canvasId}')">
-                        </canvas>
-                    `;
-                }
-            } catch (e) {
-                console.error("Failed to parse AI table JSON:", e);
-            }
-        }
-        // --- END OF NEW LOGIC ---
-
-        const cleanedHtml = htmlResponse.replace(/^```html\s*|```$/g, '').trim();
+        const cleanedHtml = (data.htmlResponse || '').replace(/^```html\s*|```$/g, '').trim();
     
         this.state.aiChatHistory[thinkingMessageIndex] = { sender: 'ai', content: cleanedHtml, language: this.state.aiSettings.language, animate: true };
         this.state.aiAudioPlayers = {
@@ -5696,15 +5609,6 @@ async handleAiQuestion(questionText) {
     }
 
     this.renderAIChatHistory();
-    
-    // After rendering, find any new canvases and draw on them
-    setTimeout(() => {
-        Object.keys(this.state.aiTableData || {}).forEach(canvasId => {
-            if (document.getElementById(canvasId)) {
-                this.drawTablePlaceholder(canvasId);
-            }
-        });
-    }, 100);
 },
 
 // Triggered by the send button in the chat view
@@ -5717,33 +5621,6 @@ submitAIChatMessage() {
     }
 },
 
-// In script.js, add this function to the app object
-
-drawTablePlaceholder(canvasId) {
-    const canvas = document.getElementById(canvasId);
-    if (!canvas) return;
-    const ctx = canvas.getContext('2d');
-    const width = canvas.width;
-    const height = canvas.height;
-
-    // Create a background gradient
-    const gradient = ctx.createLinearGradient(0, 0, width, height);
-    gradient.addColorStop(0, '#2a2f4c'); // Darker purple
-    gradient.addColorStop(1, '#1e2233'); // Even darker blue/purple
-    ctx.fillStyle = gradient;
-    ctx.fillRect(0, 0, width, height);
-
-    // Draw the icon
-    ctx.fillStyle = '#a855f7'; // A bright purple
-    ctx.font = 'bold 36px "Font Awesome 6 Free"';
-    ctx.textAlign = 'center';
-    ctx.fillText('\uf0ce', width / 2, height / 2 + 5); // Unicode for table icon
-
-    // Draw the text
-    ctx.fillStyle = 'rgba(255, 255, 255, 0.8)';
-    ctx.font = '500 18px "Inter", sans-serif';
-    ctx.fillText('Click to View Interactive Table', width / 2, height / 2 + 45);
-},
 // --- SETTINGS MENU UI & LOGIC ---
 
 // Generates the HTML for the slide-down menu
@@ -5851,23 +5728,23 @@ setAISetting(key, value) {
                                     <i class="fas fa-robot fa-fw text-white text-xl"></i>
                                 </div>
                                 <div class="flex-1">
-                                    <h3 class="text-xl font-bold text-white mb-3">AccuraBot Monitoring Active! 🤖</h3>
+                                    <h3 class="text-xl font-bold text-white mb-3">AccuraBot Monitoring Active! ÃƒÆ’Ã‚Â°Ãƒâ€¦Ã‚Â¸Ãƒâ€šÃ‚Â¤ÃƒÂ¢Ã¢â€šÂ¬Ã¢â‚¬Å“</h3>
                                     <p class="text-gray-300 mb-4 leading-relaxed">I'm continuously monitoring your Owlio Sales application, tracking GCC currency fluctuations, analyzing sales performance, and providing real-time actionable business intelligence.</p>
                                     <div class="grid grid-cols-2 lg:grid-cols-4 gap-3">
                                         <div class="bg-green-500/10 border border-green-500/30 rounded-xl p-3 text-center">
-                                            <div class="text-xl mb-1">💱</div>
+                                            <div class="text-xl mb-1">ÃƒÆ’Ã‚Â°Ãƒâ€¦Ã‚Â¸ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢Ãƒâ€šÃ‚Â±</div>
                                             <div class="text-green-400 font-semibold text-sm">Currency Monitor</div>
                                         </div>
                                         <div class="bg-green-500/10 border border-green-500/30 rounded-xl p-3 text-center">
-                                            <div class="text-xl mb-1">📦</div>
+                                            <div class="text-xl mb-1">ÃƒÆ’Ã‚Â°Ãƒâ€¦Ã‚Â¸ÃƒÂ¢Ã¢â€šÂ¬Ã…â€œÃƒâ€šÃ‚Â¦</div>
                                             <div class="text-green-400 font-semibold text-sm">Inventory</div>
                                         </div>
                                         <div class="bg-green-500/10 border border-green-500/30 rounded-xl p-3 text-center">
-                                            <div class="text-xl mb-1">🚨</div>
+                                            <div class="text-xl mb-1">ÃƒÆ’Ã‚Â°Ãƒâ€¦Ã‚Â¸Ãƒâ€¦Ã‚Â¡Ãƒâ€šÃ‚Â¨</div>
                                             <div class="text-green-400 font-semibold text-sm">Smart Alerts</div>
                                         </div>
                                         <div class="bg-green-500/10 border border-green-500/30 rounded-xl p-3 text-center">
-                                            <div class="text-xl mb-1">📊</div>
+                                            <div class="text-xl mb-1">ÃƒÆ’Ã‚Â°Ãƒâ€¦Ã‚Â¸ÃƒÂ¢Ã¢â€šÂ¬Ã…â€œÃƒâ€¦Ã‚Â </div>
                                             <div class="text-green-400 font-semibold text-sm">Live Analysis</div>
                                         </div>
                                     </div>
@@ -5969,7 +5846,7 @@ setAISetting(key, value) {
                                                     <h4 class="font-bold text-white mb-2">${rec.title}</h4>
                                                     <p class="text-gray-300 mb-3 leading-relaxed">${rec.message}</p>
                                                     <div class="bg-green-500/10 border-l-4 border-green-500 p-3 rounded-r-xl">
-                                                        <p class="text-green-400 font-medium text-sm">🤖 Bot Insight: ${rec.tip}</p>
+                                                        <p class="text-green-400 font-medium text-sm">ÃƒÆ’Ã‚Â°Ãƒâ€¦Ã‚Â¸Ãƒâ€šÃ‚Â¤ÃƒÂ¢Ã¢â€šÂ¬Ã¢â‚¬Å“ Bot Insight: ${rec.tip}</p>
                                                     </div>
                                                 </div>
                                             </div>
@@ -6805,17 +6682,17 @@ getReportsView() {
                 </h3>
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                     <div class="p-4 bg-green-500/10 border border-green-500/30 rounded-xl">
-                        <div class="text-green-400 text-2xl mb-2">✓</div>
+                        <div class="text-green-400 text-2xl mb-2">ÃƒÆ’Ã‚Â¢Ãƒâ€¦Ã¢â‚¬Å“ÃƒÂ¢Ã¢â€šÂ¬Ã…â€œ</div>
                         <div class="text-2xl font-bold text-white">${this.state.products.filter(p => p.stock > this.state.lowStockThreshold).length}</div>
                         <div class="text-gray-400 text-sm">In Stock</div>
                     </div>
                     <div class="p-4 bg-yellow-500/10 border border-yellow-500/30 rounded-xl">
-                        <div class="text-yellow-400 text-2xl mb-2">⚠</div>
+                        <div class="text-yellow-400 text-2xl mb-2">ÃƒÆ’Ã‚Â¢Ãƒâ€¦Ã‚Â¡Ãƒâ€šÃ‚Â </div>
                         <div class="text-2xl font-bold text-white">${this.state.products.filter(p => p.stock <= this.state.lowStockThreshold && p.stock > 0).length}</div>
                         <div class="text-gray-400 text-sm">Low Stock</div>
                     </div>
                     <div class="p-4 bg-red-500/10 border border-red-500/30 rounded-xl">
-                        <div class="text-red-400 text-2xl mb-2">✗</div>
+                        <div class="text-red-400 text-2xl mb-2">ÃƒÆ’Ã‚Â¢Ãƒâ€¦Ã¢â‚¬Å“ÃƒÂ¢Ã¢â€šÂ¬Ã¢â‚¬Â</div>
                         <div class="text-2xl font-bold text-white">${this.state.products.filter(p => p.stock === 0).length}</div>
                         <div class="text-gray-400 text-sm">Out of Stock</div>
                     </div>
@@ -7659,6 +7536,16 @@ renderBranchMessageBubbleHTML(msg) {
 
   // Initialize the application
     app.init(); 
+
+
+
+
+
+
+
+
+
+
 
 
 
