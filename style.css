@@ -2778,6 +2778,142 @@ div[data-highlight-numbers="true"] .ai-answer-body .negative-amount {
     font-size: 1.1rem;      /* Slightly larger for better readability */
     line-height: 1.7;       /* More space between lines for an elegant look */
 }
+
+.ai-answer-wrapper {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    margin-bottom: 1.5rem;
+}
+
+.ai-tts-toolbar {
+    display: flex;
+    justify-content: flex-end;
+}
+
+.ai-tts-button {
+    background: rgba(148, 163, 184, 0.1);
+    border: 1px solid rgba(148, 163, 184, 0.15);
+    color: var(--text-secondary);
+    width: 36px;
+    height: 36px;
+    border-radius: 999px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    box-shadow: 0 10px 25px rgba(15, 23, 42, 0.15);
+}
+
+.ai-tts-button i {
+    font-size: 0.9rem;
+}
+
+.ai-tts-button:hover {
+    background: rgba(168, 85, 247, 0.18);
+    border-color: rgba(168, 85, 247, 0.35);
+    color: var(--accent-primary);
+}
+
+.ai-tts-button.active {
+    background: rgba(168, 85, 247, 0.25);
+    border-color: rgba(168, 85, 247, 0.5);
+    color: var(--accent-primary);
+}
+
+.ai-tts-button:disabled {
+    cursor: not-allowed;
+    opacity: 0.7;
+    background: rgba(148, 163, 184, 0.1);
+    color: rgba(148, 163, 184, 0.7);
+}
+
+.ai-tts-card {
+    background: rgba(30, 41, 59, 0.85);
+    border: 1px solid rgba(148, 163, 184, 0.15);
+    border-radius: 16px;
+    padding: 1rem 1.25rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    box-shadow: 0 25px 50px -12px rgba(30, 64, 175, 0.25);
+    backdrop-filter: blur(8px);
+}
+
+.ai-tts-card.ready {
+    border-color: rgba(168, 85, 247, 0.35);
+    box-shadow: 0 20px 45px -15px rgba(168, 85, 247, 0.45);
+}
+
+.ai-tts-card.loading {
+    border-style: dashed;
+}
+
+.ai-tts-card.error {
+    border-color: rgba(248, 113, 113, 0.45);
+}
+
+.ai-tts-card-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+}
+
+.ai-tts-label {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.6rem;
+    font-weight: 600;
+    color: var(--accent-primary);
+    letter-spacing: 0.02em;
+    text-transform: uppercase;
+    font-size: 0.75rem;
+}
+
+.ai-tts-label i {
+    font-size: 0.85rem;
+}
+
+.ai-tts-close {
+    background: none;
+    border: none;
+    color: var(--text-secondary);
+    padding: 0.3rem;
+    border-radius: 999px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.ai-tts-close:hover {
+    color: var(--text-primary);
+    background: rgba(148, 163, 184, 0.12);
+}
+
+.ai-tts-status {
+    color: rgba(226, 232, 240, 0.8);
+    font-size: 0.85rem;
+}
+
+.ai-tts-meta-row {
+    display: flex;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+}
+
+.ai-tts-meta {
+    background: rgba(148, 163, 184, 0.12);
+    border-radius: 999px;
+    padding: 0.25rem 0.75rem;
+    font-size: 0.75rem;
+    color: rgba(226, 232, 240, 0.9);
+}
+
+.ai-tts-card audio {
+    width: 100%;
+    border-radius: 10px;
+}
 /* === NEW: AI Interactive Table Styles === */
 
 /* Style the canvas placeholder */

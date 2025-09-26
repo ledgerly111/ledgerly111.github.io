@@ -456,6 +456,7 @@ const app = {
     currentSaleCart: [],
     state: {
         aiChatHistory: [], // <--- CORRECT SPOT
+        aiAudioPlayers: {},
         aiSettings: {
     language: 'English',
     highlightKeywords: false, // Default is OFF
@@ -841,7 +842,8 @@ nboxNotificationInterval: null,
     if (view === 'accura-ai') {
         this.state.aiViewPhase = 'selection';
         this.state.aiChatHistory = []; // Clear previous chat history
-    }   
+        this.state.aiAudioPlayers = {};
+    }
     this.stopInboxNotifications();
     this.state.quickSale.active = false; // Close quick sale if navigating away
     this.state.currentLedgerAccount = null; // Reset selected ledger account
@@ -5285,12 +5287,14 @@ startAIChatSession(categoryKey, categoryText) {
         sender: 'welcome', // Use a special sender type for the first message
         content: `<p>Great, how can I help you with <strong>${categoryText}</strong>?</p>`
     }];
+    this.state.aiAudioPlayers = {};
     this.render();
 },
 // STEP 3 (or clicking back): This function returns to the category selection
 showAICategories() {
     this.state.aiViewPhase = 'selection';
     this.state.aiChatHistory = [];
+    this.state.aiAudioPlayers = {};
     this.render();
 },
 
@@ -5309,8 +5313,8 @@ renderAIChatHistory() {
             const direction = msg.language === 'Arabic' ? 'rtl' : 'ltr';
             const shouldAnimate = !!msg.animate;
             return `
-                <div 
-                    data-highlight-keywords="${this.state.aiSettings.highlightKeywords}" 
+                <div
+                    data-highlight-keywords="${this.state.aiSettings.highlightKeywords}"
                     data-highlight-numbers="${this.state.aiSettings.highlightNumbers}"
                 >
                     <div class="ai-answer-header fade-in">
@@ -5318,8 +5322,12 @@ renderAIChatHistory() {
                             <span class="material-symbols-outlined ai-icon-shine-effect">bubble_chart</span>
                         </div>
                     </div>
-                    <div class="ai-answer-body" dir="${direction}" data-message-index="${index}" ${shouldAnimate ? 'data-animate="true"' : ''}>
-                        ${msg.content}
+                    <div class="ai-answer-wrapper" data-message-index="${index}">
+                        ${this.renderAiAudioCard(index)}
+                        <div class="ai-answer-body" dir="${direction}" data-message-index="${index}" ${shouldAnimate ? 'data-animate="true"' : ''}>
+                            ${msg.content}
+                        </div>
+                        ${this.renderAiTtsToolbar(index)}
                     </div>
                 </div>
             `;
@@ -5340,6 +5348,191 @@ renderAIChatHistory() {
     this.scrollAIChatToBottom();
 
     requestAnimationFrame(() => this.applyAIResponseAnimation());
+},
+
+renderAiTtsToolbar(index) {
+    const player = this.state.aiAudioPlayers?.[index];
+    const isLoading = player?.status === 'loading';
+    const isActive = player?.status === 'ready' && player?.isVisible;
+    const buttonIcon = isLoading ? 'fas fa-spinner fa-spin' : 'fas fa-volume-up';
+    const buttonTitle = isLoading ? 'Generating voice...' : (isActive ? 'Hide narration' : 'Listen to this answer');
+
+    return `
+        <div class="ai-tts-toolbar">
+            <button
+                class="ai-tts-button ${isActive ? 'active' : ''}"
+                title="${buttonTitle}"
+                ${isLoading ? 'disabled' : ''}
+                onclick="app.handleAiTtsClick(${index})"
+            >
+                <i class="${buttonIcon}"></i>
+            </button>
+        </div>
+    `;
+},
+
+renderAiAudioCard(index) {
+    const player = this.state.aiAudioPlayers?.[index];
+    if (!player || !player.isVisible) return '';
+
+    if (player.status === 'loading') {
+        return `
+            <div class="ai-tts-card loading" data-message-index="${index}">
+                <div class="ai-tts-card-header">
+                    <div class="ai-tts-label">
+                        <i class="fas fa-volume-up"></i>
+                        Generating narration
+                    </div>
+                    <button class="ai-tts-close" onclick="app.closeAiAudioCard(${index})">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+                <p class="ai-tts-status"><i class="fas fa-spinner fa-spin"></i> Crafting Bubble AI's voice...</p>
+            </div>
+        `;
+    }
+
+    if (player.status === 'error') {
+        return `
+            <div class="ai-tts-card error" data-message-index="${index}">
+                <div class="ai-tts-card-header">
+                    <div class="ai-tts-label">
+                        <i class="fas fa-volume-xmark"></i>
+                        Text-to-speech unavailable
+                    </div>
+                    <button class="ai-tts-close" onclick="app.closeAiAudioCard(${index})">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+                <p class="ai-tts-status">${player.error || 'We could not generate narration for this response.'}</p>
+            </div>
+        `;
+    }
+
+    const voiceInfo = player.voiceName ? `<span class="ai-tts-meta">${player.voiceName.replace(/_/g, ' ')}</span>` : '';
+
+    return `
+        <div class="ai-tts-card ready" data-message-index="${index}">
+            <div class="ai-tts-card-header">
+                <div class="ai-tts-label">
+                    <i class="fas fa-wave-square"></i>
+                    Bubble AI voice
+                </div>
+                <button class="ai-tts-close" onclick="app.closeAiAudioCard(${index})" title="Hide narration">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="ai-tts-meta-row">
+                ${voiceInfo}
+                ${player.speakingRate ? `<span class="ai-tts-meta">Speed ×${player.speakingRate.toFixed(1)}</span>` : ''}
+            </div>
+            <audio controls preload="auto" src="${player.audioUrl}"></audio>
+        </div>
+    `;
+},
+
+async handleAiTtsClick(index) {
+    const message = this.state.aiChatHistory[index];
+    if (!message || message.sender !== 'ai') return;
+
+    const players = this.state.aiAudioPlayers || {};
+    const existing = players[index];
+
+    if (existing && existing.status === 'loading') {
+        return;
+    }
+
+    if (existing && existing.status === 'ready') {
+        players[index] = { ...existing, isVisible: !existing.isVisible };
+        this.state.aiAudioPlayers = { ...players };
+        this.renderAIChatHistory();
+        if (players[index].isVisible) {
+            this.autoPlayAiAudio(index);
+        }
+        return;
+    }
+
+    players[index] = { status: 'loading', isVisible: true };
+    this.state.aiAudioPlayers = { ...players };
+    this.renderAIChatHistory();
+
+    try {
+        const textContent = this.extractPlainTextFromHtml(message.content);
+        if (!textContent.trim()) {
+            throw new Error('No narratable content found in the response.');
+        }
+        const res = await fetch(`${this.serverUrl}/api/tts`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                text: textContent,
+                language: message.language || this.state.aiSettings.language,
+            }),
+        });
+
+        if (!res.ok) {
+            throw new Error(`TTS request failed with status ${res.status}`);
+        }
+
+        const data = await res.json();
+        const audioMime = data.audioMimeType || 'audio/mpeg';
+        const audioUrl = `data:${audioMime};base64,${data.audioContent}`;
+
+        players[index] = {
+            status: 'ready',
+            isVisible: true,
+            audioUrl,
+            voiceName: data.voiceName,
+            speakingRate: data.speakingRate,
+        };
+        this.state.aiAudioPlayers = { ...players };
+        this.renderAIChatHistory();
+        this.autoPlayAiAudio(index);
+    } catch (error) {
+        console.error('Failed to generate AI narration:', error);
+        const friendlyMessage = (error && error.message && error.message.includes('No narratable'))
+            ? 'This response cannot be narrated.'
+            : 'Unable to generate narration right now. Please try again later.';
+        players[index] = {
+            status: 'error',
+            isVisible: true,
+            error: friendlyMessage,
+        };
+        this.state.aiAudioPlayers = { ...players };
+        this.renderAIChatHistory();
+    }
+},
+
+closeAiAudioCard(index) {
+    if (!this.state.aiAudioPlayers?.[index]) return;
+    const players = { ...this.state.aiAudioPlayers };
+    const player = players[index];
+    if (player?.status === 'ready') {
+        const audioEl = document.querySelector(`.ai-tts-card[data-message-index="${index}"] audio`);
+        if (audioEl) {
+            audioEl.pause();
+        }
+    }
+    players[index] = { ...player, isVisible: false };
+    this.state.aiAudioPlayers = players;
+    this.renderAIChatHistory();
+},
+
+extractPlainTextFromHtml(html = '') {
+    const temp = document.createElement('div');
+    temp.innerHTML = html;
+    return temp.textContent || temp.innerText || '';
+},
+
+autoPlayAiAudio(index) {
+    setTimeout(() => {
+        const audioEl = document.querySelector(`.ai-tts-card[data-message-index="${index}"] audio`);
+        if (audioEl) {
+            audioEl.play().catch(() => {
+                /* Autoplay might be blocked; user can press play manually. */
+            });
+        }
+    }, 50);
 },
 
 scrollAIChatToBottom() {
@@ -5487,10 +5680,19 @@ async handleAiQuestion(questionText) {
         const cleanedHtml = htmlResponse.replace(/^```html\s*|```$/g, '').trim();
     
         this.state.aiChatHistory[thinkingMessageIndex] = { sender: 'ai', content: cleanedHtml, language: this.state.aiSettings.language, animate: true };
+        this.state.aiAudioPlayers = {
+            ...this.state.aiAudioPlayers,
+            [thinkingMessageIndex]: { status: 'idle', isVisible: false },
+        };
 
     } catch (error) {
         console.error("Error fetching AI response:", error);
         this.state.aiChatHistory[thinkingMessageIndex] = { sender: 'ai', content: `<div class="ai-response-error"><h4><i class="fas fa-exclamation-triangle"></i>Connection Error</h4><p>I'm sorry, I couldn't connect to the AI service. Please check your connection and try again.</p></div>`, animate: true };
+        if (this.state.aiAudioPlayers?.[thinkingMessageIndex]) {
+            const players = { ...this.state.aiAudioPlayers };
+            delete players[thinkingMessageIndex];
+            this.state.aiAudioPlayers = players;
+        }
     }
 
     this.renderAIChatHistory();
