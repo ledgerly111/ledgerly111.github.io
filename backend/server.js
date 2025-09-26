@@ -144,6 +144,66 @@ app.post('/api/ask-ai', async (req, res) => {
     }
 });
 
+function resolveVoiceSettings(language) {
+    const normalized = (language || '').toLowerCase();
+    switch (normalized) {
+        case 'arabic':
+        case 'ar':
+        case 'ar-xa':
+            return { languageCode: 'ar-XA', name: 'ar-XA-Wavenet-C' };
+        default:
+            return { languageCode: 'en-US', name: 'en-US-Wavenet-D' };
+    }
+}
+
+app.post('/api/tts', async (req, res) => {
+    const { text, language } = req.body || {};
+    const trimmedText = (text || '').trim();
+
+    if (!trimmedText) {
+        return res.status(400).json({ error: 'Text is required for speech synthesis.' });
+    }
+
+    const GOOGLE_TTS_KEY = process.env.GOOGLE_STT_API_KEY_TTS;
+    if (!GOOGLE_TTS_KEY) {
+        return res.status(500).json({ error: 'TTS API key is not configured on the server.' });
+    }
+
+    const voice = resolveVoiceSettings(language);
+    const speakingRate = 1.0;
+
+    try {
+        const response = await axios.post(
+            `https://texttospeech.googleapis.com/v1/text:synthesize?key=${GOOGLE_TTS_KEY}`,
+            {
+                input: { text: trimmedText },
+                voice: voice,
+                audioConfig: {
+                    audioEncoding: 'MP3',
+                    speakingRate,
+                    pitch: 0,
+                },
+            }
+        );
+
+        const { audioContent } = response.data || {};
+
+        if (!audioContent) {
+            return res.status(502).json({ error: 'TTS service returned an empty response.' });
+        }
+
+        res.json({
+            audioContent,
+            audioMimeType: 'audio/mpeg',
+            voiceName: voice.name,
+            speakingRate,
+        });
+    } catch (error) {
+        console.error('Error generating TTS audio:', error.response ? error.response.data : error.message);
+        res.status(500).json({ error: 'Failed to generate speech audio.' });
+    }
+});
+
 // Start the server
 app.listen(PORT, () => {
     console.log(`Owlio AI server is running on port ${PORT}`);
