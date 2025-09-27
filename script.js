@@ -5166,8 +5166,8 @@ getAIAssistantView() {
             <div class="space-y-6 fade-in">
                 <div class="flex items-center justify-between flex-wrap gap-x-4 gap-y-2">
                     <div class="flex items-center space-x-4">
-                        <div class="w-14 h-14 bg-gradient-to-r from-purple-500 to-pink-500 rounded-2xl flex items-center justify-center ai-pulse">
-                         <span class="material-symbols-outlined text-white text-4xl">bubble_chart</span>
+                        <div class="ai-header-icon ai-pulse">
+                            <span class="material-symbols-outlined ai-icon-gradient">bubble_chart</span>
                         </div>
                         <div>
                             <h2 class="text-2xl font-bold ai-gradient-text">Bubble AI Assistant</h2>
@@ -5206,19 +5206,21 @@ getAIAssistantView() {
                 <div id="ai-chat-log" class="ai-chat-log">
                     </div>
                 <div class="ai-chat-input-bar">
-    ${this.getAISettingsMenuHTML()}
-    <div class="ai-input-row">
-        <input type="text" id="ai-chat-input" class="form-input flex-1" placeholder="Ask a follow-up question..." onkeypress="if(event.key === 'Enter') app.submitAIChatMessage()">
-        <button class="perplexity-button px-4" onclick="app.submitAIChatMessage()">
-            <i class="fas fa-arrow-up"></i>
-        </button>
-    </div>
-    <div class="ai-settings-row">
-        <button class="ai-settings-button-repositioned" onclick="app.toggleAISettingsMenu()">
-            <i class="fas fa-sliders-h"></i> AI Settings
-        </button>
-    </div>
-</div>
+                    <div class="ai-input-row">
+                        <button type="button" class="ai-input-icon-button" aria-label="Insert suggestion">
+                            <i class="fas fa-plus"></i>
+                        </button>
+                        <input type="text" id="ai-chat-input" class="form-input flex-1" placeholder="Ask a follow-up question..." onkeypress="if(event.key === 'Enter') app.submitAIChatMessage()">
+                        <div class="ai-input-actions">
+                            <button type="button" class="ai-input-icon-button" aria-label="Start voice input">
+                                <i class="fas fa-microphone"></i>
+                            </button>
+                            <button type="button" class="ai-send-button" onclick="app.submitAIChatMessage()" aria-label="Send message">
+                                <i class="fas fa-arrow-up"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
             </div>
         `;
     }
@@ -5624,44 +5626,57 @@ submitAIChatMessage() {
 // --- SETTINGS MENU UI & LOGIC ---
 
 // Generates the HTML for the slide-down menu
-getAISettingsMenuHTML() {
+getAISettingsPanelHTML() {
     const { language, highlightKeywords, highlightNumbers } = this.state.aiSettings;
     return `
-        <div id="ai-settings-menu" class="ai-settings-menu">
-            <div class="ai-settings-header" onclick="this.classList.toggle('expanded'); this.nextElementSibling.style.maxHeight = this.classList.contains('expanded') ? '200px' : '0';">
-                <span>Language</span><i class="fas fa-chevron-down chevron"></i>
-            </div>
-            <div class="ai-settings-options">
-                <div class="ai-settings-option ${language === 'English' ? 'selected' : ''}" onclick="app.setAISetting('language', 'English')">English ${language === 'English' ? '<i class="fas fa-check"></i>' : ''}</div>
-                <div class="ai-settings-option ${language === 'Arabic' ? 'selected' : ''}" onclick="app.setAISetting('language', 'Arabic')">Arabic ${language === 'Arabic' ? '<i class="fas fa-check"></i>' : ''}</div>
+        <div class="ai-settings-panel-content">
+            <div class="ai-settings-section">
+                <div class="ai-settings-section-header">
+                    <div class="ai-settings-section-icon">
+                        <i class="fas fa-language"></i>
+                    </div>
+                    <div>
+                        <h4>Language</h4>
+                        <p>Select the language Bubble AI should respond with.</p>
+                    </div>
+                </div>
+                <div class="ai-settings-chip-group">
+                    <button type="button" class="ai-settings-chip ${language === 'English' ? 'active' : ''}" aria-pressed="${language === 'English'}" onclick="app.setAISetting('language', 'English')">English</button>
+                    <button type="button" class="ai-settings-chip ${language === 'Arabic' ? 'active' : ''}" aria-pressed="${language === 'Arabic'}" onclick="app.setAISetting('language', 'Arabic')">Arabic</button>
+                </div>
             </div>
 
-            <div class="ai-settings-header" onclick="this.classList.toggle('expanded'); this.nextElementSibling.style.maxHeight = this.classList.contains('expanded') ? '200px' : '0';">
-                <span>Answer Styling</span><i class="fas fa-chevron-down chevron"></i>
-            </div>
-            <div class="ai-settings-options">
-                <div class="ai-settings-option" onclick="app.setAISetting('highlightKeywords')">
-                    <span>Highlight Keywords</span>
-                    <span class="font-bold text-xs ${highlightKeywords ? 'text-green-400' : 'text-red-400'}">${highlightKeywords ? 'ON' : 'OFF'}</span>
+            <div class="ai-settings-section">
+                <div class="ai-settings-section-header">
+                    <div class="ai-settings-section-icon">
+                        <i class="fas fa-highlighter"></i>
+                    </div>
+                    <div>
+                        <h4>Answer Styling</h4>
+                        <p>Control how insights are highlighted inside responses.</p>
+                    </div>
                 </div>
-                <div class="ai-settings-option" onclick="app.setAISetting('highlightNumbers')">
-                    <span>Highlight Numbers</span>
-                    <span class="font-bold text-xs ${highlightNumbers ? 'text-green-400' : 'text-red-400'}">${highlightNumbers ? 'ON' : 'OFF'}</span>
+                <div class="ai-settings-toggle-group">
+                    <button type="button" class="ai-settings-toggle ${highlightKeywords ? 'active' : ''}" aria-pressed="${highlightKeywords}" onclick="app.setAISetting('highlightKeywords')">
+                        <div class="ai-toggle-label">
+                            <span>Highlight Keywords</span>
+                            <small>Emphasize important terms and concepts.</small>
+                        </div>
+                        <div class="ai-toggle-switch"><span></span></div>
+                        <span class="ai-toggle-status">${highlightKeywords ? 'On' : 'Off'}</span>
+                    </button>
+                    <button type="button" class="ai-settings-toggle ${highlightNumbers ? 'active' : ''}" aria-pressed="${highlightNumbers}" onclick="app.setAISetting('highlightNumbers')">
+                        <div class="ai-toggle-label">
+                            <span>Highlight Numbers</span>
+                            <small>Spot KPIs and financial metrics quickly.</small>
+                        </div>
+                        <div class="ai-toggle-switch"><span></span></div>
+                        <span class="ai-toggle-status">${highlightNumbers ? 'On' : 'Off'}</span>
+                    </button>
                 </div>
             </div>
         </div>
     `;
-},
-
-// Toggles the visibility of the settings menu
-toggleAISettingsMenu() {
-    const menu = document.getElementById('ai-settings-menu');
-    // Close other accordion sections when opening a new one
-    menu.querySelectorAll('.ai-settings-header').forEach(header => {
-        header.classList.remove('expanded');
-        header.nextElementSibling.style.maxHeight = '0';
-    });
-    menu.classList.toggle('open');
 },
 
 // Sets a specific AI setting
@@ -5673,13 +5688,26 @@ setAISetting(key, value) {
         // This is a direct value set (for language)
         this.state.aiSettings[key] = value;
     }
-    
-    // Re-render the menu to show the updated selection and then close it
-    const inputBar = document.querySelector('.ai-chat-input-bar');
-    if (inputBar) {
-        inputBar.querySelector('.ai-settings-menu').outerHTML = this.getAISettingsMenuHTML();
+
+    // Persist and refresh the settings panel if it is visible
+    this.saveData();
+    const settingsPanel = document.getElementById('ai-settings-panel');
+    if (settingsPanel) {
+        settingsPanel.innerHTML = this.getAISettingsPanelHTML();
     }
-    this.toggleAISettingsMenu();
+
+    let message = '';
+    if (key === 'language') {
+        message = `AI responses will now use ${this.state.aiSettings.language}.`;
+    } else if (key === 'highlightKeywords') {
+        message = `Keyword highlighting ${this.state.aiSettings.highlightKeywords ? 'enabled' : 'disabled'}.`;
+    } else if (key === 'highlightNumbers') {
+        message = `Number highlighting ${this.state.aiSettings.highlightNumbers ? 'enabled' : 'disabled'}.`;
+    }
+
+    if (message) {
+        NotificationSystem.success(message);
+    }
 },
 
 
@@ -6733,6 +6761,17 @@ getSettingsView() {
                          <div class="w-full h-16 rounded-lg mb-3 flex items-center justify-center" style="background: linear-gradient(135deg, #000000, #0c0c0c);"><span class="text-white font-bold">Aa</span></div>
                         <h4 class="font-semibold text-white">Pitch Black</h4>
                     </div>
+                </div>
+            </div>
+
+            <div class="perplexity-card p-6">
+                <h3 class="text-xl font-bold text-white mb-4 flex items-center">
+                    <i class="fas fa-robot text-purple-400 mr-2"></i>
+                    AI Preferences
+                </h3>
+                <p class="text-gray-400 mb-4">Tune how Bubble AI responds and formats information.</p>
+                <div id="ai-settings-panel" class="ai-settings-panel">
+                    ${this.getAISettingsPanelHTML()}
                 </div>
             </div>
 
