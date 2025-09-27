@@ -660,6 +660,13 @@ nboxNotificationInterval: null,
         'login-manager': () => this.selectUser('manager'),
         'login-worker': () => this.selectUser('worker'),
         'ask-ai': (id) => this.handleAiQuestion(id),
+        'ask-ai-followup': () => {
+            const followupEl = event?.target?.closest('[data-action="ask-ai-followup"][data-question]');
+            const question = followupEl?.getAttribute('data-question');
+            if (question) {
+                this.handleAiQuestion(question.trim());
+            }
+        },
         'share-ai-response': () => {
             NotificationSystem.info('Sharing options coming soon.');
         },

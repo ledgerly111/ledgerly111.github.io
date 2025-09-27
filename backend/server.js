@@ -97,6 +97,20 @@ app.post('/api/ask-ai', async (req, res) => {
         - Your response MUST be valid HTML. Use semantic elements such as <h2>, <ul>, <li>, <p>, and <strong>.
         - If structured data is best shown in a table, output a clean HTML <table> with the class "ai-data-table" for styling.
 
+        **Follow-up Questions (for business conversations):**
+        - When the latest user message is a business question (not a casual greeting), append a follow-up section after the main answer.
+        - The section must use this exact structure:
+            <div class="ai-followup-section">
+                <h3>Suggested follow-up questions</h3>
+                <div class="ai-followup-bubbles">
+                    <button type="button" class="ai-followup-button" data-action="ask-ai-followup" data-question="QUESTION 1">QUESTION 1</button>
+                    <button type="button" class="ai-followup-button" data-action="ask-ai-followup" data-question="QUESTION 2">QUESTION 2</button>
+                    <button type="button" class="ai-followup-button" data-action="ask-ai-followup" data-question="QUESTION 3">QUESTION 3</button>
+                </div>
+            </div>
+        - Replace QUESTION 1-3 with three concise, relevant follow-up questions tailored to the conversation. Avoid quotation marks inside the data-question value.
+        - Do not include this follow-up section for simple greetings or casual chatter.
+
         **High-Level Business Summary (ignore for simple greetings):**
         ${JSON.stringify(summary, null, 2)}
     `;

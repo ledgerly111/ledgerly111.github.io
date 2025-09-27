@@ -2820,6 +2820,65 @@ div[data-highlight-numbers="true"] .ai-answer-body .negative-amount {
     font-weight: 700;
 }
 
+/* === Suggested Follow-up Questions Styling === */
+.ai-followup-section {
+    margin-top: 1.75rem;
+    padding-top: 1.25rem;
+    border-top: 1px solid var(--border-color);
+}
+
+.ai-followup-section h3 {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.ai-followup-bubbles {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    margin-top: 0.75rem;
+}
+
+.ai-followup-button {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    background: var(--bg-tertiary);
+    border: 1px solid rgba(148, 163, 184, 0.2);
+    color: var(--text-secondary);
+    border-radius: 999px;
+    padding: 0.45rem 0.95rem;
+    font-size: 0.95rem;
+    line-height: 1.2;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    box-shadow: 0 4px 14px rgba(15, 23, 42, 0.18);
+}
+
+.ai-followup-button:hover,
+.ai-followup-button:focus {
+    background: var(--ai-color);
+    color: #0f172a;
+    border-color: transparent;
+    box-shadow: 0 6px 20px rgba(79, 70, 229, 0.35);
+}
+
+.ai-followup-button i {
+    font-size: 0.85rem;
+}
+
+.ai-answer-body[dir="rtl"] .ai-followup-bubbles {
+    justify-content: flex-end;
+}
+
+.ai-answer-body[dir="rtl"] .ai-followup-button {
+    direction: rtl;
+}
+
 /* === NEW: AI Icon Shine Animation === */
 @keyframes icon-shine-sweep {
     from { background-position: 200% center; }
