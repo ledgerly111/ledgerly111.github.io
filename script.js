@@ -5207,18 +5207,10 @@ getAIAssistantView() {
                     </div>
                 <div class="ai-chat-input-bar">
                     <div class="ai-input-row">
-                        <button type="button" class="ai-input-icon-button" aria-label="Insert suggestion">
-                            <i class="fas fa-plus"></i>
-                        </button>
                         <input type="text" id="ai-chat-input" class="form-input flex-1" placeholder="Ask a follow-up question..." onkeypress="if(event.key === 'Enter') app.submitAIChatMessage()">
-                        <div class="ai-input-actions">
-                            <button type="button" class="ai-input-icon-button" aria-label="Start voice input">
-                                <i class="fas fa-microphone"></i>
-                            </button>
-                            <button type="button" class="ai-send-button" onclick="app.submitAIChatMessage()" aria-label="Send message">
-                                <i class="fas fa-arrow-up"></i>
-                            </button>
-                        </div>
+                        <button type="button" class="ai-send-button" onclick="app.submitAIChatMessage()" aria-label="Send message">
+                            <i class="fas fa-arrow-up"></i>
+                        </button>
                     </div>
                 </div>
             </div>
