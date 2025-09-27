@@ -5337,7 +5337,11 @@ renderAIChatHistory() {
     }).join('');
 
     this.repositionAIFollowups();
-    this.scrollAIChatToBottom();
+
+    const lastMessage = this.state.aiChatHistory[this.state.aiChatHistory.length - 1];
+    if (lastMessage && (lastMessage.sender !== 'ai' || !lastMessage.animate)) {
+        this.scrollAIChatToBottom();
+    }
     requestAnimationFrame(() => {
         this.applyAIResponseAnimation();
         this.repositionAIFollowups();
@@ -5353,6 +5357,10 @@ repositionAIFollowups() {
         const body = wrapper.querySelector('.ai-answer-body');
         const footer = wrapper.querySelector('.ai-answer-footer');
         if (!body || !footer) {
+            return;
+        }
+
+        if (body.hasAttribute('data-animate') || body.dataset.typing === 'true') {
             return;
         }
 
@@ -5523,7 +5531,7 @@ applyAIResponseAnimation() {
             delete target.dataset.animating;
             target.removeAttribute('data-animate');
             delete target.dataset.scrolledIntoView;
-            this.scrollAIChatToBottom();
+            this.repositionAIFollowups();
 
             const index = parseInt(target.getAttribute('data-message-index'), 10);
             if (!Number.isNaN(index) && this.state.aiChatHistory[index]) {
