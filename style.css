@@ -2822,9 +2822,13 @@ div[data-highlight-numbers="true"] .ai-answer-body .negative-amount {
 
 /* === Suggested Follow-up Questions Styling === */
 .ai-followup-section {
-    margin-top: 1.75rem;
-    padding-top: 1.25rem;
+    margin-top: 1.25rem;
+    padding-top: 1rem;
     border-top: 1px solid var(--border-color);
+}
+
+.ai-answer-wrapper > .ai-followup-section {
+    width: 100%;
 }
 
 .ai-followup-section h3 {

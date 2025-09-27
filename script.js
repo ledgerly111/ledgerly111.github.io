@@ -5336,13 +5336,33 @@ renderAIChatHistory() {
         return '';
     }).join('');
 
+    this.repositionAIFollowups();
     this.scrollAIChatToBottom();
-    requestAnimationFrame(() => this.applyAIResponseAnimation());
+    requestAnimationFrame(() => {
+        this.applyAIResponseAnimation();
+        this.repositionAIFollowups();
+    });
 },
 
 // REPLACE THE OLD FUNCTION WITH THIS WORKING JAVASCRIPT VERSION
 
 // REPLACE THE OLD handleAiTtsClick FUNCTION WITH THIS ONE
+repositionAIFollowups() {
+    const wrappers = document.querySelectorAll('.ai-answer-wrapper');
+    wrappers.forEach(wrapper => {
+        const body = wrapper.querySelector('.ai-answer-body');
+        const footer = wrapper.querySelector('.ai-answer-footer');
+        if (!body || !footer) {
+            return;
+        }
+
+        const followupSections = body.querySelectorAll('.ai-followup-section');
+        followupSections.forEach(section => {
+            footer.insertAdjacentElement('afterend', section);
+        });
+    });
+},
+
 async handleAiTtsClick(index) {
     const headerEl = document.querySelector(`.ai-answer-header[data-message-index="${index}"]`);
     if (headerEl) {
