@@ -332,28 +332,28 @@ const inboxNotifications = [
     {
         avatarBackground: 'bg-gradient-to-r from-green-500 to-emerald-500',
         username: 'System',
-        content: '📦 New sale recorded for Emirates Tech Solutions.',
+        content: 'New sale recorded for Emirates Tech Solutions.',
         color: 'text-green-400',
         duration: 4000,
     },
     {
         avatarBackground: 'bg-gradient-to-r from-yellow-500 to-orange-500',
         username: 'AccuraBot',
-        content: '⚠️ Low stock warning for Wireless Mouse.',
+        content: 'Low stock warning for Wireless Mouse.',
         color: 'text-yellow-400',
         duration: 4000,
     },
     {
         avatarBackground: 'bg-gradient-to-r from-blue-500 to-cyan-500',
         username: 'John Manager',
-        content: '📝 Stock request for Premium Laptops approved.',
+        content: 'Stock request for Premium Laptops approved.',
         color: 'text-blue-400',
         duration: 4500,
     },
     {
         avatarBackground: 'bg-gradient-to-r from-purple-500 to-pink-500',
         username: 'Bubble AI',
-        content: '💡 New insight: Consider a marketing campaign for External SSDs.',
+        content: 'New insight: Consider a marketing campaign for External SSDs.',
         color: 'text-purple-400',
         duration: 5000,
     },
@@ -1015,10 +1015,10 @@ getUserSelectionView() {
                 if (isEdit) {
                     const index = this.state.products.findIndex(p => p.id === product.id);
                     this.state.products[index] = product;
-                    NotificationSystem.success('ÃƒÆ’Ã‚Â¢Ãƒâ€¦Ã¢â‚¬Å“ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¦ Product updated successfully!');
+                    NotificationSystem.success('Product updated successfully!');
                 } else {
                     this.state.products.push(product);
-                    NotificationSystem.success('ÃƒÆ’Ã‚Â°Ãƒâ€¦Ã‚Â¸Ãƒâ€¦Ã‚Â½ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â° Product added successfully!');
+                    NotificationSystem.success('Product added successfully!');
                 }
 
                 this.closeModal();
@@ -1045,10 +1045,10 @@ getUserSelectionView() {
                 if (isEdit) {
                     const index = this.state.customers.findIndex(c => c.id === customer.id);
                     this.state.customers[index] = customer;
-                    NotificationSystem.success('ÃƒÆ’Ã‚Â¢Ãƒâ€¦Ã¢â‚¬Å“ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¦ Customer updated successfully!');
+                    NotificationSystem.success('Customer updated successfully!');
                 } else {
                     this.state.customers.push(customer);
-                    NotificationSystem.success('ÃƒÆ’Ã‚Â°Ãƒâ€¦Ã‚Â¸Ãƒâ€¦Ã‚Â½ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â° Customer added successfully!');
+                    NotificationSystem.success('Customer added successfully!');
                 }
 
                 this.closeModal();
@@ -1162,7 +1162,7 @@ getUserSelectionView() {
     this.closeModal();
     this.saveData();
     this.render();
-    NotificationSystem.success(`ÃƒÆ’Ã‚Â°Ãƒâ€¦Ã‚Â¸Ãƒâ€¦Ã‚Â½ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â° Sale recorded! Total: ${this.formatCurrency(sale.total)}`);
+    NotificationSystem.success(`Sale recorded! Total: ${this.formatCurrency(sale.total)}`);
     this.triggerStockAlertCheck();
 },
 
@@ -1191,7 +1191,7 @@ handleTaskForm(data) {
             // Preserve existing data that isn't in the form
             const oldTask = this.state.tasks[taskIndex];
             this.state.tasks[taskIndex] = { ...oldTask, ...taskData };
-            NotificationSystem.success('ÃƒÆ’Ã‚Â¢Ãƒâ€¦Ã¢â‚¬Å“ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¦ Task updated successfully!');
+            NotificationSystem.success('Task updated successfully!');
         }
     } else {
         // This is the logic for CREATING a new task
@@ -1206,7 +1206,7 @@ handleTaskForm(data) {
             lastNotifiedProgress: 0
         };
         this.state.tasks.push(newTask);
-        NotificationSystem.success('ÃƒÆ’Ã‚Â°Ãƒâ€¦Ã‚Â¸Ãƒâ€¦Ã‚Â¡ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ New main task created! You can now assign it to a branch.');
+        NotificationSystem.success('New main task created! You can now assign it to a branch.');
     }
 
     this.saveData();
@@ -1233,10 +1233,10 @@ handleTaskForm(data) {
                     // Preserve original creator when editing
                     expense.createdByUserId = this.state.expenses[index].createdByUserId;
                     this.state.expenses[index] = expense;
-                    NotificationSystem.success('ÃƒÆ’Ã‚Â¢Ãƒâ€¦Ã¢â‚¬Å“ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¦ Expense updated successfully!');
+                    NotificationSystem.success('Expense updated successfully!');
                 } else {
                     this.state.expenses.push(expense);
-                    NotificationSystem.success('ÃƒÆ’Ã‚Â°Ãƒâ€¦Ã‚Â¸ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢Ãƒâ€šÃ‚Â¸ Expense recorded successfully!');
+                    NotificationSystem.success('Expense recorded successfully!');
                 }
 
                 const expenseAccountCode = expense.category;
@@ -1279,14 +1279,14 @@ handleTaskForm(data) {
                             this.state.currentUser = { ...employee };
                         }
                         
-                        NotificationSystem.success('ÃƒÆ’Ã‚Â¢Ãƒâ€¦Ã¢â‚¬Å“ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¦ Employee updated successfully!');
+                        NotificationSystem.success('Employee updated successfully!');
                     } else {
                         NotificationSystem.error('Employee not found for update.');
                         return;
                     }
                 } else {
                     this.state.users.push(employee);
-                    NotificationSystem.success('ÃƒÆ’Ã‚Â°Ãƒâ€¦Ã‚Â¸ÃƒÂ¢Ã¢â€šÂ¬Ã‹Å“Ãƒâ€šÃ‚Â¨ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚ÂÃƒÆ’Ã‚Â°Ãƒâ€¦Ã‚Â¸ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢Ãƒâ€šÃ‚Â¼ Employee added successfully!');
+                    NotificationSystem.success('Employee added successfully!');
                 }
 
                 this.closeModal();
@@ -1321,7 +1321,7 @@ aiAnalysis: `Message categorized as ${BubbleAI.analyzeSentiment(data.content)} s
                 this.saveData();
                 this.updateBotAnalysis();
                 this.render();
-                NotificationSystem.success('ÃƒÆ’Ã‚Â°Ãƒâ€¦Ã‚Â¸ÃƒÂ¢Ã¢â€šÂ¬Ã…â€œÃƒâ€šÃ‚Â§ Message sent with AI analysis!');
+                NotificationSystem.success('Message sent with AI analysis!');
             },
 
             handleCompanySettingsForm(data) {
@@ -1330,7 +1330,7 @@ aiAnalysis: `Message categorized as ${BubbleAI.analyzeSentiment(data.content)} s
                 
                 this.saveData();
                 this.render();
-                NotificationSystem.success('ÃƒÆ’Ã‚Â¢Ãƒâ€¦Ã‚Â¡ÃƒÂ¢Ã¢â‚¬Å¾Ã‚Â¢ÃƒÆ’Ã‚Â¯Ãƒâ€šÃ‚Â¸Ãƒâ€šÃ‚Â Company settings updated successfully!');
+                NotificationSystem.success('Company settings updated successfully!');
             },
            
 
@@ -1410,7 +1410,7 @@ updateTaskProgress(sale, profit) {
 getTaskHealthReportHTML(task) {
     const progressPercentage = Math.min((task.progress / task.goalTarget) * 100, 100).toFixed(1);
     const isCompleted = task.status === 'completed';
-    const title = isCompleted ? `ÃƒÆ’Ã‚Â°Ãƒâ€¦Ã‚Â¸Ãƒâ€šÃ‚ÂÃƒÂ¢Ã¢â€šÂ¬Ã‚Â  Task Completed!` : `ÃƒÆ’Ã‚Â°Ãƒâ€¦Ã‚Â¸Ãƒâ€¦Ã‚Â¡ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ Task Progress Update`;
+    const title = isCompleted ? `Task Completed!` : `Task Progress Update`;
     const participants = task.participants.map(pId => this.state.users.find(u => u.id === pId)?.name || 'Unknown');
 
     return `
@@ -1505,7 +1505,7 @@ handleSendTaskForm(data) {
     this.closeModal();
     this.render();
     // Updated success message
-    NotificationSystem.success(`ÃƒÆ’Ã‚Â¢Ãƒâ€¦Ã¢â‚¬Å“ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¦ Task is now available for the "${branch.name}" branch to join.`);
+    NotificationSystem.success(`Task is now available for the "${branch.name}" branch to join.`);
 },
 
 // PASTE THIS NEW HELPER FUNCTION
@@ -2282,7 +2282,7 @@ getModalContent(type, id = null) {
                     this.updateAIInsights();
                     this.updateBotAnalysis();
                     this.render();
-                    NotificationSystem.success('ÃƒÆ’Ã‚Â°Ãƒâ€¦Ã‚Â¸ÃƒÂ¢Ã¢â€šÂ¬Ã¢â‚¬ÂÃƒÂ¢Ã¢â€šÂ¬Ã‹Å“ÃƒÆ’Ã‚Â¯Ãƒâ€šÃ‚Â¸Ãƒâ€šÃ‚Â Product deleted successfully!');
+                    NotificationSystem.success('Product deleted successfully!');
                 }
             },
 
@@ -2293,7 +2293,7 @@ getModalContent(type, id = null) {
                     this.updateAIInsights();
                     this.updateBotAnalysis();
                     this.render();
-                    NotificationSystem.success('ÃƒÆ’Ã‚Â°Ãƒâ€¦Ã‚Â¸ÃƒÂ¢Ã¢â€šÂ¬Ã¢â‚¬ÂÃƒÂ¢Ã¢â€šÂ¬Ã‹Å“ÃƒÆ’Ã‚Â¯Ãƒâ€šÃ‚Â¸Ãƒâ€šÃ‚Â Customer deleted successfully!');
+                    NotificationSystem.success('Customer deleted successfully!');
                 }
             },
 
@@ -2304,7 +2304,7 @@ getModalContent(type, id = null) {
                     this.updateAIInsights();
                     this.updateBotAnalysis();
                     this.render();
-                    NotificationSystem.success('ÃƒÆ’Ã‚Â°Ãƒâ€¦Ã‚Â¸ÃƒÂ¢Ã¢â€šÂ¬Ã¢â‚¬ÂÃƒÂ¢Ã¢â€šÂ¬Ã‹Å“ÃƒÆ’Ã‚Â¯Ãƒâ€šÃ‚Â¸Ãƒâ€šÃ‚Â Expense deleted successfully!');
+                    NotificationSystem.success('Expense deleted successfully!');
                 }
             },
 
@@ -2315,7 +2315,7 @@ getModalContent(type, id = null) {
                     this.updateAIInsights();
                     this.updateBotAnalysis();
                     this.render();
-                    NotificationSystem.success('ÃƒÆ’Ã‚Â°Ãƒâ€¦Ã‚Â¸ÃƒÂ¢Ã¢â€šÂ¬Ã¢â‚¬ÂÃƒÂ¢Ã¢â€šÂ¬Ã‹Å“ÃƒÆ’Ã‚Â¯Ãƒâ€šÃ‚Â¸Ãƒâ€šÃ‚Â Employee deleted successfully!');
+                    NotificationSystem.success('Employee deleted successfully!');
                 }
             },
 
@@ -2334,7 +2334,7 @@ getModalContent(type, id = null) {
             this.saveData();
             this.render();
             this.closeModal();
-            NotificationSystem.success('ÃƒÆ’Ã‚Â°Ãƒâ€¦Ã‚Â¸ÃƒÂ¢Ã¢â€šÂ¬Ã¢â‚¬ÂÃƒÂ¢Ã¢â€šÂ¬Ã‹Å“ÃƒÆ’Ã‚Â¯Ãƒâ€šÃ‚Â¸Ãƒâ€šÃ‚Â Task deleted successfully!');
+            NotificationSystem.success('Task deleted successfully!');
         }
     });
 },
@@ -2410,7 +2410,7 @@ handleJoinTask(id) {
     
     this.saveData();
     this.render(); // Re-render to update the UI
-    NotificationSystem.success(`ÃƒÆ’Ã‚Â°Ãƒâ€¦Ã‚Â¸Ãƒâ€¦Ã‚Â½ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â° You have joined the task: "${mainTask.title}"!`);
+    NotificationSystem.success(`You have joined the task: "${mainTask.title}"!`);
 },
 
 
@@ -2447,7 +2447,7 @@ updateTaskProgress(sale, profit) {
                 this.sendTaskProgressNotification(currentTask, '100');
                 currentTask.lastNotifiedProgress = 100;
             }
-             NotificationSystem.success(`ÃƒÆ’Ã‚Â°Ãƒâ€¦Ã‚Â¸Ãƒâ€šÃ‚ÂÃƒÂ¢Ã¢â€šÂ¬Ã‚Â  Task "${currentTask.title}" completed! Great job!`);
+             NotificationSystem.success(`Task "${currentTask.title}" completed! Great job!`);
         } else if (progressPercentage >= 75 && currentTask.lastNotifiedProgress < 75) {
             this.sendTaskProgressNotification(currentTask, '75');
             currentTask.lastNotifiedProgress = 75;
@@ -2478,7 +2478,7 @@ checkMainTaskCompletion(parentTaskId) {
         if (mainTaskIndex !== -1) {
             this.state.tasks[mainTaskIndex].status = 'completed';
             const mainTask = this.state.tasks[mainTaskIndex];
-            NotificationSystem.success(`ÃƒÆ’Ã‚Â°Ãƒâ€¦Ã‚Â¸Ãƒâ€šÃ‚ÂÃƒÂ¢Ã¢â€šÂ¬Ã‚Â  Main Task Completed: "${mainTask.title}"! Great work, team!`);
+            NotificationSystem.success(`Main Task Completed: "${mainTask.title}"! Great work, team!`);
             
             // Optional: Send a final report notification for the main task
             if (mainTask.accuraBotEnabled) {
@@ -2711,7 +2711,7 @@ downloadTaskTxt(taskId) {
                 this.saveData();
                 this.render();
                 this.downloadInvoice(invoice.id);
-                NotificationSystem.success('ÃƒÆ’Ã‚Â°Ãƒâ€¦Ã‚Â¸ÃƒÂ¢Ã¢â€šÂ¬Ã…â€œÃƒÂ¢Ã¢â€šÂ¬Ã…Â¾ Professional invoice generated successfully!');
+                NotificationSystem.success('Professional invoice generated successfully!');
             },
 
             exportData() {
@@ -2723,7 +2723,7 @@ downloadTaskTxt(taskId) {
                 link.download = `${this.state.companyName.replace(/\s+/g, '-').toLowerCase()}-data.json`;
                 link.click();
                 URL.revokeObjectURL(url);
-                NotificationSystem.success('ÃƒÆ’Ã‚Â°Ãƒâ€¦Ã‚Â¸ÃƒÂ¢Ã¢â€šÂ¬Ã…â€œÃƒâ€šÃ‚Â¤ Business data exported successfully!');
+                NotificationSystem.success('Business data exported successfully!');
             },
 
             markMessageRead(id) {
@@ -3185,7 +3185,7 @@ downloadInvoice(invoiceId) {
     this.updateBotAnalysis();
     this.state.quickSale.active = false;
     this.render();
-    NotificationSystem.success(`ÃƒÆ’Ã‚Â¢Ãƒâ€¦Ã‚Â¡Ãƒâ€šÃ‚Â¡ Quick Sale recorded! Total: ${this.formatCurrency(sale.total)}`);
+    NotificationSystem.success(`Quick Sale recorded! Total: ${this.formatCurrency(sale.total)}`);
     this.triggerStockAlertCheck();
 },
 
@@ -3626,7 +3626,7 @@ renderInbox() {
                             <div class="flex items-center justify-between mb-1">
                                 <div class="flex items-center space-x-2">
                                     <span class="font-semibold ${isSystemAlert ? 'text-red-400' : 'text-white'}">
-                                        ${isSystemAlert ? 'ÃƒÆ’Ã‚Â°Ãƒâ€¦Ã‚Â¸Ãƒâ€šÃ‚Â¤ÃƒÂ¢Ã¢â€šÂ¬Ã¢â‚¬Å“ AccuraBot Alert' : senderName}
+                                        ${isSystemAlert ? 'AccuraBot Alert' : senderName}
                                     </span>
                                     ${isSentByMe ? '<span class="text-xs text-gray-500"><i class="fas fa-check-double text-blue-400"></i></span>' : ''}
                                     ${message.type === 'task' ? `
@@ -4703,7 +4703,7 @@ getNavbar() {
                         ${['admin', 'manager'].includes(this.state.currentUser.role) ? `
                             <div class="flex items-center space-x-2">
                                 <span class="px-3 py-1 bg-gradient-to-r from-yellow-500 to-orange-500 text-white text-xs rounded-full font-medium">
-                                    ${countryInfo.currency} ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â¢ ${countryInfo.name.split(' ')[0]}
+                                    ${countryInfo.currency} - ${countryInfo.name.split(' ')[0]}
                                 </span>
                             </div>
                         ` : ''}
@@ -4811,7 +4811,7 @@ getSidebar() {
                     <h4 class="text-lg font-bold bg-gradient-to-r from-yellow-500 to-orange-500 bg-clip-text text-transparent mb-1">${this.state.companyName}</h4>
                     <p class="text-gray-400 text-xs">Powered by Bubble AI</p>
                     <div class="mt-2 text-xs text-gray-500">
-                        ${GCC_COUNTRIES[this.state.selectedCountry].currency} ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â¢ ${GCC_COUNTRIES[this.state.selectedCountry].name.split(' ')[0]}
+                        ${GCC_COUNTRIES[this.state.selectedCountry].currency} - ${GCC_COUNTRIES[this.state.selectedCountry].name.split(' ')[0]}
                     </div>
                 </div>
             </div>
@@ -4896,17 +4896,17 @@ getSidebar() {
                                 </div>
                                 <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                                     <div class="text-center p-4 bg-gradient-to-r from-green-500/10 to-emerald-500/10 rounded-xl border border-green-500/20">
-                                        <div class="text-green-400 text-2xl mb-2">ÃƒÆ’Ã‚Â°Ãƒâ€¦Ã‚Â¸ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢Ãƒâ€šÃ‚Â°</div>
+                                        <div class="text-green-400 text-2xl mb-2">SAL</div>
                                         <p class="text-gray-400 text-sm mb-2">Monthly Salary</p>
                                         <p class="text-lg font-bold text-green-400 animated-number" data-target="${monthlySalary}" data-format="currency">${this.formatCurrency(0)}</p>
                                     </div>
                                     <div class="text-center p-4 bg-gradient-to-r from-blue-500/10 to-cyan-500/10 rounded-xl border border-blue-500/20">
-                                        <div class="text-blue-400 text-2xl mb-2">ÃƒÆ’Ã‚Â°Ãƒâ€¦Ã‚Â¸Ãƒâ€¦Ã‚Â½Ãƒâ€šÃ‚Â¯</div>
+                                        <div class="text-blue-400 text-2xl mb-2">COM</div>
                                         <p class="text-gray-400 text-sm mb-2">Commission</p>
                                         <p class="text-lg font-bold text-blue-400 animated-number" data-target="${currentUser.commission || 0}" data-format="currency">${this.formatCurrency(0)}</p>
                                     </div>
                                     <div class="text-center p-4 bg-gradient-to-r from-teal-500/10 to-blue-500/10 rounded-xl border border-teal-500/20">
-                                        <div class="text-teal-400 text-2xl mb-2">ÃƒÆ’Ã‚Â°Ãƒâ€¦Ã‚Â¸Ãƒâ€šÃ‚ÂÃƒÂ¢Ã¢â€šÂ¬Ã‚Â </div>
+                                        <div class="text-teal-400 text-2xl mb-2">TOT</div>
                                         <p class="text-gray-400 text-sm mb-2">Total Earnings</p>
                                         <p class="text-xl font-bold text-teal-400 animated-number" data-target="${totalEarnings}" data-format="currency">${this.formatCurrency(0)}</p>
                                     </div>
@@ -4995,7 +4995,7 @@ getSidebar() {
                                                     <h4 class="font-bold text-white mb-2">${insight.title}</h4>
                                                     <p class="text-gray-300 mb-3 leading-relaxed">${insight.message}</p>
                                                     <div class="bg-${this.state.aiMode === 'ai' ? 'purple' : 'green'}-500/10 border-l-4 border-${this.state.aiMode === 'ai' ? 'purple' : 'green'}-500 p-3 rounded-r-lg">
-                                                        <p class="text-sm text-${this.state.aiMode === 'ai' ? 'purple' : 'green'}-400 font-medium">ÃƒÆ’Ã‚Â°Ãƒâ€¦Ã‚Â¸ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢Ãƒâ€šÃ‚Â¡ Recommendation: ${insight.action}</p>
+                                                        <p class="text-sm text-${this.state.aiMode === 'ai' ? 'purple' : 'green'}-400 font-medium">Recommendation: ${insight.action}</p>
                                                     </div>
                                                 </div>
                                             </div>
@@ -5728,23 +5728,23 @@ setAISetting(key, value) {
                                     <i class="fas fa-robot fa-fw text-white text-xl"></i>
                                 </div>
                                 <div class="flex-1">
-                                    <h3 class="text-xl font-bold text-white mb-3">AccuraBot Monitoring Active! ÃƒÆ’Ã‚Â°Ãƒâ€¦Ã‚Â¸Ãƒâ€šÃ‚Â¤ÃƒÂ¢Ã¢â€šÂ¬Ã¢â‚¬Å“</h3>
+                                    <h3 class="text-xl font-bold text-white mb-3">AccuraBot Monitoring Active!</h3>
                                     <p class="text-gray-300 mb-4 leading-relaxed">I'm continuously monitoring your Owlio Sales application, tracking GCC currency fluctuations, analyzing sales performance, and providing real-time actionable business intelligence.</p>
                                     <div class="grid grid-cols-2 lg:grid-cols-4 gap-3">
                                         <div class="bg-green-500/10 border border-green-500/30 rounded-xl p-3 text-center">
-                                            <div class="text-xl mb-1">ÃƒÆ’Ã‚Â°Ãƒâ€¦Ã‚Â¸ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢Ãƒâ€šÃ‚Â±</div>
+                                            <div class="text-xl mb-1">FX</div>
                                             <div class="text-green-400 font-semibold text-sm">Currency Monitor</div>
                                         </div>
                                         <div class="bg-green-500/10 border border-green-500/30 rounded-xl p-3 text-center">
-                                            <div class="text-xl mb-1">ÃƒÆ’Ã‚Â°Ãƒâ€¦Ã‚Â¸ÃƒÂ¢Ã¢â€šÂ¬Ã…â€œÃƒâ€šÃ‚Â¦</div>
+                                            <div class="text-xl mb-1">INV</div>
                                             <div class="text-green-400 font-semibold text-sm">Inventory</div>
                                         </div>
                                         <div class="bg-green-500/10 border border-green-500/30 rounded-xl p-3 text-center">
-                                            <div class="text-xl mb-1">ÃƒÆ’Ã‚Â°Ãƒâ€¦Ã‚Â¸Ãƒâ€¦Ã‚Â¡Ãƒâ€šÃ‚Â¨</div>
+                                            <div class="text-xl mb-1">ALR</div>
                                             <div class="text-green-400 font-semibold text-sm">Smart Alerts</div>
                                         </div>
                                         <div class="bg-green-500/10 border border-green-500/30 rounded-xl p-3 text-center">
-                                            <div class="text-xl mb-1">ÃƒÆ’Ã‚Â°Ãƒâ€¦Ã‚Â¸ÃƒÂ¢Ã¢â€šÂ¬Ã…â€œÃƒâ€¦Ã‚Â </div>
+                                            <div class="text-xl mb-1">ANL</div>
                                             <div class="text-green-400 font-semibold text-sm">Live Analysis</div>
                                         </div>
                                     </div>
@@ -5846,7 +5846,7 @@ setAISetting(key, value) {
                                                     <h4 class="font-bold text-white mb-2">${rec.title}</h4>
                                                     <p class="text-gray-300 mb-3 leading-relaxed">${rec.message}</p>
                                                     <div class="bg-green-500/10 border-l-4 border-green-500 p-3 rounded-r-xl">
-                                                        <p class="text-green-400 font-medium text-sm">ÃƒÆ’Ã‚Â°Ãƒâ€¦Ã‚Â¸Ãƒâ€šÃ‚Â¤ÃƒÂ¢Ã¢â€šÂ¬Ã¢â‚¬Å“ Bot Insight: ${rec.tip}</p>
+                                                        <p class="text-green-400 font-medium text-sm">Bot Insight: ${rec.tip}</p>
                                                     </div>
                                                 </div>
                                             </div>
@@ -6682,17 +6682,17 @@ getReportsView() {
                 </h3>
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                     <div class="p-4 bg-green-500/10 border border-green-500/30 rounded-xl">
-                        <div class="text-green-400 text-2xl mb-2">ÃƒÆ’Ã‚Â¢Ãƒâ€¦Ã¢â‚¬Å“ÃƒÂ¢Ã¢â€šÂ¬Ã…â€œ</div>
+                        <div class="text-green-400 text-2xl mb-2">OK</div>
                         <div class="text-2xl font-bold text-white">${this.state.products.filter(p => p.stock > this.state.lowStockThreshold).length}</div>
                         <div class="text-gray-400 text-sm">In Stock</div>
                     </div>
                     <div class="p-4 bg-yellow-500/10 border border-yellow-500/30 rounded-xl">
-                        <div class="text-yellow-400 text-2xl mb-2">ÃƒÆ’Ã‚Â¢Ãƒâ€¦Ã‚Â¡Ãƒâ€šÃ‚Â </div>
+                        <div class="text-yellow-400 text-2xl mb-2">LOW</div>
                         <div class="text-2xl font-bold text-white">${this.state.products.filter(p => p.stock <= this.state.lowStockThreshold && p.stock > 0).length}</div>
                         <div class="text-gray-400 text-sm">Low Stock</div>
                     </div>
                     <div class="p-4 bg-red-500/10 border border-red-500/30 rounded-xl">
-                        <div class="text-red-400 text-2xl mb-2">ÃƒÆ’Ã‚Â¢Ãƒâ€¦Ã¢â‚¬Å“ÃƒÂ¢Ã¢â€šÂ¬Ã¢â‚¬Â</div>
+                        <div class="text-red-400 text-2xl mb-2">OUT</div>
                         <div class="text-2xl font-bold text-white">${this.state.products.filter(p => p.stock === 0).length}</div>
                         <div class="text-gray-400 text-sm">Out of Stock</div>
                     </div>
