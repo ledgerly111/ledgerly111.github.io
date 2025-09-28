@@ -35,6 +35,205 @@ const GCC_COUNTRIES = {
     'OM': { name: 'Oman', currency: 'OMR', symbol: 'OMR', rate: 0.38, tax: 0.05, taxName: 'VAT' }
 };
 
+const salesGradientPlugin = {
+    id: 'salesGradient',
+    beforeDatasetsDraw(chart) {
+        const pluginOptions = chart.options?.plugins?.salesGradient;
+        if (!pluginOptions?.enabled || !chart.chartArea) return;
+
+        const datasetIndex = pluginOptions.datasetIndex ?? 0;
+        const dataset = chart.data?.datasets?.[datasetIndex];
+        if (!dataset) return;
+
+        const { ctx, chartArea } = chart;
+        const fillGradient = ctx.createLinearGradient(0, chartArea.top, 0, chartArea.bottom);
+        fillGradient.addColorStop(0, pluginOptions.fill?.from ?? 'rgba(253, 224, 71, 0.28)');
+        fillGradient.addColorStop(1, pluginOptions.fill?.to ?? 'rgba(250, 204, 21, 0.04)');
+        dataset.backgroundColor = fillGradient;
+
+        const lineGradient = ctx.createLinearGradient(chartArea.left, chartArea.top, chartArea.right, chartArea.top);
+        lineGradient.addColorStop(0, pluginOptions.line?.from ?? '#fde047');
+        lineGradient.addColorStop(1, pluginOptions.line?.to ?? '#f97316');
+        dataset.borderColor = lineGradient;
+    }
+};
+
+const salesGlowPlugin = {
+    id: 'salesGlow',
+    afterDatasetsDraw(chart) {
+        const pluginOptions = chart.options?.plugins?.salesGlow;
+        if (!pluginOptions?.enabled) return;
+
+        const datasetMeta = chart.getDatasetMeta(pluginOptions.datasetIndex ?? 0);
+        if (!datasetMeta || datasetMeta.hidden) return;
+
+        const ctx = chart.ctx;
+        const now = performance.now();
+
+        datasetMeta.data.forEach((point, index) => {
+            const position = point.tooltipPosition();
+            const pulse = (Math.sin((now / (pluginOptions.speed || 1200)) + index) + 1) / 2;
+            const radius = (pluginOptions.baseRadius || 4) + pulse * (pluginOptions.pulseRadius || 3);
+
+            ctx.save();
+            ctx.beginPath();
+            ctx.arc(position.x, position.y, radius, 0, Math.PI * 2);
+
+            const glowGradient = ctx.createRadialGradient(position.x, position.y, radius * 0.2, position.x, position.y, radius);
+            glowGradient.addColorStop(0, pluginOptions.pointColor || '#facc15');
+            glowGradient.addColorStop(1, 'rgba(250, 204, 21, 0)');
+
+            ctx.fillStyle = glowGradient;
+            ctx.shadowColor = pluginOptions.glowColor || 'rgba(250, 204, 21, 0.45)';
+            ctx.shadowBlur = 12 + pulse * 10;
+            ctx.fill();
+            ctx.restore();
+        });
+
+        if (!chart.$salesGlowFrame) {
+            chart.$salesGlowFrame = requestAnimationFrame(() => {
+                chart.$salesGlowFrame = null;
+                chart.draw();
+            });
+        }
+    },
+    beforeDestroy(chart) {
+        if (chart.$salesGlowFrame) {
+            cancelAnimationFrame(chart.$salesGlowFrame);
+            chart.$salesGlowFrame = null;
+        }
+    }
+};
+
+if (typeof Chart !== 'undefined') {
+    Chart.register(salesGradientPlugin, salesGlowPlugin);
+}
+
+function createSalesPerformanceChart(ctx, labels, values, datasetLabel, currencySymbol = '') {
+    if (!ctx) return null;
+
+    return new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels,
+            datasets: [{
+                label: datasetLabel,
+                data: values,
+                fill: true,
+                borderWidth: 2.5,
+                tension: 0.45,
+                pointRadius: 0,
+                pointHoverRadius: 0
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            layout: {
+                padding: { top: 12, right: 12, bottom: 8, left: 12 }
+            },
+            interaction: {
+                mode: 'index',
+                intersect: false
+            },
+            scales: {
+                x: {
+                    grid: { display: false, drawBorder: false },
+                    ticks: {
+                        color: '#fef3c7',
+                        padding: 10,
+                        font: { family: 'Saira, sans-serif', size: 12 }
+                    }
+                },
+                y: {
+                    beginAtZero: true,
+                    grid: { color: 'rgba(250, 204, 21, 0.08)', drawBorder: false },
+                    ticks: {
+                        color: '#fde68a',
+                        padding: 10,
+                        font: { family: 'Saira, sans-serif', size: 12 },
+                        callback(value) {
+                            if (typeof value !== 'number') return value;
+                            const formatted = value.toLocaleString(undefined, {
+                                maximumFractionDigits: 0
+                            });
+                            return currencySymbol ? `${currencySymbol} ${formatted}` : formatted;
+                        }
+                    }
+                }
+            },
+            elements: {
+                line: { borderCapStyle: 'round', borderJoinStyle: 'round' },
+                point: { radius: 0, hoverRadius: 0 }
+            },
+            plugins: {
+                legend: { display: false },
+                tooltip: {
+                    backgroundColor: 'rgba(17, 24, 39, 0.95)',
+                    borderColor: 'rgba(250, 204, 21, 0.4)',
+                    borderWidth: 1,
+                    titleColor: '#fef08a',
+                    bodyColor: '#fef3c7',
+                    displayColors: false,
+                    padding: 12,
+                    callbacks: {
+                        label(context) {
+                            const value = typeof context.parsed?.y === 'number' ? context.parsed.y : 0;
+                            const formatted = value.toLocaleString(undefined, {
+                                minimumFractionDigits: 0,
+                                maximumFractionDigits: 0
+                            });
+                            return currencySymbol ? `${currencySymbol} ${formatted}` : formatted;
+                        }
+                    }
+                },
+                salesGradient: {
+                    enabled: true,
+                    datasetIndex: 0,
+                    fill: {
+                        from: 'rgba(253, 224, 71, 0.28)',
+                        to: 'rgba(250, 204, 21, 0.04)'
+                    },
+                    line: {
+                        from: '#fde047',
+                        to: '#f97316'
+                    }
+                },
+                salesGlow: {
+                    enabled: true,
+                    datasetIndex: 0,
+                    glowColor: 'rgba(250, 204, 21, 0.45)',
+                    pointColor: '#facc15',
+                    baseRadius: 4,
+                    pulseRadius: 3,
+                    speed: 1200
+                }
+            },
+            animations: {
+                y: {
+                    duration: 1200,
+                    easing: 'easeOutQuart',
+                    delay(context) {
+                        return context.type === 'data' && context.datasetIndex === 0
+                            ? context.dataIndex * 120
+                            : 0;
+                    }
+                },
+                x: {
+                    duration: 1000,
+                    easing: 'easeOutQuart'
+                },
+                tension: {
+                    duration: 1800,
+                    easing: 'linear',
+                    from: 0.2,
+                    to: 0.45
+                }
+            }
+        }
+    });
+}
+
 // Enhanced Notification System
 class NotificationSystem {
     static show(message, type = 'info', duration = 4000) {
@@ -2829,19 +3028,21 @@ downloadTaskTxt(taskId) {
                     salesByMonth[month] = (salesByMonth[month] || 0) + sale.total;
                 });
 
-                const salesData = {
-                    labels: Object.keys(salesByMonth),
-                    datasets: [{
-                        label: `Monthly Sales (${GCC_COUNTRIES[this.state.selectedCountry].currency})`,
-                        data: Object.values(salesByMonth),
-                        borderColor: '#00d4aa',
-                        backgroundColor: 'rgba(0, 212, 170, 0.1)',
-                        tension: 0.4,
-                        fill: true
-                    }]
-                };
+                const salesCtx = document.getElementById('salesChart')?.getContext('2d');
+                if (salesCtx) {
+                    const currencyDetails = GCC_COUNTRIES[this.state.selectedCountry];
+                    if (this.charts?.salesChart) {
+                        this.charts.salesChart.destroy();
+                    }
 
-                this.createChart('salesChart', 'line', salesData);
+                    this.charts.salesChart = createSalesPerformanceChart(
+                        salesCtx,
+                        Object.keys(salesByMonth),
+                        Object.values(salesByMonth),
+                        `Monthly Sales (${currencyDetails.currency})`,
+                        currencyDetails.symbol || currencyDetails.currency
+                    );
+                }
 
                 // Revenue vs Expenses
                 const totalRevenue = this.state.sales.reduce((sum, sale) => sum + sale.total, 0);
@@ -3249,25 +3450,14 @@ downloadInvoice(invoiceId) {
                         return acc;
                     }, {});
 
-                    window.salesChart = new Chart(salesCtx, {
-                        type: 'line',
-                        data: {
-                            labels: Object.keys(salesByMonth),
-                            datasets: [{
-                                label: 'Monthly Sales',
-                                data: Object.values(salesByMonth),
-                                borderColor: '#00d4aa',
-                                backgroundColor: 'rgba(0, 212, 170, 0.1)',
-                                tension: 0.4,
-                                fill: true,
-                            }]
-                        },
-                        options: {
-                            responsive: true,
-                            maintainAspectRatio: false,
-                            scales: { y: { beginAtZero: true } }
-                        }
-                    });
+                    const currencyDetails = GCC_COUNTRIES[this.state.selectedCountry];
+                    window.salesChart = createSalesPerformanceChart(
+                        salesCtx,
+                        Object.keys(salesByMonth),
+                        Object.values(salesByMonth),
+                        `Monthly Sales (${currencyDetails.currency})`,
+                        currencyDetails.symbol || currencyDetails.currency
+                    );
                 }
 
                 if (financeCtx) { // CORRECTED CHECK
@@ -5018,7 +5208,7 @@ getSidebar() {
                                     <i class="fas fa-chart-line text-teal-400 mr-2"></i>
                                     Sales Performance
                                 </h3>
-                                <div class="chart-container">
+                                <div class="chart-container sales-performance-chart">
                                     <canvas id="salesChart"></canvas>
                                 </div>
                             </div>
