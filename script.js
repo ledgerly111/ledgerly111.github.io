@@ -385,6 +385,7 @@ const AI_CATEGORIES = {
 const app = {
     serverUrl: 'https://ledgerly-backend-e8au.onrender.com',
     charts: {},
+    dashboardChartsData: null,
     currentSaleCart: [],
     state: {
         aiChatHistory: [], // <--- CORRECT SPOT
@@ -2822,49 +2823,122 @@ downloadTaskTxt(taskId) {
             },
 
             createDashboardCharts() {
-                // Sales trend chart
-                const salesByMonth = {};
-                this.state.sales.forEach(sale => {
-                    const month = sale.date.substring(0, 7);
-                    salesByMonth[month] = (salesByMonth[month] || 0) + sale.total;
-                });
+                if (this.state.currentView !== 'dashboard') {
+                    return;
+                }
 
-                const salesData = {
-                    labels: Object.keys(salesByMonth),
-                    datasets: [{
-                        label: `Monthly Sales (${GCC_COUNTRIES[this.state.selectedCountry].currency})`,
-                        data: Object.values(salesByMonth),
-                        borderColor: '#00d4aa',
-                        backgroundColor: 'rgba(0, 212, 170, 0.1)',
-                        tension: 0.4,
-                        fill: true
-                    }]
-                };
+                const data = this.dashboardChartsData;
+                if (!data) {
+                    return;
+                }
 
-                this.createChart('salesChart', 'line', salesData);
+                const {
+                    workingHoursLabels,
+                    workingHoursData,
+                    oilLevel,
+                    batteryLevel,
+                    temperatureLabels,
+                    temperatureData
+                } = data;
 
-                // Revenue vs Expenses
-                const totalRevenue = this.state.sales.reduce((sum, sale) => sum + sale.total, 0);
-                const totalExpenses = this.state.expenses.reduce((sum, expense) => sum + expense.amount, 0);
+                if (workingHoursLabels && workingHoursLabels.length) {
+                    this.createChart('workingHoursChart', 'bar', {
+                        labels: workingHoursLabels,
+                        datasets: [{
+                            label: 'Hours',
+                            data: workingHoursData,
+                            backgroundColor: workingHoursLabels.map(() => 'rgba(56, 189, 248, 0.45)'),
+                            borderColor: '#38bdf8',
+                            borderWidth: 1,
+                            borderRadius: 8,
+                            borderSkipped: false,
+                            maxBarThickness: 26
+                        }]
+                    }, {
+                        plugins: { legend: { display: false } },
+                        scales: {
+                            x: {
+                                grid: { display: false },
+                                ticks: { color: '#94a3b8', font: { size: 12 } }
+                            },
+                            y: {
+                                beginAtZero: true,
+                                suggestedMax: 12,
+                                grid: { color: 'rgba(148, 163, 184, 0.18)' },
+                                ticks: { color: '#94a3b8', font: { size: 12 } }
+                            }
+                        }
+                    });
+                }
 
-                const financeData = {
-                    labels: ['Revenue', 'Expenses', 'Net Profit'],
-                    datasets: [{
-                        data: [totalRevenue, totalExpenses, totalRevenue - totalExpenses],
-                        backgroundColor: [
-                            'rgba(0, 212, 170, 0.8)',
-                            'rgba(239, 68, 68, 0.8)',
-                            'rgba(59, 130, 246, 0.8)'
-                        ],
-                        borderColor: [
-                            '#00d4aa',
-                            '#ef4444',
-                            '#3b82f6'
-                        ]
-                    }]
-                };
+                if (typeof oilLevel === 'number') {
+                    this.createChart('oilLevelChart', 'doughnut', {
+                        labels: ['Oil Level', 'Remaining'],
+                        datasets: [{
+                            data: [oilLevel, Math.max(0, 100 - oilLevel)],
+                            backgroundColor: ['#38bdf8', 'rgba(15, 23, 42, 0.5)'],
+                            hoverBackgroundColor: ['#38bdf8', 'rgba(15, 23, 42, 0.6)'],
+                            borderWidth: 0
+                        }]
+                    }, {
+                        rotation: -90,
+                        circumference: 180,
+                        cutout: '70%',
+                        plugins: {
+                            legend: { display: false },
+                            tooltip: { enabled: false }
+                        }
+                    });
+                }
 
-                this.createChart('financeChart', 'doughnut', financeData);
+                if (temperatureLabels && temperatureLabels.length) {
+                    this.createChart('temperatureChart', 'line', {
+                        labels: temperatureLabels,
+                        datasets: [{
+                            label: 'Module Temp',
+                            data: temperatureData,
+                            borderColor: '#facc15',
+                            backgroundColor: 'rgba(250, 204, 21, 0.12)',
+                            fill: true,
+                            tension: 0.4,
+                            pointRadius: 0
+                        }]
+                    }, {
+                        plugins: { legend: { display: false } },
+                        scales: {
+                            x: {
+                                grid: { display: false },
+                                ticks: { color: '#94a3b8', font: { size: 12 } }
+                            },
+                            y: {
+                                suggestedMin: 40,
+                                suggestedMax: 100,
+                                grid: { color: 'rgba(148, 163, 184, 0.14)' },
+                                ticks: { color: '#94a3b8', font: { size: 12 } }
+                            }
+                        }
+                    });
+                }
+
+                const oilValue = document.getElementById('oil-level-value');
+                if (oilValue && typeof oilLevel === 'number') {
+                    oilValue.textContent = `${oilLevel}%`;
+                }
+
+                const batteryValue = document.getElementById('battery-level-value');
+                if (batteryValue && typeof batteryLevel === 'number') {
+                    batteryValue.textContent = `${batteryLevel}%`;
+                }
+
+                const batteryBar = document.querySelector('.battery-level');
+                if (batteryBar && typeof batteryLevel === 'number') {
+                    batteryBar.style.width = `${batteryLevel}%`;
+                    if (batteryLevel < 35) {
+                        batteryBar.classList.add('low');
+                    } else {
+                        batteryBar.classList.remove('low');
+                    }
+                }
             },
 
             // REPLACE your current downloadInvoice function with this one.
@@ -4836,9 +4910,7 @@ getSidebar() {
     `;
 },
 
-
-
-         getDashboardView() {
+        getDashboardView() {
                 const { currentUser, users, sales, expenses, products, customers } = this.state;
                 let filteredSales, filteredExpenses;
 
@@ -4850,303 +4922,398 @@ getSidebar() {
                     const workerIds = users.filter(u => u.role === 'worker').map(u => u.id);
                     const managedUserIds = [currentUser.id, ...workerIds];
                     filteredSales = sales.filter(s => managedUserIds.includes(s.salesPersonId));
-                    // Check for the new createdByUserId property, fallback to old addedBy
                     filteredExpenses = expenses.filter(e => managedUserIds.includes(e.createdByUserId || e.addedBy));
-                } else { // worker
+                } else {
                     filteredSales = sales.filter(s => s.salesPersonId === currentUser.id);
-                    // Check for the new createdByUserId property, fallback to old addedBy
                     filteredExpenses = expenses.filter(e => (e.createdByUserId || e.addedBy) === currentUser.id);
                 }
                 // --- END DATA SCOPING ---
 
-                const totalRevenue = filteredSales.reduce((sum, s) => sum + s.total, 0);
-                const totalExpensesVal = filteredExpenses.reduce((sum, e) => sum + e.amount, 0);
+                const totalRevenue = filteredSales.reduce((sum, s) => sum + (s.total || 0), 0);
+                const totalExpensesVal = filteredExpenses.reduce((sum, e) => sum + (e.amount || 0), 0);
                 const netProfit = totalRevenue - totalExpensesVal;
                 const lowStockProducts = products.filter(p => p.stock <= this.state.lowStockThreshold);
                 const recentSales = filteredSales.slice(-5).reverse();
+                const totalInventoryValue = products.reduce((sum, p) => sum + (p.price * p.stock), 0);
 
                 const monthlySalary = (currentUser.salary / 12) || 0;
                 const totalEarnings = monthlySalary + (currentUser.commission || 0);
-                const totalInventoryValue = products.reduce((sum, p) => sum + (p.price * p.stock), 0);
-                
-                // Using the filtered data for calculations
-                const totalProducts = this.state.products.length;
-                const totalCustomers = this.state.customers.length;
-                const totalSalesCount = filteredSales.length;
+
+                const parseDate = (value) => {
+                    if (!value) return null;
+                    const parsed = new Date(value);
+                    return Number.isNaN(parsed.getTime()) ? null : parsed;
+                };
+
+                const now = new Date();
+                const dayMs = 24 * 60 * 60 * 1000;
+                const workingHoursLabels = [];
+                const workingHoursData = [];
+
+                for (let i = 6; i >= 0; i--) {
+                    const day = new Date(now.getTime() - i * dayMs);
+                    const label = day.toLocaleDateString(undefined, { weekday: 'short' });
+                    const dayKey = day.toISOString().slice(0, 10);
+                    let daySalesCount = 0;
+
+                    filteredSales.forEach(sale => {
+                        const saleDate = parseDate(sale.date);
+                        if (!saleDate) return;
+                        if (saleDate.toISOString().slice(0, 10) === dayKey) {
+                            daySalesCount += 1;
+                        }
+                    });
+
+                    const hours = Math.min(12, daySalesCount * 1.75 + (daySalesCount > 0 ? 4 : 2));
+                    workingHoursLabels.push(label);
+                    workingHoursData.push(parseFloat(hours.toFixed(1)));
+                }
+
+                const weeklyWorkingHours = workingHoursData.reduce((sum, hours) => sum + hours, 0);
+                const averageWorkingHours = workingHoursData.length ? (weeklyWorkingHours / workingHoursData.length) : 0;
+                const todaysHours = workingHoursData.length ? workingHoursData[workingHoursData.length - 1] : 0;
+
+                const oilLevel = Math.max(35, Math.min(95, Math.round((totalRevenue / (totalRevenue + totalExpensesVal + 1)) * 100)));
+                const salaryBaseline = monthlySalary > 0 ? monthlySalary : 1200;
+                const batteryLevel = Math.max(25, Math.min(100, Math.round(((currentUser.commission || 0) + monthlySalary) / salaryBaseline * 80)));
+
+                const alertPenalty = Math.min(35, lowStockProducts.length * 6);
+                const profitBoost = netProfit >= 0 ? Math.min(15, Math.round((netProfit / (totalRevenue + 1)) * 40)) : -12;
+                const machineHealth = Math.max(45, Math.min(100, Math.round((oilLevel * 0.45) + (batteryLevel * 0.35) + 20 - alertPenalty + profitBoost)));
+                const systemStatus = machineHealth > 80 ? 'Optimal' : machineHealth > 60 ? 'Stable' : 'Attention';
+                const uptimeScore = Math.round(Math.min(100, (weeklyWorkingHours / ((workingHoursData.length || 1) * 12)) * 100));
+                const activeAlerts = lowStockProducts.length + (netProfit < 0 ? 1 : 0);
+
+                const weekWindow = now.getTime() - 6 * dayMs;
+                const weekSales = filteredSales.filter(sale => {
+                    const saleDate = parseDate(sale.date);
+                    return saleDate ? saleDate.getTime() >= weekWindow : false;
+                });
+                const weekRevenue = weekSales.reduce((sum, sale) => sum + (sale.total || 0), 0);
+
+                const weekExpenses = filteredExpenses.filter(expense => {
+                    const expenseDate = parseDate(expense.date);
+                    return expenseDate ? expenseDate.getTime() >= weekWindow : false;
+                });
+                const weekExpenseValue = weekExpenses.reduce((sum, expense) => sum + (expense.amount || 0), 0);
+
+                const energyUsage = Math.max(18, Math.min(92, Math.round((weekExpenseValue / (weekRevenue + 1)) * 80 + 18)));
+
+                const productSalesMap = {};
+                filteredSales.forEach(sale => {
+                    (sale.items || []).forEach(item => {
+                        const productId = item.productId;
+                        const qty = item.quantity || 0;
+                        productSalesMap[productId] = (productSalesMap[productId] || 0) + qty;
+                    });
+                });
+                const topProductEntry = Object.entries(productSalesMap).sort((a, b) => b[1] - a[1])[0];
+                const topProduct = topProductEntry ? products.find(p => p.id === parseInt(topProductEntry[0])) : null;
+                const topProductName = topProduct ? topProduct.name : (products[0] ? products[0].name : 'Inventory Ready');
+
+                const temperatureLabels = [];
+                const temperatureData = [];
+                for (let i = 9; i >= 0; i--) {
+                    const day = new Date(now.getTime() - i * dayMs);
+                    const dayLabel = day.toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
+                    const dayKey = day.toISOString().slice(0, 10);
+                    const dayRevenue = filteredSales.reduce((sum, sale) => {
+                        const saleDate = parseDate(sale.date);
+                        if (!saleDate) return sum;
+                        return saleDate.toISOString().slice(0, 10) === dayKey ? sum + (sale.total || 0) : sum;
+                    }, 0);
+                    const baseline = 62 + Math.min(28, dayRevenue / 300);
+                    const adjustment = netProfit < 0 ? -6 : 0;
+                    const temperature = Math.max(48, Math.min(96, Math.round(baseline + adjustment - lowStockProducts.length)));
+                    temperatureLabels.push(dayLabel);
+                    temperatureData.push(temperature);
+                }
+
+                const insights = inboxNotifications.slice(0, 3);
+                const criticalInventory = lowStockProducts.slice(0, 4);
+
+                const machineId = `CAM-NX ${String(currentUser.id).padStart(3, '0')}`;
+                const topCustomerName = (() => {
+                    if (!recentSales.length) return 'Customer Ready';
+                    const customer = customers.find(c => c.id === recentSales[0].customerId);
+                    return customer ? customer.name : 'Customer Ready';
+                })();
+
+                this.dashboardChartsData = {
+                    workingHoursLabels,
+                    workingHoursData,
+                    oilLevel,
+                    batteryLevel,
+                    temperatureLabels,
+                    temperatureData,
+                    weeklyWorkingHours,
+                    averageWorkingHours,
+                    todaysHours
+                };
 
                 return `
-                    <div class="space-y-6 fade-in">
-                        <div class="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4">
-                            <div>
-                                <h2 class="text-2xl lg:text-3xl font-bold text-white mb-2">AI-Powered Dashboard</h2>
-                                <p class="text-gray-400">Welcome back, ${currentUser.name}!</p>
+                    <div class="owlio-dashboard fade-in">
+                        <div class="dashboard-main">
+                            <div class="dashboard-top">
+                                <div>
+                                    <p class="dashboard-kicker">Operations Command</p>
+                                    <h2 class="dashboard-title">Owlio Control Surface</h2>
+                                    <p class="dashboard-subtitle">System status: <span class="status-pill status-${systemStatus.toLowerCase()}">${systemStatus}</span></p>
+                                </div>
+                                <div class="dashboard-actions">
+                                    ${['admin', 'manager'].includes(this.state.currentUser.role) ? this.getCountrySelector() : ''}
+                                    <button data-action="refresh-ai" class="${this.state.aiMode === 'ai' ? 'ai-button' : 'bot-button'} dashboard-refresh">
+                                        <i class="fas fa-arrows-rotate"></i>
+                                        Refresh AI
+                                    </button>
+                                </div>
                             </div>
-                            <div class="flex items-center space-x-3">
-                                ${['admin', 'manager'].includes(this.state.currentUser.role) ? this.getCountrySelector() : ''}
-                                <button data-action="refresh-ai" class="${this.state.aiMode === 'ai' ? 'ai-button' : 'bot-button'} px-4 py-2 rounded-xl font-medium">
-                                    <i class="fas fa-sync-alt mr-2"></i>Refresh AI
-                                </button>
-                            </div>
-                        </div>
 
-                        ${['worker', 'manager'].includes(currentUser.role) ? `
-                            <div class="perplexity-card p-6 slide-up">
-                                <div class="flex items-center justify-between mb-4">
-                                    <h3 class="text-xl font-bold text-white flex items-center">
-                                        <i class="fas fa-coins text-teal-400 mr-2"></i>
-                                        Live Earnings
-                                    </h3>
-                                    <div class="flex items-center space-x-2">
-                                        <div class="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
-                                        <span class="text-sm text-green-400 font-medium">LIVE</span>
-                                    </div>
+                            <div class="dashboard-metric-grid">
+                                <div class="dashboard-metric-card metric-blue">
+                                    <div class="metric-label">Total Revenue</div>
+                                    <div class="metric-value animated-number" data-target="${totalRevenue}" data-format="currency">${this.formatCurrency(0)}</div>
+                                    <div class="metric-subtext">${weekSales.length} deals this week</div>
                                 </div>
-                                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                                    <div class="text-center p-4 bg-gradient-to-r from-green-500/10 to-emerald-500/10 rounded-xl border border-green-500/20">
-                                        <div class="text-green-400 text-2xl mb-2">SAL</div>
-                                        <p class="text-gray-400 text-sm mb-2">Monthly Salary</p>
-                                        <p class="text-lg font-bold text-green-400 animated-number" data-target="${monthlySalary}" data-format="currency">${this.formatCurrency(0)}</p>
-                                    </div>
-                                    <div class="text-center p-4 bg-gradient-to-r from-blue-500/10 to-cyan-500/10 rounded-xl border border-blue-500/20">
-                                        <div class="text-blue-400 text-2xl mb-2">COM</div>
-                                        <p class="text-gray-400 text-sm mb-2">Commission</p>
-                                        <p class="text-lg font-bold text-blue-400 animated-number" data-target="${currentUser.commission || 0}" data-format="currency">${this.formatCurrency(0)}</p>
-                                    </div>
-                                    <div class="text-center p-4 bg-gradient-to-r from-teal-500/10 to-blue-500/10 rounded-xl border border-teal-500/20">
-                                        <div class="text-teal-400 text-2xl mb-2">TOT</div>
-                                        <p class="text-gray-400 text-sm mb-2">Total Earnings</p>
-                                        <p class="text-xl font-bold text-teal-400 animated-number" data-target="${totalEarnings}" data-format="currency">${this.formatCurrency(0)}</p>
-                                    </div>
+                                <div class="dashboard-metric-card metric-purple">
+                                    <div class="metric-label">Net Profit</div>
+                                    <div class="metric-value animated-number" data-target="${netProfit}" data-format="currency">${this.formatCurrency(0)}</div>
+                                    <div class="metric-subtext ${netProfit >= 0 ? 'text-positive' : 'text-negative'}">${netProfit >= 0 ? 'Profitable flow' : 'Review spending'}</div>
+                                </div>
+                                <div class="dashboard-metric-card metric-gold">
+                                    <div class="metric-label">Inventory Value</div>
+                                    <div class="metric-value animated-number" data-target="${totalInventoryValue}" data-format="currency">${this.formatCurrency(0)}</div>
+                                    <div class="metric-subtext">Top mover: ${topProductName}</div>
+                                </div>
+                                <div class="dashboard-metric-card metric-green">
+                                    <div class="metric-label">Machine Health</div>
+                                    <div class="metric-value">${machineHealth}%</div>
+                                    <div class="metric-subtext">Uptime ${uptimeScore}%</div>
                                 </div>
                             </div>
-                        ` : ''}
 
-                        <div class="responsive-grid-6">
-                            <div class="perplexity-card p-4 hover:scale-105 transition-all duration-300 slide-up">
-                                <div class="flex items-center justify-between">
-                                    <div>
-                                        <p class="text-gray-400 text-sm mb-1">Products</p>
-                                        <p class="text-2xl font-bold text-white animated-number" data-target="${totalProducts}" data-format="integer">${0}</p>
+                            <div class="dashboard-status-grid">
+                                <div class="perplexity-card machine-card">
+                                    <div class="card-header">
+                                        <div>
+                                            <h3>Machine Info</h3>
+                                            <p>CAM Guardian module overview</p>
+                                        </div>
+                                        <span class="status-pill status-${systemStatus.toLowerCase()}">${systemStatus}</span>
                                     </div>
-                                    <div class="w-10 h-10 bg-blue-500/20 rounded-xl flex items-center justify-center"><i class="fas fa-box text-blue-400"></i></div>
-                                </div>
-                            </div>
-                            
-                            <div class="perplexity-card p-4 hover:scale-105 transition-all duration-300 slide-up">
-                                <div class="flex items-center justify-between">
-                                    <div>
-                                        <p class="text-gray-400 text-sm mb-1">Customers</p>
-                                        <p class="text-2xl font-bold text-white animated-number" data-target="${totalCustomers}" data-format="integer">${0}</p>
+                                    <div class="machine-stats">
+                                        <div>
+                                            <span class="stat-label">Machine ID</span>
+                                            <p class="stat-value">${machineId}</p>
+                                        </div>
+                                        <div>
+                                            <span class="stat-label">Operator</span>
+                                            <p class="stat-value">${currentUser.name}</p>
+                                        </div>
+                                        <div>
+                                            <span class="stat-label">Top Client</span>
+                                            <p class="stat-value">${topCustomerName}</p>
+                                        </div>
+                                        <div>
+                                            <span class="stat-label">Active Alerts</span>
+                                            <p class="stat-value">${activeAlerts}</p>
+                                        </div>
                                     </div>
-                                    <div class="w-10 h-10 bg-green-500/20 rounded-xl flex items-center justify-center"><i class="fas fa-users text-green-400"></i></div>
-                                </div>
-                            </div>
-                            
-                            <div class="perplexity-card p-4 hover:scale-105 transition-all duration-300 slide-up">
-                                <div class="flex items-center justify-between">
-                                    <div>
-                                        <p class="text-gray-400 text-sm mb-1">Sales</p>
-                                        <p class="text-2xl font-bold text-white animated-number" data-target="${totalSalesCount}" data-format="integer">${0}</p>
+                                    <div class="mini-chart">
+                                        <div class="mini-chart-header">
+                                            <span>Working Hours</span>
+                                            <span>${weeklyWorkingHours.toFixed(1)}h / wk</span>
+                                        </div>
+                                        <div class="mini-chart-body">
+                                            <canvas id="workingHoursChart"></canvas>
+                                        </div>
+                                        <div class="mini-chart-footer">
+                                            <span>Avg ${averageWorkingHours.toFixed(1)}h</span>
+                                            <span>${todaysHours.toFixed(1)}h today</span>
+                                        </div>
                                     </div>
-                                    <div class="w-10 h-10 bg-purple-500/20 rounded-xl flex items-center justify-center"><i class="fas fa-shopping-cart text-purple-400"></i></div>
                                 </div>
-                            </div>
-                            
-                            <div class="perplexity-card p-4 hover:scale-105 transition-all duration-300 slide-up">
-                                <div class="flex items-center justify-between">
-                                    <div>
-                                        <p class="text-gray-400 text-sm mb-1">Revenue</p>
-                                        <p class="text-lg font-bold text-green-400 animated-number" data-target="${totalRevenue}" data-format="currency">${this.formatCurrency(0, false)}</p>
-                                    </div>
-                                    <div class="w-10 h-10 bg-green-500/20 rounded-xl flex items-center justify-center"><i class="fas fa-arrow-up text-green-400"></i></div>
-                                </div>
-                            </div>
-                            
-                            <div class="perplexity-card p-4 hover:scale-105 transition-all duration-300 slide-up">
-                                <div class="flex items-center justify-between">
-                                    <div>
-                                        <p class="text-gray-400 text-sm mb-1">Net Profit</p>
-                                        <p class="text-xl font-bold ${netProfit >= 0 ? 'text-blue-400' : 'text-red-400'} animated-number" data-target="${netProfit}" data-format="currency">${this.formatCurrency(0, false)}</p>
-                                    </div>
-                                    <div class="w-10 h-10 ${netProfit >= 0 ? 'bg-blue-500/20' : 'bg-red-500/20'} rounded-xl flex items-center justify-center"><i class="fas fa-chart-line ${netProfit >= 0 ? 'text-blue-400' : 'text-red-400'}"></i></div>
-                                </div>
-                            </div>
-                            <div class="perplexity-card p-4 hover:scale-105 transition-all duration-300 slide-up">
-                                <div class="flex items-center justify-between">
-                                    <div>
-                                        <p class="text-gray-400 text-sm mb-1">Inventory Value</p>
-                                        <p class="text-lg font-bold text-yellow-400 animated-number" data-target="${totalInventoryValue}" data-format="currency">${this.formatCurrency(0, false)}</p>
-                                    </div>
-                                    <div class="w-10 h-10 bg-yellow-500/20 rounded-xl flex items-center justify-center"><i class="fas fa-boxes text-yellow-400"></i></div>
-                                </div>
-                            </div>
-                        </div>
 
-                        ${this.state.aiInsights.length > 0 ? `
-                            <div class="${this.state.aiMode === 'ai' ? 'ai-card' : 'bot-card'} p-6 slide-up">
-                                <div class="flex items-center justify-between mb-6">
-                                    <h3 class="text-xl font-bold text-white flex items-center">
-    <i class="fas ${this.state.aiMode === 'ai' ? 'fa-brain text-purple-400' : 'fa-robot text-green-400'} mr-2"></i>
-    ${this.state.aiMode === 'ai' ? 'Bubble AI' : 'AccuraBot'} Business Insights
-</h3>
-                                    <div class="px-3 py-1 ${this.state.aiMode === 'ai' ? 'bg-purple-500/20 text-purple-400' : 'bg-green-500/20 text-green-400'} rounded-full text-sm font-medium">
-                                        ${this.state.aiMode === 'ai' ? 'AI Powered' : 'Bot Analysis'}
+                                <div class="perplexity-card gauge-card">
+                                    <div class="card-header">
+                                        <div>
+                                            <h3>Current Oil Level</h3>
+                                            <p>Lubrication integrity</p>
+                                        </div>
+                                        <button class="ghost-button" data-action="tasks">
+                                            <i class="fas fa-eye"></i>
+                                        </button>
                                     </div>
-                                </div>
-                                <div class="grid gap-4">
-                                    ${this.state.aiInsights.map(insight => `
-                                        <div class="bg-gray-800/60 backdrop-filter backdrop-blur-lg p-4 rounded-xl border border-gray-600/50 hover:border-${this.state.aiMode === 'ai' ? 'purple' : 'green'}-500/50 transition-all duration-300 slide-up">
-                                            <div class="flex items-start space-x-4">
-                                                <div class="text-2xl">${insight.icon}</div>
-                                                <div class="flex-1">
-                                                    <h4 class="font-bold text-white mb-2">${insight.title}</h4>
-                                                    <p class="text-gray-300 mb-3 leading-relaxed">${insight.message}</p>
-                                                    <div class="bg-${this.state.aiMode === 'ai' ? 'purple' : 'green'}-500/10 border-l-4 border-${this.state.aiMode === 'ai' ? 'purple' : 'green'}-500 p-3 rounded-r-lg">
-                                                        <p class="text-sm text-${this.state.aiMode === 'ai' ? 'purple' : 'green'}-400 font-medium">Recommendation: ${insight.action}</p>
-                                                    </div>
-                                                </div>
+                                    <div class="gauge-wrapper">
+                                        <div class="gauge-shell">
+                                            <canvas id="oilLevelChart"></canvas>
+                                            <div class="gauge-overlay">
+                                                <span id="oil-level-value">${oilLevel}%</span>
+                                                <p>Filled</p>
                                             </div>
                                         </div>
-                                    `).join('')}
+                                        <div class="gauge-meta">
+                                            <div>
+                                                <span class="stat-label">Target</span>
+                                                <p class="stat-value">82%</p>
+                                            </div>
+                                            <div>
+                                                <span class="stat-label">Last Inspection</span>
+                                                <p class="stat-value">${now.toLocaleDateString()}</p>
+                                            </div>
+                                            <div>
+                                                <span class="stat-label">Cycle Efficiency</span>
+                                                <p class="stat-value">${Math.min(99, Math.max(55, Math.round(averageWorkingHours * 8)))}%</p>
+                                            </div>
+                                        </div>
+                                    </div>
                                 </div>
-                            </div>
-                        ` : ''}
 
-                        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                            <div class="perplexity-card p-6 slide-up">
-                                <h3 class="text-xl font-bold text-white mb-4 flex items-center">
-                                    <i class="fas fa-chart-line text-teal-400 mr-2"></i>
-                                    Sales Performance
-                                </h3>
-                                <div class="chart-container">
-                                    <canvas id="salesChart"></canvas>
+                                <div class="perplexity-card battery-card">
+                                    <div class="card-header">
+                                        <div>
+                                            <h3>Battery State</h3>
+                                            <p>Power reserves</p>
+                                        </div>
+                                        <button class="ghost-button" data-action="accura-ai">
+                                            <i class="fas fa-plug"></i>
+                                        </button>
+                                    </div>
+                                    <div class="battery-meter">
+                                        <div class="battery-level" style="width: ${batteryLevel}%"></div>
+                                    </div>
+                                    <div class="battery-meta">
+                                        <div>
+                                            <span class="stat-label">Charge</span>
+                                            <p class="stat-value" id="battery-level-value">${batteryLevel}%</p>
+                                        </div>
+                                        <div>
+                                            <span class="stat-label">Energy Usage</span>
+                                            <p class="stat-value">${energyUsage}%</p>
+                                        </div>
+                                        <div>
+                                            <span class="stat-label">Monthly Earnings</span>
+                                            <p class="stat-value">${this.formatCurrency(totalEarnings)}</p>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
-                            
-                            <div class="perplexity-card p-6 slide-up">
-                                <h3 class="text-xl font-bold text-white mb-4 flex items-center">
-                                    <i class="fas fa-chart-pie text-blue-400 mr-2"></i>
-                                    Financial Overview
-                                    </h3>
-                                <div class="chart-container">
-                                    <canvas id="financeChart"></canvas>
+
+                            <div class="dashboard-history-grid">
+                                <div class="perplexity-card history-card">
+                                    <div class="card-header">
+                                        <div>
+                                            <h3>History Module Temperature</h3>
+                                            <p>Last 10 readings</p>
+                                        </div>
+                                        <span class="status-chip">${temperatureData[temperatureData.length - 1]}°C</span>
+                                    </div>
+                                    <div class="history-chart">
+                                        <canvas id="temperatureChart"></canvas>
+                                    </div>
+                                    <div class="history-footer">
+                                        <div>
+                                            <span class="stat-label">Peak</span>
+                                            <p class="stat-value">${Math.max(...temperatureData)}°C</p>
+                                        </div>
+                                        <div>
+                                            <span class="stat-label">Low</span>
+                                            <p class="stat-value">${Math.min(...temperatureData)}°C</p>
+                                        </div>
+                                        <div>
+                                            <span class="stat-label">Trend</span>
+                                            <p class="stat-value ${netProfit >= 0 ? 'text-positive' : 'text-negative'}">${netProfit >= 0 ? 'Cooling' : 'Warming'}</p>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                         </div>
-
-                        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                            <div class="perplexity-card p-6 slide-up">
-                                <h3 class="text-xl font-bold text-white mb-4 flex items-center">
-                                    <i class="fas fa-bolt text-yellow-400 mr-2"></i>
-                                    Quick Actions
-                                </h3>
-                                <div class="grid grid-cols-2 gap-4">
-                                    <button data-action="add-sale" class="perplexity-button p-4 rounded-xl text-center hover:scale-105 transition-all duration-300">
-                                        <i class="fas fa-plus text-xl mb-2"></i>
-                                        <div class="font-medium">New Sale</div>
-                                        <div class="text-xs opacity-80 mt-1">Multi-product</div>
-                                    </button>
-                                    <button data-action="add-expense" class="expenses-button p-4 rounded-xl text-center hover:scale-105 transition-all duration-300">
-                                        <i class="fas fa-receipt text-xl mb-2"></i>
-                                        <div class="font-medium">Add Expense</div>
-                                        <div class="text-xs opacity-80 mt-1">Track costs</div>
-                                    </button>
-                                    ${this.canManageProducts() ? `
-                                        <button data-action="add-product" class="ai-button p-4 rounded-xl text-center hover:scale-105 transition-all duration-300">
-                                            <i class="fas fa-box text-xl mb-2"></i>
-                                            <div class="font-medium">Add Product</div>
-                                            <div class="text-xs opacity-80 mt-1">Expand inventory</div>
-                                        </button>
-                                    ` : ''}
-                                    <button data-action="add-customer" class="bot-button p-4 rounded-xl text-center hover:scale-105 transition-all duration-300">
-                                        <i class="fas fa-user-plus text-xl mb-2"></i>
-                                        <div class="font-medium">New Customer</div>
-                                        <div class="text-xs opacity-80 mt-1">Grow base</div>
-                                    </button>
+                        <aside class="dashboard-side">
+                            <div class="object-browser-card perplexity-card">
+                                <div class="object-browser-menu">
+                                    <button class="active">Design</button>
+                                    <button>Object Directory</button>
+                                    <button>AI Widgets</button>
                                 </div>
-                            </div>
+                                <div class="object-browser-content">
+                                    <section class="object-browser-section">
+                                        <h4>Properties</h4>
+                                        <div class="object-browser-item">
+                                            <span>Machine Health</span>
+                                            <span>${machineHealth}%</span>
+                                        </div>
+                                        <div class="object-browser-item">
+                                            <span>Uptime Score</span>
+                                            <span>${uptimeScore}%</span>
+                                        </div>
+                                        <div class="object-browser-item">
+                                            <span>Active Alerts</span>
+                                            <span>${activeAlerts}</span>
+                                        </div>
+                                        <div class="object-browser-item">
+                                            <span>Unread Signals</span>
+                                            <span>${this.getUnreadMessageCount()}</span>
+                                        </div>
+                                    </section>
 
-                            <div class="perplexity-card p-6 slide-up">
-                                <h3 class="text-xl font-bold text-white mb-4 flex items-center">
-                                    <i class="fas fa-clock text-blue-400 mr-2"></i>
-                                    Recent Activity
-                                </h3>
-                                ${recentSales.length > 0 ? `
-                                    <div class="space-y-3">
-                                        ${recentSales.map(sale => {
-                                            const customer = this.state.customers.find(c => c.id === sale.customerId);
-                                            const itemSummary = sale.items.length > 1 ? `${sale.items.length} items` : `${sale.items[0].quantity} x ${this.state.products.find(p => p.id === sale.items[0].productId)?.name}`;
-                                            return `
-                                                <div class="flex justify-between items-center p-3 bg-gray-800/50 rounded-xl border border-gray-600/30 hover:border-teal-500/50 transition-all duration-300">
-                                                    <div class="flex items-center space-x-3">
-                                                        <div class="w-8 h-8 bg-gradient-to-r from-teal-500 to-blue-500 rounded-lg flex items-center justify-center">
-                                                            <i class="fas fa-shopping-bag text-white text-sm"></i>
-                                                        </div>
+                                    <section class="object-browser-section">
+                                        <h4>Object Inspector Widgets</h4>
+                                        ${criticalInventory.length ? `
+                                            <ul class="object-inventory">
+                                                ${criticalInventory.map(product => `
+                                                    <li>
+                                                        <span>${product.name}</span>
+                                                        <span>${product.stock} left</span>
+                                                    </li>
+                                                `).join('')}
+                                            </ul>
+                                        ` : `
+                                            <p class="empty-state">Inventory balanced. No alerts.</p>
+                                        `}
+                                    </section>
+
+                                    <section class="object-browser-section">
+                                        <h4>Recent Signals</h4>
+                                        <div class="object-browser-feed">
+                                            ${insights.map(notification => `
+                                                <div class="object-feed-item">
+                                                    <span class="dot ${notification.color?.replace('text-', 'bg-') || 'bg-blue-500'}"></span>
+                                                    <div>
+                                                        <p class="feed-title">${notification.username}</p>
+                                                        <p class="feed-body">${notification.content}</p>
+                                                    </div>
+                                                </div>
+                                            `).join('')}
+                                            ${recentSales.slice(0, 3).map(sale => {
+                                                const customer = customers.find(c => c.id === sale.customerId);
+                                                const label = customer ? customer.name : 'Customer';
+                                                return `
+                                                    <div class="object-feed-item">
+                                                        <span class="dot bg-green-500"></span>
                                                         <div>
-                                                            <p class="text-white font-medium text-sm">${itemSummary}</p>
-                                                            <p class="text-gray-400 text-xs">${customer ? customer.name : 'Customer'}</p>
+                                                            <p class="feed-title">Sale • ${label}</p>
+                                                            <p class="feed-body">${this.formatCurrency(sale.total)} total</p>
                                                         </div>
                                                     </div>
-                                                    <div class="text-right">
-                                                        <p class="text-white font-bold">${this.formatCurrency(sale.total)}</p>
-                                                        <button data-action="generate-invoice" data-id="${sale.id}" class="text-teal-400 hover:text-teal-300 text-xs">
-                                                            <i class="fas fa-file-invoice mr-1"></i>Invoice
-                                                        </button>
-                                                    </div>
-                                                </div>
-                                            `;
-                                        }).join('')}
-                                    </div>
-                                ` : `
-                                    <div class="text-center py-8 text-gray-400">
-                                        <i class="fas fa-chart-line text-3xl mb-3 opacity-50"></i>
-                                        <p class="mb-2">No recent sales</p>
-                                        <button data-action="add-sale" class="perplexity-button px-4 py-2 rounded-xl">
-                                            <i class="fas fa-plus mr-2"></i>Record Sale
+                                                `;
+                                            }).join('')}
+                                        </div>
+                                    </section>
+
+                                    <div class="object-browser-footer">
+                                        <button data-action="products" class="perplexity-button">
+                                            <i class="fas fa-box-open"></i>
+                                            Manage Inventory
                                         </button>
                                     </div>
-                                `}
-                            </div>
-                        </div>
-
-                        ${lowStockProducts.length > 0 ? `
-                            <div class="perplexity-card p-6 border-l-4 border-red-500 bg-gradient-to-r from-red-500/10 to-transparent slide-up">
-                                <div class="flex items-center justify-between mb-4">
-                                    <h3 class="text-xl font-bold text-white flex items-center">
-                                        <i class="fas fa-exclamation-triangle text-red-400 mr-2 animate-pulse"></i>
-                                        Stock Alert
-                                    </h3>
-                                    <span class="px-3 py-1 bg-red-500/20 text-red-400 rounded-full text-sm font-medium">
-                                        ${lowStockProducts.length} Items
-                                    </span>
-                                </div>
-                                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
-                                    ${lowStockProducts.slice(0, 6).map(product => `
-                                        <div class="bg-red-500/10 border border-red-500/30 rounded-xl p-3 hover:border-red-500/50 transition-all duration-300">
-                                            <div class="flex items-center justify-between">
-                                                <div>
-                                                    <p class="text-white font-medium text-sm">${product.name}</p>
-                                                    <p class="text-red-400 text-sm font-bold">${product.stock} left</p>
-                                                </div>
-                                                <div class="text-red-400 text-xl">
-                                                    <i class="fas fa-exclamation-triangle"></i>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    `).join('')}
-                                </div>
-                                <div class="mt-4 text-center">
-                                    <button data-action="products" class="perplexity-button px-4 py-2 rounded-xl">
-                                        <i class="fas fa-box mr-2"></i>Manage Inventory
-                                    </button>
                                 </div>
                             </div>
-                        ` : ''}
+                        </aside>
                     </div>
                 `;
             },
 
-            getCountrySelector() {
+        getCountrySelector() {
                 return `
                     <div class="flex items-center space-x-2">
                         <label class="text-sm text-gray-400 font-medium hidden sm:inline">Country:</label>
