@@ -68,40 +68,35 @@ const salesGlowPlugin = {
         if (!datasetMeta || datasetMeta.hidden) return;
 
         const ctx = chart.ctx;
-        const now = performance.now();
+        const baseRadius = pluginOptions.baseRadius || 5;
+        const glowSpread = pluginOptions.glowRadius || 4;
 
-        datasetMeta.data.forEach((point, index) => {
+        datasetMeta.data.forEach((point) => {
             const position = point.tooltipPosition();
-            const pulse = (Math.sin((now / (pluginOptions.speed || 1200)) + index) + 1) / 2;
-            const radius = (pluginOptions.baseRadius || 4) + pulse * (pluginOptions.pulseRadius || 3);
+            const radius = baseRadius;
+            const outerRadius = radius + glowSpread;
 
             ctx.save();
             ctx.beginPath();
-            ctx.arc(position.x, position.y, radius, 0, Math.PI * 2);
+            ctx.arc(position.x, position.y, outerRadius, 0, Math.PI * 2);
 
-            const glowGradient = ctx.createRadialGradient(position.x, position.y, radius * 0.2, position.x, position.y, radius);
+            const glowGradient = ctx.createRadialGradient(
+                position.x,
+                position.y,
+                radius * 0.4,
+                position.x,
+                position.y,
+                outerRadius
+            );
             glowGradient.addColorStop(0, pluginOptions.pointColor || '#facc15');
             glowGradient.addColorStop(1, 'rgba(250, 204, 21, 0)');
 
             ctx.fillStyle = glowGradient;
             ctx.shadowColor = pluginOptions.glowColor || 'rgba(250, 204, 21, 0.45)';
-            ctx.shadowBlur = 12 + pulse * 10;
+            ctx.shadowBlur = pluginOptions.shadowBlur ?? 16;
             ctx.fill();
             ctx.restore();
         });
-
-        if (!chart.$salesGlowFrame) {
-            chart.$salesGlowFrame = requestAnimationFrame(() => {
-                chart.$salesGlowFrame = null;
-                chart.draw();
-            });
-        }
-    },
-    beforeDestroy(chart) {
-        if (chart.$salesGlowFrame) {
-            cancelAnimationFrame(chart.$salesGlowFrame);
-            chart.$salesGlowFrame = null;
-        }
     }
 };
 
@@ -205,8 +200,8 @@ function createSalesPerformanceChart(ctx, labels, values, datasetLabel, currency
                     glowColor: 'rgba(250, 204, 21, 0.45)',
                     pointColor: '#facc15',
                     baseRadius: 4,
-                    pulseRadius: 3,
-                    speed: 1200
+                    glowRadius: 3,
+                    shadowBlur: 18
                 }
             },
             animations: {
@@ -722,6 +717,7 @@ nboxNotificationInterval: null,
     const savedTheme = DataStorage.load('OwlioTheme') || 'dark-theme'; // Default to dark
     this.setTheme(savedTheme);
     this.render();
+    this.setupViewportObservers();
     this.bindEvents();
     this.updateAIInsights();
     this.updateBotAnalysis();
@@ -758,7 +754,7 @@ nboxNotificationInterval: null,
                 this.state.mobileMenuOpen = !this.state.mobileMenuOpen;
                 const sidebar = document.getElementById('mobile-sidebar');
                 const overlay = document.getElementById('sidebar-overlay');
-                
+
                 if (this.state.mobileMenuOpen) {
                     sidebar?.classList.add('open');
                     overlay?.classList.add('open');
@@ -766,15 +762,53 @@ nboxNotificationInterval: null,
                     sidebar?.classList.remove('open');
                     overlay?.classList.remove('open');
                 }
+
+                if (document?.body) {
+                    document.body.classList.toggle('no-scroll', this.state.mobileMenuOpen);
+                }
             },
 
             closeMobileSidebar() {
                 this.state.mobileMenuOpen = false;
                 const sidebar = document.getElementById('mobile-sidebar');
                 const overlay = document.getElementById('sidebar-overlay');
-                
+
                 sidebar?.classList.remove('open');
                 overlay?.classList.remove('open');
+
+                if (document?.body) {
+                    document.body.classList.remove('no-scroll');
+                }
+            },
+
+            setupViewportObservers() {
+                if (!this.boundViewportHandler) {
+                    this.boundViewportHandler = () => this.handleViewportChange();
+                }
+
+                this.handleViewportChange();
+
+                if (!this.viewportObserversAttached) {
+                    window.addEventListener('resize', this.boundViewportHandler, { passive: true });
+                    window.addEventListener('orientationchange', this.boundViewportHandler);
+                    this.viewportObserversAttached = true;
+                }
+            },
+
+            handleViewportChange() {
+                this.applyPerformanceMode();
+
+                if (window.innerWidth >= 1024 && this.state.mobileMenuOpen) {
+                    this.closeMobileSidebar();
+                }
+            },
+
+            applyPerformanceMode() {
+                const body = document?.body;
+                if (!body || typeof window === 'undefined' || !window.matchMedia) return;
+
+                const reduceEffects = window.matchMedia('(max-width: 768px)').matches;
+                body.classList.toggle('performance-mode', reduceEffects);
             },
 
             updateAIInsights() {

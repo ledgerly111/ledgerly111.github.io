@@ -415,6 +415,72 @@
             opacity: 0;
             visibility: hidden;
             transition: all 0.3s ease;
+            pointer-events: none;
+        }
+
+        body.no-scroll {
+            overflow: hidden;
+        }
+
+        body.performance-mode {
+            background-color: var(--bg-primary);
+        }
+
+        body.performance-mode .navbar,
+        body.performance-mode .mobile-sidebar,
+        body.performance-mode .desktop-sidebar,
+        body.performance-mode .glass-panel,
+        body.performance-mode .dashboard-hero,
+        body.performance-mode .stat-card,
+        body.performance-mode .metric-card,
+        body.performance-mode .quick-action-card,
+        body.performance-mode .ai-card,
+        body.performance-mode .ai-response-card,
+        body.performance-mode .timeline-card,
+        body.performance-mode .kanban-column,
+        body.performance-mode .kanban-card,
+        body.performance-mode .modal-content,
+        body.performance-mode .notification,
+        body.performance-mode .summary-card,
+        body.performance-mode .report-card,
+        body.performance-mode .quick-sale-step-container,
+        body.performance-mode .quick-sale-review,
+        body.performance-mode .quick-sale-actions,
+        body.performance-mode .branch-card,
+        body.performance-mode .inbox-thread,
+        body.performance-mode .ai-insight-card,
+        body.performance-mode .sales-performance-card,
+        body.performance-mode .finance-card,
+        body.performance-mode .kanban-board,
+        body.performance-mode .task-card,
+        body.performance-mode .card,
+        body.performance-mode .info-card,
+        body.performance-mode .performance-card,
+        body.performance-mode .report-widget {
+            backdrop-filter: none !important;
+            -webkit-backdrop-filter: none !important;
+            box-shadow: none !important;
+        }
+
+        body.performance-mode .navbar,
+        body.performance-mode .mobile-sidebar,
+        body.performance-mode .desktop-sidebar,
+        body.performance-mode .glass-panel,
+        body.performance-mode .dashboard-hero,
+        body.performance-mode .stat-card,
+        body.performance-mode .quick-action-card,
+        body.performance-mode .ai-card,
+        body.performance-mode .ai-response-card,
+        body.performance-mode .modal-content,
+        body.performance-mode .notification,
+        body.performance-mode .quick-sale-step-container,
+        body.performance-mode .quick-sale-review,
+        body.performance-mode .quick-sale-actions,
+        body.performance-mode .task-card,
+        body.performance-mode .summary-card,
+        body.performance-mode .report-card,
+        body.performance-mode .report-widget {
+            background: var(--bg-secondary, rgba(11, 18, 32, 0.92)) !important;
         }
  
         /* === NEW CSS FOR QUICK SALE === */
@@ -712,6 +778,7 @@
         .sidebar-overlay.open {
             opacity: 1;
             visibility: visible;
+            pointer-events: auto;
         }
 
         /* Desktop Sidebar */
