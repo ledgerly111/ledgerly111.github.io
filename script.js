@@ -5004,13 +5004,16 @@ getSidebar() {
 
     const sidebarContent = `
         <div class="p-6">
-            <div class="flex items-center mb-8">
-              <div id="sidebar-logo-container" class="animated-header-container">
+            <div class="flex items-center justify-between gap-4 mb-8">
+              <div class="flex items-center gap-3 animated-header-container" id="sidebar-logo-container">
                 <span class="material-symbols-outlined owl-logo-icon">owl</span>
                 <h1 class="animated-header text-2xl font-bold">
                     <span style="--i:1">O</span><span style="--i:2">w</span><span style="--i:3">l</span><span style="--i:4">i</span><span style="--i:5">o</span>
                 </h1>
               </div>
+              <button type="button" class="mobile-sidebar-close" data-action="toggle-mobile-menu" aria-label="Close navigation">
+                <span class="material-symbols-outlined text-xl">close</span>
+              </button>
             </div>
             <h3 class="text-sm font-semibold text-gray-400 uppercase tracking-wider mb-3">Navigation</h3>
             <ul class="space-y-2">

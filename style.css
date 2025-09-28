@@ -86,6 +86,7 @@
     --gold-color: #fbbf24;
     --quick-sale-bg: #0b1120;
     --quick-sale-accent: #38bdf8;
+    --mobile-sidebar-width: min(320px, 82vw);
 }
 
 
@@ -389,8 +390,8 @@
        .mobile-sidebar {
     position: fixed;
     top: 0;
-    left: -280px;
-    width: 280px;
+    left: calc(var(--mobile-sidebar-width) * -1);
+    width: var(--mobile-sidebar-width);
     height: 100vh;
     background: linear-gradient(160deg, rgba(11, 18, 32, 0.95) 0%, rgba(15, 23, 42, 0.7) 100%);
     backdrop-filter: blur(18px);
@@ -399,18 +400,31 @@
     transition: left 0.3s ease;
     z-index: 2000;
     overflow-y: auto;
+    box-shadow: 18px 0 45px rgba(2, 6, 23, 0.55);
 }
+ codex/refactor-salesglowplugin-for-performance-w0usoc
         .mobile-sidebar.open {
             left: 0;
         }
 
+
+        .mobile-sidebar.open {
+            left: 0;
+        }
+
+main
         .sidebar-overlay {
             position: fixed;
             top: 0;
             left: 0;
+codex/refactor-salesglowplugin-for-performance-w0usoc
+            right: 0;
+            height: 100%;
+            background: rgba(2, 6, 23, 0.55);
+
             width: 100%;
             height: 100%;
-            background: rgba(0, 0, 0, 0.5);
+            background: rgba(0, 0, 0, 0.5); main
             z-index: 1999;
             opacity: 0;
             visibility: hidden;
@@ -779,6 +793,9 @@
             opacity: 1;
             visibility: visible;
             pointer-events: auto;
+codex/refactor-salesglowplugin-for-performance-w0usoc
+            left: var(--mobile-sidebar-width);
+            right: 0;main
         }
 
         /* Desktop Sidebar */
@@ -1525,6 +1542,34 @@
             color: var(--accent-primary);
             border: 1px solid rgba(0, 212, 170, 0.3);
             box-shadow: 0 4px 15px rgba(0, 212, 170, 0.2);
+        }
+
+        .mobile-sidebar-close {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 40px;
+            height: 40px;
+            border-radius: 12px;
+            border: 1px solid rgba(148, 163, 184, 0.35);
+            background: rgba(15, 23, 42, 0.55);
+            color: #e2e8f0;
+            transition: all 0.25s ease;
+            box-shadow: 0 10px 25px rgba(8, 15, 30, 0.35);
+        }
+
+        .mobile-sidebar-close:hover,
+        .mobile-sidebar-close:focus-visible {
+            color: #f8fafc;
+            border-color: rgba(148, 163, 184, 0.6);
+            background: rgba(30, 41, 59, 0.65);
+            outline: none;
+        }
+
+        @media (min-width: 1024px) {
+            .mobile-sidebar-close {
+                display: none;
+            }
         }
 
         .menu-item i {
