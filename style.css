@@ -86,6 +86,7 @@
     --gold-color: #fbbf24;
     --quick-sale-bg: #0b1120;
     --quick-sale-accent: #38bdf8;
+    --mobile-sidebar-width: min(320px, 82vw);
 }
 
 
@@ -389,8 +390,8 @@
        .mobile-sidebar {
     position: fixed;
     top: 0;
-    left: -280px;
-    width: 280px;
+    left: calc(var(--mobile-sidebar-width) * -1);
+    width: var(--mobile-sidebar-width);
     height: 100vh;
     background: linear-gradient(160deg, rgba(11, 18, 32, 0.95) 0%, rgba(15, 23, 42, 0.7) 100%);
     backdrop-filter: blur(18px);
@@ -399,6 +400,7 @@
     transition: left 0.3s ease;
     z-index: 2000;
     overflow-y: auto;
+    box-shadow: 18px 0 45px rgba(2, 6, 23, 0.55);
 }
         .mobile-sidebar.open {
             left: 0;
@@ -408,13 +410,79 @@
             position: fixed;
             top: 0;
             left: 0;
-            width: 100%;
+            right: 0;
             height: 100%;
-            background: rgba(0, 0, 0, 0.5);
+            background: rgba(2, 6, 23, 0.55);
             z-index: 1999;
             opacity: 0;
             visibility: hidden;
             transition: all 0.3s ease;
+            pointer-events: none;
+        }
+
+        body.no-scroll {
+            overflow: hidden;
+        }
+
+        body.performance-mode {
+            background-color: var(--bg-primary);
+        }
+
+        body.performance-mode .navbar,
+        body.performance-mode .mobile-sidebar,
+        body.performance-mode .desktop-sidebar,
+        body.performance-mode .glass-panel,
+        body.performance-mode .dashboard-hero,
+        body.performance-mode .stat-card,
+        body.performance-mode .metric-card,
+        body.performance-mode .quick-action-card,
+        body.performance-mode .ai-card,
+        body.performance-mode .ai-response-card,
+        body.performance-mode .timeline-card,
+        body.performance-mode .kanban-column,
+        body.performance-mode .kanban-card,
+        body.performance-mode .modal-content,
+        body.performance-mode .notification,
+        body.performance-mode .summary-card,
+        body.performance-mode .report-card,
+        body.performance-mode .quick-sale-step-container,
+        body.performance-mode .quick-sale-review,
+        body.performance-mode .quick-sale-actions,
+        body.performance-mode .branch-card,
+        body.performance-mode .inbox-thread,
+        body.performance-mode .ai-insight-card,
+        body.performance-mode .sales-performance-card,
+        body.performance-mode .finance-card,
+        body.performance-mode .kanban-board,
+        body.performance-mode .task-card,
+        body.performance-mode .card,
+        body.performance-mode .info-card,
+        body.performance-mode .performance-card,
+        body.performance-mode .report-widget {
+            backdrop-filter: none !important;
+            -webkit-backdrop-filter: none !important;
+            box-shadow: none !important;
+        }
+
+        body.performance-mode .navbar,
+        body.performance-mode .mobile-sidebar,
+        body.performance-mode .desktop-sidebar,
+        body.performance-mode .glass-panel,
+        body.performance-mode .dashboard-hero,
+        body.performance-mode .stat-card,
+        body.performance-mode .quick-action-card,
+        body.performance-mode .ai-card,
+        body.performance-mode .ai-response-card,
+        body.performance-mode .modal-content,
+        body.performance-mode .notification,
+        body.performance-mode .quick-sale-step-container,
+        body.performance-mode .quick-sale-review,
+        body.performance-mode .quick-sale-actions,
+        body.performance-mode .task-card,
+        body.performance-mode .summary-card,
+        body.performance-mode .report-card,
+        body.performance-mode .report-widget {
+            background: var(--bg-secondary, rgba(11, 18, 32, 0.92)) !important;
         }
  
         /* === NEW CSS FOR QUICK SALE === */
@@ -712,6 +780,9 @@
         .sidebar-overlay.open {
             opacity: 1;
             visibility: visible;
+            pointer-events: auto;
+            left: var(--mobile-sidebar-width);
+            right: 0;
         }
 
         /* Desktop Sidebar */
@@ -1458,6 +1529,34 @@
             color: var(--accent-primary);
             border: 1px solid rgba(0, 212, 170, 0.3);
             box-shadow: 0 4px 15px rgba(0, 212, 170, 0.2);
+        }
+
+        .mobile-sidebar-close {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 40px;
+            height: 40px;
+            border-radius: 12px;
+            border: 1px solid rgba(148, 163, 184, 0.35);
+            background: rgba(15, 23, 42, 0.55);
+            color: #e2e8f0;
+            transition: all 0.25s ease;
+            box-shadow: 0 10px 25px rgba(8, 15, 30, 0.35);
+        }
+
+        .mobile-sidebar-close:hover,
+        .mobile-sidebar-close:focus-visible {
+            color: #f8fafc;
+            border-color: rgba(148, 163, 184, 0.6);
+            background: rgba(30, 41, 59, 0.65);
+            outline: none;
+        }
+
+        @media (min-width: 1024px) {
+            .mobile-sidebar-close {
+                display: none;
+            }
         }
 
         .menu-item i {
