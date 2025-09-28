@@ -402,17 +402,29 @@
     overflow-y: auto;
     box-shadow: 18px 0 45px rgba(2, 6, 23, 0.55);
 }
+ codex/refactor-salesglowplugin-for-performance-w0usoc
         .mobile-sidebar.open {
             left: 0;
         }
 
+
+        .mobile-sidebar.open {
+            left: 0;
+        }
+
+main
         .sidebar-overlay {
             position: fixed;
             top: 0;
             left: 0;
+codex/refactor-salesglowplugin-for-performance-w0usoc
             right: 0;
             height: 100%;
             background: rgba(2, 6, 23, 0.55);
+
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5); main
             z-index: 1999;
             opacity: 0;
             visibility: hidden;
@@ -781,8 +793,9 @@
             opacity: 1;
             visibility: visible;
             pointer-events: auto;
+codex/refactor-salesglowplugin-for-performance-w0usoc
             left: var(--mobile-sidebar-width);
-            right: 0;
+            right: 0;main
         }
 
         /* Desktop Sidebar */
