@@ -2822,205 +2822,191 @@ downloadTaskTxt(taskId) {
                 });
             },
 
-            createDashboardCharts() {
-                if (this.state.currentView !== 'dashboard') {
-                    return;
-                }
+    
+        createDashboardCharts() {
+            if (this.state.currentView !== 'dashboard') {
+                return;
+            }
 
-                const data = this.dashboardChartsData;
-                if (!data) {
-                    return;
-                }
+            const data = this.dashboardChartsData;
+            if (!data) {
+                return;
+            }
 
-                const {
-                    workingHoursLabels,
-                    workingHoursData,
-                    oilLevel,
-                    batteryLevel,
-                    temperatureLabels,
-                    temperatureData,
-                    teamPerformanceLabels,
-                    teamPerformanceData,
-                    salaryDistributionData,
-                    personalSalesLabels,
-                    personalSalesData
-                } = data;
+            const {
+                netProfitTrendLabels,
+                netProfitTrendData,
+                cashFlowLabels,
+                cashFlowInflow,
+                cashFlowOutflow,
+                taskStatusLabels,
+                taskStatusData,
+                teamPerformanceLabels,
+                teamPerformanceData,
+                salaryDistributionData,
+                personalSalesLabels,
+                personalSalesData
+            } = data;
 
-                if (workingHoursLabels && workingHoursLabels.length) {
-                    this.createChart('workingHoursChart', 'bar', {
-                        labels: workingHoursLabels,
-                        datasets: [{
-                            label: 'Hours',
-                            data: workingHoursData,
-                            backgroundColor: workingHoursLabels.map(() => 'rgba(56, 189, 248, 0.45)'),
-                            borderColor: '#38bdf8',
-                            borderWidth: 1,
-                            borderRadius: 8,
-                            borderSkipped: false,
-                            maxBarThickness: 26
-                        }]
-                    }, {
-                        plugins: { legend: { display: false } },
-                        scales: {
-                            x: {
-                                grid: { display: false },
-                                ticks: { color: '#94a3b8', font: { size: 12 } }
-                            },
-                            y: {
-                                beginAtZero: true,
-                                suggestedMax: 12,
-                                grid: { color: 'rgba(148, 163, 184, 0.18)' },
-                                ticks: { color: '#94a3b8', font: { size: 12 } }
-                            }
+            if (netProfitTrendLabels && netProfitTrendLabels.length) {
+                this.createChart('netProfitTrendChart', 'line', {
+                    labels: netProfitTrendLabels,
+                    datasets: [{
+                        label: 'Net Profit',
+                        data: netProfitTrendData,
+                        borderColor: '#38bdf8',
+                        backgroundColor: 'rgba(56, 189, 248, 0.22)',
+                        fill: true,
+                        tension: 0.4,
+                        pointRadius: 4,
+                        pointBackgroundColor: '#38bdf8'
+                    }]
+                }, {
+                    plugins: { legend: { display: false } },
+                    scales: {
+                        x: {
+                            grid: { display: false },
+                            ticks: { color: '#94a3b8', font: { size: 12 } }
+                        },
+                        y: {
+                            beginAtZero: true,
+                            grid: { color: 'rgba(148, 163, 184, 0.16)' },
+                            ticks: { color: '#94a3b8', font: { size: 12 } }
                         }
-                    });
-                }
+                    }
+                });
+            }
 
-                if (typeof oilLevel === 'number') {
-                    this.createChart('oilLevelChart', 'doughnut', {
-                        labels: ['Oil Level', 'Remaining'],
-                        datasets: [{
-                            data: [oilLevel, Math.max(0, 100 - oilLevel)],
-                            backgroundColor: ['#38bdf8', 'rgba(15, 23, 42, 0.5)'],
-                            hoverBackgroundColor: ['#38bdf8', 'rgba(15, 23, 42, 0.6)'],
-                            borderWidth: 0
-                        }]
-                    }, {
-                        rotation: -90,
-                        circumference: 180,
-                        cutout: '70%',
-                        plugins: {
-                            legend: { display: false },
-                            tooltip: { enabled: false }
-                        }
-                    });
-                }
-
-                if (temperatureLabels && temperatureLabels.length) {
-                    this.createChart('temperatureChart', 'line', {
-                        labels: temperatureLabels,
-                        datasets: [{
-                            label: 'Module Temp',
-                            data: temperatureData,
-                            borderColor: '#facc15',
-                            backgroundColor: 'rgba(250, 204, 21, 0.12)',
-                            fill: true,
-                            tension: 0.4,
-                            pointRadius: 0
-                        }]
-                    }, {
-                        plugins: { legend: { display: false } },
-                        scales: {
-                            x: {
-                                grid: { display: false },
-                                ticks: { color: '#94a3b8', font: { size: 12 } }
-                            },
-                            y: {
-                                suggestedMin: 40,
-                                suggestedMax: 100,
-                                grid: { color: 'rgba(148, 163, 184, 0.14)' },
-                                ticks: { color: '#94a3b8', font: { size: 12 } }
-                            }
-                        }
-                    });
-                }
-
-                if (teamPerformanceLabels && teamPerformanceLabels.length) {
-                    this.createChart('teamPerformanceChart', 'bar', {
-                        labels: teamPerformanceLabels,
-                        datasets: [{
-                            label: 'Revenue',
-                            data: teamPerformanceData,
-                            backgroundColor: teamPerformanceLabels.map(() => 'rgba(168, 85, 247, 0.45)'),
-                            borderColor: '#a855f7',
-                            borderWidth: 1,
+            if (cashFlowLabels && cashFlowLabels.length) {
+                this.createChart('cashFlowChart', 'bar', {
+                    labels: cashFlowLabels,
+                    datasets: [
+                        {
+                            label: 'Inflow',
+                            data: cashFlowInflow,
+                            backgroundColor: 'rgba(56, 189, 248, 0.6)',
                             borderRadius: 10,
                             borderSkipped: false,
                             maxBarThickness: 28
-                        }]
-                    }, {
-                        plugins: { legend: { display: false } },
-                        scales: {
-                            x: {
-                                grid: { display: false },
-                                ticks: { color: '#94a3b8', font: { size: 12 } }
-                            },
-                            y: {
-                                beginAtZero: true,
-                                grid: { color: 'rgba(148, 163, 184, 0.18)' },
-                                ticks: { color: '#94a3b8', font: { size: 12 } }
-                            }
+                        },
+                        {
+                            label: 'Outflow',
+                            data: cashFlowOutflow,
+                            backgroundColor: 'rgba(248, 113, 113, 0.45)',
+                            borderRadius: 10,
+                            borderSkipped: false,
+                            maxBarThickness: 28
                         }
-                    });
-                }
-
-                if (Array.isArray(salaryDistributionData) && salaryDistributionData.length === 2) {
-                    this.createChart('salaryDistributionChart', 'doughnut', {
-                        labels: ['Salary', 'Commission'],
-                        datasets: [{
-                            data: salaryDistributionData,
-                            backgroundColor: ['#38bdf8', '#facc15'],
-                            borderWidth: 0
-                        }]
-                    }, {
-                        cutout: '65%',
-                        plugins: {
-                            legend: { display: false }
+                    ]
+                }, {
+                    scales: {
+                        x: {
+                            grid: { display: false },
+                            ticks: { color: '#94a3b8', font: { size: 12 } }
+                        },
+                        y: {
+                            beginAtZero: true,
+                            grid: { color: 'rgba(148, 163, 184, 0.18)' },
+                            ticks: { color: '#94a3b8', font: { size: 12 } }
                         }
-                    });
-                }
-
-                if (personalSalesLabels && personalSalesLabels.length) {
-                    this.createChart('personalSalesChart', 'line', {
-                        labels: personalSalesLabels,
-                        datasets: [{
-                            label: 'Personal Revenue',
-                            data: personalSalesData,
-                            borderColor: '#38bdf8',
-                            backgroundColor: 'rgba(56, 189, 248, 0.22)',
-                            fill: true,
-                            tension: 0.45,
-                            pointRadius: 4,
-                            pointBackgroundColor: '#38bdf8'
-                        }]
-                    }, {
-                        plugins: { legend: { display: false } },
-                        scales: {
-                            x: {
-                                grid: { display: false },
-                                ticks: { color: '#94a3b8', font: { size: 12 } }
-                            },
-                            y: {
-                                beginAtZero: true,
-                                grid: { color: 'rgba(148, 163, 184, 0.16)' },
-                                ticks: { color: '#94a3b8', font: { size: 12 } }
-                            }
-                        }
-                    });
-                }
-
-                const oilValue = document.getElementById('oil-level-value');
-                if (oilValue && typeof oilLevel === 'number') {
-                    oilValue.textContent = `${oilLevel}%`;
-                }
-
-                const batteryValue = document.getElementById('battery-level-value');
-                if (batteryValue && typeof batteryLevel === 'number') {
-                    batteryValue.textContent = `${batteryLevel}%`;
-                }
-
-                const batteryBar = document.querySelector('.battery-level');
-                if (batteryBar && typeof batteryLevel === 'number') {
-                    batteryBar.style.width = `${batteryLevel}%`;
-                    if (batteryLevel < 35) {
-                        batteryBar.classList.add('low');
-                    } else {
-                        batteryBar.classList.remove('low');
                     }
-                }
-            },
+                });
+            }
 
-            // REPLACE your current downloadInvoice function with this one.
+            if (taskStatusLabels && taskStatusLabels.length) {
+                this.createChart('taskStatusChart', 'doughnut', {
+                    labels: taskStatusLabels,
+                    datasets: [{
+                        data: taskStatusData,
+                        backgroundColor: ['#22c55e', '#38bdf8', '#f97316'],
+                        borderWidth: 0
+                    }]
+                }, {
+                    cutout: '65%',
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: { color: '#b4bcd0' }
+                        }
+                    }
+                });
+            }
+
+            if (teamPerformanceLabels && teamPerformanceLabels.length) {
+                this.createChart('teamPerformanceChart', 'bar', {
+                    labels: teamPerformanceLabels,
+                    datasets: [{
+                        label: 'Revenue',
+                        data: teamPerformanceData,
+                        backgroundColor: teamPerformanceLabels.map(() => 'rgba(56, 189, 248, 0.65)'),
+                        borderColor: '#38bdf8',
+                        borderWidth: 1,
+                        borderRadius: 10,
+                        borderSkipped: false,
+                        maxBarThickness: 28
+                    }]
+                }, {
+                    plugins: { legend: { display: false } },
+                    scales: {
+                        x: {
+                            grid: { display: false },
+                            ticks: { color: '#94a3b8', font: { size: 12 } }
+                        },
+                        y: {
+                            beginAtZero: true,
+                            grid: { color: 'rgba(148, 163, 184, 0.18)' },
+                            ticks: { color: '#94a3b8', font: { size: 12 } }
+                        }
+                    }
+                });
+            }
+
+            if (Array.isArray(salaryDistributionData) && salaryDistributionData.length === 2) {
+                this.createChart('salaryDistributionChart', 'doughnut', {
+                    labels: ['Salary', 'Commission'],
+                    datasets: [{
+                        data: salaryDistributionData,
+                        backgroundColor: ['#38bdf8', '#facc15'],
+                        borderWidth: 0
+                    }]
+                }, {
+                    cutout: '65%',
+                    plugins: {
+                        legend: { display: false }
+                    }
+                });
+            }
+
+            if (personalSalesLabels && personalSalesLabels.length) {
+                this.createChart('personalSalesChart', 'line', {
+                    labels: personalSalesLabels,
+                    datasets: [{
+                        label: 'Personal Revenue',
+                        data: personalSalesData,
+                        borderColor: '#38bdf8',
+                        backgroundColor: 'rgba(56, 189, 248, 0.22)',
+                        fill: true,
+                        tension: 0.45,
+                        pointRadius: 4,
+                        pointBackgroundColor: '#38bdf8'
+                    }]
+                }, {
+                    plugins: { legend: { display: false } },
+                    scales: {
+                        x: {
+                            grid: { display: false },
+                            ticks: { color: '#94a3b8', font: { size: 12 } }
+                        },
+                        y: {
+                            beginAtZero: true,
+                            grid: { color: 'rgba(148, 163, 184, 0.16)' },
+                            ticks: { color: '#94a3b8', font: { size: 12 } }
+                        }
+                    }
+                });
+            }
+        },
+        // REPLACE your current downloadInvoice function with this one.
 downloadInvoice(invoiceId) {
     const invoice = this.state.invoices.find(i => i.id === parseInt(invoiceId));
     if (!invoice) return;
@@ -5017,6 +5003,7 @@ getSidebar() {
             const recentSales = filteredSales.slice(-5).reverse();
             const totalInventoryValue = products.reduce((sum, p) => sum + (p.price * p.stock), 0);
 
+
             const monthlySalary = (currentUser.salary / 12) || 0;
             const totalEarnings = monthlySalary + (currentUser.commission || 0);
 
@@ -5044,59 +5031,102 @@ getSidebar() {
                 return series;
             };
 
+            const buildMonthlyNetProfitSeries = (sourceSales, sourceExpenses, months = 6) => {
+                const now = new Date();
+                const series = [];
+                for (let i = months - 1; i >= 0; i--) {
+                    const pointDate = new Date(now.getFullYear(), now.getMonth() - i, 1);
+                    const label = pointDate.toLocaleDateString(undefined, { month: 'short' });
+
+                    const revenue = sourceSales.reduce((sum, sale) => {
+                        const saleDate = parseDate(sale.date);
+                        if (!saleDate) return sum;
+                        return saleDate.getFullYear() === pointDate.getFullYear() && saleDate.getMonth() === pointDate.getMonth()
+                            ? sum + (sale.total || 0)
+                            : sum;
+                    }, 0);
+
+                    const expenses = sourceExpenses.reduce((sum, expense) => {
+                        const expenseDate = parseDate(expense.date);
+                        if (!expenseDate) return sum;
+                        return expenseDate.getFullYear() === pointDate.getFullYear() && expenseDate.getMonth() === pointDate.getMonth()
+                            ? sum + (expense.amount || 0)
+                            : sum;
+                    }, 0);
+
+                    series.push({
+                        label,
+                        net: parseFloat((revenue - expenses).toFixed(2))
+                    });
+                }
+                return series;
+            };
+
             const now = new Date();
             const dayMs = 24 * 60 * 60 * 1000;
-            const workingHoursLabels = [];
-            const workingHoursData = [];
+            const startOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
 
+            const cashFlowTrend = [];
             for (let i = 6; i >= 0; i--) {
                 const day = new Date(now.getTime() - i * dayMs);
                 const label = day.toLocaleDateString(undefined, { weekday: 'short' });
                 const dayKey = day.toISOString().slice(0, 10);
-                let daySalesCount = 0;
 
-                filteredSales.forEach(sale => {
+                const inflow = filteredSales.reduce((sum, sale) => {
                     const saleDate = parseDate(sale.date);
-                    if (!saleDate) return;
-                    if (saleDate.toISOString().slice(0, 10) === dayKey) {
-                        daySalesCount += 1;
-                    }
-                });
+                    if (!saleDate) return sum;
+                    return saleDate.toISOString().slice(0, 10) === dayKey ? sum + (sale.total || 0) : sum;
+                }, 0);
 
-                const hours = Math.min(12, daySalesCount * 1.75 + (daySalesCount > 0 ? 4 : 2));
-                workingHoursLabels.push(label);
-                workingHoursData.push(parseFloat(hours.toFixed(1)));
+                const outflow = filteredExpenses.reduce((sum, expense) => {
+                    const expenseDate = parseDate(expense.date);
+                    if (!expenseDate) return sum;
+                    return expenseDate.toISOString().slice(0, 10) === dayKey ? sum + (expense.amount || 0) : sum;
+                }, 0);
+
+                cashFlowTrend.push({
+                    label,
+                    inflow: parseFloat(inflow.toFixed(2)),
+                    outflow: parseFloat(outflow.toFixed(2)),
+                    net: parseFloat((inflow - outflow).toFixed(2))
+                });
             }
 
-            const weeklyWorkingHours = workingHoursData.reduce((sum, hours) => sum + hours, 0);
-            const averageWorkingHours = workingHoursData.length ? (weeklyWorkingHours / workingHoursData.length) : 0;
-            const todaysHours = workingHoursData.length ? workingHoursData[workingHoursData.length - 1] : 0;
-
-            const oilLevel = Math.max(35, Math.min(95, Math.round((totalRevenue / (totalRevenue + totalExpensesVal + 1)) * 100)));
-            const salaryBaseline = monthlySalary > 0 ? monthlySalary : 1200;
-            const batteryLevel = Math.max(25, Math.min(100, Math.round(((currentUser.commission || 0) + monthlySalary) / salaryBaseline * 80)));
-
-            const alertPenalty = Math.min(35, lowStockProducts.length * 6);
-            const profitBoost = netProfit >= 0 ? Math.min(15, Math.round((netProfit / (totalRevenue + 1)) * 40)) : -12;
-            const machineHealth = Math.max(45, Math.min(100, Math.round((oilLevel * 0.45) + (batteryLevel * 0.35) + 20 - alertPenalty + profitBoost)));
-            const systemStatus = machineHealth > 80 ? 'Optimal' : machineHealth > 60 ? 'Stable' : 'Attention';
-            const uptimeScore = Math.round(Math.min(100, (weeklyWorkingHours / ((workingHoursData.length || 1) * 12)) * 100));
-            const activeAlerts = lowStockProducts.length + (netProfit < 0 ? 1 : 0);
-
-            const weekWindow = now.getTime() - 6 * dayMs;
+            const weeklyWindow = now.getTime() - 6 * dayMs;
             const weekSales = filteredSales.filter(sale => {
                 const saleDate = parseDate(sale.date);
-                return saleDate ? saleDate.getTime() >= weekWindow : false;
+                return saleDate ? saleDate.getTime() >= weeklyWindow : false;
             });
             const weekRevenue = weekSales.reduce((sum, sale) => sum + (sale.total || 0), 0);
 
             const weekExpenses = filteredExpenses.filter(expense => {
                 const expenseDate = parseDate(expense.date);
-                return expenseDate ? expenseDate.getTime() >= weekWindow : false;
+                return expenseDate ? expenseDate.getTime() >= weeklyWindow : false;
             });
             const weekExpenseValue = weekExpenses.reduce((sum, expense) => sum + (expense.amount || 0), 0);
 
-            const energyUsage = Math.max(18, Math.min(92, Math.round((weekExpenseValue / (weekRevenue + 1)) * 80 + 18)));
+            const todaysFlow = cashFlowTrend[cashFlowTrend.length - 1] || { inflow: 0, outflow: 0, net: 0 };
+            const weeklyNetCash = cashFlowTrend.reduce((sum, entry) => sum + entry.net, 0);
+
+            const monthlyNetProfitSeries = buildMonthlyNetProfitSeries(filteredSales, filteredExpenses, 6);
+
+            const creditSalesTotal = filteredSales
+                .filter(sale => (sale.saleType || '').toLowerCase() === 'credit')
+                .reduce((sum, sale) => sum + (sale.total || 0), 0);
+            const cashSalesTotal = filteredSales
+                .filter(sale => (sale.saleType || '').toLowerCase() === 'cash')
+                .reduce((sum, sale) => sum + (sale.total || 0), 0);
+
+            const cashOnHand = Math.max(0, totalRevenue - totalExpensesVal);
+            const receivablesTotal = creditSalesTotal;
+            const payablesTotal = totalExpensesVal;
+
+            const businessOutlook = netProfit > 0 && cashOnHand > 0 ? 'Strong' : netProfit >= 0 ? 'Stable' : 'Caution';
+            const businessOutlookClass = businessOutlook === 'Strong'
+                ? 'status-optimal'
+                : businessOutlook === 'Stable'
+                    ? 'status-stable'
+                    : 'status-attention';
 
             const productSalesMap = {};
             filteredSales.forEach(sale => {
@@ -5108,35 +5138,10 @@ getSidebar() {
             });
             const topProductEntry = Object.entries(productSalesMap).sort((a, b) => b[1] - a[1])[0];
             const topProduct = topProductEntry ? products.find(p => p.id === parseInt(topProductEntry[0])) : null;
-            const topProductName = topProduct ? topProduct.name : (products[0] ? products[0].name : 'Inventory Ready');
-
-            const temperatureLabels = [];
-            const temperatureData = [];
-            for (let i = 9; i >= 0; i--) {
-                const day = new Date(now.getTime() - i * dayMs);
-                const dayLabel = day.toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
-                const dayKey = day.toISOString().slice(0, 10);
-                const dayRevenue = filteredSales.reduce((sum, sale) => {
-                    const saleDate = parseDate(sale.date);
-                    if (!saleDate) return sum;
-                    return saleDate.toISOString().slice(0, 10) === dayKey ? sum + (sale.total || 0) : sum;
-                }, 0);
-                const baseline = 62 + Math.min(28, dayRevenue / 300);
-                const adjustment = netProfit < 0 ? -6 : 0;
-                const temperature = Math.max(48, Math.min(96, Math.round(baseline + adjustment - lowStockProducts.length)));
-                temperatureLabels.push(dayLabel);
-                temperatureData.push(temperature);
-            }
+            const topProductName = topProduct ? topProduct.name : 'No sales data yet';
 
             const insights = inboxNotifications.slice(0, 3);
             const criticalInventory = lowStockProducts.slice(0, 4);
-
-            const machineId = `CAM-NX ${String(currentUser.id).padStart(3, '0')}`;
-            const topCustomerName = (() => {
-                if (!recentSales.length) return 'Customer Ready';
-                const customer = customers.find(c => c.id === recentSales[0].customerId);
-                return customer ? customer.name : 'Customer Ready';
-            })();
 
             const companyPayroll = users.reduce((sum, user) => sum + ((user.salary || 0) / 12), 0);
             const estimatedAssets = totalInventoryValue + totalRevenue;
@@ -5157,6 +5162,49 @@ getSidebar() {
                 const participants = task.participants || [];
                 return task.createdBy === currentUser.id || participants.includes(currentUser.id) || participants.some(id => teamWorkerIds.includes(id));
             });
+
+            const completedTasks = tasks.filter(task => task.status === 'completed');
+            const activeTasks = tasks.filter(task => task.status !== 'completed');
+            const overdueTasks = activeTasks.filter(task => {
+                const due = parseDate(task.dueDate);
+                return due ? due.getTime() < startOfToday : false;
+            });
+            const dueSoonThreshold = startOfToday + (3 * dayMs);
+            const dueSoonTasks = activeTasks.filter(task => {
+                const due = parseDate(task.dueDate);
+                return due ? due.getTime() >= startOfToday && due.getTime() <= dueSoonThreshold : false;
+            });
+            const taskCompletionRate = tasks.length ? Math.round((completedTasks.length / tasks.length) * 100) : 0;
+
+            const taskStatusBreakdown = [
+                { label: 'Completed', count: completedTasks.length },
+                { label: 'In Progress', count: Math.max(0, activeTasks.length - overdueTasks.length) },
+                { label: 'Overdue', count: overdueTasks.length }
+            ];
+
+            const priorityTasks = outstandingTasks
+                .map(task => {
+                    const due = parseDate(task.dueDate);
+                    return {
+                        id: task.id,
+                        title: task.title || 'Untitled Task',
+                        dueDate: task.dueDate,
+                        dueLabel: due ? due.toLocaleDateString(undefined, { month: 'short', day: 'numeric' }) : 'No due date',
+                        overdue: due ? due.getTime() < startOfToday : false,
+                        status: task.status || 'active'
+                    };
+                })
+                .sort((a, b) => {
+                    const dateA = parseDate(a.dueDate);
+                    const dateB = parseDate(b.dueDate);
+                    if (!dateA && !dateB) return 0;
+                    if (!dateA) return 1;
+                    if (!dateB) return -1;
+                    return dateA.getTime() - dateB.getTime();
+                })
+                .slice(0, 4);
+
+            const alertCount = lowStockProducts.length + overdueTasks.length;
 
             const workerPerformance = teamWorkers.map(worker => {
                 const workerSales = sales.filter(sale => sale.salesPersonId === worker.id);
@@ -5184,34 +5232,17 @@ getSidebar() {
                 totalExpensesVal,
                 netProfit,
                 lowStockProducts,
-                recentSales,
                 totalInventoryValue,
                 monthlySalary,
                 totalEarnings,
-                workingHoursLabels,
-                workingHoursData,
-                weeklyWorkingHours,
-                averageWorkingHours,
-                todaysHours,
-                oilLevel,
-                batteryLevel,
-                machineHealth,
-                systemStatus,
-                uptimeScore,
-                activeAlerts,
-                weekSalesCount: weekSales.length,
-                weekRevenue,
-                energyUsage,
-                temperatureLabels,
-                temperatureData,
                 insights,
                 criticalInventory,
-                machineId,
-                topCustomerName,
                 now,
                 companyPayroll,
                 balanceSheetGap,
                 balanceSheetStatus,
+                estimatedAssets,
+                estimatedLiabilities,
                 pendingApprovals,
                 teamWorkers,
                 workerPerformance,
@@ -5223,9 +5254,36 @@ getSidebar() {
                 outstandingTasks,
                 personalTasks,
                 personalSalesSeries,
-                topProductName
+                topProductName,
+                businessOutlook,
+                businessOutlookClass,
+                cashOnHand,
+                receivablesTotal,
+                payablesTotal,
+                cashSalesTotal,
+                creditSalesTotal,
+                cashFlowTrend,
+                cashFlowSummary: {
+                    todayInflow: todaysFlow.inflow,
+                    todayOutflow: todaysFlow.outflow,
+                    todayNet: todaysFlow.net,
+                    weeklyNet: parseFloat(weeklyNetCash.toFixed(2))
+                },
+                taskStats: {
+                    total: tasks.length,
+                    completionRate: taskCompletionRate,
+                    overdue: overdueTasks.length,
+                    dueSoon: dueSoonTasks.length,
+                    active: activeTasks.length,
+                    assigned: personalTasks.length,
+                    breakdown: taskStatusBreakdown,
+                    priority: priorityTasks
+                },
+                alertCount,
+                weekSalesCount: weekSales.length,
+                weekRevenue,
+                weekExpenseValue
             };
-
             const chartData = this.buildDashboardCharts(currentUser.role, metrics);
             this.dashboardChartsData = chartData;
 
@@ -5242,19 +5300,14 @@ getSidebar() {
 
         buildDashboardCharts(role, metrics) {
             const chartData = {
-                workingHoursLabels: metrics.workingHoursLabels,
-                workingHoursData: metrics.workingHoursData,
-                averageWorkingHours: metrics.averageWorkingHours,
-                weeklyWorkingHours: metrics.weeklyWorkingHours,
-                todaysHours: metrics.todaysHours
+                netProfitTrendLabels: metrics.monthlyNetProfitSeries.map(point => point.label),
+                netProfitTrendData: metrics.monthlyNetProfitSeries.map(point => point.net),
+                cashFlowLabels: metrics.cashFlowTrend.map(point => point.label),
+                cashFlowInflow: metrics.cashFlowTrend.map(point => point.inflow),
+                cashFlowOutflow: metrics.cashFlowTrend.map(point => point.outflow),
+                taskStatusLabels: metrics.taskStats.breakdown.map(item => item.label),
+                taskStatusData: metrics.taskStats.breakdown.map(item => item.count)
             };
-
-            if (role === 'admin') {
-                chartData.oilLevel = metrics.oilLevel;
-                chartData.batteryLevel = metrics.batteryLevel;
-                chartData.temperatureLabels = metrics.temperatureLabels;
-                chartData.temperatureData = metrics.temperatureData;
-            }
 
             if (role === 'manager') {
                 chartData.teamPerformanceLabels = metrics.workerPerformance.map(worker => worker.name);
@@ -5270,38 +5323,43 @@ getSidebar() {
             return chartData;
         },
 
+
         renderAdminDashboard(metrics) {
             const {
                 currentUser,
-                systemStatus,
+                businessOutlook,
+                businessOutlookClass,
                 totalRevenue,
                 netProfit,
                 balanceSheetStatus,
                 balanceSheetGap,
                 pendingApprovals,
                 weekSalesCount,
-                machineId,
-                topCustomerName,
-                activeAlerts,
-                weeklyWorkingHours,
-                averageWorkingHours,
-                todaysHours,
+                estimatedAssets,
+                estimatedLiabilities,
                 companyPayroll,
-                energyUsage,
-                totalEarnings,
-                temperatureData,
+                totalInventoryValue,
+                cashOnHand,
+                receivablesTotal,
+                payablesTotal,
+                cashSalesTotal,
+                creditSalesTotal,
+                cashFlowSummary,
+                taskStats,
+                lowStockProducts,
                 insights,
                 criticalInventory,
-                recentSales,
                 customers,
-                machineHealth,
-                uptimeScore,
                 topProductName,
-                totalInventoryValue,
-                oilLevel
+                totalEarnings,
+                weekRevenue,
+                weekExpenseValue,
+                alertCount
             } = metrics;
 
-            const latestTemperature = temperatureData.length ? temperatureData[temperatureData.length - 1] : 0;
+            const latestNet = monthlyNetProfitSeries.length ? monthlyNetProfitSeries[monthlyNetProfitSeries.length - 1].net : 0;
+            const inventoryAlerts = lowStockProducts.slice(0, 6);
+            const priorityTasks = taskStats.priority || [];
 
             return `
                 <div class="owlio-dashboard fade-in admin-dashboard">
@@ -5310,7 +5368,7 @@ getSidebar() {
                             <div>
                                 <p class="dashboard-kicker">Operations Command</p>
                                 <h2 class="dashboard-title">Owlio Control Surface</h2>
-                                <p class="dashboard-subtitle">System status: <span class="status-pill status-${systemStatus.toLowerCase()}">${systemStatus}</span></p>
+                                <p class="dashboard-subtitle">Business outlook: <span class="status-pill ${businessOutlookClass}">${businessOutlook}</span></p>
                             </div>
                             <div class="dashboard-actions">
                                 ${this.getCountrySelector()}
@@ -5333,14 +5391,14 @@ getSidebar() {
                                 <div class="metric-subtext ${netProfit >= 0 ? 'text-positive' : 'text-negative'}">${netProfit >= 0 ? 'Profitable flow' : 'Review spending'}</div>
                             </div>
                             <div class="dashboard-metric-card metric-gold">
-                                <div class="metric-label">Balance Sheet</div>
-                                <div class="metric-value">${balanceSheetStatus}</div>
-                                <div class="metric-subtext">Spread ${this.formatCurrency(balanceSheetGap)}</div>
+                                <div class="metric-label">Cash on Hand</div>
+                                <div class="metric-value">${this.formatCurrency(cashOnHand)}</div>
+                                <div class="metric-subtext">Receivables ${this.formatCurrency(receivablesTotal)}</div>
                             </div>
                             <div class="dashboard-metric-card metric-green">
-                                <div class="metric-label">Task Approvals</div>
+                                <div class="metric-label">Pending Approvals</div>
                                 <div class="metric-value">${pendingApprovals.length}</div>
-                                <div class="metric-subtext">Awaiting action</div>
+                                <div class="metric-subtext">Cash burn ${this.formatCurrency(weekExpenseValue)}</div>
                             </div>
                         </div>
 
@@ -5359,137 +5417,147 @@ getSidebar() {
                         </div>
 
                         <div class="dashboard-status-grid">
-                            <div class="perplexity-card machine-card">
+                            <div class="perplexity-card finance-card">
                                 <div class="card-header">
                                     <div>
-                                        <h3>Machine Info</h3>
-                                        <p>CAM Guardian module overview</p>
+                                        <h3>Balance Sheet Snapshot</h3>
+                                        <p>Assets vs liabilities at a glance</p>
                                     </div>
-                                    <span class="status-pill status-${systemStatus.toLowerCase()}">${systemStatus}</span>
+                                    <span class="status-pill ${businessOutlookClass}">${balanceSheetStatus}</span>
                                 </div>
-                                <div class="machine-stats">
+                                <div class="finance-stats-grid">
                                     <div>
-                                        <span class="stat-label">Machine ID</span>
-                                        <p class="stat-value">${machineId}</p>
+                                        <span class="stat-label">Assets</span>
+                                        <p class="stat-value">${this.formatCurrency(estimatedAssets)}</p>
                                     </div>
                                     <div>
-                                        <span class="stat-label">Operator</span>
-                                        <p class="stat-value">${currentUser.name}</p>
+                                        <span class="stat-label">Liabilities</span>
+                                        <p class="stat-value">${this.formatCurrency(estimatedLiabilities)}</p>
                                     </div>
                                     <div>
-                                        <span class="stat-label">Top Client</span>
-                                        <p class="stat-value">${topCustomerName}</p>
+                                        <span class="stat-label">Payroll Run Rate</span>
+                                        <p class="stat-value">${this.formatCurrency(companyPayroll)}</p>
                                     </div>
                                     <div>
-                                        <span class="stat-label">Active Alerts</span>
-                                        <p class="stat-value">${activeAlerts}</p>
+                                        <span class="stat-label">Inventory Value</span>
+                                        <p class="stat-value">${this.formatCurrency(totalInventoryValue)}</p>
                                     </div>
                                 </div>
                                 <div class="mini-chart">
                                     <div class="mini-chart-header">
-                                        <span>Working Hours</span>
-                                        <span>${weeklyWorkingHours.toFixed(1)}h / wk</span>
+                                        <span>Net Profit Trend</span>
+                                        <span>${this.formatCurrency(latestNet)}</span>
                                     </div>
                                     <div class="mini-chart-body">
-                                        <canvas id="workingHoursChart"></canvas>
+                                        <canvas id="netProfitTrendChart"></canvas>
                                     </div>
                                     <div class="mini-chart-footer">
-                                        <span>Avg ${averageWorkingHours.toFixed(1)}h</span>
-                                        <span>${todaysHours.toFixed(1)}h today</span>
+                                        <span>Cash ${this.formatCurrency(cashOnHand)}</span>
+                                        <span>Payables ${this.formatCurrency(payablesTotal)}</span>
                                     </div>
                                 </div>
                             </div>
 
-                            <div class="perplexity-card gauge-card">
+                            <div class="perplexity-card cashflow-card">
                                 <div class="card-header">
                                     <div>
-                                        <h3>Liquidity Gauge</h3>
-                                        <p>Cash vs. payroll coverage</p>
+                                        <h3>Cash Flow Monitor</h3>
+                                        <p>7-day inflow vs outflow</p>
                                     </div>
-                                    <button class="ghost-button" data-action="tasks">
-                                        <i class="fas fa-eye"></i>
+                                    <button class="ghost-button" data-action="ledger">
+                                        <i class="fas fa-chart-line"></i>
                                     </button>
                                 </div>
-                                <div class="gauge-wrapper">
-                                    <div class="gauge-shell">
-                                        <canvas id="oilLevelChart"></canvas>
-                                        <div class="gauge-overlay">
-                                            <span id="oil-level-value">${oilLevel}%</span>
-                                            <p>Filled</p>
-                                        </div>
+                                <div class="cashflow-stats">
+                                    <div>
+                                        <span class="stat-label">Today's Inflow</span>
+                                        <p class="stat-value">${this.formatCurrency(cashFlowSummary.todayInflow)}</p>
                                     </div>
-                                    <div class="gauge-meta">
-                                        <div>
-                                            <span class="stat-label">Payroll / Mo</span>
-                                            <p class="stat-value">${this.formatCurrency(companyPayroll)}</p>
-                                        </div>
-                                        <div>
-                                            <span class="stat-label">Energy Use</span>
-                                            <p class="stat-value">${energyUsage}%</p>
-                                        </div>
-                                        <div>
-                                            <span class="stat-label">Cycle Efficiency</span>
-                                            <p class="stat-value">${Math.min(99, Math.max(55, Math.round(averageWorkingHours * 8)))}%</p>
-                                        </div>
+                                    <div>
+                                        <span class="stat-label">Today's Outflow</span>
+                                        <p class="stat-value">${this.formatCurrency(cashFlowSummary.todayOutflow)}</p>
+                                    </div>
+                                    <div>
+                                        <span class="stat-label">Weekly Net</span>
+                                        <p class="stat-value ${cashFlowSummary.weeklyNet >= 0 ? 'text-positive' : 'text-negative'}">${this.formatCurrency(cashFlowSummary.weeklyNet)}</p>
+                                    </div>
+                                </div>
+                                <div class="mini-chart">
+                                    <div class="mini-chart-header">
+                                        <span>Operating cash</span>
+                                        <span>${this.formatCurrency(weekRevenue)} revenue</span>
+                                    </div>
+                                    <div class="mini-chart-body">
+                                        <canvas id="cashFlowChart"></canvas>
+                                    </div>
+                                    <div class="mini-chart-footer">
+                                        <span>Credit ${this.formatCurrency(creditSalesTotal)}</span>
+                                        <span>Cash ${this.formatCurrency(cashSalesTotal)}</span>
                                     </div>
                                 </div>
                             </div>
 
-                            <div class="perplexity-card battery-card">
+                            <div class="perplexity-card tasks-card">
                                 <div class="card-header">
                                     <div>
-                                        <h3>Executive Snapshot</h3>
-                                        <p>Approvals, alerts & pay</p>
+                                        <h3>Current Tasks</h3>
+                                        <p>Approvals and key follow-ups</p>
                                     </div>
-                                    <button class="ghost-button" data-action="accura-ai">
-                                        <i class="fas fa-plug"></i>
-                                    </button>
+                                    <span class="status-chip">${taskStats.overdue} overdue</span>
                                 </div>
-                                <div class="battery-meter">
-                                    <div class="battery-level" style="width: ${metrics.batteryLevel}%"></div>
+                                <div class="tasks-progress">
+                                    <div class="tasks-progress-bar" style="width: ${Math.min(100, Math.max(0, taskStats.completionRate))}%"></div>
                                 </div>
-                                <div class="battery-meta">
-                                    <div>
-                                        <span class="stat-label">Requests</span>
-                                        <p class="stat-value" id="battery-level-value">${pendingApprovals.length}</p>
-                                    </div>
-                                    <div>
-                                        <span class="stat-label">Alerts</span>
-                                        <p class="stat-value">${activeAlerts}</p>
-                                    </div>
-                                    <div>
-                                        <span class="stat-label">Monthly Earnings</span>
-                                        <p class="stat-value">${this.formatCurrency(totalEarnings)}</p>
-                                    </div>
+                                <div class="tasks-progress-meta">
+                                    <span>${taskStats.completionRate}% complete</span>
+                                    <span>${taskStats.active} active • ${taskStats.dueSoon} due soon</span>
                                 </div>
+                                <div class="tasks-chart">
+                                    <canvas id="taskStatusChart"></canvas>
+                                </div>
+                                <ul class="task-priority-list">
+                                    ${priorityTasks.length ? priorityTasks.map(task => `
+                                        <li class="${task.overdue ? 'overdue' : ''}">
+                                            <div>
+                                                <p class="task-title">${task.title}</p>
+                                                <p class="task-meta">${task.dueLabel} • ${(task.status || 'active').replace(/_/g, ' ')}</p>
+                                            </div>
+                                            <button class="ghost-button" data-action="view-task" data-task-id="${task.id}">
+                                                <i class="fas fa-arrow-right"></i>
+                                            </button>
+                                        </li>
+                                    `).join('') : '<li class="empty-state">All strategic tasks are on track.</li>'}
+                                </ul>
                             </div>
                         </div>
 
                         <div class="dashboard-history-grid">
-                            <div class="perplexity-card history-card">
+                            <div class="perplexity-card inventory-card">
                                 <div class="card-header">
                                     <div>
-                                        <h3>Cash Temperature</h3>
-                                        <p>10 recent readings</p>
+                                        <h3>Inventory Alerts</h3>
+                                        <p>Products below safety stock</p>
                                     </div>
-                                    <span class="status-chip">${latestTemperature}°C</span>
+                                    <span class="status-chip">${inventoryAlerts.length ? `${inventoryAlerts.length} items` : 'Balanced'}</span>
                                 </div>
-                                <div class="history-chart">
-                                    <canvas id="temperatureChart"></canvas>
+                                <div class="inventory-alerts">
+                                    ${inventoryAlerts.length ? `
+                                        <ul>
+                                            ${inventoryAlerts.map(product => `
+                                                <li>
+                                                    <div>
+                                                        <p class="inventory-name">${product.name}</p>
+                                                        <p class="inventory-meta">${product.sku ? `SKU ${product.sku}` : 'Low stock alert'}</p>
+                                                    </div>
+                                                    <span class="inventory-stock">${product.stock} left</span>
+                                                </li>
+                                            `).join('')}
+                                        </ul>
+                                    ` : '<p class="empty-state">Inventory balanced. No alerts.</p>'}
                                 </div>
-                                <div class="history-footer">
-                                    <div>
-                                        <span class="stat-label">Peak</span>
-                                        <p class="stat-value">${temperatureData.length ? Math.max(...temperatureData) : 0}°C</p>
-                                    </div>
-                                    <div>
-                                        <span class="stat-label">Low</span>
-                                        <p class="stat-value">${temperatureData.length ? Math.min(...temperatureData) : 0}°C</p>
-                                    </div>
-                                    <div>
-                                        <span class="stat-label">Inventory</span>
-                                        <p class="stat-value">${topProductName}</p>
-                                    </div>
+                                <div class="inventory-footer">
+                                    <span class="stat-label">Top Seller</span>
+                                    <p class="stat-value">${topProductName}</p>
                                 </div>
                             </div>
                         </div>
@@ -5503,22 +5571,22 @@ getSidebar() {
                             </div>
                             <div class="object-browser-content">
                                 <section class="object-browser-section">
-                                    <h4>Properties</h4>
+                                    <h4>Financial Snapshot</h4>
                                     <div class="object-browser-item">
-                                        <span>Machine Health</span>
-                                        <span>${machineHealth}%</span>
+                                        <span>Cash on Hand</span>
+                                        <span>${this.formatCurrency(cashOnHand)}</span>
                                     </div>
                                     <div class="object-browser-item">
-                                        <span>Uptime Score</span>
-                                        <span>${uptimeScore}%</span>
+                                        <span>Receivables</span>
+                                        <span>${this.formatCurrency(receivablesTotal)}</span>
                                     </div>
                                     <div class="object-browser-item">
-                                        <span>Active Alerts</span>
-                                        <span>${activeAlerts}</span>
+                                        <span>Payables</span>
+                                        <span>${this.formatCurrency(payablesTotal)}</span>
                                     </div>
                                     <div class="object-browser-item">
-                                        <span>Unread Signals</span>
-                                        <span>${this.getUnreadMessageCount()}</span>
+                                        <span>Open Alerts</span>
+                                        <span>${alertCount}</span>
                                     </div>
                                 </section>
 
@@ -5582,25 +5650,35 @@ getSidebar() {
         renderManagerDashboard(metrics) {
             const {
                 currentUser,
-                systemStatus,
+                businessOutlook,
+                businessOutlookClass,
                 teamRevenue,
                 teamSalesCount,
                 teamWorkers,
                 workerPerformance,
                 teamSalaryTotal,
                 teamCommissionTotal,
-                weeklyWorkingHours,
-                averageWorkingHours,
-                todaysHours,
+                pendingApprovals,
                 managerOutstanding,
                 insights,
-                pendingApprovals,
-                machineHealth,
-                uptimeScore,
-                activeAlerts
+                taskStats,
+                cashFlowSummary,
+                cashOnHand,
+                receivablesTotal,
+                payablesTotal,
+                lowStockProducts,
+                weekRevenue,
+                weekExpenseValue,
+                alertCount,
+                cashSalesTotal,
+                creditSalesTotal
             } = metrics;
 
             const topPerformer = workerPerformance[0];
+            const teamTaskFocus = (taskStats.priority || []).filter(task => managerOutstanding.some(item => item.id === task.id));
+            const displayTasks = (teamTaskFocus.length ? teamTaskFocus : (taskStats.priority || [])).slice(0, 4);
+            const latestNet = monthlyNetProfitSeries.length ? monthlyNetProfitSeries[monthlyNetProfitSeries.length - 1].net : 0;
+            const inventoryAlerts = lowStockProducts.slice(0, 5);
 
             return `
                 <div class="owlio-dashboard fade-in manager-dashboard">
@@ -5609,7 +5687,7 @@ getSidebar() {
                             <div>
                                 <p class="dashboard-kicker">Team Oversight</p>
                                 <h2 class="dashboard-title">Owlio Control Surface</h2>
-                                <p class="dashboard-subtitle">Lead status: <span class="status-pill status-${systemStatus.toLowerCase()}">${systemStatus}</span></p>
+                                <p class="dashboard-subtitle">Team posture: <span class="status-pill ${businessOutlookClass}">${businessOutlook}</span></p>
                             </div>
                             <div class="dashboard-actions">
                                 ${this.getCountrySelector()}
@@ -5629,71 +5707,143 @@ getSidebar() {
                             <div class="dashboard-metric-card metric-purple">
                                 <div class="metric-label">Active Workers</div>
                                 <div class="metric-value">${teamWorkers.length}</div>
-                                <div class="metric-subtext">${workerPerformance.filter(w => w.revenue > 0).length} contributing</div>
+                                <div class="metric-subtext">${workerPerformance.filter(w => w.revenue > 0).length} producing</div>
                             </div>
                             <div class="dashboard-metric-card metric-gold">
-                                <div class="metric-label">Salary Coverage</div>
+                                <div class="metric-label">Compensation Cover</div>
                                 <div class="metric-value">${this.formatCurrency(teamSalaryTotal)}</div>
                                 <div class="metric-subtext">Commission ${this.formatCurrency(teamCommissionTotal)}</div>
                             </div>
                             <div class="dashboard-metric-card metric-green">
                                 <div class="metric-label">Outstanding Tasks</div>
                                 <div class="metric-value">${managerOutstanding.length}</div>
-                                <div class="metric-subtext">Includes ${pendingApprovals.length} approvals</div>
+                                <div class="metric-subtext">${pendingApprovals.length} awaiting approval</div>
                             </div>
                         </div>
 
                         <div class="dashboard-status-grid">
-                            <div class="perplexity-card machine-card">
+                            <div class="perplexity-card finance-card">
                                 <div class="card-header">
                                     <div>
-                                        <h3>Team Activity</h3>
-                                        <p>Deal cadence & focus</p>
+                                        <h3>Team Sales Momentum</h3>
+                                        <p>Monthly revenue performance</p>
                                     </div>
-                                    <span class="status-pill status-${systemStatus.toLowerCase()}">${systemStatus}</span>
+                                    <span class="status-pill ${businessOutlookClass}">${this.formatCurrency(latestNet)}</span>
                                 </div>
-                                <div class="machine-stats">
-                                    <div>
-                                        <span class="stat-label">Lead Manager</span>
-                                        <p class="stat-value">${currentUser.name}</p>
-                                    </div>
+                                <div class="finance-stats-grid">
                                     <div>
                                         <span class="stat-label">Top Performer</span>
                                         <p class="stat-value">${topPerformer ? topPerformer.name : 'TBD'}</p>
                                     </div>
                                     <div>
-                                        <span class="stat-label">Avg Hours</span>
-                                        <p class="stat-value">${averageWorkingHours.toFixed(1)} h</p>
+                                        <span class="stat-label">Top Revenue</span>
+                                        <p class="stat-value">${topPerformer ? this.formatCurrency(topPerformer.revenue) : this.formatCurrency(0)}</p>
                                     </div>
                                     <div>
-                                        <span class="stat-label">Alerts</span>
-                                        <p class="stat-value">${managerOutstanding.length}</p>
+                                        <span class="stat-label">Cash on Hand</span>
+                                        <p class="stat-value">${this.formatCurrency(cashOnHand)}</p>
+                                    </div>
+                                    <div>
+                                        <span class="stat-label">Receivables</span>
+                                        <p class="stat-value">${this.formatCurrency(receivablesTotal)}</p>
                                     </div>
                                 </div>
                                 <div class="mini-chart">
                                     <div class="mini-chart-header">
-                                        <span>Working Hours</span>
-                                        <span>${weeklyWorkingHours.toFixed(1)}h / wk</span>
+                                        <span>Team Net Trend</span>
+                                        <span>${this.formatCurrency(latestNet)}</span>
                                     </div>
                                     <div class="mini-chart-body">
-                                        <canvas id="workingHoursChart"></canvas>
+                                        <canvas id="netProfitTrendChart"></canvas>
                                     </div>
                                     <div class="mini-chart-footer">
-                                        <span>Avg ${averageWorkingHours.toFixed(1)}h</span>
-                                        <span>${todaysHours.toFixed(1)}h today</span>
+                                        <span>Payables ${this.formatCurrency(payablesTotal)}</span>
+                                        <span>Burn ${this.formatCurrency(weekExpenseValue)}</span>
                                     </div>
                                 </div>
                             </div>
 
-                            <div class="perplexity-card history-card">
+                            <div class="perplexity-card cashflow-card">
+                                <div class="card-header">
+                                    <div>
+                                        <h3>Pipeline Cash Flow</h3>
+                                        <p>Daily inflow vs outflow</p>
+                                    </div>
+                                    <button class="ghost-button" data-action="reports">
+                                        <i class="fas fa-chart-area"></i>
+                                    </button>
+                                </div>
+                                <div class="cashflow-stats">
+                                    <div>
+                                        <span class="stat-label">Today's Inflow</span>
+                                        <p class="stat-value">${this.formatCurrency(cashFlowSummary.todayInflow)}</p>
+                                    </div>
+                                    <div>
+                                        <span class="stat-label">Today's Outflow</span>
+                                        <p class="stat-value">${this.formatCurrency(cashFlowSummary.todayOutflow)}</p>
+                                    </div>
+                                    <div>
+                                        <span class="stat-label">Weekly Net</span>
+                                        <p class="stat-value ${cashFlowSummary.weeklyNet >= 0 ? 'text-positive' : 'text-negative'}">${this.formatCurrency(cashFlowSummary.weeklyNet)}</p>
+                                    </div>
+                                </div>
+                                <div class="mini-chart">
+                                    <div class="mini-chart-header">
+                                        <span>Operating cash</span>
+                                        <span>${this.formatCurrency(weekRevenue)} revenue</span>
+                                    </div>
+                                    <div class="mini-chart-body">
+                                        <canvas id="cashFlowChart"></canvas>
+                                    </div>
+                                    <div class="mini-chart-footer">
+                                        <span>Credit ${this.formatCurrency(creditSalesTotal)}</span>
+                                        <span>Cash ${this.formatCurrency(cashSalesTotal)}</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="perplexity-card tasks-card">
+                                <div class="card-header">
+                                    <div>
+                                        <h3>Task Pipeline</h3>
+                                        <p>Team blockers & coaching moments</p>
+                                    </div>
+                                    <span class="status-chip">${taskStats.overdue} overdue</span>
+                                </div>
+                                <div class="tasks-progress">
+                                    <div class="tasks-progress-bar" style="width: ${Math.min(100, Math.max(0, taskStats.completionRate))}%"></div>
+                                </div>
+                                <div class="tasks-progress-meta">
+                                    <span>${taskStats.completionRate}% complete</span>
+                                    <span>${managerOutstanding.length} open • ${taskStats.dueSoon} due soon</span>
+                                </div>
+                                <div class="tasks-chart">
+                                    <canvas id="taskStatusChart"></canvas>
+                                </div>
+                                <ul class="task-priority-list">
+                                    ${displayTasks.length ? displayTasks.map(task => `
+                                        <li class="${task.overdue ? 'overdue' : ''}">
+                                            <div>
+                                                <p class="task-title">${task.title}</p>
+                                                <p class="task-meta">${task.dueLabel} • ${(task.status || 'active').replace(/_/g, ' ')}</p>
+                                            </div>
+                                            <button class="ghost-button" data-action="view-task" data-task-id="${task.id}">
+                                                <i class="fas fa-arrow-right"></i>
+                                            </button>
+                                        </li>
+                                    `).join('') : '<li class="empty-state">No outstanding blockers. Great job!</li>'}
+                                </ul>
+                            </div>
+                        </div>
+
+                        <div class="dashboard-history-grid">
+                            <div class="perplexity-card performance-card">
                                 <div class="card-header">
                                     <div>
                                         <h3>Team Performance</h3>
-                                        <p>Revenue by team member</p>
+                                        <p>Revenue contribution by rep</p>
                                     </div>
-                                    <button class="ghost-button" data-action="tasks">
-                                        <i class="fas fa-users"></i>
-                                    </button>
+                                    <span class="status-chip">${workerPerformance.length} members</span>
                                 </div>
                                 <div class="history-chart">
                                     <canvas id="teamPerformanceChart"></canvas>
@@ -5709,12 +5859,12 @@ getSidebar() {
                                     </div>
                                     <div>
                                         <span class="stat-label">Active Alerts</span>
-                                        <p class="stat-value">${activeAlerts}</p>
+                                        <p class="stat-value">${alertCount}</p>
                                     </div>
                                 </div>
                             </div>
 
-                            <div class="perplexity-card battery-card">
+                            <div class="perplexity-card compensation-card">
                                 <div class="card-header">
                                     <div>
                                         <h3>Compensation Mix</h3>
@@ -5727,7 +5877,7 @@ getSidebar() {
                                 <div class="history-chart">
                                     <canvas id="salaryDistributionChart"></canvas>
                                 </div>
-                                <div class="battery-meta">
+                                <div class="compensation-stats">
                                     <div>
                                         <span class="stat-label">Salary</span>
                                         <p class="stat-value">${this.formatCurrency(teamSalaryTotal)}</p>
@@ -5740,32 +5890,6 @@ getSidebar() {
                                         <span class="stat-label">Per Worker Avg</span>
                                         <p class="stat-value">${teamWorkers.length ? this.formatCurrency(teamSalaryTotal / teamWorkers.length) : this.formatCurrency(0)}</p>
                                     </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="dashboard-history-grid">
-                            <div class="perplexity-card history-card">
-                                <div class="card-header">
-                                    <div>
-                                        <h3>Outstanding Tasks</h3>
-                                        <p>Team blockers & follow-ups</p>
-                                    </div>
-                                    <span class="status-chip">${managerOutstanding.length} open</span>
-                                </div>
-                                <div class="object-browser-feed">
-                                    ${managerOutstanding.slice(0, 5).map(task => {
-                                        const owner = this.state.users.find(u => u.id === task.createdBy);
-                                        return `
-                                            <div class="object-feed-item">
-                                                <span class="dot bg-yellow-500"></span>
-                                                <div>
-                                                    <p class="feed-title">${task.title || 'Untitled Task'}</p>
-                                                    <p class="feed-body">Owner: ${owner ? owner.name : 'Unknown'} • ${task.status}</p>
-                                                </div>
-                                            </div>
-                                        `;
-                                    }).join('') || '<p class="empty-state">No outstanding tasks. Great job!</p>'}
                                 </div>
                             </div>
                         </div>
@@ -5788,6 +5912,19 @@ getSidebar() {
                                             </li>
                                         `).join('')}
                                     </ul>
+                                </section>
+                                <section class="object-browser-section">
+                                    <h4>Inventory Alerts</h4>
+                                    ${inventoryAlerts.length ? `
+                                        <ul class="object-inventory">
+                                            ${inventoryAlerts.map(product => `
+                                                <li>
+                                                    <span>${product.name}</span>
+                                                    <span>${product.stock} left</span>
+                                                </li>
+                                            `).join('')}
+                                        </ul>
+                                    ` : '<p class="empty-state">No inventory concerns.</p>'}
                                 </section>
                                 <section class="object-browser-section">
                                     <h4>Team Signals</h4>
@@ -5819,34 +5956,45 @@ getSidebar() {
         renderWorkerDashboard(metrics) {
             const {
                 currentUser,
-                systemStatus,
-                monthlySalary,
-                totalRevenue,
+                filteredSales,
                 personalTasks,
-                personalSalesSeries,
-                weeklyWorkingHours,
-                averageWorkingHours,
-                todaysHours,
+                taskStats,
+                cashFlowSummary,
+                cashOnHand,
+                receivablesTotal,
+                payablesTotal,
                 insights,
-                recentSales,
+                lowStockProducts,
                 customers,
+                personalSalesSeries,
                 totalEarnings,
-                energyUsage
+                weekRevenue,
+                weekExpenseValue,
+                cashSalesTotal,
+                creditSalesTotal,
+                alertCount
             } = metrics;
 
-            const bestMonth = personalSalesSeries.length ? Math.max(...personalSalesSeries.map(point => point.total)) : 0;
-            const currentMonth = personalSalesSeries.length ? personalSalesSeries[personalSalesSeries.length - 1].total : 0;
+            const personalRevenue = filteredSales.reduce((sum, sale) => sum + (sale.total || 0), 0);
+            const personalDeals = filteredSales.length;
+            const commission = currentUser.commission || 0;
+            const baseSalary = currentUser.salary || 0;
+            const personalPriority = (taskStats.priority || []).filter(task => personalTasks.some(pt => pt.id === task.id));
+            const displayTasks = (personalPriority.length ? personalPriority : (taskStats.priority || [])).slice(0, 4);
+            const latestPersonalPoint = personalSalesSeries.length ? personalSalesSeries[personalSalesSeries.length - 1].total : 0;
+            const inventoryWatch = lowStockProducts.slice(0, 4);
 
             return `
                 <div class="owlio-dashboard fade-in worker-dashboard">
                     <div class="dashboard-main">
                         <div class="dashboard-top">
                             <div>
-                                <p class="dashboard-kicker">My Performance</p>
-                                <h2 class="dashboard-title">Owlio Personal Cockpit</h2>
-                                <p class="dashboard-subtitle">Focus mode: <span class="status-pill status-${systemStatus.toLowerCase()}">${systemStatus}</span></p>
+                                <p class="dashboard-kicker">My Workspace</p>
+                                <h2 class="dashboard-title">Owlio Control Surface</h2>
+                                <p class="dashboard-subtitle">Ready to sell: <span class="status-pill status-optimal">${personalDeals} active deals</span></p>
                             </div>
                             <div class="dashboard-actions">
+                                ${this.getCountrySelector()}
                                 <button data-action="refresh-ai" class="${this.state.aiMode === 'ai' ? 'ai-button' : 'bot-button'} dashboard-refresh">
                                     <i class="fas fa-arrows-rotate"></i>
                                     Refresh AI
@@ -5856,124 +6004,167 @@ getSidebar() {
 
                         <div class="dashboard-metric-grid">
                             <div class="dashboard-metric-card metric-blue">
-                                <div class="metric-label">Monthly Salary</div>
-                                <div class="metric-value">${this.formatCurrency(monthlySalary)}</div>
-                                <div class="metric-subtext">Base compensation</div>
+                                <div class="metric-label">My Revenue</div>
+                                <div class="metric-value animated-number" data-target="${personalRevenue}" data-format="currency">${this.formatCurrency(0)}</div>
+                                <div class="metric-subtext">${personalDeals} deals won</div>
                             </div>
                             <div class="dashboard-metric-card metric-purple">
-                                <div class="metric-label">Commission</div>
-                                <div class="metric-value">${this.formatCurrency(currentUser.commission || 0)}</div>
-                                <div class="metric-subtext">Earned this cycle</div>
+                                <div class="metric-label">Commission Earned</div>
+                                <div class="metric-value">${this.formatCurrency(commission)}</div>
+                                <div class="metric-subtext">Total earnings ${this.formatCurrency(totalEarnings)}</div>
                             </div>
                             <div class="dashboard-metric-card metric-gold">
-                                <div class="metric-label">Personal Revenue</div>
-                                <div class="metric-value animated-number" data-target="${totalRevenue}" data-format="currency">${this.formatCurrency(0)}</div>
-                                <div class="metric-subtext">${personalSalesSeries.length ? personalSalesSeries[personalSalesSeries.length - 1].label : 'This month'}</div>
+                                <div class="metric-label">Tasks Assigned</div>
+                                <div class="metric-value">${personalTasks.length}</div>
+                                <div class="metric-subtext">${taskStats.dueSoon} due soon</div>
                             </div>
                             <div class="dashboard-metric-card metric-green">
-                                <div class="metric-label">Active Tasks</div>
-                                <div class="metric-value">${personalTasks.length}</div>
-                                <div class="metric-subtext">Keep momentum</div>
+                                <div class="metric-label">Weekly Revenue</div>
+                                <div class="metric-value">${this.formatCurrency(weekRevenue)}</div>
+                                <div class="metric-subtext">Team burn ${this.formatCurrency(weekExpenseValue)}</div>
                             </div>
                         </div>
 
                         <div class="dashboard-status-grid">
-                            <div class="perplexity-card machine-card">
+                            <div class="perplexity-card finance-card">
                                 <div class="card-header">
                                     <div>
-                                        <h3>Daily Rhythm</h3>
-                                        <p>Your recent activity</p>
+                                        <h3>My Earnings Snapshot</h3>
+                                        <p>Salary, commission & pipeline</p>
                                     </div>
-                                    <span class="status-pill status-${systemStatus.toLowerCase()}">${systemStatus}</span>
+                                    <span class="status-pill status-optimal">On track</span>
                                 </div>
-                                <div class="machine-stats">
+                                <div class="finance-stats-grid">
                                     <div>
-                                        <span class="stat-label">Name</span>
-                                        <p class="stat-value">${currentUser.name}</p>
+                                        <span class="stat-label">Base Salary</span>
+                                        <p class="stat-value">${this.formatCurrency(baseSalary)}</p>
                                     </div>
                                     <div>
-                                        <span class="stat-label">Weekly Hours</span>
-                                        <p class="stat-value">${weeklyWorkingHours.toFixed(1)} h</p>
+                                        <span class="stat-label">Commission</span>
+                                        <p class="stat-value">${this.formatCurrency(commission)}</p>
                                     </div>
                                     <div>
-                                        <span class="stat-label">Average</span>
-                                        <p class="stat-value">${averageWorkingHours.toFixed(1)} h</p>
+                                        <span class="stat-label">Cash on Hand</span>
+                                        <p class="stat-value">${this.formatCurrency(cashOnHand)}</p>
                                     </div>
                                     <div>
-                                        <span class="stat-label">Today</span>
-                                        <p class="stat-value">${todaysHours.toFixed(1)} h</p>
+                                        <span class="stat-label">Receivables</span>
+                                        <p class="stat-value">${this.formatCurrency(receivablesTotal)}</p>
                                     </div>
                                 </div>
                                 <div class="mini-chart">
                                     <div class="mini-chart-header">
-                                        <span>Working Hours</span>
-                                        <span>${weeklyWorkingHours.toFixed(1)}h / wk</span>
+                                        <span>Personal sales trend</span>
+                                        <span>${this.formatCurrency(latestPersonalPoint)}</span>
                                     </div>
                                     <div class="mini-chart-body">
-                                        <canvas id="workingHoursChart"></canvas>
+                                        <canvas id="personalSalesChart"></canvas>
                                     </div>
                                     <div class="mini-chart-footer">
-                                        <span>Avg ${averageWorkingHours.toFixed(1)}h</span>
-                                        <span>${todaysHours.toFixed(1)}h today</span>
+                                        <span>Credit ${this.formatCurrency(creditSalesTotal)}</span>
+                                        <span>Cash ${this.formatCurrency(cashSalesTotal)}</span>
                                     </div>
                                 </div>
                             </div>
 
-                            <div class="perplexity-card history-card">
+                            <div class="perplexity-card cashflow-card">
                                 <div class="card-header">
                                     <div>
-                                        <h3>Sales Momentum</h3>
-                                        <p>Monthly personal revenue</p>
+                                        <h3>Business Pulse</h3>
+                                        <p>Company cash insight</p>
                                     </div>
-                                    <button class="ghost-button" data-action="sales">
-                                        <i class="fas fa-chart-line"></i>
+                                    <button class="ghost-button" data-action="reports">
+                                        <i class="fas fa-chart-bar"></i>
                                     </button>
                                 </div>
-                                <div class="history-chart">
-                                    <canvas id="personalSalesChart"></canvas>
+                                <div class="cashflow-stats">
+                                    <div>
+                                        <span class="stat-label">Today's Inflow</span>
+                                        <p class="stat-value">${this.formatCurrency(cashFlowSummary.todayInflow)}</p>
+                                    </div>
+                                    <div>
+                                        <span class="stat-label">Today's Outflow</span>
+                                        <p class="stat-value">${this.formatCurrency(cashFlowSummary.todayOutflow)}</p>
+                                    </div>
+                                    <div>
+                                        <span class="stat-label">Weekly Net</span>
+                                        <p class="stat-value ${cashFlowSummary.weeklyNet >= 0 ? 'text-positive' : 'text-negative'}">${this.formatCurrency(cashFlowSummary.weeklyNet)}</p>
+                                    </div>
                                 </div>
-                                <div class="history-footer">
-                                    <div>
-                                        <span class="stat-label">Best Month</span>
-                                        <p class="stat-value">${this.formatCurrency(bestMonth)}</p>
+                                <div class="mini-chart">
+                                    <div class="mini-chart-header">
+                                        <span>Cash flow</span>
+                                        <span>${this.formatCurrency(weekRevenue)} revenue</span>
                                     </div>
-                                    <div>
-                                        <span class="stat-label">Current Month</span>
-                                        <p class="stat-value">${this.formatCurrency(currentMonth)}</p>
+                                    <div class="mini-chart-body">
+                                        <canvas id="cashFlowChart"></canvas>
                                     </div>
-                                    <div>
-                                        <span class="stat-label">Energy Use</span>
-                                        <p class="stat-value">${energyUsage}%</p>
+                                    <div class="mini-chart-footer">
+                                        <span>Alerts ${alertCount}</span>
+                                        <span>Payables ${this.formatCurrency(payablesTotal)}</span>
                                     </div>
                                 </div>
                             </div>
 
-                            <div class="perplexity-card battery-card">
+                            <div class="perplexity-card tasks-card">
                                 <div class="card-header">
                                     <div>
-                                        <h3>Pay Snapshot</h3>
-                                        <p>Salary, commission & goals</p>
+                                        <h3>My Tasks</h3>
+                                        <p>Focus for today</p>
                                     </div>
-                                    <button class="ghost-button" data-action="tasks">
-                                        <i class="fas fa-check"></i>
-                                    </button>
+                                    <span class="status-chip">${personalTasks.length} assigned</span>
                                 </div>
-                                <div class="battery-meter">
-                                    <div class="battery-level" style="width: ${metrics.batteryLevel}%"></div>
+                                <div class="tasks-progress">
+                                    <div class="tasks-progress-bar" style="width: ${Math.min(100, Math.max(0, taskStats.completionRate))}%"></div>
                                 </div>
-                                <div class="battery-meta">
+                                <div class="tasks-progress-meta">
+                                    <span>${taskStats.completionRate}% complete</span>
+                                    <span>${taskStats.dueSoon} due soon</span>
+                                </div>
+                                <div class="tasks-chart">
+                                    <canvas id="taskStatusChart"></canvas>
+                                </div>
+                                <ul class="task-priority-list">
+                                    ${displayTasks.length ? displayTasks.map(task => `
+                                        <li class="${task.overdue ? 'overdue' : ''}">
+                                            <div>
+                                                <p class="task-title">${task.title}</p>
+                                                <p class="task-meta">${task.dueLabel} • ${(task.status || 'active').replace(/_/g, ' ')}</p>
+                                            </div>
+                                            <button class="ghost-button" data-action="view-task" data-task-id="${task.id}">
+                                                <i class="fas fa-arrow-right"></i>
+                                            </button>
+                                        </li>
+                                    `).join('') : '<li class="empty-state">No tasks pending. Great work!</li>'}
+                                </ul>
+                            </div>
+                        </div>
+
+                        <div class="dashboard-history-grid">
+                            <div class="perplexity-card inventory-card">
+                                <div class="card-header">
                                     <div>
-                                        <span class="stat-label">Monthly Earnings</span>
-                                        <p class="stat-value">${this.formatCurrency(totalEarnings)}</p>
+                                        <h3>Inventory Watch</h3>
+                                        <p>Products trending low</p>
                                     </div>
-                                    <div>
-                                        <span class="stat-label">Active Tasks</span>
-                                        <p class="stat-value">${personalTasks.length}</p>
-                                    </div>
-                                    <div>
-                                        <span class="stat-label">Commission</span>
-                                        <p class="stat-value">${this.formatCurrency(currentUser.commission || 0)}</p>
-                                    </div>
+                                    <span class="status-chip">${inventoryWatch.length ? `${inventoryWatch.length} items` : 'Stable'}</span>
+                                </div>
+                                <div class="inventory-alerts">
+                                    ${inventoryWatch.length ? `
+                                        <ul>
+                                            ${inventoryWatch.map(product => `
+                                                <li>
+                                                    <div>
+                                                        <p class="inventory-name">${product.name}</p>
+                                                        <p class="inventory-meta">${product.stock} left</p>
+                                                    </div>
+                                                    <button class="ghost-button" data-action="request-stock" data-product-id="${product.id}">
+                                                        <i class="fas fa-box-open"></i>
+                                                    </button>
+                                                </li>
+                                            `).join('')}
+                                        </ul>
+                                    ` : '<p class="empty-state">Stock is healthy.</p>'}
                                 </div>
                             </div>
                         </div>
@@ -5981,29 +6172,15 @@ getSidebar() {
                     <aside class="dashboard-side">
                         <div class="object-browser-card perplexity-card">
                             <div class="object-browser-menu">
-                                <button class="active">Tasks</button>
+                                <button class="active">Sales Feed</button>
+                                <button>Tasks</button>
                                 <button>Signals</button>
-                                <button>Wins</button>
                             </div>
                             <div class="object-browser-content">
                                 <section class="object-browser-section">
-                                    <h4>Assigned Tasks</h4>
+                                    <h4>Recent Sales</h4>
                                     <div class="object-browser-feed">
-                                        ${personalTasks.slice(0, 5).map(task => `
-                                            <div class="object-feed-item">
-                                                <span class="dot bg-sky-500"></span>
-                                                <div>
-                                                    <p class="feed-title">${task.title || 'Team Task'}</p>
-                                                    <p class="feed-body">${task.status}</p>
-                                                </div>
-                                            </div>
-                                        `).join('') || '<p class="empty-state">All tasks completed. Great work!</p>'}
-                                    </div>
-                                </section>
-                                <section class="object-browser-section">
-                                    <h4>Recent Wins</h4>
-                                    <div class="object-browser-feed">
-                                        ${recentSales.slice(0, 3).map(sale => {
+                                        ${filteredSales.slice(0, 5).map(sale => {
                                             const customer = customers.find(c => c.id === sale.customerId);
                                             const label = customer ? customer.name : 'Customer';
                                             return `
@@ -6011,15 +6188,26 @@ getSidebar() {
                                                     <span class="dot bg-green-500"></span>
                                                     <div>
                                                         <p class="feed-title">${label}</p>
-                                                        <p class="feed-body">${this.formatCurrency(sale.total)} total</p>
+                                                        <p class="feed-body">${this.formatCurrency(sale.total)} • ${new Date(sale.date).toLocaleDateString()}</p>
                                                     </div>
                                                 </div>
                                             `;
-                                        }).join('') || '<p class="empty-state">Log your first sale to see wins here.</p>'}
+                                        }).join('') || '<p class="empty-state">No recent sales yet. Start a deal!</p>'}
                                     </div>
                                 </section>
                                 <section class="object-browser-section">
-                                    <h4>Coach Signals</h4>
+                                    <h4>My Tasks</h4>
+                                    <ul class="object-inventory">
+                                        ${personalTasks.slice(0, 5).map(task => `
+                                            <li>
+                                                <span>${task.title || 'Untitled Task'}</span>
+                                                <span>${task.status}</span>
+                                            </li>
+                                        `).join('') || '<li class="empty-state">No tasks assigned.</li>'}
+                                    </ul>
+                                </section>
+                                <section class="object-browser-section">
+                                    <h4>AI Signals</h4>
                                     <div class="object-browser-feed">
                                         ${insights.map(notification => `
                                             <div class="object-feed-item">
@@ -6038,23 +6226,6 @@ getSidebar() {
                 </div>
             `;
         },
-
-
-        getCountrySelector() {
-                return `
-                    <div class="flex items-center space-x-2">
-                        <label class="text-sm text-gray-400 font-medium hidden sm:inline">Country:</label>
-                        <select onchange="app.changeCountry(this.value)" class="bg-gradient-to-r from-yellow-600 to-orange-600 text-white px-3 py-1 rounded-xl border-none outline-none font-medium text-sm">
-                            ${Object.entries(GCC_COUNTRIES).map(([code, country]) => `
-                                <option value="${code}" ${this.state.selectedCountry === code ? 'selected' : ''} style="background: #1a1f2e; color: white;">
-                                    ${country.currency} - ${country.name.split(' ')[0]}
-                                </option>
-                            `).join('')}
-                        </select>
-                    </div>
-                `;
-            },
-
 
 // In script.js
 // ==> REPLACE THIS FUNCTION <==
