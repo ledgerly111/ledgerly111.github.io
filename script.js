@@ -717,6 +717,7 @@ nboxNotificationInterval: null,
     const savedTheme = DataStorage.load('OwlioTheme') || 'dark-theme'; // Default to dark
     this.setTheme(savedTheme);
     this.render();
+    this.setupViewportObservers();
     this.bindEvents();
     this.updateAIInsights();
     this.updateBotAnalysis();
@@ -753,7 +754,7 @@ nboxNotificationInterval: null,
                 this.state.mobileMenuOpen = !this.state.mobileMenuOpen;
                 const sidebar = document.getElementById('mobile-sidebar');
                 const overlay = document.getElementById('sidebar-overlay');
-                
+
                 if (this.state.mobileMenuOpen) {
                     sidebar?.classList.add('open');
                     overlay?.classList.add('open');
@@ -761,15 +762,53 @@ nboxNotificationInterval: null,
                     sidebar?.classList.remove('open');
                     overlay?.classList.remove('open');
                 }
+
+                if (document?.body) {
+                    document.body.classList.toggle('no-scroll', this.state.mobileMenuOpen);
+                }
             },
 
             closeMobileSidebar() {
                 this.state.mobileMenuOpen = false;
                 const sidebar = document.getElementById('mobile-sidebar');
                 const overlay = document.getElementById('sidebar-overlay');
-                
+
                 sidebar?.classList.remove('open');
                 overlay?.classList.remove('open');
+
+                if (document?.body) {
+                    document.body.classList.remove('no-scroll');
+                }
+            },
+
+            setupViewportObservers() {
+                if (!this.boundViewportHandler) {
+                    this.boundViewportHandler = () => this.handleViewportChange();
+                }
+
+                this.handleViewportChange();
+
+                if (!this.viewportObserversAttached) {
+                    window.addEventListener('resize', this.boundViewportHandler, { passive: true });
+                    window.addEventListener('orientationchange', this.boundViewportHandler);
+                    this.viewportObserversAttached = true;
+                }
+            },
+
+            handleViewportChange() {
+                this.applyPerformanceMode();
+
+                if (window.innerWidth >= 1024 && this.state.mobileMenuOpen) {
+                    this.closeMobileSidebar();
+                }
+            },
+
+            applyPerformanceMode() {
+                const body = document?.body;
+                if (!body || typeof window === 'undefined' || !window.matchMedia) return;
+
+                const reduceEffects = window.matchMedia('(max-width: 768px)').matches;
+                body.classList.toggle('performance-mode', reduceEffects);
             },
 
             updateAIInsights() {
