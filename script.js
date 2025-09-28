@@ -35,200 +35,6 @@ const GCC_COUNTRIES = {
     'OM': { name: 'Oman', currency: 'OMR', symbol: 'OMR', rate: 0.38, tax: 0.05, taxName: 'VAT' }
 };
 
-const salesGradientPlugin = {
-    id: 'salesGradient',
-    beforeDatasetsDraw(chart) {
-        const pluginOptions = chart.options?.plugins?.salesGradient;
-        if (!pluginOptions?.enabled || !chart.chartArea) return;
-
-        const datasetIndex = pluginOptions.datasetIndex ?? 0;
-        const dataset = chart.data?.datasets?.[datasetIndex];
-        if (!dataset) return;
-
-        const { ctx, chartArea } = chart;
-        const fillGradient = ctx.createLinearGradient(0, chartArea.top, 0, chartArea.bottom);
-        fillGradient.addColorStop(0, pluginOptions.fill?.from ?? 'rgba(253, 224, 71, 0.28)');
-        fillGradient.addColorStop(1, pluginOptions.fill?.to ?? 'rgba(250, 204, 21, 0.04)');
-        dataset.backgroundColor = fillGradient;
-
-        const lineGradient = ctx.createLinearGradient(chartArea.left, chartArea.top, chartArea.right, chartArea.top);
-        lineGradient.addColorStop(0, pluginOptions.line?.from ?? '#fde047');
-        lineGradient.addColorStop(1, pluginOptions.line?.to ?? '#f97316');
-        dataset.borderColor = lineGradient;
-    }
-};
-
-const salesGlowPlugin = {
-    id: 'salesGlow',
-    afterDatasetsDraw(chart) {
-        const pluginOptions = chart.options?.plugins?.salesGlow;
-        if (!pluginOptions?.enabled) return;
-
-        const datasetMeta = chart.getDatasetMeta(pluginOptions.datasetIndex ?? 0);
-        if (!datasetMeta || datasetMeta.hidden) return;
-
-        const ctx = chart.ctx;
-        const baseRadius = pluginOptions.baseRadius || 5;
-        const glowSpread = pluginOptions.glowRadius || 4;
-
-        datasetMeta.data.forEach((point) => {
-            const position = point.tooltipPosition();
-            const radius = baseRadius;
-            const outerRadius = radius + glowSpread;
-
-            ctx.save();
-            ctx.beginPath();
-            ctx.arc(position.x, position.y, outerRadius, 0, Math.PI * 2);
-
-            const glowGradient = ctx.createRadialGradient(
-                position.x,
-                position.y,
-                radius * 0.4,
-                position.x,
-                position.y,
-                outerRadius
-            );
-            glowGradient.addColorStop(0, pluginOptions.pointColor || '#facc15');
-            glowGradient.addColorStop(1, 'rgba(250, 204, 21, 0)');
-
-            ctx.fillStyle = glowGradient;
-            ctx.shadowColor = pluginOptions.glowColor || 'rgba(250, 204, 21, 0.45)';
-            ctx.shadowBlur = pluginOptions.shadowBlur ?? 16;
-            ctx.fill();
-            ctx.restore();
-        });
-    }
-};
-
-if (typeof Chart !== 'undefined') {
-    Chart.register(salesGradientPlugin, salesGlowPlugin);
-}
-
-function createSalesPerformanceChart(ctx, labels, values, datasetLabel, currencySymbol = '') {
-    if (!ctx) return null;
-
-    return new Chart(ctx, {
-        type: 'line',
-        data: {
-            labels,
-            datasets: [{
-                label: datasetLabel,
-                data: values,
-                fill: true,
-                borderWidth: 2.5,
-                tension: 0.45,
-                pointRadius: 0,
-                pointHoverRadius: 0
-            }]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            layout: {
-                padding: { top: 12, right: 12, bottom: 8, left: 12 }
-            },
-            interaction: {
-                mode: 'index',
-                intersect: false
-            },
-            scales: {
-                x: {
-                    grid: { display: false, drawBorder: false },
-                    ticks: {
-                        color: '#fef3c7',
-                        padding: 10,
-                        font: { family: 'Saira, sans-serif', size: 12 }
-                    }
-                },
-                y: {
-                    beginAtZero: true,
-                    grid: { color: 'rgba(250, 204, 21, 0.08)', drawBorder: false },
-                    ticks: {
-                        color: '#fde68a',
-                        padding: 10,
-                        font: { family: 'Saira, sans-serif', size: 12 },
-                        callback(value) {
-                            if (typeof value !== 'number') return value;
-                            const formatted = value.toLocaleString(undefined, {
-                                maximumFractionDigits: 0
-                            });
-                            return currencySymbol ? `${currencySymbol} ${formatted}` : formatted;
-                        }
-                    }
-                }
-            },
-            elements: {
-                line: { borderCapStyle: 'round', borderJoinStyle: 'round' },
-                point: { radius: 0, hoverRadius: 0 }
-            },
-            plugins: {
-                legend: { display: false },
-                tooltip: {
-                    backgroundColor: 'rgba(17, 24, 39, 0.95)',
-                    borderColor: 'rgba(250, 204, 21, 0.4)',
-                    borderWidth: 1,
-                    titleColor: '#fef08a',
-                    bodyColor: '#fef3c7',
-                    displayColors: false,
-                    padding: 12,
-                    callbacks: {
-                        label(context) {
-                            const value = typeof context.parsed?.y === 'number' ? context.parsed.y : 0;
-                            const formatted = value.toLocaleString(undefined, {
-                                minimumFractionDigits: 0,
-                                maximumFractionDigits: 0
-                            });
-                            return currencySymbol ? `${currencySymbol} ${formatted}` : formatted;
-                        }
-                    }
-                },
-                salesGradient: {
-                    enabled: true,
-                    datasetIndex: 0,
-                    fill: {
-                        from: 'rgba(253, 224, 71, 0.28)',
-                        to: 'rgba(250, 204, 21, 0.04)'
-                    },
-                    line: {
-                        from: '#fde047',
-                        to: '#f97316'
-                    }
-                },
-                salesGlow: {
-                    enabled: true,
-                    datasetIndex: 0,
-                    glowColor: 'rgba(250, 204, 21, 0.45)',
-                    pointColor: '#facc15',
-                    baseRadius: 4,
-                    glowRadius: 3,
-                    shadowBlur: 18
-                }
-            },
-            animations: {
-                y: {
-                    duration: 1200,
-                    easing: 'easeOutQuart',
-                    delay(context) {
-                        return context.type === 'data' && context.datasetIndex === 0
-                            ? context.dataIndex * 120
-                            : 0;
-                    }
-                },
-                x: {
-                    duration: 1000,
-                    easing: 'easeOutQuart'
-                },
-                tension: {
-                    duration: 1800,
-                    easing: 'linear',
-                    from: 0.2,
-                    to: 0.45
-                }
-            }
-        }
-    });
-}
-
 // Enhanced Notification System
 class NotificationSystem {
     static show(message, type = 'info', duration = 4000) {
@@ -717,7 +523,6 @@ nboxNotificationInterval: null,
     const savedTheme = DataStorage.load('OwlioTheme') || 'dark-theme'; // Default to dark
     this.setTheme(savedTheme);
     this.render();
-    this.setupViewportObservers();
     this.bindEvents();
     this.updateAIInsights();
     this.updateBotAnalysis();
@@ -754,7 +559,7 @@ nboxNotificationInterval: null,
                 this.state.mobileMenuOpen = !this.state.mobileMenuOpen;
                 const sidebar = document.getElementById('mobile-sidebar');
                 const overlay = document.getElementById('sidebar-overlay');
-
+                
                 if (this.state.mobileMenuOpen) {
                     sidebar?.classList.add('open');
                     overlay?.classList.add('open');
@@ -762,53 +567,15 @@ nboxNotificationInterval: null,
                     sidebar?.classList.remove('open');
                     overlay?.classList.remove('open');
                 }
-
-                if (document?.body) {
-                    document.body.classList.toggle('no-scroll', this.state.mobileMenuOpen);
-                }
             },
 
             closeMobileSidebar() {
                 this.state.mobileMenuOpen = false;
                 const sidebar = document.getElementById('mobile-sidebar');
                 const overlay = document.getElementById('sidebar-overlay');
-
+                
                 sidebar?.classList.remove('open');
                 overlay?.classList.remove('open');
-
-                if (document?.body) {
-                    document.body.classList.remove('no-scroll');
-                }
-            },
-
-            setupViewportObservers() {
-                if (!this.boundViewportHandler) {
-                    this.boundViewportHandler = () => this.handleViewportChange();
-                }
-
-                this.handleViewportChange();
-
-                if (!this.viewportObserversAttached) {
-                    window.addEventListener('resize', this.boundViewportHandler, { passive: true });
-                    window.addEventListener('orientationchange', this.boundViewportHandler);
-                    this.viewportObserversAttached = true;
-                }
-            },
-
-            handleViewportChange() {
-                this.applyPerformanceMode();
-
-                if (window.innerWidth >= 1024 && this.state.mobileMenuOpen) {
-                    this.closeMobileSidebar();
-                }
-            },
-
-            applyPerformanceMode() {
-                const body = document?.body;
-                if (!body || typeof window === 'undefined' || !window.matchMedia) return;
-
-                const reduceEffects = window.matchMedia('(max-width: 768px)').matches;
-                body.classList.toggle('performance-mode', reduceEffects);
             },
 
             updateAIInsights() {
@@ -3062,21 +2829,19 @@ downloadTaskTxt(taskId) {
                     salesByMonth[month] = (salesByMonth[month] || 0) + sale.total;
                 });
 
-                const salesCtx = document.getElementById('salesChart')?.getContext('2d');
-                if (salesCtx) {
-                    const currencyDetails = GCC_COUNTRIES[this.state.selectedCountry];
-                    if (this.charts?.salesChart) {
-                        this.charts.salesChart.destroy();
-                    }
+                const salesData = {
+                    labels: Object.keys(salesByMonth),
+                    datasets: [{
+                        label: `Monthly Sales (${GCC_COUNTRIES[this.state.selectedCountry].currency})`,
+                        data: Object.values(salesByMonth),
+                        borderColor: '#00d4aa',
+                        backgroundColor: 'rgba(0, 212, 170, 0.1)',
+                        tension: 0.4,
+                        fill: true
+                    }]
+                };
 
-                    this.charts.salesChart = createSalesPerformanceChart(
-                        salesCtx,
-                        Object.keys(salesByMonth),
-                        Object.values(salesByMonth),
-                        `Monthly Sales (${currencyDetails.currency})`,
-                        currencyDetails.symbol || currencyDetails.currency
-                    );
-                }
+                this.createChart('salesChart', 'line', salesData);
 
                 // Revenue vs Expenses
                 const totalRevenue = this.state.sales.reduce((sum, sale) => sum + sale.total, 0);
@@ -3484,14 +3249,25 @@ downloadInvoice(invoiceId) {
                         return acc;
                     }, {});
 
-                    const currencyDetails = GCC_COUNTRIES[this.state.selectedCountry];
-                    window.salesChart = createSalesPerformanceChart(
-                        salesCtx,
-                        Object.keys(salesByMonth),
-                        Object.values(salesByMonth),
-                        `Monthly Sales (${currencyDetails.currency})`,
-                        currencyDetails.symbol || currencyDetails.currency
-                    );
+                    window.salesChart = new Chart(salesCtx, {
+                        type: 'line',
+                        data: {
+                            labels: Object.keys(salesByMonth),
+                            datasets: [{
+                                label: 'Monthly Sales',
+                                data: Object.values(salesByMonth),
+                                borderColor: '#00d4aa',
+                                backgroundColor: 'rgba(0, 212, 170, 0.1)',
+                                tension: 0.4,
+                                fill: true,
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            scales: { y: { beginAtZero: true } }
+                        }
+                    });
                 }
 
                 if (financeCtx) { // CORRECTED CHECK
@@ -5004,16 +4780,13 @@ getSidebar() {
 
     const sidebarContent = `
         <div class="p-6">
-            <div class="flex items-center justify-between gap-4 mb-8">
-              <div class="flex items-center gap-3 animated-header-container" id="sidebar-logo-container">
+            <div class="flex items-center mb-8">
+              <div id="sidebar-logo-container" class="animated-header-container">
                 <span class="material-symbols-outlined owl-logo-icon">owl</span>
                 <h1 class="animated-header text-2xl font-bold">
                     <span style="--i:1">O</span><span style="--i:2">w</span><span style="--i:3">l</span><span style="--i:4">i</span><span style="--i:5">o</span>
                 </h1>
               </div>
-              <button type="button" class="mobile-sidebar-close" data-action="toggle-mobile-menu" aria-label="Close navigation">
-                <span class="material-symbols-outlined text-xl">close</span>
-              </button>
             </div>
             <h3 class="text-sm font-semibold text-gray-400 uppercase tracking-wider mb-3">Navigation</h3>
             <ul class="space-y-2">
@@ -5095,271 +4868,280 @@ getSidebar() {
                 const monthlySalary = (currentUser.salary / 12) || 0;
                 const totalEarnings = monthlySalary + (currentUser.commission || 0);
                 const totalInventoryValue = products.reduce((sum, p) => sum + (p.price * p.stock), 0);
-                const averageSale = filteredSales.length > 0 ? totalRevenue / filteredSales.length : 0;
-                const averageExpense = filteredExpenses.length > 0 ? totalExpensesVal / filteredExpenses.length : 0;
-
+                
                 // Using the filtered data for calculations
                 const totalProducts = this.state.products.length;
                 const totalCustomers = this.state.customers.length;
                 const totalSalesCount = filteredSales.length;
 
                 return `
-                    <div class="dashboard-shell fade-in">
-                        <section class="dashboard-hero glass-panel slide-up">
-                            <div class="dashboard-hero__header">
-                                <div>
-                                    <span class="dashboard-hero__eyebrow">Owlio Command Center</span>
-                                    <h2 class="dashboard-hero__title">Welcome back, ${currentUser.name}</h2>
-                                    <p class="dashboard-hero__subtitle">Here is the live health report for ${this.state.companyName}.</p>
-                                </div>
-                                <div class="dashboard-hero__actions">
-                                    ${['admin', 'manager'].includes(this.state.currentUser.role) ? `<div class="dashboard-hero__selector">${this.getCountrySelector()}</div>` : ''}
-                                    <button data-action="refresh-ai" class="dashboard-hero__button ${this.state.aiMode === 'ai' ? 'ai-button' : 'bot-button'}">
-                                        <i class="fas fa-sync-alt"></i>
-                                        <span>Refresh AI</span>
-                                    </button>
-                                    <button data-action="start-quick-sale" class="dashboard-hero__button quick-sale-button">
-                                        <i class="fas fa-bolt"></i>
-                                        <span>Quick Sale</span>
-                                    </button>
-                                </div>
+                    <div class="space-y-6 fade-in">
+                        <div class="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4">
+                            <div>
+                                <h2 class="text-2xl lg:text-3xl font-bold text-white mb-2">AI-Powered Dashboard</h2>
+                                <p class="text-gray-400">Welcome back, ${currentUser.name}!</p>
                             </div>
-                            <div class="dashboard-hero__stats">
-                                <div class="hero-stat">
-                                    <span>Revenue</span>
-                                    <strong class="animated-number" data-target="${totalRevenue}" data-format="currency">${this.formatCurrency(0)}</strong>
-                                </div>
-                                <div class="hero-stat">
-                                    <span>Expenses</span>
-                                    <strong class="animated-number" data-target="${totalExpensesVal}" data-format="currency">${this.formatCurrency(0)}</strong>
-                                </div>
-                                <div class="hero-stat">
-                                    <span>Net Profit</span>
-                                    <strong class="animated-number ${netProfit >= 0 ? 'text-positive' : 'text-negative'}" data-target="${netProfit}" data-format="currency">${this.formatCurrency(0)}</strong>
-                                </div>
+                            <div class="flex items-center space-x-3">
+                                ${['admin', 'manager'].includes(this.state.currentUser.role) ? this.getCountrySelector() : ''}
+                                <button data-action="refresh-ai" class="${this.state.aiMode === 'ai' ? 'ai-button' : 'bot-button'} px-4 py-2 rounded-xl font-medium">
+                                    <i class="fas fa-sync-alt mr-2"></i>Refresh AI
+                                </button>
                             </div>
-                            <div class="dashboard-hero__badges">
-                                <span class="hero-badge"><i class="fas fa-users"></i>${totalCustomers} Customers</span>
-                                <span class="hero-badge"><i class="fas fa-boxes"></i>${totalProducts} Products</span>
-                                <span class="hero-badge"><i class="fas fa-chart-line"></i>${totalSalesCount} Sales</span>
-                                ${lowStockProducts.length > 0 ? `<span class="hero-badge hero-badge--alert"><i class="fas fa-exclamation-triangle"></i>${lowStockProducts.length} Low Stock</span>` : ''}
-                            </div>
-                        </section>
+                        </div>
 
                         ${['worker', 'manager'].includes(currentUser.role) ? `
-                            <section class="glass-panel dashboard-live-earnings slide-up">
-                                <div class="dashboard-panel__header">
-                                    <div>
-                                        <p class="panel-eyebrow">Team Pulse</p>
-                                        <h3>Live Earnings Stream</h3>
-                                    </div>
-                                    <div class="live-indicator">
-                                        <span class="dot"></span>
-                                        <span>Updating</span>
-                                    </div>
-                                </div>
-                                <div class="dashboard-live-earnings__grid">
-                                    <div class="live-earnings-card">
-                                        <span>Monthly Salary</span>
-                                        <strong class="animated-number" data-target="${monthlySalary}" data-format="currency">${this.formatCurrency(0)}</strong>
-                                    </div>
-                                    <div class="live-earnings-card">
-                                        <span>Commission</span>
-                                        <strong class="animated-number" data-target="${currentUser.commission || 0}" data-format="currency">${this.formatCurrency(0)}</strong>
-                                    </div>
-                                    <div class="live-earnings-card highlight">
-                                        <span>Total Earnings</span>
-                                        <strong class="animated-number" data-target="${totalEarnings}" data-format="currency">${this.formatCurrency(0)}</strong>
+                            <div class="perplexity-card p-6 slide-up">
+                                <div class="flex items-center justify-between mb-4">
+                                    <h3 class="text-xl font-bold text-white flex items-center">
+                                        <i class="fas fa-coins text-teal-400 mr-2"></i>
+                                        Live Earnings
+                                    </h3>
+                                    <div class="flex items-center space-x-2">
+                                        <div class="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
+                                        <span class="text-sm text-green-400 font-medium">LIVE</span>
                                     </div>
                                 </div>
-                            </section>
+                                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                    <div class="text-center p-4 bg-gradient-to-r from-green-500/10 to-emerald-500/10 rounded-xl border border-green-500/20">
+                                        <div class="text-green-400 text-2xl mb-2">SAL</div>
+                                        <p class="text-gray-400 text-sm mb-2">Monthly Salary</p>
+                                        <p class="text-lg font-bold text-green-400 animated-number" data-target="${monthlySalary}" data-format="currency">${this.formatCurrency(0)}</p>
+                                    </div>
+                                    <div class="text-center p-4 bg-gradient-to-r from-blue-500/10 to-cyan-500/10 rounded-xl border border-blue-500/20">
+                                        <div class="text-blue-400 text-2xl mb-2">COM</div>
+                                        <p class="text-gray-400 text-sm mb-2">Commission</p>
+                                        <p class="text-lg font-bold text-blue-400 animated-number" data-target="${currentUser.commission || 0}" data-format="currency">${this.formatCurrency(0)}</p>
+                                    </div>
+                                    <div class="text-center p-4 bg-gradient-to-r from-teal-500/10 to-blue-500/10 rounded-xl border border-teal-500/20">
+                                        <div class="text-teal-400 text-2xl mb-2">TOT</div>
+                                        <p class="text-gray-400 text-sm mb-2">Total Earnings</p>
+                                        <p class="text-xl font-bold text-teal-400 animated-number" data-target="${totalEarnings}" data-format="currency">${this.formatCurrency(0)}</p>
+                                    </div>
+                                </div>
+                            </div>
                         ` : ''}
 
-                        <section class="dashboard-kpi-grid">
-                            <div class="kpi-card glass-panel slide-up">
-                                <div class="kpi-card__icon kpi-card__icon--blue"><i class="fas fa-box"></i></div>
-                                <div class="kpi-card__meta">
-                                    <span>Products</span>
-                                    <strong class="animated-number" data-target="${totalProducts}" data-format="integer">0</strong>
-                                </div>
-                            </div>
-                            <div class="kpi-card glass-panel slide-up">
-                                <div class="kpi-card__icon kpi-card__icon--green"><i class="fas fa-users"></i></div>
-                                <div class="kpi-card__meta">
-                                    <span>Customers</span>
-                                    <strong class="animated-number" data-target="${totalCustomers}" data-format="integer">0</strong>
-                                </div>
-                            </div>
-                            <div class="kpi-card glass-panel slide-up">
-                                <div class="kpi-card__icon kpi-card__icon--purple"><i class="fas fa-shopping-cart"></i></div>
-                                <div class="kpi-card__meta">
-                                    <span>Sales Orders</span>
-                                    <strong class="animated-number" data-target="${totalSalesCount}" data-format="integer">0</strong>
-                                </div>
-                            </div>
-                            <div class="kpi-card glass-panel slide-up">
-                                <div class="kpi-card__icon kpi-card__icon--amber"><i class="fas fa-warehouse"></i></div>
-                                <div class="kpi-card__meta">
-                                    <span>Inventory Value</span>
-                                    <strong class="animated-number" data-target="${totalInventoryValue}" data-format="currency">${this.formatCurrency(0)}</strong>
-                                </div>
-                            </div>
-                            <div class="kpi-card glass-panel slide-up">
-                                <div class="kpi-card__icon kpi-card__icon--cyan"><i class="fas fa-chart-area"></i></div>
-                                <div class="kpi-card__meta">
-                                    <span>Avg. Sale</span>
-                                    <strong class="animated-number" data-target="${averageSale}" data-format="currency">${this.formatCurrency(0)}</strong>
-                                </div>
-                            </div>
-                            <div class="kpi-card glass-panel slide-up">
-                                <div class="kpi-card__icon kpi-card__icon--rose"><i class="fas fa-money-bill-wave"></i></div>
-                                <div class="kpi-card__meta">
-                                    <span>Avg. Expense</span>
-                                    <strong class="animated-number" data-target="${averageExpense}" data-format="currency">${this.formatCurrency(0)}</strong>
-                                </div>
-                            </div>
-                        </section>
-
-                        <section class="dashboard-panels">
-                            <div class="dashboard-panel glass-panel dashboard-panel--wide slide-up">
-                                <div class="dashboard-panel__header">
+                        <div class="responsive-grid-6">
+                            <div class="perplexity-card p-4 hover:scale-105 transition-all duration-300 slide-up">
+                                <div class="flex items-center justify-between">
                                     <div>
-                                        <p class="panel-eyebrow">Momentum</p>
-                                        <h3>Monthly Sales Performance</h3>
+                                        <p class="text-gray-400 text-sm mb-1">Products</p>
+                                        <p class="text-2xl font-bold text-white animated-number" data-target="${totalProducts}" data-format="integer">${0}</p>
+                                    </div>
+                                    <div class="w-10 h-10 bg-blue-500/20 rounded-xl flex items-center justify-center"><i class="fas fa-box text-blue-400"></i></div>
+                                </div>
+                            </div>
+                            
+                            <div class="perplexity-card p-4 hover:scale-105 transition-all duration-300 slide-up">
+                                <div class="flex items-center justify-between">
+                                    <div>
+                                        <p class="text-gray-400 text-sm mb-1">Customers</p>
+                                        <p class="text-2xl font-bold text-white animated-number" data-target="${totalCustomers}" data-format="integer">${0}</p>
+                                    </div>
+                                    <div class="w-10 h-10 bg-green-500/20 rounded-xl flex items-center justify-center"><i class="fas fa-users text-green-400"></i></div>
+                                </div>
+                            </div>
+                            
+                            <div class="perplexity-card p-4 hover:scale-105 transition-all duration-300 slide-up">
+                                <div class="flex items-center justify-between">
+                                    <div>
+                                        <p class="text-gray-400 text-sm mb-1">Sales</p>
+                                        <p class="text-2xl font-bold text-white animated-number" data-target="${totalSalesCount}" data-format="integer">${0}</p>
+                                    </div>
+                                    <div class="w-10 h-10 bg-purple-500/20 rounded-xl flex items-center justify-center"><i class="fas fa-shopping-cart text-purple-400"></i></div>
+                                </div>
+                            </div>
+                            
+                            <div class="perplexity-card p-4 hover:scale-105 transition-all duration-300 slide-up">
+                                <div class="flex items-center justify-between">
+                                    <div>
+                                        <p class="text-gray-400 text-sm mb-1">Revenue</p>
+                                        <p class="text-lg font-bold text-green-400 animated-number" data-target="${totalRevenue}" data-format="currency">${this.formatCurrency(0, false)}</p>
+                                    </div>
+                                    <div class="w-10 h-10 bg-green-500/20 rounded-xl flex items-center justify-center"><i class="fas fa-arrow-up text-green-400"></i></div>
+                                </div>
+                            </div>
+                            
+                            <div class="perplexity-card p-4 hover:scale-105 transition-all duration-300 slide-up">
+                                <div class="flex items-center justify-between">
+                                    <div>
+                                        <p class="text-gray-400 text-sm mb-1">Net Profit</p>
+                                        <p class="text-xl font-bold ${netProfit >= 0 ? 'text-blue-400' : 'text-red-400'} animated-number" data-target="${netProfit}" data-format="currency">${this.formatCurrency(0, false)}</p>
+                                    </div>
+                                    <div class="w-10 h-10 ${netProfit >= 0 ? 'bg-blue-500/20' : 'bg-red-500/20'} rounded-xl flex items-center justify-center"><i class="fas fa-chart-line ${netProfit >= 0 ? 'text-blue-400' : 'text-red-400'}"></i></div>
+                                </div>
+                            </div>
+                            <div class="perplexity-card p-4 hover:scale-105 transition-all duration-300 slide-up">
+                                <div class="flex items-center justify-between">
+                                    <div>
+                                        <p class="text-gray-400 text-sm mb-1">Inventory Value</p>
+                                        <p class="text-lg font-bold text-yellow-400 animated-number" data-target="${totalInventoryValue}" data-format="currency">${this.formatCurrency(0, false)}</p>
+                                    </div>
+                                    <div class="w-10 h-10 bg-yellow-500/20 rounded-xl flex items-center justify-center"><i class="fas fa-boxes text-yellow-400"></i></div>
+                                </div>
+                            </div>
+                        </div>
+
+                        ${this.state.aiInsights.length > 0 ? `
+                            <div class="${this.state.aiMode === 'ai' ? 'ai-card' : 'bot-card'} p-6 slide-up">
+                                <div class="flex items-center justify-between mb-6">
+                                    <h3 class="text-xl font-bold text-white flex items-center">
+    <i class="fas ${this.state.aiMode === 'ai' ? 'fa-brain text-purple-400' : 'fa-robot text-green-400'} mr-2"></i>
+    ${this.state.aiMode === 'ai' ? 'Bubble AI' : 'AccuraBot'} Business Insights
+</h3>
+                                    <div class="px-3 py-1 ${this.state.aiMode === 'ai' ? 'bg-purple-500/20 text-purple-400' : 'bg-green-500/20 text-green-400'} rounded-full text-sm font-medium">
+                                        ${this.state.aiMode === 'ai' ? 'AI Powered' : 'Bot Analysis'}
                                     </div>
                                 </div>
-                                <div class="dashboard-panel__body dashboard-panel__body--chart">
+                                <div class="grid gap-4">
+                                    ${this.state.aiInsights.map(insight => `
+                                        <div class="bg-gray-800/60 backdrop-filter backdrop-blur-lg p-4 rounded-xl border border-gray-600/50 hover:border-${this.state.aiMode === 'ai' ? 'purple' : 'green'}-500/50 transition-all duration-300 slide-up">
+                                            <div class="flex items-start space-x-4">
+                                                <div class="text-2xl">${insight.icon}</div>
+                                                <div class="flex-1">
+                                                    <h4 class="font-bold text-white mb-2">${insight.title}</h4>
+                                                    <p class="text-gray-300 mb-3 leading-relaxed">${insight.message}</p>
+                                                    <div class="bg-${this.state.aiMode === 'ai' ? 'purple' : 'green'}-500/10 border-l-4 border-${this.state.aiMode === 'ai' ? 'purple' : 'green'}-500 p-3 rounded-r-lg">
+                                                        <p class="text-sm text-${this.state.aiMode === 'ai' ? 'purple' : 'green'}-400 font-medium">Recommendation: ${insight.action}</p>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    `).join('')}
+                                </div>
+                            </div>
+                        ` : ''}
+
+                        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                            <div class="perplexity-card p-6 slide-up">
+                                <h3 class="text-xl font-bold text-white mb-4 flex items-center">
+                                    <i class="fas fa-chart-line text-teal-400 mr-2"></i>
+                                    Sales Performance
+                                </h3>
+                                <div class="chart-container">
                                     <canvas id="salesChart"></canvas>
                                 </div>
                             </div>
-                            <div class="dashboard-panel-stack">
-                                <div class="dashboard-panel glass-panel slide-up">
-                                    <div class="dashboard-panel__header">
-                                        <div>
-                                            <p class="panel-eyebrow">Cash Flow</p>
-                                            <h3>Revenue vs Expenses</h3>
-                                        </div>
-                                    </div>
-                                    <div class="dashboard-panel__body dashboard-panel__body--chart">
-                                        <canvas id="financeChart"></canvas>
-                                    </div>
-                                </div>
-                                <div class="dashboard-panel glass-panel slide-up">
-                                    <div class="dashboard-panel__header">
-                                        <div>
-                                            <p class="panel-eyebrow">Shortcuts</p>
-                                            <h3>Quick Actions</h3>
-                                        </div>
-                                    </div>
-                                    <div class="dashboard-quick-actions">
-                                        <button data-action="add-sale" class="dashboard-quick-actions__item perplexity-button">
-                                            <i class="fas fa-plus"></i>
-                                            <div>
-                                                <strong>Record Sale</strong>
-                                                <span>Multi-product</span>
-                                            </div>
-                                        </button>
-                                        <button data-action="add-expense" class="dashboard-quick-actions__item expenses-button">
-                                            <i class="fas fa-receipt"></i>
-                                            <div>
-                                                <strong>Add Expense</strong>
-                                                <span>Track costs</span>
-                                            </div>
-                                        </button>
-                                        ${this.canManageProducts() ? `
-                                            <button data-action="add-product" class="dashboard-quick-actions__item ai-button">
-                                                <i class="fas fa-box"></i>
-                                                <div>
-                                                    <strong>New Product</strong>
-                                                    <span>Expand inventory</span>
-                                                </div>
-                                            </button>
-                                        ` : ''}
-                                        <button data-action="add-customer" class="dashboard-quick-actions__item bot-button">
-                                            <i class="fas fa-user-plus"></i>
-                                            <div>
-                                                <strong>Add Customer</strong>
-                                                <span>Grow base</span>
-                                            </div>
-                                        </button>
-                                    </div>
+                            
+                            <div class="perplexity-card p-6 slide-up">
+                                <h3 class="text-xl font-bold text-white mb-4 flex items-center">
+                                    <i class="fas fa-chart-pie text-blue-400 mr-2"></i>
+                                    Financial Overview
+                                    </h3>
+                                <div class="chart-container">
+                                    <canvas id="financeChart"></canvas>
                                 </div>
                             </div>
-                        </section>
+                        </div>
 
-                        <section class="dashboard-bottom-grid">
-                            <div class="dashboard-panel glass-panel slide-up">
-                                <div class="dashboard-panel__header">
-                                    <div>
-                                        <p class="panel-eyebrow">Activity</p>
-                                        <h3>Recent Sales</h3>
-                                    </div>
+                        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                            <div class="perplexity-card p-6 slide-up">
+                                <h3 class="text-xl font-bold text-white mb-4 flex items-center">
+                                    <i class="fas fa-bolt text-yellow-400 mr-2"></i>
+                                    Quick Actions
+                                </h3>
+                                <div class="grid grid-cols-2 gap-4">
+                                    <button data-action="add-sale" class="perplexity-button p-4 rounded-xl text-center hover:scale-105 transition-all duration-300">
+                                        <i class="fas fa-plus text-xl mb-2"></i>
+                                        <div class="font-medium">New Sale</div>
+                                        <div class="text-xs opacity-80 mt-1">Multi-product</div>
+                                    </button>
+                                    <button data-action="add-expense" class="expenses-button p-4 rounded-xl text-center hover:scale-105 transition-all duration-300">
+                                        <i class="fas fa-receipt text-xl mb-2"></i>
+                                        <div class="font-medium">Add Expense</div>
+                                        <div class="text-xs opacity-80 mt-1">Track costs</div>
+                                    </button>
+                                    ${this.canManageProducts() ? `
+                                        <button data-action="add-product" class="ai-button p-4 rounded-xl text-center hover:scale-105 transition-all duration-300">
+                                            <i class="fas fa-box text-xl mb-2"></i>
+                                            <div class="font-medium">Add Product</div>
+                                            <div class="text-xs opacity-80 mt-1">Expand inventory</div>
+                                        </button>
+                                    ` : ''}
+                                    <button data-action="add-customer" class="bot-button p-4 rounded-xl text-center hover:scale-105 transition-all duration-300">
+                                        <i class="fas fa-user-plus text-xl mb-2"></i>
+                                        <div class="font-medium">New Customer</div>
+                                        <div class="text-xs opacity-80 mt-1">Grow base</div>
+                                    </button>
                                 </div>
+                            </div>
+
+                            <div class="perplexity-card p-6 slide-up">
+                                <h3 class="text-xl font-bold text-white mb-4 flex items-center">
+                                    <i class="fas fa-clock text-blue-400 mr-2"></i>
+                                    Recent Activity
+                                </h3>
                                 ${recentSales.length > 0 ? `
-                                    <ul class="dashboard-activity-list">
+                                    <div class="space-y-3">
                                         ${recentSales.map(sale => {
                                             const customer = this.state.customers.find(c => c.id === sale.customerId);
                                             const itemSummary = sale.items.length > 1 ? `${sale.items.length} items` : `${sale.items[0].quantity} x ${this.state.products.find(p => p.id === sale.items[0].productId)?.name}`;
                                             return `
-                                                <li class="activity-item">
-                                                    <div class="activity-item__meta">
-                                                        <span class="activity-item__icon"><i class="fas fa-shopping-bag"></i></span>
+                                                <div class="flex justify-between items-center p-3 bg-gray-800/50 rounded-xl border border-gray-600/30 hover:border-teal-500/50 transition-all duration-300">
+                                                    <div class="flex items-center space-x-3">
+                                                        <div class="w-8 h-8 bg-gradient-to-r from-teal-500 to-blue-500 rounded-lg flex items-center justify-center">
+                                                            <i class="fas fa-shopping-bag text-white text-sm"></i>
+                                                        </div>
                                                         <div>
-                                                            <strong>${itemSummary}</strong>
-                                                            <span>${customer ? customer.name : 'Customer'}</span>
+                                                            <p class="text-white font-medium text-sm">${itemSummary}</p>
+                                                            <p class="text-gray-400 text-xs">${customer ? customer.name : 'Customer'}</p>
                                                         </div>
                                                     </div>
-                                                    <div class="activity-item__actions">
-                                                        <strong>${this.formatCurrency(sale.total)}</strong>
-                                                        <button data-action="generate-invoice" data-id="${sale.id}" class="activity-link">
-                                                            <i class="fas fa-file-invoice"></i> Invoice
+                                                    <div class="text-right">
+                                                        <p class="text-white font-bold">${this.formatCurrency(sale.total)}</p>
+                                                        <button data-action="generate-invoice" data-id="${sale.id}" class="text-teal-400 hover:text-teal-300 text-xs">
+                                                            <i class="fas fa-file-invoice mr-1"></i>Invoice
                                                         </button>
                                                     </div>
-                                                </li>
+                                                </div>
                                             `;
                                         }).join('')}
-                                    </ul>
+                                    </div>
                                 ` : `
-                                    <div class="dashboard-empty">
-                                        <i class="fas fa-chart-line"></i>
-                                        <p>No recent sales yet.</p>
-                                        <button data-action="add-sale" class="perplexity-button">
-                                            <i class="fas fa-plus"></i>
-                                            <span>Record Sale</span>
+                                    <div class="text-center py-8 text-gray-400">
+                                        <i class="fas fa-chart-line text-3xl mb-3 opacity-50"></i>
+                                        <p class="mb-2">No recent sales</p>
+                                        <button data-action="add-sale" class="perplexity-button px-4 py-2 rounded-xl">
+                                            <i class="fas fa-plus mr-2"></i>Record Sale
                                         </button>
                                     </div>
                                 `}
                             </div>
+                        </div>
 
-                            ${lowStockProducts.length > 0 ? `
-                                <div class="dashboard-panel glass-panel slide-up">
-                                    <div class="dashboard-panel__header">
-                                        <div>
-                                            <p class="panel-eyebrow">Alerts</p>
-                                            <h3>Low Stock Watch</h3>
-                                        </div>
-                                        <span class="hero-badge hero-badge--alert">${lowStockProducts.length} critical</span>
-                                    </div>
-                                    <div class="stock-alert-grid">
-                                        ${lowStockProducts.slice(0, 6).map(product => `
-                                            <div class="stock-alert-card">
-                                                <div>
-                                                    <strong>${product.name}</strong>
-                                                    <span>${product.stock} left</span>
-                                                </div>
-                                                <i class="fas fa-exclamation-triangle"></i>
-                                            </div>
-                                        `).join('')}
-                                    </div>
-                                    <div class="dashboard-panel__footer">
-                                        <button data-action="products" class="perplexity-button">
-                                            <i class="fas fa-box"></i>
-                                            <span>Manage Inventory</span>
-                                        </button>
-                                    </div>
+                        ${lowStockProducts.length > 0 ? `
+                            <div class="perplexity-card p-6 border-l-4 border-red-500 bg-gradient-to-r from-red-500/10 to-transparent slide-up">
+                                <div class="flex items-center justify-between mb-4">
+                                    <h3 class="text-xl font-bold text-white flex items-center">
+                                        <i class="fas fa-exclamation-triangle text-red-400 mr-2 animate-pulse"></i>
+                                        Stock Alert
+                                    </h3>
+                                    <span class="px-3 py-1 bg-red-500/20 text-red-400 rounded-full text-sm font-medium">
+                                        ${lowStockProducts.length} Items
+                                    </span>
                                 </div>
-                            ` : ''}
-                        </section>
+                                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+                                    ${lowStockProducts.slice(0, 6).map(product => `
+                                        <div class="bg-red-500/10 border border-red-500/30 rounded-xl p-3 hover:border-red-500/50 transition-all duration-300">
+                                            <div class="flex items-center justify-between">
+                                                <div>
+                                                    <p class="text-white font-medium text-sm">${product.name}</p>
+                                                    <p class="text-red-400 text-sm font-bold">${product.stock} left</p>
+                                                </div>
+                                                <div class="text-red-400 text-xl">
+                                                    <i class="fas fa-exclamation-triangle"></i>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    `).join('')}
+                                </div>
+                                <div class="mt-4 text-center">
+                                    <button data-action="products" class="perplexity-button px-4 py-2 rounded-xl">
+                                        <i class="fas fa-box mr-2"></i>Manage Inventory
+                                    </button>
+                                </div>
+                            </div>
+                        ` : ''}
                     </div>
                 `;
             },
@@ -7820,7 +7602,6 @@ renderBranchMessageBubbleHTML(msg) {
 
   // Initialize the application
     app.init(); 
-
 
 
 
