@@ -2838,7 +2838,12 @@ downloadTaskTxt(taskId) {
                     oilLevel,
                     batteryLevel,
                     temperatureLabels,
-                    temperatureData
+                    temperatureData,
+                    teamPerformanceLabels,
+                    teamPerformanceData,
+                    salaryDistributionData,
+                    personalSalesLabels,
+                    personalSalesData
                 } = data;
 
                 if (workingHoursLabels && workingHoursLabels.length) {
@@ -2914,6 +2919,80 @@ downloadTaskTxt(taskId) {
                                 suggestedMin: 40,
                                 suggestedMax: 100,
                                 grid: { color: 'rgba(148, 163, 184, 0.14)' },
+                                ticks: { color: '#94a3b8', font: { size: 12 } }
+                            }
+                        }
+                    });
+                }
+
+                if (teamPerformanceLabels && teamPerformanceLabels.length) {
+                    this.createChart('teamPerformanceChart', 'bar', {
+                        labels: teamPerformanceLabels,
+                        datasets: [{
+                            label: 'Revenue',
+                            data: teamPerformanceData,
+                            backgroundColor: teamPerformanceLabels.map(() => 'rgba(168, 85, 247, 0.45)'),
+                            borderColor: '#a855f7',
+                            borderWidth: 1,
+                            borderRadius: 10,
+                            borderSkipped: false,
+                            maxBarThickness: 28
+                        }]
+                    }, {
+                        plugins: { legend: { display: false } },
+                        scales: {
+                            x: {
+                                grid: { display: false },
+                                ticks: { color: '#94a3b8', font: { size: 12 } }
+                            },
+                            y: {
+                                beginAtZero: true,
+                                grid: { color: 'rgba(148, 163, 184, 0.18)' },
+                                ticks: { color: '#94a3b8', font: { size: 12 } }
+                            }
+                        }
+                    });
+                }
+
+                if (Array.isArray(salaryDistributionData) && salaryDistributionData.length === 2) {
+                    this.createChart('salaryDistributionChart', 'doughnut', {
+                        labels: ['Salary', 'Commission'],
+                        datasets: [{
+                            data: salaryDistributionData,
+                            backgroundColor: ['#38bdf8', '#facc15'],
+                            borderWidth: 0
+                        }]
+                    }, {
+                        cutout: '65%',
+                        plugins: {
+                            legend: { display: false }
+                        }
+                    });
+                }
+
+                if (personalSalesLabels && personalSalesLabels.length) {
+                    this.createChart('personalSalesChart', 'line', {
+                        labels: personalSalesLabels,
+                        datasets: [{
+                            label: 'Personal Revenue',
+                            data: personalSalesData,
+                            borderColor: '#38bdf8',
+                            backgroundColor: 'rgba(56, 189, 248, 0.22)',
+                            fill: true,
+                            tension: 0.45,
+                            pointRadius: 4,
+                            pointBackgroundColor: '#38bdf8'
+                        }]
+                    }, {
+                        plugins: { legend: { display: false } },
+                        scales: {
+                            x: {
+                                grid: { display: false },
+                                ticks: { color: '#94a3b8', font: { size: 12 } }
+                            },
+                            y: {
+                                beginAtZero: true,
+                                grid: { color: 'rgba(148, 163, 184, 0.16)' },
                                 ticks: { color: '#94a3b8', font: { size: 12 } }
                             }
                         }
@@ -4911,407 +4990,1055 @@ getSidebar() {
 },
 
         getDashboardView() {
-                const { currentUser, users, sales, expenses, products, customers } = this.state;
-                let filteredSales, filteredExpenses;
+            const { currentUser, users, sales, expenses, products, customers, tasks = [], messages = [] } = this.state;
+            if (!currentUser) {
+                return '';
+            }
 
-                // --- DATA SCOPING LOGIC ---
-                if (currentUser.role === 'admin') {
-                    filteredSales = sales;
-                    filteredExpenses = expenses;
-                } else if (currentUser.role === 'manager') {
-                    const workerIds = users.filter(u => u.role === 'worker').map(u => u.id);
-                    const managedUserIds = [currentUser.id, ...workerIds];
-                    filteredSales = sales.filter(s => managedUserIds.includes(s.salesPersonId));
-                    filteredExpenses = expenses.filter(e => managedUserIds.includes(e.createdByUserId || e.addedBy));
-                } else {
-                    filteredSales = sales.filter(s => s.salesPersonId === currentUser.id);
-                    filteredExpenses = expenses.filter(e => (e.createdByUserId || e.addedBy) === currentUser.id);
-                }
-                // --- END DATA SCOPING ---
+            let filteredSales;
+            let filteredExpenses;
+            if (currentUser.role === 'admin') {
+                filteredSales = sales;
+                filteredExpenses = expenses;
+            } else if (currentUser.role === 'manager') {
+                const workerIds = users.filter(u => u.role === 'worker').map(u => u.id);
+                const scopedIds = [currentUser.id, ...workerIds];
+                filteredSales = sales.filter(s => scopedIds.includes(s.salesPersonId));
+                filteredExpenses = expenses.filter(e => scopedIds.includes(e.createdByUserId || e.addedBy));
+            } else {
+                filteredSales = sales.filter(s => s.salesPersonId === currentUser.id);
+                filteredExpenses = expenses.filter(e => (e.createdByUserId || e.addedBy) === currentUser.id);
+            }
 
-                const totalRevenue = filteredSales.reduce((sum, s) => sum + (s.total || 0), 0);
-                const totalExpensesVal = filteredExpenses.reduce((sum, e) => sum + (e.amount || 0), 0);
-                const netProfit = totalRevenue - totalExpensesVal;
-                const lowStockProducts = products.filter(p => p.stock <= this.state.lowStockThreshold);
-                const recentSales = filteredSales.slice(-5).reverse();
-                const totalInventoryValue = products.reduce((sum, p) => sum + (p.price * p.stock), 0);
+            const totalRevenue = filteredSales.reduce((sum, s) => sum + (s.total || 0), 0);
+            const totalExpensesVal = filteredExpenses.reduce((sum, e) => sum + (e.amount || 0), 0);
+            const netProfit = totalRevenue - totalExpensesVal;
+            const lowStockProducts = products.filter(p => p.stock <= this.state.lowStockThreshold);
+            const recentSales = filteredSales.slice(-5).reverse();
+            const totalInventoryValue = products.reduce((sum, p) => sum + (p.price * p.stock), 0);
 
-                const monthlySalary = (currentUser.salary / 12) || 0;
-                const totalEarnings = monthlySalary + (currentUser.commission || 0);
+            const monthlySalary = (currentUser.salary / 12) || 0;
+            const totalEarnings = monthlySalary + (currentUser.commission || 0);
 
-                const parseDate = (value) => {
-                    if (!value) return null;
-                    const parsed = new Date(value);
-                    return Number.isNaN(parsed.getTime()) ? null : parsed;
-                };
+            const parseDate = (value) => {
+                if (!value) return null;
+                const parsed = new Date(value);
+                return Number.isNaN(parsed.getTime()) ? null : parsed;
+            };
 
+            const buildMonthlySeries = (sourceSales, months = 6) => {
                 const now = new Date();
-                const dayMs = 24 * 60 * 60 * 1000;
-                const workingHoursLabels = [];
-                const workingHoursData = [];
-
-                for (let i = 6; i >= 0; i--) {
-                    const day = new Date(now.getTime() - i * dayMs);
-                    const label = day.toLocaleDateString(undefined, { weekday: 'short' });
-                    const dayKey = day.toISOString().slice(0, 10);
-                    let daySalesCount = 0;
-
-                    filteredSales.forEach(sale => {
-                        const saleDate = parseDate(sale.date);
-                        if (!saleDate) return;
-                        if (saleDate.toISOString().slice(0, 10) === dayKey) {
-                            daySalesCount += 1;
-                        }
-                    });
-
-                    const hours = Math.min(12, daySalesCount * 1.75 + (daySalesCount > 0 ? 4 : 2));
-                    workingHoursLabels.push(label);
-                    workingHoursData.push(parseFloat(hours.toFixed(1)));
-                }
-
-                const weeklyWorkingHours = workingHoursData.reduce((sum, hours) => sum + hours, 0);
-                const averageWorkingHours = workingHoursData.length ? (weeklyWorkingHours / workingHoursData.length) : 0;
-                const todaysHours = workingHoursData.length ? workingHoursData[workingHoursData.length - 1] : 0;
-
-                const oilLevel = Math.max(35, Math.min(95, Math.round((totalRevenue / (totalRevenue + totalExpensesVal + 1)) * 100)));
-                const salaryBaseline = monthlySalary > 0 ? monthlySalary : 1200;
-                const batteryLevel = Math.max(25, Math.min(100, Math.round(((currentUser.commission || 0) + monthlySalary) / salaryBaseline * 80)));
-
-                const alertPenalty = Math.min(35, lowStockProducts.length * 6);
-                const profitBoost = netProfit >= 0 ? Math.min(15, Math.round((netProfit / (totalRevenue + 1)) * 40)) : -12;
-                const machineHealth = Math.max(45, Math.min(100, Math.round((oilLevel * 0.45) + (batteryLevel * 0.35) + 20 - alertPenalty + profitBoost)));
-                const systemStatus = machineHealth > 80 ? 'Optimal' : machineHealth > 60 ? 'Stable' : 'Attention';
-                const uptimeScore = Math.round(Math.min(100, (weeklyWorkingHours / ((workingHoursData.length || 1) * 12)) * 100));
-                const activeAlerts = lowStockProducts.length + (netProfit < 0 ? 1 : 0);
-
-                const weekWindow = now.getTime() - 6 * dayMs;
-                const weekSales = filteredSales.filter(sale => {
-                    const saleDate = parseDate(sale.date);
-                    return saleDate ? saleDate.getTime() >= weekWindow : false;
-                });
-                const weekRevenue = weekSales.reduce((sum, sale) => sum + (sale.total || 0), 0);
-
-                const weekExpenses = filteredExpenses.filter(expense => {
-                    const expenseDate = parseDate(expense.date);
-                    return expenseDate ? expenseDate.getTime() >= weekWindow : false;
-                });
-                const weekExpenseValue = weekExpenses.reduce((sum, expense) => sum + (expense.amount || 0), 0);
-
-                const energyUsage = Math.max(18, Math.min(92, Math.round((weekExpenseValue / (weekRevenue + 1)) * 80 + 18)));
-
-                const productSalesMap = {};
-                filteredSales.forEach(sale => {
-                    (sale.items || []).forEach(item => {
-                        const productId = item.productId;
-                        const qty = item.quantity || 0;
-                        productSalesMap[productId] = (productSalesMap[productId] || 0) + qty;
-                    });
-                });
-                const topProductEntry = Object.entries(productSalesMap).sort((a, b) => b[1] - a[1])[0];
-                const topProduct = topProductEntry ? products.find(p => p.id === parseInt(topProductEntry[0])) : null;
-                const topProductName = topProduct ? topProduct.name : (products[0] ? products[0].name : 'Inventory Ready');
-
-                const temperatureLabels = [];
-                const temperatureData = [];
-                for (let i = 9; i >= 0; i--) {
-                    const day = new Date(now.getTime() - i * dayMs);
-                    const dayLabel = day.toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
-                    const dayKey = day.toISOString().slice(0, 10);
-                    const dayRevenue = filteredSales.reduce((sum, sale) => {
+                const series = [];
+                for (let i = months - 1; i >= 0; i--) {
+                    const pointDate = new Date(now.getFullYear(), now.getMonth() - i, 1);
+                    const label = pointDate.toLocaleDateString(undefined, { month: 'short' });
+                    const total = sourceSales.reduce((sum, sale) => {
                         const saleDate = parseDate(sale.date);
                         if (!saleDate) return sum;
-                        return saleDate.toISOString().slice(0, 10) === dayKey ? sum + (sale.total || 0) : sum;
+                        return saleDate.getFullYear() === pointDate.getFullYear() && saleDate.getMonth() === pointDate.getMonth()
+                            ? sum + (sale.total || 0)
+                            : sum;
                     }, 0);
-                    const baseline = 62 + Math.min(28, dayRevenue / 300);
-                    const adjustment = netProfit < 0 ? -6 : 0;
-                    const temperature = Math.max(48, Math.min(96, Math.round(baseline + adjustment - lowStockProducts.length)));
-                    temperatureLabels.push(dayLabel);
-                    temperatureData.push(temperature);
+                    series.push({ label, total: parseFloat(total.toFixed(2)) });
                 }
+                return series;
+            };
 
-                const insights = inboxNotifications.slice(0, 3);
-                const criticalInventory = lowStockProducts.slice(0, 4);
+            const now = new Date();
+            const dayMs = 24 * 60 * 60 * 1000;
+            const workingHoursLabels = [];
+            const workingHoursData = [];
 
-                const machineId = `CAM-NX ${String(currentUser.id).padStart(3, '0')}`;
-                const topCustomerName = (() => {
-                    if (!recentSales.length) return 'Customer Ready';
-                    const customer = customers.find(c => c.id === recentSales[0].customerId);
-                    return customer ? customer.name : 'Customer Ready';
-                })();
+            for (let i = 6; i >= 0; i--) {
+                const day = new Date(now.getTime() - i * dayMs);
+                const label = day.toLocaleDateString(undefined, { weekday: 'short' });
+                const dayKey = day.toISOString().slice(0, 10);
+                let daySalesCount = 0;
 
-                this.dashboardChartsData = {
-                    workingHoursLabels,
-                    workingHoursData,
-                    oilLevel,
-                    batteryLevel,
-                    temperatureLabels,
-                    temperatureData,
-                    weeklyWorkingHours,
-                    averageWorkingHours,
-                    todaysHours
+                filteredSales.forEach(sale => {
+                    const saleDate = parseDate(sale.date);
+                    if (!saleDate) return;
+                    if (saleDate.toISOString().slice(0, 10) === dayKey) {
+                        daySalesCount += 1;
+                    }
+                });
+
+                const hours = Math.min(12, daySalesCount * 1.75 + (daySalesCount > 0 ? 4 : 2));
+                workingHoursLabels.push(label);
+                workingHoursData.push(parseFloat(hours.toFixed(1)));
+            }
+
+            const weeklyWorkingHours = workingHoursData.reduce((sum, hours) => sum + hours, 0);
+            const averageWorkingHours = workingHoursData.length ? (weeklyWorkingHours / workingHoursData.length) : 0;
+            const todaysHours = workingHoursData.length ? workingHoursData[workingHoursData.length - 1] : 0;
+
+            const oilLevel = Math.max(35, Math.min(95, Math.round((totalRevenue / (totalRevenue + totalExpensesVal + 1)) * 100)));
+            const salaryBaseline = monthlySalary > 0 ? monthlySalary : 1200;
+            const batteryLevel = Math.max(25, Math.min(100, Math.round(((currentUser.commission || 0) + monthlySalary) / salaryBaseline * 80)));
+
+            const alertPenalty = Math.min(35, lowStockProducts.length * 6);
+            const profitBoost = netProfit >= 0 ? Math.min(15, Math.round((netProfit / (totalRevenue + 1)) * 40)) : -12;
+            const machineHealth = Math.max(45, Math.min(100, Math.round((oilLevel * 0.45) + (batteryLevel * 0.35) + 20 - alertPenalty + profitBoost)));
+            const systemStatus = machineHealth > 80 ? 'Optimal' : machineHealth > 60 ? 'Stable' : 'Attention';
+            const uptimeScore = Math.round(Math.min(100, (weeklyWorkingHours / ((workingHoursData.length || 1) * 12)) * 100));
+            const activeAlerts = lowStockProducts.length + (netProfit < 0 ? 1 : 0);
+
+            const weekWindow = now.getTime() - 6 * dayMs;
+            const weekSales = filteredSales.filter(sale => {
+                const saleDate = parseDate(sale.date);
+                return saleDate ? saleDate.getTime() >= weekWindow : false;
+            });
+            const weekRevenue = weekSales.reduce((sum, sale) => sum + (sale.total || 0), 0);
+
+            const weekExpenses = filteredExpenses.filter(expense => {
+                const expenseDate = parseDate(expense.date);
+                return expenseDate ? expenseDate.getTime() >= weekWindow : false;
+            });
+            const weekExpenseValue = weekExpenses.reduce((sum, expense) => sum + (expense.amount || 0), 0);
+
+            const energyUsage = Math.max(18, Math.min(92, Math.round((weekExpenseValue / (weekRevenue + 1)) * 80 + 18)));
+
+            const productSalesMap = {};
+            filteredSales.forEach(sale => {
+                (sale.items || []).forEach(item => {
+                    const productId = item.productId;
+                    const qty = item.quantity || 0;
+                    productSalesMap[productId] = (productSalesMap[productId] || 0) + qty;
+                });
+            });
+            const topProductEntry = Object.entries(productSalesMap).sort((a, b) => b[1] - a[1])[0];
+            const topProduct = topProductEntry ? products.find(p => p.id === parseInt(topProductEntry[0])) : null;
+            const topProductName = topProduct ? topProduct.name : (products[0] ? products[0].name : 'Inventory Ready');
+
+            const temperatureLabels = [];
+            const temperatureData = [];
+            for (let i = 9; i >= 0; i--) {
+                const day = new Date(now.getTime() - i * dayMs);
+                const dayLabel = day.toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
+                const dayKey = day.toISOString().slice(0, 10);
+                const dayRevenue = filteredSales.reduce((sum, sale) => {
+                    const saleDate = parseDate(sale.date);
+                    if (!saleDate) return sum;
+                    return saleDate.toISOString().slice(0, 10) === dayKey ? sum + (sale.total || 0) : sum;
+                }, 0);
+                const baseline = 62 + Math.min(28, dayRevenue / 300);
+                const adjustment = netProfit < 0 ? -6 : 0;
+                const temperature = Math.max(48, Math.min(96, Math.round(baseline + adjustment - lowStockProducts.length)));
+                temperatureLabels.push(dayLabel);
+                temperatureData.push(temperature);
+            }
+
+            const insights = inboxNotifications.slice(0, 3);
+            const criticalInventory = lowStockProducts.slice(0, 4);
+
+            const machineId = `CAM-NX ${String(currentUser.id).padStart(3, '0')}`;
+            const topCustomerName = (() => {
+                if (!recentSales.length) return 'Customer Ready';
+                const customer = customers.find(c => c.id === recentSales[0].customerId);
+                return customer ? customer.name : 'Customer Ready';
+            })();
+
+            const companyPayroll = users.reduce((sum, user) => sum + ((user.salary || 0) / 12), 0);
+            const estimatedAssets = totalInventoryValue + totalRevenue;
+            const estimatedLiabilities = totalExpensesVal + companyPayroll;
+            const balanceSheetGap = estimatedAssets - estimatedLiabilities;
+            const balanceSheetStatus = balanceSheetGap >= 0 ? 'Healthy' : 'Leverage High';
+
+            const pendingApprovals = messages.filter(msg => msg.type === 'task' && typeof msg.status === 'string' && msg.status.startsWith('pending'));
+            const teamWorkers = users.filter(u => u.role === 'worker');
+            const teamWorkerIds = teamWorkers.map(worker => worker.id);
+            const teamSalaryTotal = teamWorkers.reduce((sum, worker) => sum + (worker.salary || 0), 0);
+            const teamCommissionTotal = teamWorkers.reduce((sum, worker) => sum + (worker.commission || 0), 0);
+            const teamSales = sales.filter(sale => teamWorkerIds.includes(sale.salesPersonId));
+            const teamRevenue = teamSales.reduce((sum, sale) => sum + (sale.total || 0), 0);
+
+            const outstandingTasks = tasks.filter(task => !task.isSubTask && task.status !== 'completed');
+            const managerOutstanding = outstandingTasks.filter(task => {
+                const participants = task.participants || [];
+                return task.createdBy === currentUser.id || participants.includes(currentUser.id) || participants.some(id => teamWorkerIds.includes(id));
+            });
+
+            const workerPerformance = teamWorkers.map(worker => {
+                const workerSales = sales.filter(sale => sale.salesPersonId === worker.id);
+                const workerRevenue = workerSales.reduce((sum, sale) => sum + (sale.total || 0), 0);
+                const workerTasks = outstandingTasks.filter(task => (task.participants || []).includes(worker.id));
+                return {
+                    id: worker.id,
+                    name: worker.name,
+                    revenue: workerRevenue,
+                    commission: worker.commission || 0,
+                    tasks: workerTasks.length
                 };
+            }).sort((a, b) => b.revenue - a.revenue);
 
-                return `
-                    <div class="owlio-dashboard fade-in">
-                        <div class="dashboard-main">
-                            <div class="dashboard-top">
+            const personalTasks = outstandingTasks.filter(task => (task.participants || []).includes(currentUser.id));
+            const personalSalesSeries = buildMonthlySeries(filteredSales, 6);
+
+            const metrics = {
+                currentUser,
+                users,
+                customers,
+                filteredSales,
+                filteredExpenses,
+                totalRevenue,
+                totalExpensesVal,
+                netProfit,
+                lowStockProducts,
+                recentSales,
+                totalInventoryValue,
+                monthlySalary,
+                totalEarnings,
+                workingHoursLabels,
+                workingHoursData,
+                weeklyWorkingHours,
+                averageWorkingHours,
+                todaysHours,
+                oilLevel,
+                batteryLevel,
+                machineHealth,
+                systemStatus,
+                uptimeScore,
+                activeAlerts,
+                weekSalesCount: weekSales.length,
+                weekRevenue,
+                energyUsage,
+                temperatureLabels,
+                temperatureData,
+                insights,
+                criticalInventory,
+                machineId,
+                topCustomerName,
+                now,
+                companyPayroll,
+                balanceSheetGap,
+                balanceSheetStatus,
+                pendingApprovals,
+                teamWorkers,
+                workerPerformance,
+                teamSalaryTotal,
+                teamCommissionTotal,
+                teamRevenue,
+                teamSalesCount: teamSales.length,
+                managerOutstanding,
+                outstandingTasks,
+                personalTasks,
+                personalSalesSeries,
+                topProductName
+            };
+
+            const chartData = this.buildDashboardCharts(currentUser.role, metrics);
+            this.dashboardChartsData = chartData;
+
+            if (currentUser.role === 'admin') {
+                return this.renderAdminDashboard(metrics);
+            }
+
+            if (currentUser.role === 'manager') {
+                return this.renderManagerDashboard(metrics);
+            }
+
+            return this.renderWorkerDashboard(metrics);
+        },
+
+        buildDashboardCharts(role, metrics) {
+            const chartData = {
+                workingHoursLabels: metrics.workingHoursLabels,
+                workingHoursData: metrics.workingHoursData,
+                averageWorkingHours: metrics.averageWorkingHours,
+                weeklyWorkingHours: metrics.weeklyWorkingHours,
+                todaysHours: metrics.todaysHours
+            };
+
+            if (role === 'admin') {
+                chartData.oilLevel = metrics.oilLevel;
+                chartData.batteryLevel = metrics.batteryLevel;
+                chartData.temperatureLabels = metrics.temperatureLabels;
+                chartData.temperatureData = metrics.temperatureData;
+            }
+
+            if (role === 'manager') {
+                chartData.teamPerformanceLabels = metrics.workerPerformance.map(worker => worker.name);
+                chartData.teamPerformanceData = metrics.workerPerformance.map(worker => parseFloat(worker.revenue.toFixed(2)));
+                chartData.salaryDistributionData = [metrics.teamSalaryTotal, metrics.teamCommissionTotal];
+            }
+
+            if (role === 'worker') {
+                chartData.personalSalesLabels = metrics.personalSalesSeries.map(point => point.label);
+                chartData.personalSalesData = metrics.personalSalesSeries.map(point => point.total);
+            }
+
+            return chartData;
+        },
+
+        renderAdminDashboard(metrics) {
+            const {
+                currentUser,
+                systemStatus,
+                totalRevenue,
+                netProfit,
+                balanceSheetStatus,
+                balanceSheetGap,
+                pendingApprovals,
+                weekSalesCount,
+                machineId,
+                topCustomerName,
+                activeAlerts,
+                weeklyWorkingHours,
+                averageWorkingHours,
+                todaysHours,
+                companyPayroll,
+                energyUsage,
+                totalEarnings,
+                temperatureData,
+                insights,
+                criticalInventory,
+                recentSales,
+                customers,
+                machineHealth,
+                uptimeScore,
+                topProductName,
+                totalInventoryValue,
+                oilLevel
+            } = metrics;
+
+            const latestTemperature = temperatureData.length ? temperatureData[temperatureData.length - 1] : 0;
+
+            return `
+                <div class="owlio-dashboard fade-in admin-dashboard">
+                    <div class="dashboard-main">
+                        <div class="dashboard-top">
+                            <div>
+                                <p class="dashboard-kicker">Operations Command</p>
+                                <h2 class="dashboard-title">Owlio Control Surface</h2>
+                                <p class="dashboard-subtitle">System status: <span class="status-pill status-${systemStatus.toLowerCase()}">${systemStatus}</span></p>
+                            </div>
+                            <div class="dashboard-actions">
+                                ${this.getCountrySelector()}
+                                <button data-action="refresh-ai" class="${this.state.aiMode === 'ai' ? 'ai-button' : 'bot-button'} dashboard-refresh">
+                                    <i class="fas fa-arrows-rotate"></i>
+                                    Refresh AI
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="dashboard-metric-grid">
+                            <div class="dashboard-metric-card metric-blue">
+                                <div class="metric-label">Company Revenue</div>
+                                <div class="metric-value animated-number" data-target="${totalRevenue}" data-format="currency">${this.formatCurrency(0)}</div>
+                                <div class="metric-subtext">${weekSalesCount} deals this week</div>
+                            </div>
+                            <div class="dashboard-metric-card metric-purple">
+                                <div class="metric-label">Net Profit</div>
+                                <div class="metric-value animated-number" data-target="${netProfit}" data-format="currency">${this.formatCurrency(0)}</div>
+                                <div class="metric-subtext ${netProfit >= 0 ? 'text-positive' : 'text-negative'}">${netProfit >= 0 ? 'Profitable flow' : 'Review spending'}</div>
+                            </div>
+                            <div class="dashboard-metric-card metric-gold">
+                                <div class="metric-label">Balance Sheet</div>
+                                <div class="metric-value">${balanceSheetStatus}</div>
+                                <div class="metric-subtext">Spread ${this.formatCurrency(balanceSheetGap)}</div>
+                            </div>
+                            <div class="dashboard-metric-card metric-green">
+                                <div class="metric-label">Task Approvals</div>
+                                <div class="metric-value">${pendingApprovals.length}</div>
+                                <div class="metric-subtext">Awaiting action</div>
+                            </div>
+                        </div>
+
+                        <div class="perplexity-card admin-control-card">
+                            <div class="card-header">
                                 <div>
-                                    <p class="dashboard-kicker">Operations Command</p>
-                                    <h2 class="dashboard-title">Owlio Control Surface</h2>
-                                    <p class="dashboard-subtitle">System status: <span class="status-pill status-${systemStatus.toLowerCase()}">${systemStatus}</span></p>
+                                    <h3>Company Controls</h3>
+                                    <p>Finance & operations quick actions</p>
                                 </div>
-                                <div class="dashboard-actions">
-                                    ${['admin', 'manager'].includes(this.state.currentUser.role) ? this.getCountrySelector() : ''}
-                                    <button data-action="refresh-ai" class="${this.state.aiMode === 'ai' ? 'ai-button' : 'bot-button'} dashboard-refresh">
-                                        <i class="fas fa-arrows-rotate"></i>
-                                        Refresh AI
+                            </div>
+                            <div class="admin-control-actions">
+                                <button class="perplexity-button" data-action="ledger">Review Balance Sheet</button>
+                                <button class="ghost-button" data-action="tasks">Approve Tasks</button>
+                                <button class="ghost-button" data-action="payroll">Run Payroll</button>
+                            </div>
+                        </div>
+
+                        <div class="dashboard-status-grid">
+                            <div class="perplexity-card machine-card">
+                                <div class="card-header">
+                                    <div>
+                                        <h3>Machine Info</h3>
+                                        <p>CAM Guardian module overview</p>
+                                    </div>
+                                    <span class="status-pill status-${systemStatus.toLowerCase()}">${systemStatus}</span>
+                                </div>
+                                <div class="machine-stats">
+                                    <div>
+                                        <span class="stat-label">Machine ID</span>
+                                        <p class="stat-value">${machineId}</p>
+                                    </div>
+                                    <div>
+                                        <span class="stat-label">Operator</span>
+                                        <p class="stat-value">${currentUser.name}</p>
+                                    </div>
+                                    <div>
+                                        <span class="stat-label">Top Client</span>
+                                        <p class="stat-value">${topCustomerName}</p>
+                                    </div>
+                                    <div>
+                                        <span class="stat-label">Active Alerts</span>
+                                        <p class="stat-value">${activeAlerts}</p>
+                                    </div>
+                                </div>
+                                <div class="mini-chart">
+                                    <div class="mini-chart-header">
+                                        <span>Working Hours</span>
+                                        <span>${weeklyWorkingHours.toFixed(1)}h / wk</span>
+                                    </div>
+                                    <div class="mini-chart-body">
+                                        <canvas id="workingHoursChart"></canvas>
+                                    </div>
+                                    <div class="mini-chart-footer">
+                                        <span>Avg ${averageWorkingHours.toFixed(1)}h</span>
+                                        <span>${todaysHours.toFixed(1)}h today</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="perplexity-card gauge-card">
+                                <div class="card-header">
+                                    <div>
+                                        <h3>Liquidity Gauge</h3>
+                                        <p>Cash vs. payroll coverage</p>
+                                    </div>
+                                    <button class="ghost-button" data-action="tasks">
+                                        <i class="fas fa-eye"></i>
                                     </button>
                                 </div>
-                            </div>
-
-                            <div class="dashboard-metric-grid">
-                                <div class="dashboard-metric-card metric-blue">
-                                    <div class="metric-label">Total Revenue</div>
-                                    <div class="metric-value animated-number" data-target="${totalRevenue}" data-format="currency">${this.formatCurrency(0)}</div>
-                                    <div class="metric-subtext">${weekSales.length} deals this week</div>
-                                </div>
-                                <div class="dashboard-metric-card metric-purple">
-                                    <div class="metric-label">Net Profit</div>
-                                    <div class="metric-value animated-number" data-target="${netProfit}" data-format="currency">${this.formatCurrency(0)}</div>
-                                    <div class="metric-subtext ${netProfit >= 0 ? 'text-positive' : 'text-negative'}">${netProfit >= 0 ? 'Profitable flow' : 'Review spending'}</div>
-                                </div>
-                                <div class="dashboard-metric-card metric-gold">
-                                    <div class="metric-label">Inventory Value</div>
-                                    <div class="metric-value animated-number" data-target="${totalInventoryValue}" data-format="currency">${this.formatCurrency(0)}</div>
-                                    <div class="metric-subtext">Top mover: ${topProductName}</div>
-                                </div>
-                                <div class="dashboard-metric-card metric-green">
-                                    <div class="metric-label">Machine Health</div>
-                                    <div class="metric-value">${machineHealth}%</div>
-                                    <div class="metric-subtext">Uptime ${uptimeScore}%</div>
-                                </div>
-                            </div>
-
-                            <div class="dashboard-status-grid">
-                                <div class="perplexity-card machine-card">
-                                    <div class="card-header">
-                                        <div>
-                                            <h3>Machine Info</h3>
-                                            <p>CAM Guardian module overview</p>
-                                        </div>
-                                        <span class="status-pill status-${systemStatus.toLowerCase()}">${systemStatus}</span>
-                                    </div>
-                                    <div class="machine-stats">
-                                        <div>
-                                            <span class="stat-label">Machine ID</span>
-                                            <p class="stat-value">${machineId}</p>
-                                        </div>
-                                        <div>
-                                            <span class="stat-label">Operator</span>
-                                            <p class="stat-value">${currentUser.name}</p>
-                                        </div>
-                                        <div>
-                                            <span class="stat-label">Top Client</span>
-                                            <p class="stat-value">${topCustomerName}</p>
-                                        </div>
-                                        <div>
-                                            <span class="stat-label">Active Alerts</span>
-                                            <p class="stat-value">${activeAlerts}</p>
+                                <div class="gauge-wrapper">
+                                    <div class="gauge-shell">
+                                        <canvas id="oilLevelChart"></canvas>
+                                        <div class="gauge-overlay">
+                                            <span id="oil-level-value">${oilLevel}%</span>
+                                            <p>Filled</p>
                                         </div>
                                     </div>
-                                    <div class="mini-chart">
-                                        <div class="mini-chart-header">
-                                            <span>Working Hours</span>
-                                            <span>${weeklyWorkingHours.toFixed(1)}h / wk</span>
-                                        </div>
-                                        <div class="mini-chart-body">
-                                            <canvas id="workingHoursChart"></canvas>
-                                        </div>
-                                        <div class="mini-chart-footer">
-                                            <span>Avg ${averageWorkingHours.toFixed(1)}h</span>
-                                            <span>${todaysHours.toFixed(1)}h today</span>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <div class="perplexity-card gauge-card">
-                                    <div class="card-header">
+                                    <div class="gauge-meta">
                                         <div>
-                                            <h3>Current Oil Level</h3>
-                                            <p>Lubrication integrity</p>
-                                        </div>
-                                        <button class="ghost-button" data-action="tasks">
-                                            <i class="fas fa-eye"></i>
-                                        </button>
-                                    </div>
-                                    <div class="gauge-wrapper">
-                                        <div class="gauge-shell">
-                                            <canvas id="oilLevelChart"></canvas>
-                                            <div class="gauge-overlay">
-                                                <span id="oil-level-value">${oilLevel}%</span>
-                                                <p>Filled</p>
-                                            </div>
-                                        </div>
-                                        <div class="gauge-meta">
-                                            <div>
-                                                <span class="stat-label">Target</span>
-                                                <p class="stat-value">82%</p>
-                                            </div>
-                                            <div>
-                                                <span class="stat-label">Last Inspection</span>
-                                                <p class="stat-value">${now.toLocaleDateString()}</p>
-                                            </div>
-                                            <div>
-                                                <span class="stat-label">Cycle Efficiency</span>
-                                                <p class="stat-value">${Math.min(99, Math.max(55, Math.round(averageWorkingHours * 8)))}%</p>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <div class="perplexity-card battery-card">
-                                    <div class="card-header">
-                                        <div>
-                                            <h3>Battery State</h3>
-                                            <p>Power reserves</p>
-                                        </div>
-                                        <button class="ghost-button" data-action="accura-ai">
-                                            <i class="fas fa-plug"></i>
-                                        </button>
-                                    </div>
-                                    <div class="battery-meter">
-                                        <div class="battery-level" style="width: ${batteryLevel}%"></div>
-                                    </div>
-                                    <div class="battery-meta">
-                                        <div>
-                                            <span class="stat-label">Charge</span>
-                                            <p class="stat-value" id="battery-level-value">${batteryLevel}%</p>
+                                            <span class="stat-label">Payroll / Mo</span>
+                                            <p class="stat-value">${this.formatCurrency(companyPayroll)}</p>
                                         </div>
                                         <div>
-                                            <span class="stat-label">Energy Usage</span>
+                                            <span class="stat-label">Energy Use</span>
                                             <p class="stat-value">${energyUsage}%</p>
                                         </div>
                                         <div>
-                                            <span class="stat-label">Monthly Earnings</span>
-                                            <p class="stat-value">${this.formatCurrency(totalEarnings)}</p>
+                                            <span class="stat-label">Cycle Efficiency</span>
+                                            <p class="stat-value">${Math.min(99, Math.max(55, Math.round(averageWorkingHours * 8)))}%</p>
                                         </div>
                                     </div>
                                 </div>
                             </div>
 
-                            <div class="dashboard-history-grid">
-                                <div class="perplexity-card history-card">
-                                    <div class="card-header">
-                                        <div>
-                                            <h3>History Module Temperature</h3>
-                                            <p>Last 10 readings</p>
-                                        </div>
-                                        <span class="status-chip">${temperatureData[temperatureData.length - 1]}°C</span>
+                            <div class="perplexity-card battery-card">
+                                <div class="card-header">
+                                    <div>
+                                        <h3>Executive Snapshot</h3>
+                                        <p>Approvals, alerts & pay</p>
                                     </div>
-                                    <div class="history-chart">
-                                        <canvas id="temperatureChart"></canvas>
+                                    <button class="ghost-button" data-action="accura-ai">
+                                        <i class="fas fa-plug"></i>
+                                    </button>
+                                </div>
+                                <div class="battery-meter">
+                                    <div class="battery-level" style="width: ${metrics.batteryLevel}%"></div>
+                                </div>
+                                <div class="battery-meta">
+                                    <div>
+                                        <span class="stat-label">Requests</span>
+                                        <p class="stat-value" id="battery-level-value">${pendingApprovals.length}</p>
                                     </div>
-                                    <div class="history-footer">
-                                        <div>
-                                            <span class="stat-label">Peak</span>
-                                            <p class="stat-value">${Math.max(...temperatureData)}°C</p>
-                                        </div>
-                                        <div>
-                                            <span class="stat-label">Low</span>
-                                            <p class="stat-value">${Math.min(...temperatureData)}°C</p>
-                                        </div>
-                                        <div>
-                                            <span class="stat-label">Trend</span>
-                                            <p class="stat-value ${netProfit >= 0 ? 'text-positive' : 'text-negative'}">${netProfit >= 0 ? 'Cooling' : 'Warming'}</p>
-                                        </div>
+                                    <div>
+                                        <span class="stat-label">Alerts</span>
+                                        <p class="stat-value">${activeAlerts}</p>
+                                    </div>
+                                    <div>
+                                        <span class="stat-label">Monthly Earnings</span>
+                                        <p class="stat-value">${this.formatCurrency(totalEarnings)}</p>
                                     </div>
                                 </div>
                             </div>
                         </div>
-                        <aside class="dashboard-side">
-                            <div class="object-browser-card perplexity-card">
-                                <div class="object-browser-menu">
-                                    <button class="active">Design</button>
-                                    <button>Object Directory</button>
-                                    <button>AI Widgets</button>
+
+                        <div class="dashboard-history-grid">
+                            <div class="perplexity-card history-card">
+                                <div class="card-header">
+                                    <div>
+                                        <h3>Cash Temperature</h3>
+                                        <p>10 recent readings</p>
+                                    </div>
+                                    <span class="status-chip">${latestTemperature}°C</span>
                                 </div>
-                                <div class="object-browser-content">
-                                    <section class="object-browser-section">
-                                        <h4>Properties</h4>
-                                        <div class="object-browser-item">
-                                            <span>Machine Health</span>
-                                            <span>${machineHealth}%</span>
-                                        </div>
-                                        <div class="object-browser-item">
-                                            <span>Uptime Score</span>
-                                            <span>${uptimeScore}%</span>
-                                        </div>
-                                        <div class="object-browser-item">
-                                            <span>Active Alerts</span>
-                                            <span>${activeAlerts}</span>
-                                        </div>
-                                        <div class="object-browser-item">
-                                            <span>Unread Signals</span>
-                                            <span>${this.getUnreadMessageCount()}</span>
-                                        </div>
-                                    </section>
-
-                                    <section class="object-browser-section">
-                                        <h4>Object Inspector Widgets</h4>
-                                        ${criticalInventory.length ? `
-                                            <ul class="object-inventory">
-                                                ${criticalInventory.map(product => `
-                                                    <li>
-                                                        <span>${product.name}</span>
-                                                        <span>${product.stock} left</span>
-                                                    </li>
-                                                `).join('')}
-                                            </ul>
-                                        ` : `
-                                            <p class="empty-state">Inventory balanced. No alerts.</p>
-                                        `}
-                                    </section>
-
-                                    <section class="object-browser-section">
-                                        <h4>Recent Signals</h4>
-                                        <div class="object-browser-feed">
-                                            ${insights.map(notification => `
-                                                <div class="object-feed-item">
-                                                    <span class="dot ${notification.color?.replace('text-', 'bg-') || 'bg-blue-500'}"></span>
-                                                    <div>
-                                                        <p class="feed-title">${notification.username}</p>
-                                                        <p class="feed-body">${notification.content}</p>
-                                                    </div>
-                                                </div>
-                                            `).join('')}
-                                            ${recentSales.slice(0, 3).map(sale => {
-                                                const customer = customers.find(c => c.id === sale.customerId);
-                                                const label = customer ? customer.name : 'Customer';
-                                                return `
-                                                    <div class="object-feed-item">
-                                                        <span class="dot bg-green-500"></span>
-                                                        <div>
-                                                            <p class="feed-title">Sale • ${label}</p>
-                                                            <p class="feed-body">${this.formatCurrency(sale.total)} total</p>
-                                                        </div>
-                                                    </div>
-                                                `;
-                                            }).join('')}
-                                        </div>
-                                    </section>
-
-                                    <div class="object-browser-footer">
-                                        <button data-action="products" class="perplexity-button">
-                                            <i class="fas fa-box-open"></i>
-                                            Manage Inventory
-                                        </button>
+                                <div class="history-chart">
+                                    <canvas id="temperatureChart"></canvas>
+                                </div>
+                                <div class="history-footer">
+                                    <div>
+                                        <span class="stat-label">Peak</span>
+                                        <p class="stat-value">${temperatureData.length ? Math.max(...temperatureData) : 0}°C</p>
+                                    </div>
+                                    <div>
+                                        <span class="stat-label">Low</span>
+                                        <p class="stat-value">${temperatureData.length ? Math.min(...temperatureData) : 0}°C</p>
+                                    </div>
+                                    <div>
+                                        <span class="stat-label">Inventory</span>
+                                        <p class="stat-value">${topProductName}</p>
                                     </div>
                                 </div>
                             </div>
-                        </aside>
+                        </div>
                     </div>
-                `;
-            },
+                    <aside class="dashboard-side">
+                        <div class="object-browser-card perplexity-card">
+                            <div class="object-browser-menu">
+                                <button class="active">Executive</button>
+                                <button>Directory</button>
+                                <button>AI Widgets</button>
+                            </div>
+                            <div class="object-browser-content">
+                                <section class="object-browser-section">
+                                    <h4>Properties</h4>
+                                    <div class="object-browser-item">
+                                        <span>Machine Health</span>
+                                        <span>${machineHealth}%</span>
+                                    </div>
+                                    <div class="object-browser-item">
+                                        <span>Uptime Score</span>
+                                        <span>${uptimeScore}%</span>
+                                    </div>
+                                    <div class="object-browser-item">
+                                        <span>Active Alerts</span>
+                                        <span>${activeAlerts}</span>
+                                    </div>
+                                    <div class="object-browser-item">
+                                        <span>Unread Signals</span>
+                                        <span>${this.getUnreadMessageCount()}</span>
+                                    </div>
+                                </section>
+
+                                <section class="object-browser-section">
+                                    <h4>Critical Inventory</h4>
+                                    ${criticalInventory.length ? `
+                                        <ul class="object-inventory">
+                                            ${criticalInventory.map(product => `
+                                                <li>
+                                                    <span>${product.name}</span>
+                                                    <span>${product.stock} left</span>
+                                                </li>
+                                            `).join('')}
+                                        </ul>
+                                    ` : `
+                                        <p class="empty-state">Inventory balanced. No alerts.</p>
+                                    `}
+                                </section>
+
+                                <section class="object-browser-section">
+                                    <h4>Recent Signals</h4>
+                                    <div class="object-browser-feed">
+                                        ${insights.map(notification => `
+                                            <div class="object-feed-item">
+                                                <span class="dot ${notification.color?.replace('text-', 'bg-') || 'bg-blue-500'}"></span>
+                                                <div>
+                                                    <p class="feed-title">${notification.username}</p>
+                                                    <p class="feed-body">${notification.content}</p>
+                                                </div>
+                                            </div>
+                                        `).join('')}
+                                        ${recentSales.slice(0, 3).map(sale => {
+                                            const customer = customers.find(c => c.id === sale.customerId);
+                                            const label = customer ? customer.name : 'Customer';
+                                            return `
+                                                <div class="object-feed-item">
+                                                    <span class="dot bg-green-500"></span>
+                                                    <div>
+                                                        <p class="feed-title">Sale • ${label}</p>
+                                                        <p class="feed-body">${this.formatCurrency(sale.total)} total</p>
+                                                    </div>
+                                                </div>
+                                            `;
+                                        }).join('')}
+                                    </div>
+                                </section>
+
+                                <div class="object-browser-footer">
+                                    <button data-action="products" class="perplexity-button">
+                                        <i class="fas fa-box-open"></i>
+                                        Manage Inventory (${this.formatCurrency(totalInventoryValue)})
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </aside>
+                </div>
+            `;
+        },
+
+        renderManagerDashboard(metrics) {
+            const {
+                currentUser,
+                systemStatus,
+                teamRevenue,
+                teamSalesCount,
+                teamWorkers,
+                workerPerformance,
+                teamSalaryTotal,
+                teamCommissionTotal,
+                weeklyWorkingHours,
+                averageWorkingHours,
+                todaysHours,
+                managerOutstanding,
+                insights,
+                pendingApprovals,
+                machineHealth,
+                uptimeScore,
+                activeAlerts
+            } = metrics;
+
+            const topPerformer = workerPerformance[0];
+
+            return `
+                <div class="owlio-dashboard fade-in manager-dashboard">
+                    <div class="dashboard-main">
+                        <div class="dashboard-top">
+                            <div>
+                                <p class="dashboard-kicker">Team Oversight</p>
+                                <h2 class="dashboard-title">Owlio Control Surface</h2>
+                                <p class="dashboard-subtitle">Lead status: <span class="status-pill status-${systemStatus.toLowerCase()}">${systemStatus}</span></p>
+                            </div>
+                            <div class="dashboard-actions">
+                                ${this.getCountrySelector()}
+                                <button data-action="refresh-ai" class="${this.state.aiMode === 'ai' ? 'ai-button' : 'bot-button'} dashboard-refresh">
+                                    <i class="fas fa-arrows-rotate"></i>
+                                    Refresh AI
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="dashboard-metric-grid">
+                            <div class="dashboard-metric-card metric-blue">
+                                <div class="metric-label">Team Revenue</div>
+                                <div class="metric-value animated-number" data-target="${teamRevenue}" data-format="currency">${this.formatCurrency(0)}</div>
+                                <div class="metric-subtext">${teamSalesCount} team wins</div>
+                            </div>
+                            <div class="dashboard-metric-card metric-purple">
+                                <div class="metric-label">Active Workers</div>
+                                <div class="metric-value">${teamWorkers.length}</div>
+                                <div class="metric-subtext">${workerPerformance.filter(w => w.revenue > 0).length} contributing</div>
+                            </div>
+                            <div class="dashboard-metric-card metric-gold">
+                                <div class="metric-label">Salary Coverage</div>
+                                <div class="metric-value">${this.formatCurrency(teamSalaryTotal)}</div>
+                                <div class="metric-subtext">Commission ${this.formatCurrency(teamCommissionTotal)}</div>
+                            </div>
+                            <div class="dashboard-metric-card metric-green">
+                                <div class="metric-label">Outstanding Tasks</div>
+                                <div class="metric-value">${managerOutstanding.length}</div>
+                                <div class="metric-subtext">Includes ${pendingApprovals.length} approvals</div>
+                            </div>
+                        </div>
+
+                        <div class="dashboard-status-grid">
+                            <div class="perplexity-card machine-card">
+                                <div class="card-header">
+                                    <div>
+                                        <h3>Team Activity</h3>
+                                        <p>Deal cadence & focus</p>
+                                    </div>
+                                    <span class="status-pill status-${systemStatus.toLowerCase()}">${systemStatus}</span>
+                                </div>
+                                <div class="machine-stats">
+                                    <div>
+                                        <span class="stat-label">Lead Manager</span>
+                                        <p class="stat-value">${currentUser.name}</p>
+                                    </div>
+                                    <div>
+                                        <span class="stat-label">Top Performer</span>
+                                        <p class="stat-value">${topPerformer ? topPerformer.name : 'TBD'}</p>
+                                    </div>
+                                    <div>
+                                        <span class="stat-label">Avg Hours</span>
+                                        <p class="stat-value">${averageWorkingHours.toFixed(1)} h</p>
+                                    </div>
+                                    <div>
+                                        <span class="stat-label">Alerts</span>
+                                        <p class="stat-value">${managerOutstanding.length}</p>
+                                    </div>
+                                </div>
+                                <div class="mini-chart">
+                                    <div class="mini-chart-header">
+                                        <span>Working Hours</span>
+                                        <span>${weeklyWorkingHours.toFixed(1)}h / wk</span>
+                                    </div>
+                                    <div class="mini-chart-body">
+                                        <canvas id="workingHoursChart"></canvas>
+                                    </div>
+                                    <div class="mini-chart-footer">
+                                        <span>Avg ${averageWorkingHours.toFixed(1)}h</span>
+                                        <span>${todaysHours.toFixed(1)}h today</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="perplexity-card history-card">
+                                <div class="card-header">
+                                    <div>
+                                        <h3>Team Performance</h3>
+                                        <p>Revenue by team member</p>
+                                    </div>
+                                    <button class="ghost-button" data-action="tasks">
+                                        <i class="fas fa-users"></i>
+                                    </button>
+                                </div>
+                                <div class="history-chart">
+                                    <canvas id="teamPerformanceChart"></canvas>
+                                </div>
+                                <div class="history-footer">
+                                    <div>
+                                        <span class="stat-label">Top Revenue</span>
+                                        <p class="stat-value">${topPerformer ? this.formatCurrency(topPerformer.revenue) : this.formatCurrency(0)}</p>
+                                    </div>
+                                    <div>
+                                        <span class="stat-label">Commission Pool</span>
+                                        <p class="stat-value">${this.formatCurrency(teamCommissionTotal)}</p>
+                                    </div>
+                                    <div>
+                                        <span class="stat-label">Active Alerts</span>
+                                        <p class="stat-value">${activeAlerts}</p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="perplexity-card battery-card">
+                                <div class="card-header">
+                                    <div>
+                                        <h3>Compensation Mix</h3>
+                                        <p>Salary vs. commissions</p>
+                                    </div>
+                                    <button class="ghost-button" data-action="payroll">
+                                        <i class="fas fa-wallet"></i>
+                                    </button>
+                                </div>
+                                <div class="history-chart">
+                                    <canvas id="salaryDistributionChart"></canvas>
+                                </div>
+                                <div class="battery-meta">
+                                    <div>
+                                        <span class="stat-label">Salary</span>
+                                        <p class="stat-value">${this.formatCurrency(teamSalaryTotal)}</p>
+                                    </div>
+                                    <div>
+                                        <span class="stat-label">Commission</span>
+                                        <p class="stat-value">${this.formatCurrency(teamCommissionTotal)}</p>
+                                    </div>
+                                    <div>
+                                        <span class="stat-label">Per Worker Avg</span>
+                                        <p class="stat-value">${teamWorkers.length ? this.formatCurrency(teamSalaryTotal / teamWorkers.length) : this.formatCurrency(0)}</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="dashboard-history-grid">
+                            <div class="perplexity-card history-card">
+                                <div class="card-header">
+                                    <div>
+                                        <h3>Outstanding Tasks</h3>
+                                        <p>Team blockers & follow-ups</p>
+                                    </div>
+                                    <span class="status-chip">${managerOutstanding.length} open</span>
+                                </div>
+                                <div class="object-browser-feed">
+                                    ${managerOutstanding.slice(0, 5).map(task => {
+                                        const owner = this.state.users.find(u => u.id === task.createdBy);
+                                        return `
+                                            <div class="object-feed-item">
+                                                <span class="dot bg-yellow-500"></span>
+                                                <div>
+                                                    <p class="feed-title">${task.title || 'Untitled Task'}</p>
+                                                    <p class="feed-body">Owner: ${owner ? owner.name : 'Unknown'} • ${task.status}</p>
+                                                </div>
+                                            </div>
+                                        `;
+                                    }).join('') || '<p class="empty-state">No outstanding tasks. Great job!</p>'}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <aside class="dashboard-side">
+                        <div class="object-browser-card perplexity-card">
+                            <div class="object-browser-menu">
+                                <button class="active">Leaderboard</button>
+                                <button>Coaching</button>
+                                <button>Signals</button>
+                            </div>
+                            <div class="object-browser-content">
+                                <section class="object-browser-section">
+                                    <h4>Worker Performance</h4>
+                                    <ul class="object-inventory">
+                                        ${workerPerformance.map(worker => `
+                                            <li>
+                                                <span>${worker.name}</span>
+                                                <span>${this.formatCurrency(worker.revenue)}</span>
+                                            </li>
+                                        `).join('')}
+                                    </ul>
+                                </section>
+                                <section class="object-browser-section">
+                                    <h4>Team Signals</h4>
+                                    <div class="object-browser-feed">
+                                        ${insights.map(notification => `
+                                            <div class="object-feed-item">
+                                                <span class="dot ${notification.color?.replace('text-', 'bg-') || 'bg-blue-500'}"></span>
+                                                <div>
+                                                    <p class="feed-title">${notification.username}</p>
+                                                    <p class="feed-body">${notification.content}</p>
+                                                </div>
+                                            </div>
+                                        `).join('')}
+                                    </div>
+                                </section>
+                                <div class="object-browser-footer">
+                                    <button data-action="tasks" class="perplexity-button">
+                                        <i class="fas fa-clipboard-list"></i>
+                                        Manage Team Tasks
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </aside>
+                </div>
+            `;
+        },
+
+        renderWorkerDashboard(metrics) {
+            const {
+                currentUser,
+                systemStatus,
+                monthlySalary,
+                totalRevenue,
+                personalTasks,
+                personalSalesSeries,
+                weeklyWorkingHours,
+                averageWorkingHours,
+                todaysHours,
+                insights,
+                recentSales,
+                customers,
+                totalEarnings,
+                energyUsage
+            } = metrics;
+
+            const bestMonth = personalSalesSeries.length ? Math.max(...personalSalesSeries.map(point => point.total)) : 0;
+            const currentMonth = personalSalesSeries.length ? personalSalesSeries[personalSalesSeries.length - 1].total : 0;
+
+            return `
+                <div class="owlio-dashboard fade-in worker-dashboard">
+                    <div class="dashboard-main">
+                        <div class="dashboard-top">
+                            <div>
+                                <p class="dashboard-kicker">My Performance</p>
+                                <h2 class="dashboard-title">Owlio Personal Cockpit</h2>
+                                <p class="dashboard-subtitle">Focus mode: <span class="status-pill status-${systemStatus.toLowerCase()}">${systemStatus}</span></p>
+                            </div>
+                            <div class="dashboard-actions">
+                                <button data-action="refresh-ai" class="${this.state.aiMode === 'ai' ? 'ai-button' : 'bot-button'} dashboard-refresh">
+                                    <i class="fas fa-arrows-rotate"></i>
+                                    Refresh AI
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="dashboard-metric-grid">
+                            <div class="dashboard-metric-card metric-blue">
+                                <div class="metric-label">Monthly Salary</div>
+                                <div class="metric-value">${this.formatCurrency(monthlySalary)}</div>
+                                <div class="metric-subtext">Base compensation</div>
+                            </div>
+                            <div class="dashboard-metric-card metric-purple">
+                                <div class="metric-label">Commission</div>
+                                <div class="metric-value">${this.formatCurrency(currentUser.commission || 0)}</div>
+                                <div class="metric-subtext">Earned this cycle</div>
+                            </div>
+                            <div class="dashboard-metric-card metric-gold">
+                                <div class="metric-label">Personal Revenue</div>
+                                <div class="metric-value animated-number" data-target="${totalRevenue}" data-format="currency">${this.formatCurrency(0)}</div>
+                                <div class="metric-subtext">${personalSalesSeries.length ? personalSalesSeries[personalSalesSeries.length - 1].label : 'This month'}</div>
+                            </div>
+                            <div class="dashboard-metric-card metric-green">
+                                <div class="metric-label">Active Tasks</div>
+                                <div class="metric-value">${personalTasks.length}</div>
+                                <div class="metric-subtext">Keep momentum</div>
+                            </div>
+                        </div>
+
+                        <div class="dashboard-status-grid">
+                            <div class="perplexity-card machine-card">
+                                <div class="card-header">
+                                    <div>
+                                        <h3>Daily Rhythm</h3>
+                                        <p>Your recent activity</p>
+                                    </div>
+                                    <span class="status-pill status-${systemStatus.toLowerCase()}">${systemStatus}</span>
+                                </div>
+                                <div class="machine-stats">
+                                    <div>
+                                        <span class="stat-label">Name</span>
+                                        <p class="stat-value">${currentUser.name}</p>
+                                    </div>
+                                    <div>
+                                        <span class="stat-label">Weekly Hours</span>
+                                        <p class="stat-value">${weeklyWorkingHours.toFixed(1)} h</p>
+                                    </div>
+                                    <div>
+                                        <span class="stat-label">Average</span>
+                                        <p class="stat-value">${averageWorkingHours.toFixed(1)} h</p>
+                                    </div>
+                                    <div>
+                                        <span class="stat-label">Today</span>
+                                        <p class="stat-value">${todaysHours.toFixed(1)} h</p>
+                                    </div>
+                                </div>
+                                <div class="mini-chart">
+                                    <div class="mini-chart-header">
+                                        <span>Working Hours</span>
+                                        <span>${weeklyWorkingHours.toFixed(1)}h / wk</span>
+                                    </div>
+                                    <div class="mini-chart-body">
+                                        <canvas id="workingHoursChart"></canvas>
+                                    </div>
+                                    <div class="mini-chart-footer">
+                                        <span>Avg ${averageWorkingHours.toFixed(1)}h</span>
+                                        <span>${todaysHours.toFixed(1)}h today</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="perplexity-card history-card">
+                                <div class="card-header">
+                                    <div>
+                                        <h3>Sales Momentum</h3>
+                                        <p>Monthly personal revenue</p>
+                                    </div>
+                                    <button class="ghost-button" data-action="sales">
+                                        <i class="fas fa-chart-line"></i>
+                                    </button>
+                                </div>
+                                <div class="history-chart">
+                                    <canvas id="personalSalesChart"></canvas>
+                                </div>
+                                <div class="history-footer">
+                                    <div>
+                                        <span class="stat-label">Best Month</span>
+                                        <p class="stat-value">${this.formatCurrency(bestMonth)}</p>
+                                    </div>
+                                    <div>
+                                        <span class="stat-label">Current Month</span>
+                                        <p class="stat-value">${this.formatCurrency(currentMonth)}</p>
+                                    </div>
+                                    <div>
+                                        <span class="stat-label">Energy Use</span>
+                                        <p class="stat-value">${energyUsage}%</p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="perplexity-card battery-card">
+                                <div class="card-header">
+                                    <div>
+                                        <h3>Pay Snapshot</h3>
+                                        <p>Salary, commission & goals</p>
+                                    </div>
+                                    <button class="ghost-button" data-action="tasks">
+                                        <i class="fas fa-check"></i>
+                                    </button>
+                                </div>
+                                <div class="battery-meter">
+                                    <div class="battery-level" style="width: ${metrics.batteryLevel}%"></div>
+                                </div>
+                                <div class="battery-meta">
+                                    <div>
+                                        <span class="stat-label">Monthly Earnings</span>
+                                        <p class="stat-value">${this.formatCurrency(totalEarnings)}</p>
+                                    </div>
+                                    <div>
+                                        <span class="stat-label">Active Tasks</span>
+                                        <p class="stat-value">${personalTasks.length}</p>
+                                    </div>
+                                    <div>
+                                        <span class="stat-label">Commission</span>
+                                        <p class="stat-value">${this.formatCurrency(currentUser.commission || 0)}</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <aside class="dashboard-side">
+                        <div class="object-browser-card perplexity-card">
+                            <div class="object-browser-menu">
+                                <button class="active">Tasks</button>
+                                <button>Signals</button>
+                                <button>Wins</button>
+                            </div>
+                            <div class="object-browser-content">
+                                <section class="object-browser-section">
+                                    <h4>Assigned Tasks</h4>
+                                    <div class="object-browser-feed">
+                                        ${personalTasks.slice(0, 5).map(task => `
+                                            <div class="object-feed-item">
+                                                <span class="dot bg-sky-500"></span>
+                                                <div>
+                                                    <p class="feed-title">${task.title || 'Team Task'}</p>
+                                                    <p class="feed-body">${task.status}</p>
+                                                </div>
+                                            </div>
+                                        `).join('') || '<p class="empty-state">All tasks completed. Great work!</p>'}
+                                    </div>
+                                </section>
+                                <section class="object-browser-section">
+                                    <h4>Recent Wins</h4>
+                                    <div class="object-browser-feed">
+                                        ${recentSales.slice(0, 3).map(sale => {
+                                            const customer = customers.find(c => c.id === sale.customerId);
+                                            const label = customer ? customer.name : 'Customer';
+                                            return `
+                                                <div class="object-feed-item">
+                                                    <span class="dot bg-green-500"></span>
+                                                    <div>
+                                                        <p class="feed-title">${label}</p>
+                                                        <p class="feed-body">${this.formatCurrency(sale.total)} total</p>
+                                                    </div>
+                                                </div>
+                                            `;
+                                        }).join('') || '<p class="empty-state">Log your first sale to see wins here.</p>'}
+                                    </div>
+                                </section>
+                                <section class="object-browser-section">
+                                    <h4>Coach Signals</h4>
+                                    <div class="object-browser-feed">
+                                        ${insights.map(notification => `
+                                            <div class="object-feed-item">
+                                                <span class="dot ${notification.color?.replace('text-', 'bg-') || 'bg-blue-500'}"></span>
+                                                <div>
+                                                    <p class="feed-title">${notification.username}</p>
+                                                    <p class="feed-body">${notification.content}</p>
+                                                </div>
+                                            </div>
+                                        `).join('')}
+                                    </div>
+                                </section>
+                            </div>
+                        </div>
+                    </aside>
+                </div>
+            `;
+        },
+
 
         getCountrySelector() {
                 return `
