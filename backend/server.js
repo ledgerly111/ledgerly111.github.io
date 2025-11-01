@@ -12,7 +12,7 @@ const PORT = process.env.PORT || 10000;
 app.use(cors());
 app.use(express.json());
 
-// --- FINAL HELPER FUNCTION TO CREATE THE DEFINITIVE SUMMARY ---
+// Enhanced context summary with more detailed insights
 function createContextSummary(data) {
     const sales = data.sales || [];
     const expenses = data.expenses || [];
@@ -22,10 +22,19 @@ function createContextSummary(data) {
 
     const totalRevenue = sales.reduce((sum, sale) => sum + sale.total, 0);
     const totalExpenses = expenses.reduce((sum, exp) => sum + exp.amount, 0);
+    const netProfit = totalRevenue - totalExpenses;
 
-    // Calculate sales per product
+    // Calculate sales per product with profit margins
     const productPerformance = {};
-    products.forEach(p => { productPerformance[p.name] = { units_sold: 0, total_revenue: 0 }; });
+    products.forEach(p => { 
+        productPerformance[p.name] = { 
+            units_sold: 0, 
+            total_revenue: 0,
+            stock_level: p.stock || 0,
+            price: p.price || 0
+        }; 
+    });
+    
     sales.forEach(sale => {
         sale.items.forEach(item => {
             const product = products.find(p => p.id === item.productId);
@@ -35,41 +44,101 @@ function createContextSummary(data) {
             }
         });
     });
-    const product_sales_summary = Object.entries(productPerformance).map(([name, data]) => ({ name, units_sold: data.units_sold, total_revenue: parseFloat(data.total_revenue.toFixed(2)) }));
 
-    // --- NEW: Employee Performance Calculation ---
+    const product_sales_summary = Object.entries(productPerformance)
+        .map(([name, data]) => ({ 
+            name, 
+            units_sold: data.units_sold, 
+            total_revenue: parseFloat(data.total_revenue.toFixed(2)),
+            stock_level: data.stock_level,
+            price: data.price
+        }))
+        .sort((a, b) => b.total_revenue - a.total_revenue);
+
+    // Enhanced employee performance with metrics
     const employeePerformance = {};
-    users.forEach(u => { employeePerformance[u.name] = { total_sales_value: 0 }; });
+    users.forEach(u => { 
+        employeePerformance[u.name] = { 
+            total_sales_value: 0,
+            number_of_sales: 0,
+            role: u.role
+        }; 
+    });
+    
     sales.forEach(sale => {
         const employee = users.find(u => u.id === sale.salesPersonId);
         if (employee && employeePerformance[employee.name]) {
             employeePerformance[employee.name].total_sales_value += sale.total;
+            employeePerformance[employee.name].number_of_sales += 1;
         }
     });
-    const employee_sales_summary = Object.entries(employeePerformance).map(([name, data]) => ({ name, total_sales_value: parseFloat(data.total_sales_value.toFixed(2)) }));
+    
+    const employee_sales_summary = Object.entries(employeePerformance)
+        .map(([name, data]) => ({ 
+            name, 
+            total_sales_value: parseFloat(data.total_sales_value.toFixed(2)),
+            number_of_sales: data.number_of_sales,
+            average_sale_value: data.number_of_sales > 0 ? parseFloat((data.total_sales_value / data.number_of_sales).toFixed(2)) : 0,
+            role: data.role
+        }))
+        .sort((a, b) => b.total_sales_value - a.total_sales_value);
 
+    // Customer insights
+    const customerInsights = customers.map(c => ({
+        name: c.name,
+        email: c.email,
+        phone: c.phone,
+        total_purchases: sales.filter(s => s.customerId === c.id).length,
+        total_spent: sales.filter(s => s.customerId === c.id).reduce((sum, s) => sum + s.total, 0)
+    })).sort((a, b) => b.total_spent - a.total_spent);
+
+    // Expense breakdown
+    const expensesByCategory = {};
+    expenses.forEach(exp => {
+        const category = exp.category || 'Uncategorized';
+        if (!expensesByCategory[category]) {
+            expensesByCategory[category] = 0;
+        }
+        expensesByCategory[category] += exp.amount;
+    });
+
+    const expense_breakdown = Object.entries(expensesByCategory)
+        .map(([category, amount]) => ({ 
+            category, 
+            amount: parseFloat(amount.toFixed(2)),
+            percentage: totalExpenses > 0 ? parseFloat(((amount / totalExpenses) * 100).toFixed(1)) : 0
+        }))
+        .sort((a, b) => b.amount - a.amount);
 
     return {
         business_overview: {
             appName: "Owlio",
-            aiName: "Bubble AI",
-            currency: data.currency,
-            total_revenue: totalRevenue.toFixed(2),
-            total_expenses: totalExpenses.toFixed(2),
-            net_profit: (totalRevenue - totalExpenses).toFixed(2),
+            aiName: "Benka AI",
+            currency: data.currency || 'AED',
+            total_revenue: parseFloat(totalRevenue.toFixed(2)),
+            total_expenses: parseFloat(totalExpenses.toFixed(2)),
+            net_profit: parseFloat(netProfit.toFixed(2)),
+            profit_margin: totalRevenue > 0 ? parseFloat(((netProfit / totalRevenue) * 100).toFixed(2)) : 0,
+            total_sales: sales.length,
+            total_customers: customers.length,
+            total_products: products.length,
+            total_employees: users.length
         },
         inventory_details: {
             product_count: products.length,
-            products_stock_list: products.map(p => ({ name: p.name, stock: p.stock }))
+            low_stock_products: products.filter(p => p.stock < 10).map(p => ({ name: p.name, stock: p.stock })),
+            out_of_stock: products.filter(p => p.stock === 0).map(p => p.name),
+            products_stock_list: products.map(p => ({ name: p.name, stock: p.stock, price: p.price }))
         },
-        product_sales_summary: product_sales_summary,
-        employee_performance_summary: employee_sales_summary
+        product_sales_summary,
+        employee_performance_summary: employee_sales_summary,
+        customer_insights: customerInsights.slice(0, 10),
+        expense_breakdown
     };
 }
 
-
 // =================================================================
-// === AI TEXT MODEL ENDPOINT - FINAL VERSION ===
+// === IMPROVED AI TEXT MODEL ENDPOINT ===
 // =================================================================
 app.post('/api/ask-ai', async (req, res) => {
     const { userQuestion, contextData, targetLanguage = 'English', chatHistory } = req.body;
@@ -80,136 +149,136 @@ app.post('/api/ask-ai', async (req, res) => {
         return res.status(500).json({ error: 'AI API key not configured on the server.' });
     }
 
-    // This is the most standard and compatible endpoint.
-    // If this fails, the issue is 100% with the API Key's permissions in Google Cloud.
-     const GEMINI_API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-lite:generateContent?key=${GEMINI_API_KEY}`;
+    // Keep the same model as requested
+    const GEMINI_API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-lite:generateContent?key=${GEMINI_API_KEY}`;
     const summary = createContextSummary(contextData);
 
     const system_prompt = `
-        You are Bubble AI, a professional business analyst in the "Owlio" app.
+You are Benka AI, an expert business intelligence assistant integrated into the Owlio business management platform.
 
-        **Your Persona & Rules:**
-        1.  Your name is Bubble AI. Your tone is professional and helpful.
-        2.  **Context:** Use the conversation history and the business summary below.
-        3.  **Conversational AI Rule:** If the user's question is a simple greeting or casual conversation (e.g., 'hi', 'hello', 'how are you?', 'thanks'), provide a friendly, conversational HTML response without including any business data or analysis. Just be a normal chatbot for these cases. For all other business-related questions, proceed with the full analysis using the context and summary provided.
+**Core Identity:**
+- Name: Benka AI
+- Personality: Professional, insightful, data-driven, and conversational
+- Expertise: Business analysis, financial insights, performance metrics, inventory management, and strategic recommendations
 
-        **Formatting Rules (CRITICAL for Business Questions):**
-        - Your response MUST be valid HTML. Use semantic elements such as <h2>, <ul>, <li>, <p>, and <strong>.
-        - If structured data is best shown in a table, output a clean HTML <table> with the class "ai-data-table" for styling.
+**Communication Style:**
+1. **For casual conversations** (greetings, thanks, small talk): Respond warmly and naturally as a friendly AI assistant
+2. **For business questions**: Provide comprehensive, data-backed analysis with actionable insights
 
-        **Follow-up Questions (for business conversations):**
-        - When the latest user message is a business question (not a casual greeting), append a follow-up section after the main answer.
-        - The section must use this exact structure:
-            <div class="ai-followup-section">
-                <h3>Suggested follow-up questions</h3>
-                <div class="ai-followup-bubbles">
-                    <button type="button" class="ai-followup-button" data-action="ask-ai-followup" data-question="QUESTION 1">QUESTION 1</button>
-                    <button type="button" class="ai-followup-button" data-action="ask-ai-followup" data-question="QUESTION 2">QUESTION 2</button>
-                    <button type="button" class="ai-followup-button" data-action="ask-ai-followup" data-question="QUESTION 3">QUESTION 3</button>
-                </div>
-            </div>
-        - Replace QUESTION 1-3 with three concise, relevant follow-up questions tailored to the conversation. Avoid quotation marks inside the data-question value.
-        - Do not include this follow-up section for simple greetings or casual chatter.
+**Response Format Rules:**
+✓ Always respond in valid, semantic HTML
+✓ Use appropriate tags: <h2> for main headings, <h3> for subheadings, <p> for paragraphs, <strong> for emphasis
+✓ For data comparisons: Use <table class="ai-data-table"> with proper <thead> and <tbody> structure
+✓ Use <ul> and <li> for lists of recommendations or key points
+✓ Keep responses well-structured and scannable
 
-        **High-Level Business Summary (ignore for simple greetings):**
-        ${JSON.stringify(summary, null, 2)}
-    `;
+**Emoji Usage for Better Understanding:**
+✓ Use relevant emojis throughout your responses to enhance visual understanding and engagement
+✓ Add emojis to headings, key metrics, and important points
+✓ Examples of appropriate emojis:
+  - 📈 for revenue, growth, positive trends
+  - 📉 for losses, declining trends
+  - 💰 for profit, money, financial topics
+  - 📊 for data, charts, analytics
+  - 🎯 for goals, targets, objectives
+  - ⚠️ for warnings, alerts, concerns
+  - ✅ for success, completed tasks, positive outcomes
+  - ❌ for problems, failures, negative outcomes
+  - 💡 for ideas, recommendations, insights
+  - 🔍 for analysis, deep dives, investigations
+  - 📦 for inventory, products, stock
+  - 👥 for customers, employees, teams
+  - 🏆 for top performers, achievements
+  - 🚀 for improvements, growth opportunities
+  - ⏰ for time-sensitive matters, deadlines
+  - 💸 for expenses, spending
+  - 🎉 for celebrations, milestones
+✓ Don't overuse emojis - use them purposefully to highlight key information
+
+**Analysis Guidelines:**
+- **Be specific**: Reference actual numbers, percentages, and trends from the data
+- **Be insightful**: Don't just report data—explain what it means and why it matters
+- **Be actionable**: Provide practical recommendations based on the analysis
+- **Be comparative**: Highlight best/worst performers, trends, and patterns
+- **Be contextual**: Consider the business as a whole when analyzing specific aspects
+
+**Data Interpretation:**
+- Identify high-performing areas and explain why they're succeeding
+- Flag concerning trends or underperforming areas with specific improvement suggestions
+- Calculate and explain key metrics like profit margins, ROI, customer lifetime value
+- Recognize patterns in sales, expenses, or employee performance
+- Provide strategic recommendations based on data insights
+
+**Current Business Context:**
+${JSON.stringify(summary, null, 2)}
+
+**Important Notes:**
+- Currency amounts are in ${summary.business_overview.currency}
+- All financial figures are based on actual transaction data
+- Employee and product performance metrics are calculated from real sales records
+- Respond in ${targetLanguage} language
+
+When analyzing data, always consider:
+1. What the numbers actually mean for the business
+2. How different metrics relate to each other
+3. What actions the user should take based on insights
+4. Potential risks or opportunities revealed by the data
+`;
 
     const conversationContents = [];
+    
+    // Include chat history for context
     if (chatHistory && chatHistory.length > 0) {
         chatHistory.forEach(msg => {
             const role = msg.sender === 'user' ? 'user' : 'model';
+            // Clean HTML from previous responses for better context
             const cleanContent = typeof msg.content === 'string' ? msg.content.replace(/<[^>]*>?/gm, '') : '';
-            conversationContents.push({ role: role, parts: [{ text: cleanContent }] });
+            if (cleanContent.trim()) {
+                conversationContents.push({ role: role, parts: [{ text: cleanContent }] });
+            }
         });
     }
 
+    // Add the current user question
     conversationContents.push({
         role: 'user',
-        parts: [{ text: `${system_prompt}\n\nBased on all the above, answer the user's latest question: "${userQuestion}" in ${targetLanguage}.` }]
+        parts: [{ text: `${system_prompt}\n\nUser Question: "${userQuestion}"` }]
     });
 
     try {
         const geminiResponse = await axios.post(GEMINI_API_URL, {
             contents: conversationContents,
+            generationConfig: {
+                temperature: 0.7,
+                topK: 40,
+                topP: 0.95,
+                maxOutputTokens: 2048,
+            }
         });
         
         if (!geminiResponse.data.candidates || geminiResponse.data.candidates.length === 0) {
-             return res.status(500).json({ error: 'AI service returned an empty response.' });
+            return res.status(500).json({ error: 'AI service returned an empty response.' });
         }
+
         const geminiHtmlResponse = geminiResponse.data.candidates[0].content.parts[0].text;
         res.json({ htmlResponse: geminiHtmlResponse });
+        
     } catch (error) {
-        console.error('Error in AI backend:', error.response ? error.response.data.error : error.message);
-        res.status(500).json({ error: 'Failed to get a response from the AI service.' });
+        console.error('Error in AI backend:', error.response ? error.response.data : error.message);
+        res.status(500).json({ 
+            error: 'Failed to get a response from the AI service.',
+            details: error.response?.data || error.message 
+        });
     }
 });
 
-function resolveVoiceSettings(language) {
-    const normalized = (language || '').toLowerCase();
-    switch (normalized) {
-        case 'arabic':
-        case 'ar':
-        case 'ar-xa':
-            return { languageCode: 'ar-XA', name: 'ar-XA-Wavenet-C' };
-        default:
-            return { languageCode: 'en-US', name: 'en-US-Wavenet-D' };
-    }
-}
-
-app.post('/api/tts', async (req, res) => {
-    const { text, language } = req.body || {};
-    const trimmedText = (text || '').trim();
-
-    if (!trimmedText) {
-        return res.status(400).json({ error: 'Text is required for speech synthesis.' });
-    }
-
-    const GOOGLE_TTS_KEY = process.env.GOOGLE_STT_API_KEY_TTS;
-    if (!GOOGLE_TTS_KEY) {
-        return res.status(500).json({ error: 'TTS API key is not configured on the server.' });
-    }
-
-    const voice = resolveVoiceSettings(language);
-    const speakingRate = 1.0;
-
-    try {
-        const response = await axios.post(
-            `https://texttospeech.googleapis.com/v1/text:synthesize?key=${GOOGLE_TTS_KEY}`,
-            {
-                input: { text: trimmedText },
-                voice: voice,
-                audioConfig: {
-                    audioEncoding: 'MP3',
-                    speakingRate,
-                    pitch: 0,
-                },
-            }
-        );
-
-        const { audioContent } = response.data || {};
-
-        if (!audioContent) {
-            return res.status(502).json({ error: 'TTS service returned an empty response.' });
-        }
-
-        res.json({
-            audioContent,
-            audioMimeType: 'audio/mpeg',
-            voiceName: voice.name,
-            speakingRate,
-        });
-    } catch (error) {
-        console.error('Error generating TTS audio:', error.response ? error.response.data : error.message);
-        res.status(500).json({ error: 'Failed to generate speech audio.' });
-    }
+// Health check endpoint
+app.get('/health', (req, res) => {
+    res.json({ status: 'healthy', service: 'Owlio AI Backend', timestamp: new Date().toISOString() });
 });
 
 // Start the server
 app.listen(PORT, () => {
-    console.log(`Owlio AI server is running on port ${PORT}`);
+    console.log(`🚀 Benka AI server is running on port ${PORT}`);
+    console.log(`📊 Health check available at http://localhost:${PORT}/health`);
 });
-
-
-
-
